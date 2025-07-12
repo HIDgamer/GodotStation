@@ -1,0 +1,81 @@
+[gd_scene load_steps=9 format=3 uid="uid://cyfk5vl8i1o73"]
+
+[ext_resource type="Script" uid="uid://bgpwnvq3gdeai" path="res://Code/Effects/Smoke.gd" id="1_lrwp0"]
+[ext_resource type="Texture2D" uid="uid://cmixb6fnhqgn6" path="res://Assets/Effects/Particles/Smoke.png" id="1_wsyh7"]
+[ext_resource type="AudioStream" uid="uid://5kqp3qnuvphr" path="res://Sound/Grenades/Smoke.wav" id="2_pwkrs"]
+[ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="4_2gy5v"]
+
+[sub_resource type="Gradient" id="Gradient_njsy7"]
+offsets = PackedFloat32Array(0, 0.1, 0.7, 1)
+colors = PackedColorArray(0.7, 0.7, 0.7, 0, 0.7, 0.7, 0.7, 0.765, 0.7, 0.7, 0.7, 0.85, 0.7, 0.7, 0.7, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_1p1u5"]
+gradient = SubResource("Gradient_njsy7")
+
+[sub_resource type="Curve" id="Curve_l7b2p"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.3, 1.2), 0.0, 0.0, 0, 0, Vector2(0.7, 1.4), 0.0, 0.0, 0, 0, Vector2(1, 0.7), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_hycse"]
+curve = SubResource("Curve_l7b2p")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_jwcoe"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 60.0
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity_min = 10.0
+initial_velocity_max = 25.0
+angular_velocity_min = -4.0
+angular_velocity_max = 4.0
+gravity = Vector3(0, -4, 0)
+linear_accel_min = -1.5
+linear_accel_max = 1.5
+damping_min = 0.8
+damping_max = 2.5
+scale_min = 0.8
+scale_max = 3.0
+scale_curve = SubResource("CurveTexture_hycse")
+color = Color(0.7, 0.7, 0.7, 0.85)
+color_ramp = SubResource("GradientTexture1D_1p1u5")
+turbulence_enabled = true
+turbulence_noise_strength = 0.8
+turbulence_noise_scale = 3.5
+
+[node name="SmokeParticles" type="GPUParticles2D"]
+z_index = 100
+z_as_relative = false
+amount = 400
+texture = ExtResource("1_wsyh7")
+lifetime = 15.0
+explosiveness = 0.3
+randomness = 0.6
+process_material = SubResource("ParticleProcessMaterial_jwcoe")
+script = ExtResource("1_lrwp0")
+
+[node name="SmokeTendrils" type="Node2D" parent="."]
+
+[node name="HeatDistortion" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.15)
+scale = Vector2(4, 4)
+
+[node name="SmokeLight" type="PointLight2D" parent="."]
+color = Color(0.1, 0.1, 0.1, 0.5)
+energy = 0.3
+blend_mode = 1
+texture = ExtResource("4_2gy5v")
+texture_scale = 3.5
+
+[node name="SmokeSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_pwkrs")
+volume_db = -10.0
+max_distance = 1000.0
+attenuation = 1.5
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 15.0
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

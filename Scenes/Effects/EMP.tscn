@@ -1,0 +1,313 @@
+[gd_scene load_steps=32 format=3 uid="uid://b4yyvokb7qwmc"]
+
+[ext_resource type="AudioStream" uid="uid://cb4kark1bysb4" path="res://Sound/Grenades/EMP.wav" id="1_h45j1"]
+[ext_resource type="Script" uid="uid://b103nl2o17glc" path="res://Code/Effects/EMP.gd" id="1_yuxcl"]
+[ext_resource type="Material" uid="uid://xfcab3fkkmtd" path="res://Assets/Godot Resources/emp_particle_material.tres" id="2_okf7r"]
+[ext_resource type="Texture2D" uid="uid://cgxuf57lrqig4" path="res://Assets/Effects/Particles/flare_01_0.png" id="2_wqsf4"]
+[ext_resource type="Texture2D" uid="uid://c5v4cvhydx855" path="res://Assets/Effects/Particles/fire.png" id="3_fr2pj"]
+[ext_resource type="Texture2D" uid="uid://cleiwwqg67a88" path="res://Assets/Effects/FX/Eletric Aura.png" id="6_vyobs"]
+[ext_resource type="AudioStream" uid="uid://bstdf2ueexvpn" path="res://Sound/machines/electric_buzz.ogg" id="7_xwj68"]
+[ext_resource type="AudioStream" uid="uid://calimti6ddn1b" path="res://Sound/Grenades/Pulse.wav" id="8_fnq5t"]
+
+[sub_resource type="Gradient" id="Gradient_vv38a"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(0.2, 0.4, 1, 1, 0.4, 0.8, 1, 0.8, 0.2, 0.6, 1, 0.5, 0.1, 0.3, 0.8, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_q0xsq"]
+gradient = SubResource("Gradient_vv38a")
+
+[sub_resource type="Curve" id="Curve_3afdm"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.1, 1), 0.0, 0.0, 0, 0, Vector2(0.6, 1.2), 0.0, 0.0, 0, 0, Vector2(0.8, 1.3), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 5
+
+[sub_resource type="CurveTexture" id="CurveTexture_7xc1d"]
+curve = SubResource("Curve_3afdm")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gpiqx"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 10.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_min = 50.0
+initial_velocity_max = 150.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.5
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_7xc1d")
+color_ramp = SubResource("GradientTexture1D_q0xsq")
+turbulence_enabled = true
+turbulence_noise_strength = 0.3
+turbulence_noise_scale = 1.5
+
+[sub_resource type="Gradient" id="Gradient_4b3e8"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 0.9, 0.3, 0.6, 1, 0.8, 0.2, 0.5, 0.9, 0.5, 0.1, 0.3, 0.8, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_2x1tc"]
+gradient = SubResource("Gradient_4b3e8")
+
+[sub_resource type="Curve" id="Curve_w5e18"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.3, 0.3), 0.0, 0.0, 0, 0, Vector2(0.6, 0.6), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_xdwlv"]
+curve = SubResource("Curve_w5e18")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_d81ga"]
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+emission_ring_cone_angle = 90.0
+spread = 0.0
+angular_velocity_min = -90.0
+angular_velocity_max = 90.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.1
+scale_max = 0.1
+scale_curve = SubResource("CurveTexture_xdwlv")
+color_ramp = SubResource("GradientTexture1D_2x1tc")
+
+[sub_resource type="Gradient" id="Gradient_vhrgf"]
+offsets = PackedFloat32Array(0, 0.2, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.4, 0.8, 1, 0.8, 0.2, 0.6, 1, 0.5, 0.1, 0.3, 0.8, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_v7yfx"]
+gradient = SubResource("Gradient_vhrgf")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_lwf5p"]
+emission_shape = 1
+emission_sphere_radius = 5.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_min = 100.0
+initial_velocity_max = 300.0
+gravity = Vector3(0, 0, 0)
+damping_min = 50.0
+damping_max = 100.0
+scale_min = 0.1
+scale_max = 0.3
+color_ramp = SubResource("GradientTexture1D_v7yfx")
+
+[sub_resource type="Gradient" id="Gradient_pn26j"]
+offsets = PackedFloat32Array(0, 0.2, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.8, 0.9, 1, 0.8, 0.4, 0.7, 1, 0.4, 0.1, 0.3, 0.8, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_w0efd"]
+gradient = SubResource("Gradient_pn26j")
+
+[sub_resource type="Curve" id="Curve_k4f3e"]
+_data = [Vector2(0, 0.1), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_0k06a"]
+curve = SubResource("Curve_k4f3e")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_trlx8"]
+emission_shape = 1
+emission_sphere_radius = 15.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_max = 20.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.1
+scale_max = 0.4
+scale_curve = SubResource("CurveTexture_0k06a")
+color_ramp = SubResource("GradientTexture1D_w0efd")
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_2umk5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e3tey"]
+atlas = ExtResource("6_vyobs")
+region = Rect2(0, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rtexs"]
+atlas = ExtResource("6_vyobs")
+region = Rect2(96, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f0to7"]
+atlas = ExtResource("6_vyobs")
+region = Rect2(192, 0, 96, 96)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wqsj2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e3tey")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rtexs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f0to7")
+}],
+"loop": true,
+"name": &"Spark",
+"speed": 15.0
+}]
+
+[node name="EMPParticles" type="GPUParticles2D"]
+emitting = false
+amount = 1
+lifetime = 0.8
+one_shot = true
+explosiveness = 1.0
+randomness = 0.3
+process_material = SubResource("ParticleProcessMaterial_gpiqx")
+script = ExtResource("1_yuxcl")
+
+[node name="PulseWave" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 3
+texture = ExtResource("2_wqsf4")
+lifetime = 1.2
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_d81ga")
+
+[node name="ElectricArcs" type="Node2D" parent="."]
+
+[node name="ImpactParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 100
+texture = ExtResource("2_wqsf4")
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_lwf5p")
+
+[node name="Sparkles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 80
+texture = ExtResource("3_fr2pj")
+lifetime = 0.5
+process_material = SubResource("ParticleProcessMaterial_trlx8")
+
+[node name="SecondaryRing0" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 1
+texture = ExtResource("2_wqsf4")
+lifetime = 0.8
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_d81ga")
+
+[node name="SecondaryRing1" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 1
+texture = ExtResource("2_wqsf4")
+lifetime = 0.95
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_d81ga")
+
+[node name="SecondaryRing2" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 1
+texture = ExtResource("2_wqsf4")
+lifetime = 1.1
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_d81ga")
+
+[node name="SecondaryRing3" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 1
+texture = ExtResource("2_wqsf4")
+lifetime = 1.25
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_d81ga")
+
+[node name="SecondaryRing4" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 1
+texture = ExtResource("2_wqsf4")
+lifetime = 1.4
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_d81ga")
+
+[node name="ArcParticles" type="GPUParticles2D" parent="."]
+amount = 20
+lifetime = 0.5
+process_material = ExtResource("2_okf7r")
+
+[node name="EMPLight" type="PointLight2D" parent="."]
+color = Color(0.3, 0.6, 1, 1)
+energy = 2.0
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 3.0
+texture = SubResource("CompressedTexture2D_2umk5")
+texture_scale = 4.0
+
+[node name="ArcLight" type="PointLight2D" parent="."]
+color = Color(0.5, 0.7, 1, 1)
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 2.0
+texture = SubResource("CompressedTexture2D_2umk5")
+texture_scale = 2.0
+
+[node name="SecondaryLight" type="PointLight2D" parent="."]
+color = Color(0.65, 0.8, 1, 1)
+energy = 0.7
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 2.0
+texture = SubResource("CompressedTexture2D_2umk5")
+texture_scale = 3.0
+
+[node name="EnergyField" type="Node2D" parent="."]
+
+[node name="EMPSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("1_h45j1")
+
+[node name="ElectricitySound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("7_xwj68")
+volume_db = -5.0
+max_distance = 1500.0
+
+[node name="PulseSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("8_fnq5t")
+volume_db = -8.0
+max_distance = 1200.0
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
+
+[node name="ArcTimer" type="Timer" parent="."]
+wait_time = 0.05
+autostart = true
+
+[node name="PulseTimer" type="Timer" parent="."]
+wait_time = 0.35
+autostart = true
+
+[node name="ArcWidthCurve" type="Curve" parent="."]
+_import_path = NodePath("")
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+_data = [Vector2(0, 0.7), 0.0, 0.0, 0, 0, Vector2(0.1, 1), 0.0, 0.0, 0, 0, Vector2(0.9, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.5), 0.0, 0.0, 0, 0]
+point_count = 4
+script = null
+
+[node name="Spark" type="AnimatedSprite2D" parent="."]
+scale = Vector2(1.5, 1.5)
+sprite_frames = SubResource("SpriteFrames_wqsj2")
+animation = &"Spark"
+frame_progress = 0.700416
+
+[connection signal="timeout" from="LifetimeTimer" to="." method="_on_lifetime_timer_timeout"]
+[connection signal="timeout" from="ArcTimer" to="." method="_on_arc_timer_timeout"]
+[connection signal="timeout" from="PulseTimer" to="." method="_on_pulse_timer_timeout"]

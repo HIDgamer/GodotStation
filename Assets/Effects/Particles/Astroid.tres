@@ -1,0 +1,11 @@
+[gd_resource type="CanvasTexture" load_steps=4 format=3 uid="uid://y4kwf5blmr5g"]
+
+[ext_resource type="Texture2D" uid="uid://ct1jftobadr6y" path="res://Assets/Effects/Particles/debris.png" id="1_qq1ae"]
+[ext_resource type="Texture2D" uid="uid://cdpldwaigeqw5" path="res://Assets/Effects/Particles/debris_n.png" id="2_nekcs"]
+[ext_resource type="Texture2D" uid="uid://667ry31cf2mx" path="res://Assets/Effects/Particles/debris_s.png" id="3_3j4nn"]
+
+[resource]
+diffuse_texture = ExtResource("1_qq1ae")
+normal_texture = ExtResource("2_nekcs")
+specular_texture = ExtResource("3_3j4nn")
+specular_shininess = 0.0

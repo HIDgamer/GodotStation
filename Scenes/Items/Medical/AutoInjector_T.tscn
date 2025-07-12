@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3 uid="uid://c65o71vi7r2ml"]
+
+[ext_resource type="Script" uid="uid://cigd5dyhrje6s" path="res://Code/Items/Medical/AutoInjector_T.gd" id="1_h5v6t"]
+[ext_resource type="Texture2D" uid="uid://cwgmfjaat75jr" path="res://Assets/Icons/Items/Medical/Injector_Tramadol.png" id="2_o3u3g"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dneyd"]
+atlas = ExtResource("2_o3u3g")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cok0b"]
+atlas = ExtResource("2_o3u3g")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bfkys"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dneyd")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cok0b")
+}],
+"loop": true,
+"name": &"Used",
+"speed": 5.0
+}]
+
+[node name="MedicalItem" type="Node2D"]
+script = ExtResource("1_h5v6t")
+can_refill = true
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_bfkys")
+animation = &"Idle"
+autoplay = "Idle"
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-4.1, -2.1, -4.1, -1.1, -8.1, -1.1, -8.1, 1.1, -4.1, 1.1, -4.1, 2.1, 12.1, 2.1, 12.1, 1.1, 13.1, 1.1, 13.1, -1.1, 12.1, -1.1, 12.1, -2.1)
+
+[node name="InteractionArea" type="Area2D" parent="CollisionPolygon2D"]

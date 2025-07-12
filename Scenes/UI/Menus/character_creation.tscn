@@ -1,0 +1,526 @@
+[gd_scene load_steps=5 format=3 uid="uid://7qymfxsmv7d5"]
+
+[ext_resource type="Script" uid="uid://bllqbbb2vhgnb" path="res://Code/UserInterface/character_creation.gd" id="1_r633d"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o0qx8"]
+bg_color = Color(0.152941, 0.172549, 0.2, 0.901961)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="Gradient" id="Gradient_rahi8"]
+offsets = PackedFloat32Array(0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+metadata/_snap_enabled = true
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_m0hya"]
+gradient = SubResource("Gradient_rahi8")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.8, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 2
+
+[node name="CharacterCreation" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r633d")
+
+[node name="BackgroundTexture" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+
+[node name="BackgroundColor" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0509804, 0.0705882, 0.109804, 0.8)
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 20.0
+offset_bottom = 90.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 48
+text = "Character Creation"
+horizontal_alignment = 1
+
+[node name="MainContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 100.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LeftPanel" type="PanelContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_o0qx8")
+
+[node name="MarginContainer" type="MarginContainer" parent="MainContainer/LeftPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AttributesContainer" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 15
+
+[node name="NameSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/NameSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Name"
+
+[node name="NameInput" type="LineEdit" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/NameSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+placeholder_text = "Enter character name"
+
+[node name="AgeSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/AgeSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Age"
+
+[node name="AgeSpinBox" type="SpinBox" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/AgeSection"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 18.0
+max_value = 80.0
+value = 30.0
+rounded = true
+
+[node name="RaceSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/RaceSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Race"
+
+[node name="RaceOption" type="OptionButton" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/RaceSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="SexSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/SexSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Sex"
+
+[node name="SexOption" type="OptionButton" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/SexSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="HairSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Hair Style"
+
+[node name="HairContainer" type="HBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairSection"]
+layout_mode = 2
+
+[node name="PrevHair" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairSection/HairContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "◀"
+
+[node name="HairLabel" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairSection/HairContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Hair Style 1"
+horizontal_alignment = 1
+
+[node name="NextHair" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairSection/HairContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "▶"
+
+[node name="HairColorSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairColorSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Hair Color"
+
+[node name="HairColorPicker" type="ColorPickerButton" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairColorSection"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Select Color"
+color = Color(0.337255, 0.211765, 0.117647, 1)
+
+[node name="FacialHairSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Facial Hair"
+
+[node name="FacialHairContainer" type="HBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairSection"]
+layout_mode = 2
+
+[node name="PrevFacialHair" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairSection/FacialHairContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "◀"
+
+[node name="FacialHairLabel" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairSection/FacialHairContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "None"
+horizontal_alignment = 1
+
+[node name="NextFacialHair" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairSection/FacialHairContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "▶"
+
+[node name="FacialHairColorSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairColorSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Facial Hair Color"
+
+[node name="FacialHairColorPicker" type="ColorPickerButton" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairColorSection"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Select Color"
+color = Color(0.337255, 0.211765, 0.117647, 1)
+
+[node name="UnderwearSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UnderwearSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Underwear"
+
+[node name="UnderwearContainer" type="HBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UnderwearSection"]
+layout_mode = 2
+
+[node name="PrevUnderwear" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UnderwearSection/UnderwearContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "◀"
+
+[node name="UnderwearLabel" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UnderwearSection/UnderwearContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "White Briefs"
+horizontal_alignment = 1
+
+[node name="NextUnderwear" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UnderwearSection/UnderwearContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "▶"
+
+[node name="UndershirtSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UndershirtSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Undershirt"
+
+[node name="UndershirtContainer" type="HBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UndershirtSection"]
+layout_mode = 2
+
+[node name="PrevUndershirt" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UndershirtSection/UndershirtContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "◀"
+
+[node name="UndershirtLabel" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UndershirtSection/UndershirtContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "None"
+horizontal_alignment = 1
+
+[node name="NextUndershirt" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UndershirtSection/UndershirtContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "▶"
+
+[node name="OccupationSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/OccupationSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Occupation"
+
+[node name="OccupationOption" type="OptionButton" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/OccupationSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="ClothingSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/ClothingSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Clothing"
+
+[node name="ClothingContainer" type="HBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/ClothingSection"]
+layout_mode = 2
+
+[node name="PrevClothing" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/ClothingSection/ClothingContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "◀"
+
+[node name="ClothingLabel" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/ClothingSection/ClothingContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Standard Uniform"
+horizontal_alignment = 1
+
+[node name="NextClothing" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/ClothingSection/ClothingContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "▶"
+
+[node name="BackgroundTextSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundTextSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Background"
+
+[node name="BackgroundText" type="TextEdit" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundTextSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+placeholder_text = "Enter character background..."
+
+[node name="MedicalSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/MedicalSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Medical History"
+
+[node name="MedicalText" type="TextEdit" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/MedicalSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+placeholder_text = "Enter medical history..."
+
+[node name="BackgroundCycleSection" type="VBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundCycleSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Preview Background"
+
+[node name="BackgroundContainer" type="HBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundCycleSection"]
+layout_mode = 2
+
+[node name="PrevBackground" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundCycleSection/BackgroundContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "◀"
+
+[node name="BackgroundLabel" type="Label" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundCycleSection/BackgroundContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Background 1"
+horizontal_alignment = 1
+
+[node name="NextBackground" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundCycleSection/BackgroundContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "▶"
+
+[node name="HSeparator" type="HSeparator" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="RandomizeButton" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Randomize"
+
+[node name="ConfirmButton" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Confirm Character"
+
+[node name="CancelButton" type="Button" parent="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Cancel"
+
+[node name="RightPanel" type="PanelContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_o0qx8")
+
+[node name="MarginContainer" type="MarginContainer" parent="MainContainer/RightPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainContainer/RightPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PreviewLabel" type="Label" parent="MainContainer/RightPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Character Preview"
+horizontal_alignment = 1
+
+[node name="PreviewBackground" type="TextureRect" parent="MainContainer/RightPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+expand_mode = 1
+
+[node name="CharacterPreview" type="Node2D" parent="MainContainer/RightPanel/MarginContainer/VBoxContainer/PreviewBackground"]
+unique_name_in_owner = true
+position = Vector2(391, 311)
+scale = Vector2(15, 15)
+
+[node name="RotationControls" type="HBoxContainer" parent="MainContainer/RightPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="RotateLeftButton" type="Button" parent="MainContainer/RightPanel/MarginContainer/VBoxContainer/RotationControls"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "⟲ Rotate Left"
+
+[node name="DirectionLabel" type="Label" parent="MainContainer/RightPanel/MarginContainer/VBoxContainer/RotationControls"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "South"
+horizontal_alignment = 1
+
+[node name="RotateRightButton" type="Button" parent="MainContainer/RightPanel/MarginContainer/VBoxContainer/RotationControls"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Rotate Right ⟳"
+
+[node name="CharacterInfo" type="Label" parent="MainContainer/RightPanel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Name: John Doe
+Age: 30
+Race: Human
+Occupation: Engineer"
+horizontal_alignment = 1
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+position = Vector2(1088, 128)
+energy = 0.5
+texture = SubResource("GradientTexture2D_m0hya")
+texture_scale = 20.0
+
+[connection signal="text_changed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/NameSection/NameInput" to="." method="_on_name_input_text_changed"]
+[connection signal="value_changed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/AgeSection/AgeSpinBox" to="." method="_on_age_spin_box_value_changed"]
+[connection signal="item_selected" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/RaceSection/RaceOption" to="." method="_on_race_option_item_selected"]
+[connection signal="item_selected" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/SexSection/SexOption" to="." method="_on_sex_option_item_selected"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairSection/HairContainer/PrevHair" to="." method="_on_prev_hair_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairSection/HairContainer/NextHair" to="." method="_on_next_hair_pressed"]
+[connection signal="color_changed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/HairColorSection/HairColorPicker" to="." method="_on_hair_color_picker_color_changed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairSection/FacialHairContainer/PrevFacialHair" to="." method="_on_prev_facial_hair_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairSection/FacialHairContainer/NextFacialHair" to="." method="_on_next_facial_hair_pressed"]
+[connection signal="color_changed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/FacialHairColorSection/FacialHairColorPicker" to="." method="_on_facial_hair_color_picker_color_changed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UnderwearSection/UnderwearContainer/PrevUnderwear" to="." method="_on_prev_underwear_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UnderwearSection/UnderwearContainer/NextUnderwear" to="." method="_on_next_underwear_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UndershirtSection/UndershirtContainer/PrevUndershirt" to="." method="_on_prev_undershirt_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/UndershirtSection/UndershirtContainer/NextUndershirt" to="." method="_on_next_undershirt_pressed"]
+[connection signal="item_selected" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/OccupationSection/OccupationOption" to="." method="_on_occupation_option_item_selected"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/ClothingSection/ClothingContainer/PrevClothing" to="." method="_on_prev_clothing_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/ClothingSection/ClothingContainer/NextClothing" to="." method="_on_next_clothing_pressed"]
+[connection signal="text_changed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundTextSection/BackgroundText" to="." method="_on_background_text_text_changed"]
+[connection signal="text_changed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/MedicalSection/MedicalText" to="." method="_on_medical_text_text_changed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundCycleSection/BackgroundContainer/PrevBackground" to="." method="_on_prev_background_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ScrollContainer/AttributesContainer/BackgroundCycleSection/BackgroundContainer/NextBackground" to="." method="_on_next_background_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ButtonsContainer/RandomizeButton" to="." method="_on_randomize_button_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ButtonsContainer/ConfirmButton" to="." method="_on_confirm_button_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/MarginContainer/VBoxContainer/ButtonsContainer/CancelButton" to="." method="_on_cancel_button_pressed"]
+[connection signal="pressed" from="MainContainer/RightPanel/MarginContainer/VBoxContainer/RotationControls/RotateLeftButton" to="." method="_on_rotate_left_button_pressed"]
+[connection signal="pressed" from="MainContainer/RightPanel/MarginContainer/VBoxContainer/RotationControls/RotateRightButton" to="." method="_on_rotate_right_button_pressed"]

@@ -1,0 +1,203 @@
+[gd_scene load_steps=20 format=3 uid="uid://cuj34ntgy48j2"]
+
+[ext_resource type="Texture2D" uid="uid://kjtp8v53c0jv" path="res://Assets/Icons/Items/Objects/Lights.png" id="2_e58ag"]
+[ext_resource type="Script" uid="uid://sopiu7n53fvo" path="res://Code/Atoms/Object/Wall_Light.gd" id="3_jnrlv"]
+[ext_resource type="Texture2D" uid="uid://drb28gcqq1wj4" path="res://Assets/Effects/Light/Cone_2.png" id="4_30dfr"]
+[ext_resource type="Texture2D" uid="uid://vsy674kvylv1" path="res://Assets/Icons/Items/Objects/Lights_off.png" id="4_yv45d"]
+[ext_resource type="Texture2D" uid="uid://c7oq8bfywn48o" path="res://Assets/Effects/Light/Cone_1.png" id="5_3r6uo"]
+
+[sub_resource type="Gradient" id="Gradient_46ku0"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+metadata/_snap_enabled = true
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_yv45d"]
+gradient = SubResource("Gradient_46ku0")
+width = 800
+height = 800
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.8, 1)
+metadata/_snap_enabled = true
+
+[sub_resource type="Gradient" id="Gradient_yv45d"]
+offsets = PackedFloat32Array(0.4, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+metadata/_snap_enabled = true
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_30dfr"]
+gradient = SubResource("Gradient_yv45d")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.7, 1)
+metadata/_snap_enabled = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_30dfr"]
+atlas = ExtResource("2_e58ag")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7taa6"]
+atlas = ExtResource("2_e58ag")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lx47p"]
+atlas = ExtResource("2_e58ag")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3r6uo"]
+atlas = ExtResource("2_e58ag")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yv45d"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_30dfr")
+}],
+"loop": false,
+"name": &"East",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7taa6")
+}],
+"loop": false,
+"name": &"North",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lx47p")
+}],
+"loop": false,
+"name": &"South",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3r6uo")
+}],
+"loop": false,
+"name": &"West",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_knydq"]
+atlas = ExtResource("4_yv45d")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0iah8"]
+atlas = ExtResource("4_yv45d")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1mdjy"]
+atlas = ExtResource("4_yv45d")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rde17"]
+atlas = ExtResource("4_yv45d")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_30dfr"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_knydq")
+}],
+"loop": false,
+"name": &"East",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0iah8")
+}],
+"loop": false,
+"name": &"North",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1mdjy")
+}],
+"loop": false,
+"name": &"South",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rde17")
+}],
+"loop": false,
+"name": &"West",
+"speed": 5.0
+}]
+
+[node name="Wall_Light" type="PointLight2D" groups=["Lights"]]
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 1)
+shadow_filter = 1
+shadow_filter_smooth = 5.0
+texture = SubResource("GradientTexture2D_yv45d")
+height = 1024.0
+script = ExtResource("3_jnrlv")
+is_active = null
+max_energy = null
+shadow_smoothness = null
+shadow_strength = null
+use_flicker = null
+flicker_intensity = null
+flicker_speed = null
+use_pulse = null
+pulse_intensity = null
+pulse_speed = null
+use_glow = null
+is_static = null
+light_quality = null
+update_interval = null
+disable_when_offscreen = null
+shadow_distance = null
+auto_bake_on_ready = null
+auto_toggle_with_daylight = null
+turn_on_time = null
+turn_off_time = null
+metadata/use_color_temperature = true
+metadata/color_temperature = 4500
+metadata/color_filter = Color(1, 1, 1, 0)
+
+[node name="ambient_light" type="PointLight2D" parent="."]
+color = Color(1, 0.853067, 0.735035, 1)
+energy = 0.01
+shadow_enabled = true
+shadow_filter = 2
+shadow_filter_smooth = 5.0
+texture = SubResource("GradientTexture2D_30dfr")
+texture_scale = 2.0
+metadata/use_color_temperature = true
+metadata/color_temperature = 4500
+metadata/color_filter = Color(1, 1, 1, 0)
+
+[node name="cone_light1" type="PointLight2D" parent="."]
+texture = ExtResource("4_30dfr")
+metadata/use_color_temperature = true
+metadata/color_temperature = 6500
+metadata/color_filter = Color(1, 1, 1, 0)
+
+[node name="cone_light2" type="PointLight2D" parent="."]
+texture = ExtResource("5_3r6uo")
+metadata/use_color_temperature = true
+metadata/color_temperature = 6500
+metadata/color_filter = Color(1, 1, 1, 0)
+
+[node name="On" type="AnimatedSprite2D" parent="."]
+z_index = 5
+sprite_frames = SubResource("SpriteFrames_yv45d")
+animation = &"North"
+autoplay = "North"
+
+[node name="Off" type="AnimatedSprite2D" parent="."]
+visible = false
+z_index = 5
+sprite_frames = SubResource("SpriteFrames_30dfr")
+animation = &"North"
+autoplay = "North"

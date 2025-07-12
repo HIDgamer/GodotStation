@@ -1,0 +1,1226 @@
+[gd_scene load_steps=33 format=3 uid="uid://dwdx03uq5hwnt"]
+
+[ext_resource type="Script" uid="uid://cy3qm6w6601xp" path="res://StationForge/Editor.gd" id="1_y72pa"]
+[ext_resource type="Script" uid="uid://c5j31m5l2a6wp" path="res://StationForge/UIToolbar.gd" id="2_wbrdp"]
+[ext_resource type="Script" uid="uid://by516gh3wkcj1" path="res://StationForge/TilePalette.gd" id="3_4g1sc"]
+[ext_resource type="Script" uid="uid://dx473344pssqx" path="res://StationForge/ObjectList.gd" id="4_j7nbe"]
+[ext_resource type="Script" uid="uid://bptrlhv3tagyp" path="res://StationForge/ObjectProperties.gd" id="5_3d8jl"]
+[ext_resource type="Script" uid="uid://ckmntlhob3cv4" path="res://StationForge/LayerManager.gd" id="6_yfu32"]
+[ext_resource type="Script" uid="uid://8jfcoufvvr1o" path="res://StationForge/EditorCamera.gd" id="7_3gptf"]
+[ext_resource type="Script" uid="uid://h4xnf1dg7oty" path="res://StationForge/Grid.gd" id="8_wnqxm"]
+[ext_resource type="Texture2D" uid="uid://bl328dej14v7q" path="res://Assets/Tilesets/Walls/Walls.tres" id="9_mqg1n"]
+[ext_resource type="Script" uid="uid://bpm64vout6a1i" path="res://StationForge/ZoneManager.gd" id="9_rkmtv"]
+[ext_resource type="Script" uid="uid://pd42kvy1wa5e" path="res://StationForge/AtmosphereVisualizer.gd" id="10_gx4ls"]
+[ext_resource type="Script" uid="uid://ca8dq8ffiv223" path="res://StationForge/LightingSystem.gd" id="11_lsxtd"]
+[ext_resource type="Script" uid="uid://bc62i40ttc040" path="res://StationForge/PreviewMode.gd" id="12_pwx5f"]
+[ext_resource type="Script" uid="uid://bxfcgj3nbu2ak" path="res://StationForge/MapValidator.gd" id="13_oubcw"]
+[ext_resource type="Script" uid="uid://0mprdxoi1gsb" path="res://StationForge/SettingsManager.gd" id="14_n2p5h"]
+[ext_resource type="Script" uid="uid://cth1f3w3lnkxj" path="res://StationForge/EditorUIEnhancer.gd" id="15_pxtdw"]
+[ext_resource type="Script" uid="uid://b6ouo26xb4bx3" path="res://StationForge/AdvancedObjectPlacer.gd" id="16_atj0b"]
+[ext_resource type="Script" uid="uid://dfwb7sk3r4wsw" path="res://StationForge/TileEditorUI.gd" id="17_xpd2l"]
+[ext_resource type="Script" uid="uid://dre1av3ylvnfr" path="res://StationForge/TilePlacementSystem.gd" id="18_k1j5h"]
+[ext_resource type="Script" uid="uid://dj6cyuhk5nubu" path="res://StationForge/EnhancedTilesetManager.gd" id="19_elt6s"]
+[ext_resource type="Script" uid="uid://y16ox854mhkq" path="res://StationForge/TileImportSystem.gd" id="20_tkr38"]
+[ext_resource type="Script" uid="uid://dli85sb45a2uj" path="res://StationForge/TileImportUI.gd" id="21_ytu3e"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u58w2"]
+bg_color = Color(0.101961, 0.101961, 0.101961, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b4q2d"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="TileSet" id="TileSet_floor"]
+tile_size = Vector2i(32, 32)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_svvxw"]
+texture = ExtResource("9_mqg1n")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+6:1/0 = 0
+7:1/0 = 0
+8:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+4:2/0 = 0
+5:2/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+4:3/0 = 0
+5:3/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_wall"]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_svvxw")
+
+[sub_resource type="TileSet" id="TileSet_objects"]
+tile_size = Vector2i(32, 32)
+
+[sub_resource type="TileSet" id="TileSet_zone"]
+tile_size = Vector2i(32, 32)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t7c4s"]
+bg_color = Color(0.133333, 0.133333, 0.133333, 1)
+
+[sub_resource type="Theme" id="Theme_3fbpc"]
+Button/styles/normal = SubResource("StyleBoxFlat_t7c4s")
+
+[sub_resource type="GDScript" id="GDScript_import_dialog"]
+script/source = "extends Window
+func _ready():
+	# Hide on start
+	visible = false
+"
+
+[node name="StationForge" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_y72pa")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="MainPanel" type="PanelContainer" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_u58w2")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/MainPanel"]
+layout_mode = 2
+
+[node name="TopMenu" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="FileMenu" type="MenuButton" parent="UI/MainPanel/VBoxContainer/TopMenu"]
+layout_mode = 2
+focus_mode = 2
+text = "File"
+flat = false
+item_count = 5
+popup/item_0/text = "New Map"
+popup/item_0/id = 0
+popup/item_1/text = "Open Map"
+popup/item_1/id = 1
+popup/item_2/text = "Save Map"
+popup/item_2/id = 2
+popup/item_3/text = "Save Map As"
+popup/item_3/id = 3
+popup/item_4/text = "Exit"
+popup/item_4/id = 4
+
+[node name="EditMenu" type="MenuButton" parent="UI/MainPanel/VBoxContainer/TopMenu"]
+layout_mode = 2
+focus_mode = 2
+text = "Edit"
+flat = false
+item_count = 6
+popup/item_0/text = "Undo"
+popup/item_0/id = 0
+popup/item_1/text = "Redo"
+popup/item_1/id = 1
+popup/item_2/text = "Copy"
+popup/item_2/id = 2
+popup/item_3/text = "Paste"
+popup/item_3/id = 3
+popup/item_4/text = "Delete"
+popup/item_4/id = 4
+popup/item_5/text = "Select All"
+popup/item_5/id = 5
+
+[node name="ViewMenu" type="MenuButton" parent="UI/MainPanel/VBoxContainer/TopMenu"]
+layout_mode = 2
+focus_mode = 2
+text = "View"
+flat = false
+item_count = 7
+popup/item_0/text = "Show Grid"
+popup/item_0/checkable = 1
+popup/item_0/checked = true
+popup/item_0/id = 0
+popup/item_1/text = "Snap to Grid"
+popup/item_1/checkable = 1
+popup/item_1/checked = true
+popup/item_1/id = 1
+popup/item_2/text = "Reset View"
+popup/item_2/id = 2
+popup/item_3/text = "Z-Level Up"
+popup/item_3/id = 3
+popup/item_4/text = "Z-Level Down"
+popup/item_4/id = 4
+popup/item_5/text = "Zone Visualization"
+popup/item_5/id = 100
+popup/item_6/text = "Lighting Preview"
+popup/item_6/id = 110
+
+[node name="ToolsMenu" type="MenuButton" parent="UI/MainPanel/VBoxContainer/TopMenu"]
+layout_mode = 2
+focus_mode = 2
+text = "Tools"
+flat = false
+item_count = 7
+popup/item_0/text = "Export to Game..."
+popup/item_0/id = 0
+popup/item_1/text = "Import from Game..."
+popup/item_1/id = 1
+popup/item_2/text = "Settings..."
+popup/item_2/id = 2
+popup/item_3/text = "Validate Map"
+popup/item_3/id = 300
+popup/item_4/text = "Start Preview Mode"
+popup/item_4/id = 301
+popup/item_5/text = "Simulate Atmosphere"
+popup/item_5/id = 302
+popup/item_6/text = "Import Tiles..."
+popup/item_6/id = 303
+
+[node name="SettingsMenu" type="MenuButton" parent="UI/MainPanel/VBoxContainer/TopMenu"]
+layout_mode = 2
+focus_mode = 2
+text = "Settings"
+flat = false
+item_count = 5
+popup/item_0/text = "Editor Settings"
+popup/item_0/id = 400
+popup/item_1/text = "Import Settings"
+popup/item_1/id = 401
+popup/item_2/text = "Export Settings"
+popup/item_2/id = 402
+popup/item_3/text = "Reset to Default"
+popup/item_3/id = 403
+popup/item_4/text = "Theme Settings"
+popup/item_4/id = 404
+
+[node name="Spacer" type="Control" parent="UI/MainPanel/VBoxContainer/TopMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MapNameLabel" type="Label" parent="UI/MainPanel/VBoxContainer/TopMenu"]
+layout_mode = 2
+text = "New Map"
+horizontal_alignment = 1
+
+[node name="ToolbarScroll" type="ScrollContainer" parent="UI/MainPanel/VBoxContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
+
+[node name="Toolbar" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/ToolbarScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("2_wbrdp")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar"]
+layout_mode = 2
+
+[node name="ToolsSection" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ToolsSection"]
+layout_mode = 2
+text = "Tools:"
+
+[node name="PlaceButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ToolsSection"]
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+text = "Place"
+
+[node name="EraseButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Erase"
+
+[node name="SelectButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Select"
+
+[node name="FillButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Fill"
+
+[node name="LineButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Line"
+
+[node name="ImportTilesButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ToolsSection"]
+layout_mode = 2
+text = "Import Tiles"
+
+[node name="Separator" type="VSeparator" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer"]
+layout_mode = 2
+
+[node name="ObjectToolsSection" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ObjectToolsSection"]
+layout_mode = 2
+text = "Objects:"
+
+[node name="ObjectPlaceButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ObjectToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Place"
+
+[node name="ObjectEraseButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ObjectToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Erase"
+
+[node name="ObjectSelectButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ObjectToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Select"
+
+[node name="ObjectRotateButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ObjectToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Rotate"
+
+[node name="Separator2" type="VSeparator" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer"]
+layout_mode = 2
+
+[node name="LayersSection" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/LayersSection"]
+layout_mode = 2
+text = "Layers:"
+
+[node name="FloorButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/LayersSection"]
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+text = "Floor"
+
+[node name="WallButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/LayersSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Wall"
+
+[node name="ObjectsButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/LayersSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Objects"
+
+[node name="ZoneButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/LayersSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Zone"
+
+[node name="ZoneToolsSection" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Separator" type="VSeparator" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+text = "Zones:"
+
+[node name="ZoneTypeButton" type="OptionButton" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "Interior"
+popup/item_0/id = 0
+popup/item_1/text = "Maintenance"
+popup/item_1/id = 1
+popup/item_2/text = "Exterior"
+popup/item_2/id = 2
+
+[node name="PlaceZoneButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Place"
+
+[node name="FillZoneButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Fill"
+
+[node name="RectZoneButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Rectangle"
+
+[node name="EraseZoneButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Erase"
+
+[node name="VisualizeButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Visualize"
+
+[node name="SimulateButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/ZoneToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Simulate"
+
+[node name="LightingToolsSection" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Separator" type="VSeparator" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/LightingToolsSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/LightingToolsSection"]
+layout_mode = 2
+text = "Lighting:"
+
+[node name="PlaceLightButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/LightingToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Place Light"
+
+[node name="EraseLightButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/LightingToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Erase Light"
+
+[node name="LightPreviewButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/LightingToolsSection"]
+layout_mode = 2
+toggle_mode = true
+text = "Preview"
+
+[node name="LightLabel" type="Label" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/LightingToolsSection"]
+layout_mode = 2
+text = "Ambient:"
+
+[node name="AmbientSlider" type="HSlider" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/LightingToolsSection"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+min_value = 0.05
+max_value = 0.8
+step = 0.05
+value = 0.8
+
+[node name="PreviewToolsSection" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Separator" type="VSeparator" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/PreviewToolsSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/PreviewToolsSection"]
+layout_mode = 2
+text = "Preview:"
+
+[node name="StartPreviewButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/PreviewToolsSection"]
+layout_mode = 2
+text = "Start Preview"
+
+[node name="StopPreviewButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/PreviewToolsSection"]
+layout_mode = 2
+text = "Stop Preview"
+
+[node name="ValidateButton" type="Button" parent="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/PreviewToolsSection"]
+layout_mode = 2
+text = "Validate Map"
+
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/MainPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 250
+
+[node name="SidePanel" type="PanelContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+theme_override_styles/panel = SubResource("StyleBoxFlat_b4q2d")
+
+[node name="ToolTabs" type="TabContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel"]
+layout_mode = 2
+current_tab = 0
+
+[node name="TilesTab" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 0
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/TilesTab"]
+layout_mode = 2
+text = "Tile Palette"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/TilesTab"]
+layout_mode = 2
+
+[node name="TilePalette" type="ScrollContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/TilesTab"]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("3_4g1sc")
+
+[node name="GridContainer" type="GridContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/TilesTab/TilePalette"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 3
+
+[node name="ObjectsTab" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 1
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ObjectsTab"]
+layout_mode = 2
+text = "Place Objects"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ObjectsTab"]
+layout_mode = 2
+
+[node name="ObjectsList" type="ScrollContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ObjectsTab"]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("4_j7nbe")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ObjectsTab/ObjectsList"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PropertiesTab" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 2
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/PropertiesTab"]
+layout_mode = 2
+text = "Object Properties"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/PropertiesTab"]
+layout_mode = 2
+
+[node name="ObjectProperties" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/PropertiesTab"]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("5_3d8jl")
+
+[node name="PropertiesContainer" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/PropertiesTab/ObjectProperties"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LayersTab" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("6_yfu32")
+metadata/_tab_index = 3
+
+[node name="ZoneTab" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 4
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab"]
+layout_mode = 2
+text = "Zone Settings"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab"]
+layout_mode = 2
+
+[node name="ZoneProperties" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GridContainer" type="GridContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties"]
+layout_mode = 2
+columns = 2
+
+[node name="NameLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+text = "Zone Name:"
+
+[node name="NameEdit" type="LineEdit" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter zone name"
+
+[node name="TypeLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+text = "Zone Type:"
+
+[node name="TypeSelect" type="OptionButton" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "Interior"
+popup/item_0/id = 0
+popup/item_1/text = "Maintenance"
+popup/item_1/id = 1
+popup/item_2/text = "Exterior"
+popup/item_2/id = 2
+
+[node name="GravityLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+text = "Has Gravity:"
+
+[node name="GravityCheck" type="CheckBox" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+button_pressed = true
+
+[node name="AtmosphereLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+text = "Has Atmosphere:"
+
+[node name="AtmosphereCheck" type="CheckBox" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+button_pressed = true
+
+[node name="PressureLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+text = "Pressure:"
+
+[node name="PressureSlider" type="HSlider" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+value = 100.0
+
+[node name="TemperatureLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+text = "Temperature (°C):"
+
+[node name="TemperatureSpinBox" type="SpinBox" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneProperties/GridContainer"]
+layout_mode = 2
+min_value = -270.0
+max_value = 50.0
+value = 20.0
+
+[node name="ZoneList" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneList"]
+layout_mode = 2
+text = "Zones"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneList"]
+layout_mode = 2
+
+[node name="ItemList" type="ItemList" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneList"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonContainer" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneList"]
+layout_mode = 2
+
+[node name="CreateButton" type="Button" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneList/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Create"
+
+[node name="DeleteButton" type="Button" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/ZoneTab/ZoneList/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Delete"
+
+[node name="LightingTab" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 5
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab"]
+layout_mode = 2
+text = "Light Properties"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab"]
+layout_mode = 2
+
+[node name="LightProperties" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GridContainer" type="GridContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties"]
+layout_mode = 2
+columns = 2
+
+[node name="RadiusLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+text = "Light Radius:"
+
+[node name="RadiusSlider" type="HSlider" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+min_value = 32.0
+max_value = 500.0
+step = 8.0
+value = 152.0
+
+[node name="IntensityLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+text = "Light Intensity:"
+
+[node name="IntensitySlider" type="HSlider" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+max_value = 2.0
+step = 0.1
+value = 1.0
+
+[node name="ColorLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+text = "Light Color:"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+color = Color(1, 1, 0.8, 0.8)
+
+[node name="AmbientLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+text = "Ambient Light:"
+
+[node name="AmbientSlider" type="HSlider" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+min_value = 0.05
+max_value = 0.8
+step = 0.05
+value = 0.8
+
+[node name="PreviewCheckLabel" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+text = "Show Preview:"
+
+[node name="PreviewCheck" type="CheckBox" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightProperties/GridContainer"]
+layout_mode = 2
+
+[node name="LightsList" type="VBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightsList"]
+layout_mode = 2
+text = "Light Sources"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightsList"]
+layout_mode = 2
+
+[node name="ItemList" type="ItemList" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightsList"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonContainer" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightsList"]
+layout_mode = 2
+
+[node name="CreateButton" type="Button" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightsList/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Create"
+
+[node name="DeleteButton" type="Button" parent="UI/MainPanel/VBoxContainer/HSplitContainer/SidePanel/ToolTabs/LightingTab/LightsList/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Delete"
+
+[node name="EditorViewport" type="SubViewportContainer" parent="UI/MainPanel/VBoxContainer/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.75
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport"]
+handle_input_locally = false
+size = Vector2i(1004, 945)
+render_target_update_mode = 4
+
+[node name="EditorCamera" type="Camera2D" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+script = ExtResource("7_3gptf")
+
+[node name="Grid" type="Node2D" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+script = ExtResource("8_wnqxm")
+
+[node name="FloorTileMap" type="TileMap" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+tile_set = SubResource("TileSet_floor")
+format = 2
+
+[node name="WallTileMap" type="TileMap" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+modulate = Color(1, 1, 1, 0.3)
+tile_set = SubResource("TileSet_wall")
+format = 2
+
+[node name="ObjectsTileMap" type="TileMap" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+modulate = Color(1, 1, 1, 0.3)
+tile_set = SubResource("TileSet_objects")
+format = 2
+
+[node name="ZoneTileMap" type="TileMap" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+modulate = Color(1, 1, 0, 0.3)
+tile_set = SubResource("TileSet_zone")
+format = 2
+
+[node name="PlacedObjects" type="Node2D" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+
+[node name="NetworkObjects" type="Node2D" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+
+[node name="LightSources" type="Node2D" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+
+[node name="DarknessLayer" type="Node2D" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+z_index = 100
+
+[node name="PreviewContainer" type="Node2D" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+visible = false
+
+[node name="VisualizationLayer" type="CanvasLayer" parent="UI/MainPanel/VBoxContainer/HSplitContainer/EditorViewport/Viewport"]
+
+[node name="StatusBar" type="PanelContainer" parent="UI/MainPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_t7c4s")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainPanel/VBoxContainer/StatusBar"]
+layout_mode = 2
+
+[node name="StatusInfo" type="Label" parent="UI/MainPanel/VBoxContainer/StatusBar/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Position: (0, 0) | Layer: Floor | Tool: Place"
+
+[node name="Separator" type="VSeparator" parent="UI/MainPanel/VBoxContainer/StatusBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="ZLevelInfo" type="Label" parent="UI/MainPanel/VBoxContainer/StatusBar/HBoxContainer"]
+layout_mode = 2
+text = "Z-Level: 0"
+
+[node name="ZLevelDown" type="Button" parent="UI/MainPanel/VBoxContainer/StatusBar/HBoxContainer"]
+layout_mode = 2
+text = "▼"
+
+[node name="ZLevelUp" type="Button" parent="UI/MainPanel/VBoxContainer/StatusBar/HBoxContainer"]
+layout_mode = 2
+text = "▲"
+
+[node name="Dialogs" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SettingsDialog" type="Window" parent="UI/Dialogs"]
+title = "Settings"
+initial_position = 1
+size = Vector2i(800, 600)
+visible = false
+theme = SubResource("Theme_3fbpc")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Dialogs/SettingsDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="UI/Dialogs/SettingsDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Display" type="VBoxContainer" parent="UI/Dialogs/SettingsDialog/VBoxContainer/TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="GridContainer" type="GridContainer" parent="UI/Dialogs/SettingsDialog/VBoxContainer/TabContainer/Display"]
+layout_mode = 2
+columns = 2
+
+[node name="ButtonBox" type="HBoxContainer" parent="UI/Dialogs/SettingsDialog/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="ResetButton" type="Button" parent="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox"]
+layout_mode = 2
+text = "Reset to Default"
+
+[node name="Spacer" type="Control" parent="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CancelButton" type="Button" parent="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="ApplyButton" type="Button" parent="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox"]
+layout_mode = 2
+text = "Apply"
+
+[node name="OKButton" type="Button" parent="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox"]
+layout_mode = 2
+text = "OK"
+
+[node name="ValidationReportDialog" type="Window" parent="UI/Dialogs"]
+title = "Map Validation Report"
+initial_position = 1
+size = Vector2i(600, 500)
+visible = false
+theme = SubResource("Theme_3fbpc")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Dialogs/ValidationReportDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ReportText" type="TextEdit" parent="UI/Dialogs/ValidationReportDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+editable = false
+wrap_mode = 1
+
+[node name="CloseButton" type="Button" parent="UI/Dialogs/ValidationReportDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Close"
+
+[node name="SaveMapDialog" type="FileDialog" parent="UI/Dialogs"]
+title = "Open a File"
+initial_position = 1
+size = Vector2i(600, 400)
+ok_button_text = "Open"
+dialog_hide_on_ok = true
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.smap ; StationForge Map")
+
+[node name="OpenMapDialog" type="FileDialog" parent="UI/Dialogs"]
+title = "Open a File"
+initial_position = 1
+size = Vector2i(600, 400)
+ok_button_text = "Open"
+dialog_hide_on_ok = true
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.smap ; StationForge Map")
+
+[node name="ExportDialog" type="FileDialog" parent="UI/Dialogs"]
+title = "Open a File"
+initial_position = 1
+size = Vector2i(600, 400)
+ok_button_text = "Open"
+dialog_hide_on_ok = true
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.json ; JSON Map File", "*.tscn ; Scene File", "*.tres ; Resource File")
+
+[node name="NewMapDialog" type="Window" parent="UI/Dialogs"]
+title = "New Map"
+initial_position = 1
+size = Vector2i(400, 300)
+visible = false
+theme = SubResource("Theme_3fbpc")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Dialogs/NewMapDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GridContainer" type="GridContainer" parent="UI/Dialogs/NewMapDialog/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="NameLabel" type="Label" parent="UI/Dialogs/NewMapDialog/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Map Name:"
+
+[node name="NameEdit" type="LineEdit" parent="UI/Dialogs/NewMapDialog/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "New Map"
+
+[node name="WidthLabel" type="Label" parent="UI/Dialogs/NewMapDialog/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Width:"
+
+[node name="WidthEdit" type="SpinBox" parent="UI/Dialogs/NewMapDialog/VBoxContainer/GridContainer"]
+layout_mode = 2
+min_value = 10.0
+max_value = 1000.0
+value = 100.0
+suffix = "tiles"
+
+[node name="HeightLabel" type="Label" parent="UI/Dialogs/NewMapDialog/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Height:"
+
+[node name="HeightEdit" type="SpinBox" parent="UI/Dialogs/NewMapDialog/VBoxContainer/GridContainer"]
+layout_mode = 2
+min_value = 10.0
+max_value = 1000.0
+value = 100.0
+suffix = "tiles"
+
+[node name="ZLevelsLabel" type="Label" parent="UI/Dialogs/NewMapDialog/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Z-Levels:"
+
+[node name="ZLevelsEdit" type="SpinBox" parent="UI/Dialogs/NewMapDialog/VBoxContainer/GridContainer"]
+layout_mode = 2
+min_value = 1.0
+max_value = 10.0
+value = 3.0
+suffix = "levels"
+
+[node name="Spacer" type="Control" parent="UI/Dialogs/NewMapDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Dialogs/NewMapDialog/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="UI/Dialogs/NewMapDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="CreateButton" type="Button" parent="UI/Dialogs/NewMapDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Create"
+
+[node name="SettingsManager" type="Node" parent="."]
+script = ExtResource("14_n2p5h")
+
+[node name="ZoneManager" type="Node" parent="."]
+script = ExtResource("9_rkmtv")
+
+[node name="AtmosphereVisualizer" type="Node2D" parent="."]
+script = ExtResource("10_gx4ls")
+
+[node name="LightingSystem" type="Node2D" parent="."]
+script = ExtResource("11_lsxtd")
+
+[node name="PreviewMode" type="Node" parent="."]
+script = ExtResource("12_pwx5f")
+
+[node name="MapValidator" type="Node" parent="."]
+script = ExtResource("13_oubcw")
+
+[node name="EditorUIEnhancer" type="Node" parent="."]
+script = ExtResource("15_pxtdw")
+
+[node name="AdvancedObjectPlacer" type="Node" parent="."]
+script = ExtResource("16_atj0b")
+
+[node name="TileEditorUI" type="Node" parent="."]
+script = ExtResource("17_xpd2l")
+
+[node name="TilePlacementSystem" type="Node" parent="."]
+script = ExtResource("18_k1j5h")
+
+[node name="EnhancedTilesetManager" type="Node" parent="."]
+script = ExtResource("19_elt6s")
+
+[node name="TileImportSystem" type="Node" parent="."]
+script = ExtResource("20_tkr38")
+
+[node name="TileImportUI" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("21_ytu3e")
+
+[node name="ImportDialog" type="Window" parent="TileImportUI"]
+title = "Import Tiles"
+initial_position = 1
+size = Vector2i(700, 500)
+visible = false
+script = SubResource("GDScript_import_dialog")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TileImportUI/ImportDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+text = "Import Tiles or Spritesheets"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="CategoryLabel" type="Label" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+text = "Tile Category:"
+
+[node name="CategorySelector" type="OptionButton" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+selected = 0
+item_count = 4
+popup/item_0/text = "Floor Tiles"
+popup/item_0/id = 0
+popup/item_1/text = "Wall Tiles"
+popup/item_1/id = 1
+popup/item_2/text = "Object Tiles"
+popup/item_2/id = 2
+popup/item_3/text = "Zone Tiles"
+popup/item_3/id = 3
+
+[node name="FileSelectButton" type="Button" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+text = "Select Files to Import..."
+
+[node name="SliceOptions" type="VBoxContainer" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="SliceCheckbox" type="CheckBox" parent="TileImportUI/ImportDialog/VBoxContainer/SliceOptions"]
+layout_mode = 2
+text = "Slice Spritesheet"
+
+[node name="SizeContainer" type="HBoxContainer" parent="TileImportUI/ImportDialog/VBoxContainer/SliceOptions"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="TileImportUI/ImportDialog/VBoxContainer/SliceOptions/SizeContainer"]
+layout_mode = 2
+text = "Tile Size:"
+
+[node name="WidthSpinBox" type="SpinBox" parent="TileImportUI/ImportDialog/VBoxContainer/SliceOptions/SizeContainer"]
+layout_mode = 2
+min_value = 8.0
+max_value = 256.0
+value = 32.0
+suffix = "px"
+
+[node name="SeparatorLabel" type="Label" parent="TileImportUI/ImportDialog/VBoxContainer/SliceOptions/SizeContainer"]
+layout_mode = 2
+text = "x"
+
+[node name="HeightSpinBox" type="SpinBox" parent="TileImportUI/ImportDialog/VBoxContainer/SliceOptions/SizeContainer"]
+layout_mode = 2
+min_value = 8.0
+max_value = 256.0
+value = 32.0
+suffix = "px"
+
+[node name="AutotileOptions" type="VBoxContainer" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="AutotileCheckbox" type="CheckBox" parent="TileImportUI/ImportDialog/VBoxContainer/AutotileOptions"]
+layout_mode = 2
+text = "Generate Auto-tiling"
+
+[node name="TypeSelector" type="OptionButton" parent="TileImportUI/ImportDialog/VBoxContainer/AutotileOptions"]
+layout_mode = 2
+selected = 0
+item_count = 5
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "Wang 2x2"
+popup/item_1/id = 1
+popup/item_2/text = "Wang 3x3"
+popup/item_2/id = 2
+popup/item_3/text = "Corner Match"
+popup/item_3/id = 3
+popup/item_4/text = "47-bit Terrain"
+popup/item_4/id = 4
+
+[node name="PreviewLabel" type="Label" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+text = "Preview:"
+
+[node name="PreviewContainer" type="PanelContainer" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="TileImportUI/ImportDialog/VBoxContainer/PreviewContainer"]
+layout_mode = 2
+text = "No files selected"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonContainer" type="HBoxContainer" parent="TileImportUI/ImportDialog/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="TileImportUI/ImportDialog/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="ImportButton" type="Button" parent="TileImportUI/ImportDialog/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+disabled = true
+text = "Import"
+
+[node name="AutosaveTimer" type="Timer" parent="."]
+wait_time = 300.0
+
+[connection signal="pressed" from="UI/MainPanel/VBoxContainer/ToolbarScroll/Toolbar/HBoxContainer/ToolsSection/ImportTilesButton" to="TileImportUI" method="show_dialog"]
+[connection signal="pressed" from="UI/MainPanel/VBoxContainer/StatusBar/HBoxContainer/ZLevelDown" to="." method="_on_z_level_down_pressed"]
+[connection signal="pressed" from="UI/MainPanel/VBoxContainer/StatusBar/HBoxContainer/ZLevelUp" to="." method="_on_z_level_up_pressed"]
+[connection signal="pressed" from="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox/ResetButton" to="EditorUIEnhancer" method="_on_reset_settings"]
+[connection signal="pressed" from="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox/CancelButton" to="EditorUIEnhancer" method="_on_settings_dialog_close"]
+[connection signal="pressed" from="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox/ApplyButton" to="EditorUIEnhancer" method="_on_apply_settings"]
+[connection signal="pressed" from="UI/Dialogs/SettingsDialog/VBoxContainer/ButtonBox/OKButton" to="EditorUIEnhancer" method="_on_ok_settings"]
+[connection signal="pressed" from="UI/Dialogs/ValidationReportDialog/VBoxContainer/CloseButton" to="EditorUIEnhancer" method="_on_validation_dialog_close"]
+[connection signal="file_selected" from="UI/Dialogs/SaveMapDialog" to="." method="_on_save_file_selected"]
+[connection signal="file_selected" from="UI/Dialogs/OpenMapDialog" to="." method="_on_map_file_selected"]
+[connection signal="timeout" from="AutosaveTimer" to="." method="_on_autosave_timeout"]

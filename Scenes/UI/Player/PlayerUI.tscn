@@ -1,0 +1,710 @@
+[gd_scene load_steps=28 format=3 uid="uid://dnrsljtlvb77j"]
+
+[ext_resource type="Script" uid="uid://vpbvoc34kmbp" path="res://Code/UserInterface/PlayerUI.gd" id="1_tmc17"]
+[ext_resource type="Texture2D" uid="uid://dpebp2qm0v7ce" path="res://Assets/UI/Inventory/Pouch.png" id="2_pb4ad"]
+[ext_resource type="Texture2D" uid="uid://cfau505r4hd38" path="res://Assets/UI/Inventory/MainHand_main.png" id="3_2i2l7"]
+[ext_resource type="Texture2D" uid="uid://tytyoeia5ylb" path="res://Assets/UI/Inventory/OffHand_main.png" id="4_3for7"]
+[ext_resource type="Texture2D" uid="uid://d1e3e3hx2nudt" path="res://Assets/UI/Inventory/ID.png" id="5_y6q74"]
+[ext_resource type="Texture2D" uid="uid://dvencpdg061ay" path="res://Assets/UI/Inventory/belt_main.png" id="6_q5s13"]
+[ext_resource type="Texture2D" uid="uid://q6axo2utlxyh" path="res://Assets/UI/Inventory/backpack.png" id="7_iwrji"]
+[ext_resource type="Texture2D" uid="uid://cy8euv7ngpj20" path="res://Assets/UI/Inventory/Equipment.png" id="8_c6re1"]
+[ext_resource type="Texture2D" uid="uid://d1k5p74i1vh71" path="res://Assets/UI/Inventory/Head.png" id="9_2dwi6"]
+[ext_resource type="Texture2D" uid="uid://4mfb2figtxos" path="res://Assets/UI/Inventory/Ear_left.png" id="10_j13a7"]
+[ext_resource type="Texture2D" uid="uid://cy7dm4wh8xr0m" path="res://Assets/UI/Inventory/Mask.png" id="11_sjrj0"]
+[ext_resource type="Texture2D" uid="uid://d2mejmxlvwe8o" path="res://Assets/UI/Inventory/Ear_right.png" id="12_74boh"]
+[ext_resource type="Texture2D" uid="uid://bhm2lg3uj4sdl" path="res://Assets/UI/Inventory/Eyes.png" id="13_4mkda"]
+[ext_resource type="Texture2D" uid="uid://elxbe7hm6fsm" path="res://Assets/UI/Inventory/Uniform.png" id="14_rpa04"]
+[ext_resource type="Texture2D" uid="uid://cnb5cnkhmu7jc" path="res://Assets/UI/Inventory/Armor.png" id="15_w7l74"]
+[ext_resource type="Texture2D" uid="uid://df7qj0jjfwnpc" path="res://Assets/UI/Inventory/Armor_slot.png" id="16_7cohv"]
+[ext_resource type="Texture2D" uid="uid://dlkoh6hx8cup3" path="res://Assets/UI/Inventory/Gloves.png" id="17_ga0nh"]
+[ext_resource type="Texture2D" uid="uid://b24jasydxdjqt" path="res://Assets/UI/Inventory/Boots.png" id="18_jjevt"]
+[ext_resource type="Texture2D" uid="uid://ca6t6jyg74up1" path="res://Assets/UI/Inventory/help.png" id="19_moxo4"]
+[ext_resource type="Texture2D" uid="uid://chqf6cfi2fsf6" path="res://Assets/UI/Inventory/disarm.png" id="20_6vebg"]
+[ext_resource type="Texture2D" uid="uid://b7bie87r1xm21" path="res://Assets/UI/Inventory/grab.png" id="21_dx2ri"]
+[ext_resource type="Texture2D" uid="uid://cjsy8mh2ghs2q" path="res://Assets/UI/Inventory/harm.png" id="22_x4adt"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cvjkx"]
+bg_color = Color(0.156863, 0.156863, 0.156863, 0.784314)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.294118, 0.294118, 0.294118, 1)
+border_blend = true
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_notif"]
+bg_color = Color(0.196078, 0.196078, 0.196078, 0.901961)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.4, 0.4, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r3mp4"]
+bg_color = Color(0.223529, 0.223529, 0.223529, 0.831373)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.360784, 0.360784, 0.360784, 1)
+border_blend = true
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m0pey"]
+bg_color = Color(0.156863, 0.156863, 0.156863, 0.784314)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.294118, 0.294118, 0.294118, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.1)
+shadow_size = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7ocg"]
+bg_color = Color(0.156863, 0.156863, 0.156863, 0.784314)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.294118, 0.294118, 0.294118, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.1)
+shadow_size = 1
+
+[node name="PlayerUI" type="CanvasLayer" groups=["ui_elements"]]
+script = ExtResource("1_tmc17")
+
+[node name="Control" type="HBoxContainer" parent="."]
+anchors_preset = -1
+anchor_left = 0.125
+anchor_top = 0.839506
+anchor_right = 0.895833
+anchor_bottom = 0.999228
+offset_right = -296.0
+offset_bottom = -34.5
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.5, 1.5)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="DragPreview" type="TextureRect" parent="Control"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TooltipPanel" type="Panel" parent="Control"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_cvjkx")
+
+[node name="TooltipLabel" type="Label" parent="Control/TooltipPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.901961, 0.901961, 0.901961, 1)
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
+
+[node name="NotificationPanel" type="Panel" parent="Control"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_notif")
+
+[node name="NotificationLabel" type="Label" parent="Control/NotificationPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 5.0
+offset_right = -10.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.901961, 0.901961, 0.901961, 1)
+theme_override_font_sizes/font_size = 14
+text = "Item equipped!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="EquipmentItems" type="HBoxContainer" parent="Control"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="EquipmentButton" type="TextureButton" parent="Control/EquipmentItems"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+focus_mode = 0
+toggle_mode = true
+texture_normal = ExtResource("8_c6re1")
+
+[node name="EquipmentSlots" type="Control" parent="Control/EquipmentItems/EquipmentButton"]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -112.0
+offset_top = -183.333
+offset_right = -5.00031
+offset_bottom = -18.3336
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.047
+anchor_top = -0.034
+anchor_right = 1.065
+anchor_bottom = 0.917
+offset_left = 0.0290012
+offset_top = -0.0566669
+offset_right = 0.0449905
+offset_bottom = 0.0283203
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_r3mp4")
+
+[node name="GridContainer" type="GridContainer" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -48.0
+offset_top = -80.0
+offset_right = 48.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+columns = 3
+
+[node name="Spacer1" type="Control" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HeadSlot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("9_2dwi6")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeadSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/HeadSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="HeadSlotItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/HeadSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="Spacer2" type="Control" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Ear1Slot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("10_j13a7")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EarsSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/Ear1Slot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="Ear1ItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/Ear1Slot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="MaskSlot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("11_sjrj0")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MaskSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/MaskSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="MaskSlotItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/MaskSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="Ear2Slot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("12_74boh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EarsSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/Ear2Slot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="Ear2ItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/Ear2Slot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="EyesSlot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("13_4mkda")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EyesSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/EyesSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="EyesSlotItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/EyesSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="UniformSlot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("14_rpa04")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="UniformSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/UniformSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="UniformSlotItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/UniformSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="ArmorSlot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("15_w7l74")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ArmorSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/ArmorSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="ArmorSlotItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/ArmorSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="SuitSlot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("16_7cohv")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SuitSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/SuitSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="SuitSlotItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/SuitSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="GlovesSlot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("17_ga0nh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GlovesSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/GlovesSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="GlovesSlotItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/GlovesSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="ShoesSlot" type="TextureRect" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("18_jjevt")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ShoesSlotButton" type="Button" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/ShoesSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="ShoesSlotItemSprite" type="Sprite2D" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/ShoesSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="MainSlots" type="HBoxContainer" parent="Control"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="IDSlot" type="TextureRect" parent="Control/MainSlots"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("5_y6q74")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IDSlotButton" type="Button" parent="Control/MainSlots/IDSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="IDSlotItemSprite" type="Sprite2D" parent="Control/MainSlots/IDSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="BeltSlot" type="TextureRect" parent="Control/MainSlots"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("6_q5s13")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BeltSlotButton" type="Button" parent="Control/MainSlots/BeltSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="BeltSlotItemSprite" type="Sprite2D" parent="Control/MainSlots/BeltSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="BackSlot" type="TextureRect" parent="Control/MainSlots"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("7_iwrji")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BackSlotButton" type="Button" parent="Control/MainSlots/BackSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="BackSlotItemSprite" type="Sprite2D" parent="Control/MainSlots/BackSlot"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="HandSlots" type="HBoxContainer" parent="Control"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="RightHand" type="TextureButton" parent="Control/HandSlots"]
+layout_mode = 2
+focus_mode = 0
+texture_normal = ExtResource("3_2i2l7")
+
+[node name="RightHandSlot" type="TextureRect" parent="Control/HandSlots/RightHand"]
+layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 37.0
+offset_right = 5.0
+mouse_filter = 2
+
+[node name="ActiveRightIndicator" type="ColorRect" parent="Control/HandSlots/RightHand"]
+layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 79.0
+offset_right = 47.0
+mouse_filter = 2
+color = Color(0.666667, 0, 0.227451, 0.670588)
+
+[node name="LeftHand" type="TextureButton" parent="Control/HandSlots"]
+layout_mode = 2
+focus_mode = 0
+texture_normal = ExtResource("4_3for7")
+
+[node name="LeftHandSlot" type="TextureRect" parent="Control/HandSlots/LeftHand"]
+layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 37.0
+offset_right = 5.0
+mouse_filter = 2
+
+[node name="ActiveLeftIndicator" type="ColorRect" parent="Control/HandSlots/LeftHand"]
+layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 37.0
+offset_right = 5.0
+mouse_filter = 2
+color = Color(0.301961, 0, 0.956863, 0.717647)
+
+[node name="PouchSlots" type="HBoxContainer" parent="Control"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="Pouch1" type="TextureRect" parent="Control/PouchSlots"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_pb4ad")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Pouch1Button" type="Button" parent="Control/PouchSlots/Pouch1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="Pouch1ItemSprite" type="Sprite2D" parent="Control/PouchSlots/Pouch1"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="Pouch2" type="TextureRect" parent="Control/PouchSlots"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("2_pb4ad")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Pouch2Button" type="Button" parent="Control/PouchSlots/Pouch2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+
+[node name="Pouch2ItemSprite" type="Sprite2D" parent="Control/PouchSlots/Pouch2"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+position = Vector2(16, 16)
+scale = Vector2(0.9, 0.9)
+
+[node name="IntentSelector" type="GridContainer" parent="Control"]
+layout_mode = 2
+mouse_filter = 2
+columns = 2
+
+[node name="HelpIntent" type="TextureButton" parent="Control/IntentSelector"]
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+button_pressed = true
+texture_normal = ExtResource("19_moxo4")
+
+[node name="DisarmIntent" type="TextureButton" parent="Control/IntentSelector"]
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+texture_normal = ExtResource("20_6vebg")
+
+[node name="GrabIntent" type="TextureButton" parent="Control/IntentSelector"]
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+texture_normal = ExtResource("21_dx2ri")
+
+[node name="HarmIntent" type="TextureButton" parent="Control/IntentSelector"]
+layout_mode = 2
+focus_mode = 0
+toggle_mode = true
+texture_normal = ExtResource("22_x4adt")
+
+[node name="MovementButtons" type="VBoxContainer" parent="Control"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="RunButton" type="Button" parent="Control/MovementButtons"]
+custom_minimum_size = Vector2(80, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_m0pey")
+text = "Run"
+
+[node name="WalkButton" type="Button" parent="Control/MovementButtons"]
+custom_minimum_size = Vector2(80, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_a7ocg")
+disabled = true
+text = "Walk"

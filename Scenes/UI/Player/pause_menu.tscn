@@ -1,0 +1,136 @@
+[gd_scene load_steps=4 format=3 uid="uid://conwqm0x8frrv"]
+
+[ext_resource type="Script" uid="uid://clddllyivyhhl" path="res://Code/UserInterface/pause_menu.gd" id="1_emv3i"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b6a4l"]
+bg_color = Color(0.0509804, 0.0705882, 0.109804, 0.901961)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qgwf7"]
+bg_color = Color(0.0980392, 0.133333, 0.188235, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="PauseMenu" type="CanvasLayer" groups=["pause_menu"]]
+process_mode = 3
+layer = 100
+visible = false
+script = ExtResource("1_emv3i")
+handle_esc_internally = true
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.501961)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(400, 450)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_b6a4l")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ResumeButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Resume Game"
+
+[node name="SettingsPanelContainer" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_qgwf7")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SettingsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Quick Settings"
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MasterVolumeContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/MasterVolumeContainer"]
+layout_mode = 2
+text = "Master Volume"
+
+[node name="MasterVolumeSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/MasterVolumeContainer"]
+layout_mode = 2
+min_value = -80.0
+max_value = 0.0
+value = -10.0
+
+[node name="FullscreenContainer" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/FullscreenContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Fullscreen"
+
+[node name="FullscreenCheckBox" type="CheckBox" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/FullscreenContainer"]
+layout_mode = 2
+
+[node name="SettingsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Advanced Settings"
+
+[node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MainMenuButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Return to Main Menu"
+
+[node name="QuitButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Quit Game"

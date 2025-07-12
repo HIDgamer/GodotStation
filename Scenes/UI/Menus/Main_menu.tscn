@@ -1,0 +1,123 @@
+[gd_scene load_steps=2 format=3 uid="uid://d20saeuvatwuw"]
+
+[ext_resource type="Script" uid="uid://d2yxswdtbk034" path="res://Code/UserInterface/main_menu.gd" id="1_7sp8y"]
+
+[node name="MainMenuScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7sp8y")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0509804, 0.0705882, 0.109804, 1)
+
+[node name="Title" type="Label" parent="."]
+z_index = 5
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 1.0
+offset_bottom = 89.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 64
+text = "A.R.E.S-1"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="."]
+z_index = 5
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 77.0
+offset_bottom = 117.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 24
+text = "Advanced Reconnaissance & Exploration System"
+horizontal_alignment = 1
+
+[node name="Version" type="Label" parent="."]
+z_index = 5
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -40.0
+offset_right = 200.0
+offset_bottom = -20.0
+grow_vertical = 0
+text = "Version 0.1.0 MP"
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -200.0
+offset_right = 200.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="MenuOptions" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="PlayButton" type="Button" parent="PanelContainer/MarginContainer/MenuOptions"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Play"
+
+[node name="MultiplayerButton" type="Button" parent="PanelContainer/MarginContainer/MenuOptions"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Multiplayer"
+
+[node name="SettingsButton" type="Button" parent="PanelContainer/MarginContainer/MenuOptions"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Settings"
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/MarginContainer/MenuOptions"]
+layout_mode = 2
+
+[node name="QuitButton" type="Button" parent="PanelContainer/MarginContainer/MenuOptions"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Quit"
+
+[node name="Credits" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -40.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "© HIDgamer 2025"
+horizontal_alignment = 2

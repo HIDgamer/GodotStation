@@ -1,0 +1,313 @@
+[gd_scene load_steps=42 format=3 uid="uid://b8qfb7e3vd5yn"]
+
+[ext_resource type="Script" uid="uid://c8r6n1ndevlm3" path="res://Code/Effects/Explosion.gd" id="1_qe8ld"]
+[ext_resource type="Texture2D" uid="uid://cmixb6fnhqgn6" path="res://Assets/Effects/Particles/Smoke.png" id="2_sukcf"]
+[ext_resource type="Texture2D" uid="uid://cgxuf57lrqig4" path="res://Assets/Effects/Particles/flare_01_0.png" id="3_7balt"]
+[ext_resource type="Texture2D" uid="uid://ct1jftobadr6y" path="res://Assets/Effects/Particles/debris.png" id="3_787c6"]
+[ext_resource type="Material" path="res://Assets/Godot Resources/shockwave_particle_material.tres" id="3_plhir"]
+[ext_resource type="AudioStream" uid="uid://ff8dyn8bbkkh" path="res://Sound/Explosions/explosion.wav" id="6_sabd7"]
+[ext_resource type="Texture2D" uid="uid://bx01jo7bajtn6" path="res://Assets/Effects/FX/explosion_spritesheet.png" id="7_ebld0"]
+[ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="8_h6mvs"]
+
+[sub_resource type="Gradient" id="Gradient_yuxdw"]
+offsets = PackedFloat32Array(0, 0.1, 0.6, 1)
+colors = PackedColorArray(0.5, 0.5, 0.5, 0.1, 0.5, 0.5, 0.5, 0.8, 0.3, 0.3, 0.3, 0.5, 0.1, 0.1, 0.1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_qs3rr"]
+gradient = SubResource("Gradient_yuxdw")
+
+[sub_resource type="Curve" id="Curve_dn48k"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.3, 1), 0.0, 0.0, 0, 0, Vector2(0.7, 1.2), 0.0, 0.0, 0, 0, Vector2(1, 0.6), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_u6q83"]
+curve = SubResource("Curve_dn48k")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_wvrld"]
+emission_shape = 1
+emission_sphere_radius = 20.0
+spread = 180.0
+initial_velocity_min = 20.0
+initial_velocity_max = 80.0
+angular_velocity_min = -10.0
+angular_velocity_max = 10.0
+gravity = Vector3(0, -20, 0)
+damping_min = 5.0
+damping_max = 10.0
+scale_min = 2.0
+scale_max = 4.0
+scale_curve = SubResource("CurveTexture_u6q83")
+color_ramp = SubResource("GradientTexture1D_qs3rr")
+turbulence_enabled = true
+turbulence_noise_strength = 5.0
+turbulence_noise_scale = 2.0
+
+[sub_resource type="Gradient" id="Gradient_vl7tp"]
+offsets = PackedFloat32Array(0, 0.8, 1)
+colors = PackedColorArray(0.4, 0.4, 0.4, 1, 0.4, 0.4, 0.4, 1, 0.4, 0.4, 0.4, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_m2i2l"]
+gradient = SubResource("Gradient_vl7tp")
+
+[sub_resource type="Curve" id="Curve_nrm4f"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.8, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_vmmjx"]
+curve = SubResource("Curve_nrm4f")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_j28mr"]
+emission_shape = 1
+emission_sphere_radius = 10.0
+spread = 180.0
+initial_velocity_min = 100.0
+initial_velocity_max = 200.0
+angular_velocity_min = -360.0
+angular_velocity_max = 360.0
+gravity = Vector3(0, 98, 0)
+scale_min = 0.3
+scale_max = 0.8
+scale_curve = SubResource("CurveTexture_vmmjx")
+color_ramp = SubResource("GradientTexture1D_m2i2l")
+collision_mode = 1
+collision_friction = 0.2
+collision_bounce = 0.4
+
+[sub_resource type="Gradient" id="Gradient_q1egh"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(1, 0.9, 0.3, 1, 1, 0.6, 0.1, 0.9, 0.9, 0.2, 0, 0.5, 0.5, 0.1, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_rgvt1"]
+gradient = SubResource("Gradient_q1egh")
+
+[sub_resource type="Curve" id="Curve_7uf6k"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.4, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_u0r1y"]
+curve = SubResource("Curve_7uf6k")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rlt6i"]
+emission_shape = 1
+emission_sphere_radius = 15.0
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity_min = 50.0
+initial_velocity_max = 150.0
+gravity = Vector3(0, -20, 0)
+scale_min = 0.8
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_u0r1y")
+color_ramp = SubResource("GradientTexture1D_rgvt1")
+
+[sub_resource type="Gradient" id="Gradient_5mh30"]
+offsets = PackedFloat32Array(0, 0.4, 0.7, 1)
+colors = PackedColorArray(1, 1, 0.8, 1, 1, 0.9, 0.3, 1, 1, 0.6, 0, 0.7, 1, 0.3, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_7kpuw"]
+gradient = SubResource("Gradient_5mh30")
+
+[sub_resource type="Curve" id="Curve_qwsxb"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.7, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_8j7qs"]
+curve = SubResource("Curve_qwsxb")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_1tmmv"]
+emission_shape = 1
+emission_sphere_radius = 10.0
+spread = 180.0
+initial_velocity_min = 100.0
+initial_velocity_max = 300.0
+gravity = Vector3(0, 98, 0)
+damping_min = 20.0
+damping_max = 50.0
+scale_min = 0.1
+scale_max = 0.3
+scale_curve = SubResource("CurveTexture_8j7qs")
+color_ramp = SubResource("GradientTexture1D_7kpuw")
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sabd7"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ebld0"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m8ivs"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7bjsx"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k3ikn"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_josek"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xqbbl"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q4fvp"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_81ksd"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(256, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rr6cg"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(288, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6em8i"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(320, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vvwkn"]
+atlas = ExtResource("7_ebld0")
+region = Rect2(352, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_lvsv7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sabd7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ebld0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m8ivs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7bjsx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k3ikn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_josek")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xqbbl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q4fvp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_81ksd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rr6cg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6em8i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vvwkn")
+}],
+"loop": false,
+"name": &"Explosion",
+"speed": 15.0
+}]
+
+[node name="ExplosionParticles" type="GPUParticles2D"]
+emitting = false
+amount = 100
+texture = ExtResource("2_sukcf")
+lifetime = 6.0
+one_shot = true
+explosiveness = 0.7
+randomness = 0.4
+process_material = SubResource("ParticleProcessMaterial_wvrld")
+script = ExtResource("1_qe8ld")
+
+[node name="ShockwaveRing" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 1
+texture = ExtResource("3_7balt")
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+process_material = ExtResource("3_plhir")
+
+[node name="DebrisParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 30
+texture = ExtResource("3_787c6")
+lifetime = 2.0
+one_shot = true
+explosiveness = 0.9
+randomness = 0.5
+process_material = SubResource("ParticleProcessMaterial_j28mr")
+
+[node name="FlameParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 40
+texture = ExtResource("3_7balt")
+one_shot = true
+explosiveness = 0.8
+randomness = 0.3
+process_material = SubResource("ParticleProcessMaterial_rlt6i")
+
+[node name="SparkParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 60
+texture = ExtResource("3_7balt")
+one_shot = true
+explosiveness = 1.0
+randomness = 0.2
+process_material = SubResource("ParticleProcessMaterial_1tmmv")
+
+[node name="ExplosionSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_sabd7")
+
+[node name="Explosion" type="AnimatedSprite2D" parent="."]
+scale = Vector2(10, 10)
+sprite_frames = SubResource("SpriteFrames_lvsv7")
+animation = &"Explosion"
+frame = 11
+frame_progress = 0.981813
+
+[node name="ExplosionLight" type="PointLight2D" parent="."]
+color = Color(1, 0.8, 0.4, 1)
+energy = 3.0
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 3.0
+texture = ExtResource("8_h6mvs")
+texture_scale = 3.0
+
+[node name="SecondaryLight" type="PointLight2D" parent="."]
+color = Color(1, 0.6, 0.2, 1)
+energy = 1.5
+shadow_enabled = true
+texture = ExtResource("8_h6mvs")
+texture_scale = 2.1
+
+[node name="FlickerTimer" type="Timer" parent="SecondaryLight"]
+wait_time = 0.05
+autostart = true
+
+[node name="CleanupTimer" type="Timer" parent="."]
+wait_time = 7.5
+one_shot = true
+autostart = true
+
+[node name="ImpactTimer" type="Timer" parent="."]
+wait_time = 0.05
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="SecondaryLight/FlickerTimer" to="." method="_on_flicker_timer_timeout"]
+[connection signal="timeout" from="CleanupTimer" to="." method="queue_free"]
+[connection signal="timeout" from="ImpactTimer" to="." method="_apply_physics_impact"]

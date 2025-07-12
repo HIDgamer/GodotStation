@@ -1,0 +1,11 @@
+[gd_resource type="CanvasTexture" load_steps=4 format=3 uid="uid://d0smcdcy5kvcy"]
+
+[ext_resource type="Texture2D" uid="uid://kjtp8v53c0jv" path="res://Assets/Icons/Items/Objects/Lights.png" id="1_j0vf4"]
+[ext_resource type="Texture2D" uid="uid://bpaqgipr3lvxc" path="res://Assets/Icons/Items/Objects/Lights_n.png" id="2_scjra"]
+[ext_resource type="Texture2D" uid="uid://ctgk4kab7aidh" path="res://Assets/Icons/Items/Objects/Lights_s.png" id="3_mlfka"]
+
+[resource]
+diffuse_texture = ExtResource("1_j0vf4")
+normal_texture = ExtResource("2_scjra")
+specular_texture = ExtResource("3_mlfka")
+specular_shininess = 0.0

@@ -1,0 +1,189 @@
+[gd_scene load_steps=24 format=3 uid="uid://dyq1yqt4nncue"]
+
+[ext_resource type="Script" uid="uid://cjyp4jpqv1sc7" path="res://Code/Effects/Flash.gd" id="1_8ptm4"]
+[ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="2_k1b7e"]
+[ext_resource type="Texture2D" uid="uid://cgxuf57lrqig4" path="res://Assets/Effects/Particles/flare_01_0.png" id="3_3jang"]
+[ext_resource type="Texture2D" uid="uid://cmixb6fnhqgn6" path="res://Assets/Effects/Particles/Smoke.png" id="4_atlm3"]
+[ext_resource type="AudioStream" uid="uid://b3pcfcrk0u52l" path="res://Sound/handling/impact.wav" id="7_pr1u4"]
+
+[sub_resource type="Gradient" id="Gradient_kgnl3"]
+offsets = PackedFloat32Array(0, 0.8, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 0.8, 0.5, 1, 0.9, 0.7, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_lv0j2"]
+gradient = SubResource("Gradient_kgnl3")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_1q3c6"]
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+emission_ring_cone_angle = 90.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+gravity = Vector3(0, 0, 0)
+scale_min = 20.0
+scale_max = 20.0
+color_ramp = SubResource("GradientTexture1D_lv0j2")
+
+[sub_resource type="Gradient" id="Gradient_m6xv6"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 0.8, 1, 0.9, 0.6, 0.6, 0.9, 0.6, 0.3, 0.4, 0.7, 0.3, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_6hn7m"]
+gradient = SubResource("Gradient_m6xv6")
+
+[sub_resource type="Curve" id="Curve_73oem"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.2, 2), 0.0, 0.0, 0, 0, Vector2(1, 15), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_1a34i"]
+curve = SubResource("Curve_73oem")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_yq00d"]
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+emission_ring_cone_angle = 90.0
+direction = Vector3(0, 0, 0)
+spread = 0.0
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("CurveTexture_1a34i")
+color_ramp = SubResource("GradientTexture1D_6hn7m")
+
+[sub_resource type="Gradient" id="Gradient_wh8dk"]
+offsets = PackedFloat32Array(0, 0.1, 0.7, 1)
+colors = PackedColorArray(0.9, 0.9, 0.9, 0, 0.8, 0.8, 0.8, 0.5, 0.6, 0.6, 0.6, 0.3, 0.4, 0.4, 0.4, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_7g4xc"]
+gradient = SubResource("Gradient_wh8dk")
+
+[sub_resource type="Curve" id="Curve_yuxrn"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.3, 1), 0.0, 0.0, 0, 0, Vector2(0.7, 1.2), 0.0, 0.0, 0, 0, Vector2(1, 0.8), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_l521q"]
+curve = SubResource("Curve_yuxrn")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_7c6q2"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 20.0
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity_min = 10.0
+initial_velocity_max = 30.0
+gravity = Vector3(0, -10, 0)
+scale_min = 0.5
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_l521q")
+color_ramp = SubResource("GradientTexture1D_7g4xc")
+turbulence_enabled = true
+turbulence_noise_strength = 2.0
+turbulence_noise_scale = 2.0
+
+[sub_resource type="Gradient" id="Gradient_bjm7j"]
+offsets = PackedFloat32Array(0, 0.2, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.8, 1, 0.9, 0.7, 0.4, 0.8, 0.5, 0.2, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_7ddj8"]
+gradient = SubResource("Gradient_bjm7j")
+
+[sub_resource type="Curve" id="Curve_17ql6"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.1, 1.5), 0.0, 0.0, 0, 0, Vector2(0.6, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_uvr7f"]
+curve = SubResource("Curve_17ql6")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gk4mk"]
+emission_shape = 1
+emission_sphere_radius = 5.0
+direction = Vector3(0, 0, 0)
+spread = 0.0
+gravity = Vector3(0, 0, 0)
+scale_min = 10.0
+scale_max = 10.0
+scale_curve = SubResource("CurveTexture_uvr7f")
+color_ramp = SubResource("GradientTexture1D_7ddj8")
+
+[node name="FlashParticles" type="GPUParticles2D"]
+emitting = false
+amount = 1
+texture = ExtResource("2_k1b7e")
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+randomness = 0.1
+process_material = SubResource("ParticleProcessMaterial_1q3c6")
+script = ExtResource("1_8ptm4")
+
+[node name="SecondaryLight" type="PointLight2D" parent="."]
+energy = 2.5
+shadow_enabled = true
+texture = ExtResource("2_k1b7e")
+texture_scale = 8.0
+
+[node name="ShockwaveParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 1
+texture = ExtResource("3_3jang")
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_yq00d")
+
+[node name="SmokeParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 30
+texture = ExtResource("4_atlm3")
+lifetime = 3.0
+one_shot = true
+explosiveness = 0.8
+randomness = 0.5
+process_material = SubResource("ParticleProcessMaterial_7c6q2")
+
+[node name="RingParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 120
+lifetime = 0.7
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_1q3c6")
+
+[node name="SecondaryParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 40
+texture = ExtResource("3_3jang")
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.9
+randomness = 0.3
+process_material = SubResource("ParticleProcessMaterial_1q3c6")
+
+[node name="BloomParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 1
+texture = ExtResource("2_k1b7e")
+lifetime = 0.25
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_gk4mk")
+
+[node name="AudioPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("7_pr1u4")
+volume_db = 10.0
+
+[node name="SecondaryAudio" type="AudioStreamPlayer2D" parent="."]
+pitch_scale = 0.8
+max_distance = 1500.0
+
+[node name="CleanupTimer" type="Timer" parent="."]
+wait_time = 4.0
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="CleanupTimer" to="." method="queue_free"]

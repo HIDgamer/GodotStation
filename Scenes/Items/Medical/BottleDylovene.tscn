@@ -1,0 +1,90 @@
+[gd_scene load_steps=10 format=3 uid="uid://beq2jxnrjew86"]
+
+[ext_resource type="Script" uid="uid://dhs6w82upedv0" path="res://Code/Items/Medical/Bottle_Dylovene.gd" id="1_bo378"]
+[ext_resource type="Texture2D" uid="uid://daphef4atoor5" path="res://Assets/Icons/Items/Medical/Bottles.png" id="2_j6o3u"]
+[ext_resource type="Texture2D" uid="uid://cc7gio61vhrud" path="res://Assets/Effects/Chemicals/Regant.png" id="3_unjtl"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fd8il"]
+atlas = ExtResource("3_unjtl")
+region = Rect2(352, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1a74c"]
+atlas = ExtResource("3_unjtl")
+region = Rect2(320, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g34t2"]
+atlas = ExtResource("3_unjtl")
+region = Rect2(288, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gipwh"]
+atlas = ExtResource("3_unjtl")
+region = Rect2(256, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t0li7"]
+atlas = ExtResource("3_unjtl")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_68nnb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fd8il")
+}],
+"loop": true,
+"name": &"1",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1a74c")
+}],
+"loop": true,
+"name": &"2",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g34t2")
+}],
+"loop": true,
+"name": &"3",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gipwh")
+}],
+"loop": true,
+"name": &"4",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t0li7")
+}],
+"loop": true,
+"name": &"5",
+"speed": 5.0
+}]
+
+[node name="MedicalItem" type="Node2D"]
+script = ExtResource("1_bo378")
+is_medicine_container = true
+can_refill = true
+can_mix = true
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_j6o3u")
+hframes = 4
+frame = 2
+
+[node name="Regant" type="AnimatedSprite2D" parent="."]
+modulate = Color(0, 0.823529, 0, 1)
+sprite_frames = SubResource("SpriteFrames_68nnb")
+animation = &"1"
+autoplay = "1"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-3, -8, -4, -8, -4, -7, -5, -7, -5, -4, -4, -4, -4, -3, -5, -3, -5, -2, -6, -2, -6, 7, -5, 7, -5, 8, -3, 8, -3, 9, 2, 9, 2, 8, 4, 8, 4, 7, 5, 7, 5, -2, 4, -2, 4, -3, 3, -3, 3, -4, 4, -4, 4, -7, 3, -7, 3, -8, 2, -8, 2, -9, -3, -9)

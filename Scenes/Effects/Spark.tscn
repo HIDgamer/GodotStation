@@ -1,0 +1,64 @@
+[gd_scene load_steps=8 format=3 uid="uid://ciy2jdvrqx6ti"]
+
+[ext_resource type="Texture2D" uid="uid://cgxuf57lrqig4" path="res://Assets/Effects/Particles/flare_01_0.png" id="1_kbmwo"]
+
+[sub_resource type="GDScript" id="GDScript_qf27d"]
+script/source = "extends Node2D
+
+func _ready():
+	$Timer.timeout.connect(queue_free)
+"
+
+[sub_resource type="Gradient" id="Gradient_spark"]
+offsets = PackedFloat32Array(0, 0.4, 0.8, 1)
+colors = PackedColorArray(1, 0.9, 0.3, 1, 1, 0.7, 0.2, 0.8, 1, 0.4, 0, 0.4, 1, 0.2, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_spark"]
+gradient = SubResource("Gradient_spark")
+
+[sub_resource type="Curve" id="Curve_scale"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_scale"]
+curve = SubResource("Curve_scale")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dyhun"]
+particle_flag_disable_z = true
+spread = 180.0
+initial_velocity_min = 30.0
+initial_velocity_max = 80.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+gravity = Vector3(0, 0, 0)
+linear_accel_min = -50.0
+linear_accel_max = -20.0
+damping_min = 10.0
+damping_max = 20.0
+scale_min = 0.05
+scale_max = 0.15
+scale_curve = SubResource("CurveTexture_scale")
+color_ramp = SubResource("GradientTexture1D_spark")
+
+[node name="SparkImpact" type="Node2D"]
+script = SubResource("GDScript_qf27d")
+
+[node name="SparkParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 15
+texture = ExtResource("1_kbmwo")
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_dyhun")
+
+[node name="ImpactSound" type="AudioStreamPlayer2D" parent="."]
+volume_db = -10.0
+pitch_scale = 1.2
+autoplay = true
+max_distance = 300.0
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+autostart = true

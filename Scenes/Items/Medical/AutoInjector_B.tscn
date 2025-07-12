@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://prc0hc8w1ii2"]
+
+[ext_resource type="Script" uid="uid://ddj3t1agp0ej2" path="res://Code/Items/Medical/AutoInjector_B.gd" id="1_a3hj3"]
+[ext_resource type="Texture2D" uid="uid://hmjotqmjehu4" path="res://Assets/Icons/Items/Medical/AutoInjector_Single.png" id="2_28alw"]
+[ext_resource type="Texture2D" uid="uid://dis4336gdtmad" path="res://Assets/Effects/Chemicals/injector.png" id="3_25166"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5m0wu"]
+atlas = ExtResource("3_25166")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sjghl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5m0wu")
+}],
+"loop": true,
+"name": &"1",
+"speed": 5.0
+}]
+
+[node name="MedicalItem" type="Node2D"]
+script = ExtResource("1_a3hj3")
+can_refill = true
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_28alw")
+
+[node name="Regant" type="AnimatedSprite2D" parent="."]
+modulate = Color(0.796078, 0.113725, 0, 1)
+sprite_frames = SubResource("SpriteFrames_sjghl")
+animation = &"1"
+autoplay = "1"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-10.1, -3.1, -10.1, -2.1, -11.1, -2.1, -11.1, -0.9, -10.1, -0.9, -10.1, 0.9, -11.1, 0.9, -11.1, 2.1, -10.1, 2.1, -10.1, 3.1, -7.9, 3.1, -7.9, 2.1, 7.1, 2.1, 7.1, 1.1, 10.1, 1.1, 10.1, -1.1, 7.1, -1.1, 7.1, -2.1, -7.9, -2.1, -7.9, -3.1)

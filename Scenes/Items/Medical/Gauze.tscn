@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://djmjxyfjsmvl2"]
+
+[ext_resource type="Script" uid="uid://c4gsj86m0gp25" path="res://Code/Items/Medical/Gauze.gd" id="1_4q1x4"]
+[ext_resource type="Texture2D" uid="uid://ca1vgmkh6rqmb" path="res://Assets/Icons/Items/Medical/Gauze.png" id="2_m0ipf"]
+
+[node name="MedicalItem" type="Node2D"]
+script = ExtResource("1_4q1x4")
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_m0ipf")
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(1.9, -5.1, 1.9, -4.1, 0.9, -4.1, 0.9, -3.1, -0.1, -3.1, -0.1, -2.1, -1.1, -2.1, -1.1, -1.1, -2.1, -1.1, -2.1, -0.1, -3.1, -0.1, -3.1, 0.9, -4.1, 0.9, -4.1, 1.9, -5.1, 1.9, -5.1, 2.9, -6.1, 2.9, -6.1, 7.1, -5.1, 7.1, -5.1, 8.1, -4.1, 8.1, -4.1, 9.1, 0.1, 9.1, 0.1, 8.1, 9.1, 8.1, 9.1, 3.9, 5.1, 3.9, 5.1, 3.1, 6.1, 3.1, 6.1, 2.1, 7.1, 2.1, 7.1, 1.1, 8.1, 1.1, 8.1, -2.1, 7.1, -2.1, 7.1, -3.1, 6.1, -3.1, 6.1, -4.1, 5.1, -4.1, 5.1, -5.1)

@@ -1,0 +1,62 @@
+[gd_scene load_steps=8 format=3 uid="uid://d0xfkv8o80qsi"]
+
+[ext_resource type="Script" uid="uid://wosayx4eh8hr" path="res://Code/Items/Weapons/Grenades/EMPGrenade.gd" id="1_ypvnq"]
+[ext_resource type="Texture2D" uid="uid://dxfcgwxoq225w" path="res://Assets/Icons/Items/Lethal/EMP.png" id="2_ylfba"]
+[ext_resource type="AudioStream" uid="uid://wejp6t2amiii" path="res://Sound/effects/throwing/throw.wav" id="3_51ynv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tdcnf"]
+atlas = ExtResource("2_ylfba")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_si7n7"]
+atlas = ExtResource("2_ylfba")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jb6t4"]
+atlas = ExtResource("2_ylfba")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wmwr3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tdcnf")
+}],
+"loop": true,
+"name": &"No_pin",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_si7n7")
+}],
+"loop": true,
+"name": &"Pin",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jb6t4")
+}],
+"loop": true,
+"name": &"Primed",
+"speed": 5.0
+}]
+
+[node name="EMPGrenade" type="Node2D" groups=["grenades", "items", "objects"]]
+script = ExtResource("1_ypvnq")
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_wmwr3")
+animation = &"Primed"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4.1, -6.1, -4.1, -4.9, -3.1, -4.9, -3.1, -2.1, -4.1, -2.1, -4.1, 5.1, -3.1, 5.1, -3.1, 6.1, -2.1, 6.1, -2.1, 7.1, 1.1, 7.1, 1.1, 6.1, 2.1, 6.1, 2.1, 5.1, 3.1, 5.1, 3.1, -1.9, 3.9, -1.9, 3.9, 5.1, 5.1, 5.1, 5.1, -3.1, 4.1, -3.1, 4.1, -4.1, 3.1, -4.1, 3.1, -5.1, 2.1, -5.1, 2.1, -6.1)
+
+[node name="ArmSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_51ynv")
+volume_db = 24.0

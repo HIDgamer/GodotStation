@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3 uid="uid://chjl5eey6uxvm"]
+
+[ext_resource type="Script" uid="uid://bea7udwekgyrb" path="res://Code/Managers/RadialMenuManager.gd" id="1_48uet"]
+
+[node name="RadialMenuManager" type="Node"]
+script = ExtResource("1_48uet")
+
+[node name="RadialMenu" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="RadialMenu"]
+
+[connection signal="menu_closed" from="RadialMenu" to="." method="_on_menu_closed"]
+[connection signal="option_selected" from="RadialMenu" to="." method="_on_option_selected"]

@@ -1,0 +1,61 @@
+[gd_scene load_steps=8 format=3 uid="uid://bcdh3n2gbsb5l"]
+
+[ext_resource type="Script" uid="uid://byyb8woxr6oc7" path="res://Code/Items/Weapons/Grenades/SmokeGrenade.gd" id="1_d1tq7"]
+[ext_resource type="Texture2D" uid="uid://c0t8doutwof8t" path="res://Assets/Icons/Items/Lethal/Smoke.png" id="2_3bism"]
+[ext_resource type="AudioStream" uid="uid://wejp6t2amiii" path="res://Sound/effects/throwing/throw.wav" id="3_bq7ue"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6hyg5"]
+atlas = ExtResource("2_3bism")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bkb24"]
+atlas = ExtResource("2_3bism")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cm2tv"]
+atlas = ExtResource("2_3bism")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8h3kk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6hyg5")
+}],
+"loop": true,
+"name": &"No_pin",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bkb24")
+}],
+"loop": true,
+"name": &"Pin",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cm2tv")
+}],
+"loop": true,
+"name": &"Primed",
+"speed": 5.0
+}]
+
+[node name="SmokeGrenade" type="Node2D" groups=["grenades", "items", "objects"]]
+script = ExtResource("1_d1tq7")
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_8h3kk")
+animation = &"Primed"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4.1, -7.1, -4.1, -5.9, -3.1, -5.9, -3.1, -3.1, -4.1, -3.1, -4.1, 7.1, 3.1, 7.1, 3.1, -2.9, 3.9, -2.9, 3.9, 4.1, 5.1, 4.1, 5.1, -4.1, 4.1, -4.1, 4.1, -5.1, 3.1, -5.1, 3.1, -6.1, 2.1, -6.1, 2.1, -7.1)
+
+[node name="ArmSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_bq7ue")

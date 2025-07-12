@@ -1,0 +1,306 @@
+[gd_scene load_steps=8 format=3 uid="uid://bf2vv35r3bcwd"]
+
+[ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="3_deu75"]
+
+[sub_resource type="Gradient" id="Gradient_y0c4j"]
+offsets = PackedFloat32Array(0, 0.3, 0.6, 1)
+colors = PackedColorArray(1, 0.9, 0.3, 1, 1, 0.5, 0.1, 1, 0.8, 0.2, 0, 0.8, 0.3, 0.1, 0.1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_yb7yo"]
+gradient = SubResource("Gradient_y0c4j")
+
+[sub_resource type="Curve" id="Curve_4f7cv"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.3, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_h5oxx"]
+curve = SubResource("Curve_4f7cv")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ktkdg"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 10.0
+direction = Vector3(0, -1, 0)
+spread = 30.0
+initial_velocity_min = 20.0
+initial_velocity_max = 80.0
+angular_velocity_min = -90.0
+angular_velocity_max = 90.0
+gravity = Vector3(0, -50, 0)
+scale_min = 0.5
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_h5oxx")
+color_ramp = SubResource("GradientTexture1D_yb7yo")
+hue_variation_min = -0.05
+hue_variation_max = 0.05
+turbulence_enabled = true
+turbulence_noise_strength = 0.3
+turbulence_noise_scale = 2.0
+
+[sub_resource type="GDScript" id="GDScript_jmyvb"]
+script/source = "extends GPUParticles2D
+
+# Fire properties
+var fire_radius = 32  # Default radius in pixels
+var fire_intensity = 1.0  # Controls the intensity of the fire
+var fire_color = Color(1.0, 0.6, 0.3, 1.0)  # Default orange-yellow
+var emit_sparks = true  # Whether to emit occasional sparks
+
+# Last flicker time tracking
+var last_flicker_time = 0.0
+var flicker_interval = 0.1
+
+func _ready():
+	# Start playing the fire sound
+	if has_node(\"FireSound\"):
+		$FireSound.play()
+	
+	# Set up light flicker
+	if has_node(\"FireLight\"):
+		if has_node(\"FlickerTimer\"):
+			$FlickerTimer.start()
+	
+	# Setup default material if none exists
+	if not process_material:
+		setup_particle_material()
+
+func _process(delta):
+	# Handle manual flickering if no timer
+	if has_node(\"FireLight\") and not has_node(\"FlickerTimer\"):
+		last_flicker_time += delta
+		if last_flicker_time >= flicker_interval:
+			_on_flicker_timer_timeout()
+			last_flicker_time = 0.0
+	
+	# Occasional sparks
+	if emit_sparks and randf() < 0.05 * delta * fire_intensity:
+		emit_spark()
+
+# Set up the particle material if needed
+func setup_particle_material():
+	var material = ParticleProcessMaterial.new()
+	
+	# Emission settings
+	material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	material.emission_sphere_radius = fire_radius * 0.2
+	
+	# Movement
+	material.direction = Vector3(0, -1, 0)
+	material.spread = 30.0
+	material.initial_velocity_min = 20.0
+	material.initial_velocity_max = 80.0
+	
+	# Randomize movement
+	material.angular_velocity_min = -90.0
+	material.angular_velocity_max = 90.0
+	material.gravity = Vector3(0, -50, 0)
+	
+	# Size
+	material.scale_min = 0.5
+	material.scale_max = 2.0
+	
+	# Scale over lifetime
+	var curve = Curve.new()
+	curve.add_point(Vector2(0, 0.2))
+	curve.add_point(Vector2(0.3, 1.0))
+	curve.add_point(Vector2(1, 0))
+	
+	var scale_curve = CurveTexture.new()
+	scale_curve.curve = curve
+	material.scale_curve = scale_curve
+	
+	# Color gradient
+	var gradient = Gradient.new()
+	gradient.add_point(0.0, Color(1.0, 0.9, 0.3, 1.0))  # Bright yellow
+	gradient.add_point(0.3, Color(1.0, 0.5, 0.1, 1.0))  # Orange
+	gradient.add_point(0.6, Color(0.8, 0.2, 0.0, 0.8))  # Dark orange/red
+	gradient.add_point(1.0, Color(0.3, 0.1, 0.1, 0.0))  # Fade out
+	
+	var gradient_texture = GradientTexture1D.new()
+	gradient_texture.gradient = gradient
+	material.color_ramp = gradient_texture
+	
+	# Color variation
+	material.hue_variation_min = -0.05
+	material.hue_variation_max = 0.05
+	
+	# Turbulence for more realistic fire
+	material.turbulence_enabled = true
+	material.turbulence_noise_strength = 0.3
+	material.turbulence_noise_scale = 2.0
+	
+	# Apply material
+	process_material = material
+
+# Set fire properties from outside
+func set_fire_properties(radius: float, intensity: float = 1.0, color: Color = Color(1.0, 0.6, 0.3, 1.0)):
+	fire_radius = radius
+	fire_intensity = intensity
+	fire_color = color
+	
+	# Update particle count based on radius and intensity
+	amount = int(100 * (radius / 64.0) * fire_intensity)
+	amount = clamp(amount, 30, 300)
+	
+	# Update emission settings
+	if process_material:
+		process_material.emission_sphere_radius = radius * 0.2
+		
+		# Adjust velocity based on intensity
+		process_material.initial_velocity_min = 20.0 * fire_intensity
+		process_material.initial_velocity_max = 80.0 * fire_intensity
+		
+		# Update gravity for larger flames
+		process_material.gravity.y = -50.0 * fire_intensity
+		
+		# Apply color influence
+		if process_material.color_ramp and process_material.color_ramp.gradient:
+			var gradient = process_material.color_ramp.gradient
+			
+			# Adjust gradient based on fire color
+			if gradient.get_point_count() >= 4:
+				# Preserve original structure but blend with new color
+				gradient.set_color(0, Color(
+					lerp(1.0, fire_color.r, 0.5),
+					lerp(0.9, fire_color.g, 0.5),
+					lerp(0.3, fire_color.b, 0.5),
+					1.0
+				))
+				gradient.set_color(1, Color(
+					lerp(1.0, fire_color.r, 0.7),
+					lerp(0.5, fire_color.g, 0.7),
+					lerp(0.1, fire_color.b, 0.7),
+					1.0
+				))
+				gradient.set_color(2, Color(
+					lerp(0.8, fire_color.r, 0.7),
+					lerp(0.2, fire_color.g, 0.7),
+					lerp(0.0, fire_color.b, 0.7),
+					0.8
+				))
+	
+	# Update light if present
+	if has_node(\"FireLight\"):
+		$FireLight.color = Color(
+			lerp(1.0, fire_color.r, 0.7),
+			lerp(0.7, fire_color.g, 0.7),
+			lerp(0.3, fire_color.b, 0.7),
+			1.0
+		)
+		$FireLight.energy = 0.5 * fire_intensity
+		$FireLight.texture_scale = (radius / 64.0)
+	
+	# Update lifetime based on intensity
+	if has_node(\"LifetimeTimer\"):
+		$LifetimeTimer.wait_time = 20.0 + (10.0 * fire_intensity)
+
+# Random light flicker
+func _on_flicker_timer_timeout():
+	# Random light flicker
+	if has_node(\"FireLight\"):
+		var base_energy = 1.0 * fire_intensity
+		var flicker_range = 0.2 * fire_intensity
+		
+		# More dynamic flicker
+		$FireLight.energy = randf_range(base_energy - flicker_range, base_energy + flicker_range)
+		
+		# Subtle color temperature changes
+		var temp_shift = randf_range(-0.05, 0.05)
+		$FireLight.color = Color(
+			clamp($FireLight.color.r + temp_shift, 0.8, 1.0),
+			clamp($FireLight.color.g - temp_shift, 0.3, 0.8),
+			clamp($FireLight.color.b - temp_shift * 2, 0.1, 0.4),
+			1.0
+		)
+
+# Emit a spark particle
+func emit_spark():
+	# Create a temporary spark particle
+	var spark = GPUParticles2D.new()
+	add_child(spark)
+	
+	# Create spark material
+	var spark_material = ParticleProcessMaterial.new()
+	spark_material.direction = Vector3(0, -1, 0)
+	spark_material.spread = 180.0
+	spark_material.initial_velocity_min = 50.0 * fire_intensity
+	spark_material.initial_velocity_max = 150.0 * fire_intensity
+	spark_material.gravity = Vector3(0, 50, 0)
+	spark_material.scale_min = 0.2
+	spark_material.scale_max = 0.8
+	
+	# Color
+	var gradient = Gradient.new()
+	gradient.add_point(0.0, Color(1.0, 0.9, 0.4, 1.0))
+	gradient.add_point(0.5, Color(1.0, 0.5, 0.1, 0.8))
+	gradient.add_point(1.0, Color(0.8, 0.0, 0.0, 0.0))
+	
+	var gradient_texture = GradientTexture1D.new()
+	gradient_texture.gradient = gradient
+	spark_material.color_ramp = gradient_texture
+	
+	spark.process_material = spark_material
+	spark.amount = 5 + int(5.0 * fire_intensity)
+	spark.lifetime = 1.0
+	spark.explosiveness = 1.0
+	spark.one_shot = true
+	
+	# Try to set texture
+	if texture:
+		spark.texture = texture
+	
+	spark.emitting = true
+	
+	# Create cleanup timer
+	var timer = Timer.new()
+	spark.add_child(timer)
+	timer.wait_time = 1.5
+	timer.one_shot = true
+	timer.autostart = true
+	timer.timeout.connect(func(): spark.queue_free())
+
+func _on_lifetime_timer_timeout():
+	# Fade out fire
+	var tween = create_tween()
+	tween.tween_property(self, \"modulate:a\", 0.0, 1.0)
+	
+	# Fade out light
+	if has_node(\"FireLight\"):
+		tween.parallel().tween_property($FireLight, \"energy\", 0.0, 0.8)
+	
+	# Clean up when done
+	tween.tween_callback(queue_free)
+"
+
+[node name="FireParticles" type="GPUParticles2D"]
+amount = 100
+lifetime = 2.0
+explosiveness = 0.1
+randomness = 0.5
+process_material = SubResource("ParticleProcessMaterial_ktkdg")
+script = SubResource("GDScript_jmyvb")
+
+[node name="FireLight" type="PointLight2D" parent="."]
+color = Color(1, 0.7, 0.3, 1)
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 2.0
+texture = ExtResource("3_deu75")
+texture_scale = 0.5
+
+[node name="FireSound" type="AudioStreamPlayer2D" parent="."]
+volume_db = 24.0
+max_distance = 1000.0
+attenuation = 2.0
+
+[node name="FlickerTimer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 20.0
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="FlickerTimer" to="." method="_on_flicker_timer_timeout"]
+[connection signal="timeout" from="LifetimeTimer" to="." method="_on_lifetime_timer_timeout"]

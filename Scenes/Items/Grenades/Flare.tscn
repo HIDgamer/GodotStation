@@ -1,0 +1,75 @@
+[gd_scene load_steps=9 format=3 uid="uid://bd8rfjfpfbpfg"]
+
+[ext_resource type="Script" uid="uid://t3rxo2ito62q" path="res://Code/Items/Weapons/Grenades/Flare.gd" id="1_xrxtp"]
+[ext_resource type="Texture2D" uid="uid://ca046xqgccma5" path="res://Assets/Icons/Items/Lethal/Flare.png" id="2_u15x2"]
+[ext_resource type="AudioStream" uid="uid://bgptvb2vw1180" path="res://Sound/Grenades/Flare.mp3" id="3_g8j3y"]
+[ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="4_2gy5v"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_67e33"]
+atlas = ExtResource("2_u15x2")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ohw1u"]
+atlas = ExtResource("2_u15x2")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t06j8"]
+atlas = ExtResource("2_u15x2")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ucyyk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_67e33")
+}],
+"loop": true,
+"name": &"No_pin",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ohw1u")
+}],
+"loop": true,
+"name": &"Pin",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t06j8")
+}],
+"loop": true,
+"name": &"Primed",
+"speed": 5.0
+}]
+
+[node name="Flare" type="Node2D" groups=["clickable_entities", "grenades", "items", "objects"]]
+script = ExtResource("1_xrxtp")
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ucyyk")
+animation = &"Primed"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(3.9, -7.1, 3.9, -6.1, 2.9, -6.1, 2.9, -5.1, 1.9, -5.1, 1.9, -4.1, 0.9, -4.1, 0.9, -3.1, -0.0999999, -3.1, -0.0999999, -2.1, -2.1, -2.1, -2.1, -1.1, -3.1, -1.1, -3.1, -0.0999999, -4.1, -0.0999999, -4.1, 0.9, -5.1, 0.9, -5.1, 1.9, -6.1, 1.9, -6.1, 4.1, -5.1, 4.1, -5.1, 5.1, -2.9, 5.1, -2.9, 4.1, -1.9, 4.1, -1.9, 3.1, 0.1, 3.1, 0.1, 2.1, 1.1, 2.1, 1.1, 1.1, 2.1, 1.1, 2.1, 0.1, 3.1, 0.1, 3.1, -0.9, 4.1, -0.9, 4.1, -1.9, 5.1, -1.9, 5.1, -2.9, 6.1, -2.9, 6.1, -3.9, 7.1, -3.9, 7.1, -6.1, 6.1, -6.1, 6.1, -7.1)
+
+[node name="ArmSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_g8j3y")
+max_distance = 1000.0
+attenuation = 2.0
+
+[node name="FlickerTimer" type="Timer" parent="."]
+wait_time = 0.1
+
+[node name="PreloadedTextures" type="Node" parent="."]
+
+[node name="LightTexture" type="Sprite2D" parent="PreloadedTextures"]
+visible = false
+texture = ExtResource("4_2gy5v")
+
+[connection signal="timeout" from="FlickerTimer" to="." method="_flicker_light"]

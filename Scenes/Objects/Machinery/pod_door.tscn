@@ -1,0 +1,97 @@
+[gd_scene load_steps=15 format=3 uid="uid://dm7f3umldiso6"]
+
+[ext_resource type="Script" uid="uid://cb0y5omwt76a5" path="res://Code/Atoms/Object/Machinery/PodDoor.gd" id="1_ayxk4"]
+[ext_resource type="Texture2D" uid="uid://du42u2p821cbf" path="res://Assets/Tilesets/Doors/Closing.tres" id="2_cjv5b"]
+[ext_resource type="Texture2D" uid="uid://b624lf4u6wc4f" path="res://Assets/Tilesets/Doors/Opening.tres" id="3_l7yj3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pd3vs"]
+atlas = ExtResource("2_cjv5b")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vvur8"]
+atlas = ExtResource("2_cjv5b")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6jp7p"]
+atlas = ExtResource("2_cjv5b")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xoita"]
+atlas = ExtResource("2_cjv5b")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_63ysx"]
+atlas = ExtResource("2_cjv5b")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nul2p"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h4hof"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vxqjr"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bx546"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3yd1k"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_xvnkj"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pd3vs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vvur8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6jp7p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xoita")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_63ysx")
+}],
+"loop": false,
+"name": &"Close",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nul2p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h4hof")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vxqjr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bx546")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yd1k")
+}],
+"loop": false,
+"name": &"Open",
+"speed": 10.0
+}]
+
+[node name="PodDoor" type="Node2D"]
+script = ExtResource("1_ayxk4")
+
+[node name="Door" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_xvnkj")
+animation = &"Close"
+
+[node name="AutoCloseTimer" type="Timer" parent="."]

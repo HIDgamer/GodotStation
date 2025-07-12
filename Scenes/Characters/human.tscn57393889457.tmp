@@ -1,0 +1,61 @@
+[gd_scene load_steps=6 format=3 uid="uid://c6mxm7u3f5n4g"]
+
+[ext_resource type="Script" uid="uid://cuul5o6lshrwn" path="res://Code/Mobs/Controllers/Controller.gd" id="1_uwpdh"]
+[ext_resource type="Script" uid="uid://chnw437ejhnj4" path="res://Code/Mobs/Systems/CameraSystem.gd" id="2_8mbkt"]
+[ext_resource type="PackedScene" uid="uid://dnrsljtlvb77j" path="res://Scenes/UI/PlayerUI.tscn" id="2_s6v5g"]
+[ext_resource type="PackedScene" uid="uid://duso7e10esk50" path="res://Scenes/Sprites/human_sprite_system.tscn" id="3_lq0mj"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_bgoxp"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:current_state")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:current_direction")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath(".:current_z_level")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath(".:is_moving")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+properties/5/path = NodePath(".:current_tile_position")
+properties/5/spawn = true
+properties/5/replication_mode = 1
+properties/6/path = NodePath(".:target_tile_position")
+properties/6/spawn = true
+properties/6/replication_mode = 1
+properties/7/path = NodePath(".:is_floating")
+properties/7/spawn = true
+properties/7/replication_mode = 1
+properties/8/path = NodePath(".:velocity")
+properties/8/spawn = true
+properties/8/replication_mode = 1
+properties/9/path = NodePath(".:entity_name")
+properties/9/spawn = true
+properties/9/replication_mode = 1
+properties/10/path = NodePath("HumanSpriteSystem:current_direction")
+properties/10/spawn = true
+properties/10/replication_mode = 1
+properties/11/path = NodePath(".:intent")
+properties/11/spawn = true
+properties/11/replication_mode = 1
+
+[node name="GridMovementController" type="Node2D" groups=["player_controller"]]
+script = ExtResource("1_uwpdh")
+
+[node name="Camera2D" type="Camera2D" parent="." groups=["PlayerCamera"]]
+zoom = Vector2(2, 2)
+script = ExtResource("2_8mbkt")
+target_path = NodePath("..")
+default_zoom = Vector2(2, 2)
+
+[node name="PlayerUI" parent="." instance=ExtResource("2_s6v5g")]
+
+[node name="HumanSpriteSystem" parent="." instance=ExtResource("3_lq0mj")]
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_bgoxp")
+visibility_update_mode = 1

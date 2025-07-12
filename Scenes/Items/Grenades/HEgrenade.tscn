@@ -1,0 +1,61 @@
+[gd_scene load_steps=8 format=3 uid="uid://dm2h5vbxw0n31"]
+
+[ext_resource type="Script" uid="uid://bakoetqgg8rv7" path="res://Code/Items/Weapons/Grenades/HEGrenade.gd" id="1_owvcl"]
+[ext_resource type="Texture2D" uid="uid://hbiga0uga42e" path="res://Assets/Icons/Items/Lethal/HE.png" id="2_5onte"]
+[ext_resource type="AudioStream" uid="uid://wejp6t2amiii" path="res://Sound/effects/throwing/throw.wav" id="3_8spmw"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_10fed"]
+atlas = ExtResource("2_5onte")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3f6sc"]
+atlas = ExtResource("2_5onte")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jdlel"]
+atlas = ExtResource("2_5onte")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vxvdv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_10fed")
+}],
+"loop": true,
+"name": &"No_pin",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3f6sc")
+}],
+"loop": true,
+"name": &"Pin",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jdlel")
+}],
+"loop": true,
+"name": &"Primed",
+"speed": 5.0
+}]
+
+[node name="HEGrenade" type="Node2D" groups=["grenades", "items", "objects"]]
+script = ExtResource("1_owvcl")
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_vxvdv")
+animation = &"Primed"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4.1, -7.1, -4.1, -5.9, -3.1, -5.9, -3.1, -3.1, -4.1, -3.1, -4.1, -2.1, -5.1, -2.1, -5.1, -1.1, -6.1, -1.1, -6.1, 4.1, -5.1, 4.1, -5.1, 5.1, -4.1, 5.1, -4.1, 6.1, -3.1, 6.1, -3.1, 7.1, 2.1, 7.1, 2.1, 6.1, 3.1, 6.1, 3.1, 5.1, 4.1, 5.1, 4.1, 4.1, 4.9, 4.1, 4.9, 5.1, 6.1, 5.1, 6.1, -3.1, 5.1, -3.1, 5.1, -4.1, 4.1, -4.1, 4.1, -5.1, 3.1, -5.1, 3.1, -6.1, 2.1, -6.1, 2.1, -7.1)
+
+[node name="ArmSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_8spmw")

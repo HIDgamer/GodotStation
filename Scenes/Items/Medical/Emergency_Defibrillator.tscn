@@ -1,0 +1,66 @@
+[gd_scene load_steps=9 format=3 uid="uid://buu616l4wwvy5"]
+
+[ext_resource type="Script" uid="uid://b6dtxg54m4frx" path="res://Code/Items/Medical/Emergency_Defibrillator.gd" id="1_e5vyi"]
+[ext_resource type="Texture2D" uid="uid://dsag5hwxcuwyo" path="res://Assets/Icons/Items/Medical/Defib.png" id="2_lemqt"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jqkhr"]
+atlas = ExtResource("2_lemqt")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8asqw"]
+atlas = ExtResource("2_lemqt")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_61eob"]
+atlas = ExtResource("2_lemqt")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7bp1v"]
+atlas = ExtResource("2_lemqt")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8wemc"]
+atlas = ExtResource("2_lemqt")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_xa786"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jqkhr")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8asqw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_61eob")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7bp1v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8wemc")
+}],
+"loop": true,
+"name": &"Ready",
+"speed": 5.0
+}]
+
+[node name="MedicalItem" type="Node2D"]
+script = ExtResource("1_e5vyi")
+medical_type = 7
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_xa786")
+animation = &"Idle"
+autoplay = "Idle"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-7.1, -12.1, -7.1, -11.1, -8.1, -11.1, -8.1, -8.1, -11.1, -8.1, -11.1, -7.1, -12.1, -7.1, -12.1, -6.1, -13.1, -6.1, -13.1, 10.1, -12.1, 10.1, -12.1, 11.1, -11.1, 11.1, -11.1, 12.1, 12.1, 12.1, 12.1, 11.1, 13.1, 11.1, 13.1, 10.1, 14.1, 10.1, 14.1, -6.1, 13.1, -6.1, 13.1, -7.1, 12.1, -7.1, 12.1, -8.1, 9.1, -8.1, 9.1, -11.1, 8.1, -11.1, 8.1, -12.1)

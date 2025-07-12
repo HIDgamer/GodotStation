@@ -1,0 +1,59 @@
+[gd_scene load_steps=8 format=3 uid="uid://bxnpctlybofkh"]
+
+[ext_resource type="Script" uid="uid://cm8og1fwu5kle" path="res://Code/Atoms/Object/Machinery/MedicalVendor.gd" id="1_i8enh"]
+[ext_resource type="Texture2D" uid="uid://c8x3ops4kbmmr" path="res://Assets/Machinery/MedVendor.tres" id="2_poa0q"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q26pu"]
+atlas = ExtResource("2_poa0q")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cukfe"]
+atlas = ExtResource("2_poa0q")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tirom"]
+atlas = ExtResource("2_poa0q")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a8a0d"]
+atlas = ExtResource("2_poa0q")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_a8a0d"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q26pu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cukfe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tirom")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a8a0d")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}]
+
+[node name="MedicalVendor" type="Node2D"]
+script = ExtResource("1_i8enh")
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_a8a0d")
+animation = &"Idle"
+autoplay = "Idle"
+frame_progress = 0.373645
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(12.1, -16, -11.1, -16, -11.1, 16, 12.1, 16)
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+max_distance = 200.0

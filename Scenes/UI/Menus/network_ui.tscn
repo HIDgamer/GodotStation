@@ -1,0 +1,187 @@
+[gd_scene load_steps=2 format=3 uid="uid://de567xfmbsekw"]
+
+[ext_resource type="Script" uid="uid://cja7kx66wlmfr" path="res://Code/UserInterface/NetworkUI.gd" id="1_gd5mw"]
+
+[node name="NetworkUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_gd5mw")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0509804, 0.0705882, 0.109804, 1)
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 48.0
+offset_top = -9.0
+offset_right = 48.0
+offset_bottom = 51.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 42
+text = "Multiplayer Setup"
+horizontal_alignment = 1
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 120.0
+offset_bottom = 60.0
+text = "< Back"
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 0
+
+[node name="Host" type="VBoxContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+metadata/_tab_index = 0
+
+[node name="PortLabel" type="Label" parent="TabContainer/Host"]
+layout_mode = 2
+text = "Port:"
+
+[node name="PortInput" type="SpinBox" parent="TabContainer/Host"]
+layout_mode = 2
+min_value = 1024.0
+max_value = 65535.0
+value = 7777.0
+rounded = true
+
+[node name="MaxPlayersLabel" type="Label" parent="TabContainer/Host"]
+layout_mode = 2
+text = "Max Players:"
+
+[node name="MaxPlayersInput" type="SpinBox" parent="TabContainer/Host"]
+layout_mode = 2
+min_value = 1.0
+max_value = 32.0
+value = 16.0
+rounded = true
+
+[node name="UPNPCheck" type="CheckBox" parent="TabContainer/Host"]
+layout_mode = 2
+button_pressed = true
+text = "Use UPnP Port Forwarding"
+
+[node name="ManualForwardingCheck" type="CheckBox" parent="TabContainer/Host"]
+layout_mode = 2
+text = "I've manually forwarded ports"
+
+[node name="LocalIPLabel" type="Label" parent="TabContainer/Host"]
+layout_mode = 2
+text = "Local IP: ..."
+
+[node name="ForwardingHelp" type="RichTextLabel" parent="TabContainer/Host"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "[b]Port Forwarding Help:[/b]
+1. Access your router's configuration page
+2. Find 'Port Forwarding' section
+3. Forward port 7777 (UDP) to your local IP
+4. Save settings and check 'I've manually forwarded ports' box
+5. Click 'Test Port Forwarding' to verify it works"
+fit_content = true
+
+[node name="TestPortButton" type="Button" parent="TabContainer/Host"]
+layout_mode = 2
+text = "Test Port Forwarding"
+
+[node name="HSeparator" type="HSeparator" parent="TabContainer/Host"]
+layout_mode = 2
+
+[node name="HostButton" type="Button" parent="TabContainer/Host"]
+layout_mode = 2
+text = "Host Game"
+
+[node name="ExternalIPLabel" type="Label" parent="TabContainer/Host"]
+layout_mode = 2
+text = "External IP: Not available"
+
+[node name="Join" type="VBoxContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 15
+metadata/_tab_index = 1
+
+[node name="IPLabel" type="Label" parent="TabContainer/Join"]
+layout_mode = 2
+text = "Server IP:"
+
+[node name="IPInput" type="LineEdit" parent="TabContainer/Join"]
+layout_mode = 2
+placeholder_text = "Enter server IP address"
+
+[node name="PortLabel" type="Label" parent="TabContainer/Join"]
+layout_mode = 2
+text = "Port:"
+
+[node name="PortInput" type="SpinBox" parent="TabContainer/Join"]
+layout_mode = 2
+min_value = 1024.0
+max_value = 65535.0
+value = 7777.0
+rounded = true
+
+[node name="HSeparator" type="HSeparator" parent="TabContainer/Join"]
+layout_mode = 2
+
+[node name="JoinButton" type="Button" parent="TabContainer/Join"]
+layout_mode = 2
+text = "Join Game"
+
+[node name="StatusLabel" type="Label" parent="TabContainer/Join"]
+layout_mode = 2
+text = "Enter server details to connect"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 85.0
+offset_bottom = 125.0
+grow_horizontal = 2
+text = "Status: Disconnected"
+horizontal_alignment = 1
+
+[node name="ErrorLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.356863, 0.356863, 1)
+horizontal_alignment = 1
+
+[node name="PortTestDialog" type="AcceptDialog" parent="."]
+title = "Port Forwarding Test"
+size = Vector2i(400, 200)
+dialog_text = "Testing port forwarding..."

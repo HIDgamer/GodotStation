@@ -1,0 +1,139 @@
+[gd_scene load_steps=2 format=3 uid="uid://cljsnqcpn1nct"]
+
+[ext_resource type="Script" uid="uid://dli85sb45a2uj" path="res://StationForge/TileImportUI.gd" id="1_uxw0g"]
+
+[node name="TileImportUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_uxw0g")
+
+[node name="ImportDialog" type="Window" parent="."]
+title = "Import Tiles"
+initial_position = 1
+size = Vector2i(700, 500)
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ImportDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+text = "Import Tiles or Spritesheets"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="CategoryLabel" type="Label" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+text = "Tile Category:"
+
+[node name="CategorySelector" type="OptionButton" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+selected = 0
+item_count = 4
+popup/item_0/text = "Floor Tiles"
+popup/item_0/id = 0
+popup/item_1/text = "Wall Tiles"
+popup/item_1/id = 1
+popup/item_2/text = "Object Tiles"
+popup/item_2/id = 2
+popup/item_3/text = "Zone Tiles"
+popup/item_3/id = 3
+
+[node name="FileSelectButton" type="Button" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+text = "Select Files to Import..."
+
+[node name="SliceOptions" type="VBoxContainer" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="SliceCheckbox" type="CheckBox" parent="ImportDialog/VBoxContainer/SliceOptions"]
+layout_mode = 2
+text = "Slice Spritesheet"
+
+[node name="SizeContainer" type="HBoxContainer" parent="ImportDialog/VBoxContainer/SliceOptions"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ImportDialog/VBoxContainer/SliceOptions/SizeContainer"]
+layout_mode = 2
+text = "Tile Size:"
+
+[node name="WidthSpinBox" type="SpinBox" parent="ImportDialog/VBoxContainer/SliceOptions/SizeContainer"]
+layout_mode = 2
+min_value = 8.0
+max_value = 256.0
+value = 32.0
+suffix = "px"
+
+[node name="SeparatorLabel" type="Label" parent="ImportDialog/VBoxContainer/SliceOptions/SizeContainer"]
+layout_mode = 2
+text = "x"
+
+[node name="HeightSpinBox" type="SpinBox" parent="ImportDialog/VBoxContainer/SliceOptions/SizeContainer"]
+layout_mode = 2
+min_value = 8.0
+max_value = 256.0
+value = 32.0
+suffix = "px"
+
+[node name="AutotileOptions" type="VBoxContainer" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="AutotileCheckbox" type="CheckBox" parent="ImportDialog/VBoxContainer/AutotileOptions"]
+layout_mode = 2
+text = "Generate Auto-tiling"
+
+[node name="TypeSelector" type="OptionButton" parent="ImportDialog/VBoxContainer/AutotileOptions"]
+layout_mode = 2
+selected = 0
+item_count = 5
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "Wang 2x2"
+popup/item_1/id = 1
+popup/item_2/text = "Wang 3x3"
+popup/item_2/id = 2
+popup/item_3/text = "Corner Match"
+popup/item_3/id = 3
+popup/item_4/text = "47-bit Terrain"
+popup/item_4/id = 4
+
+[node name="PreviewLabel" type="Label" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+text = "Preview:"
+
+[node name="PreviewContainer" type="PanelContainer" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="ImportDialog/VBoxContainer/PreviewContainer"]
+layout_mode = 2
+text = "No files selected"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonContainer" type="HBoxContainer" parent="ImportDialog/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="ImportDialog/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="ImportButton" type="Button" parent="ImportDialog/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+disabled = true
+text = "Import"

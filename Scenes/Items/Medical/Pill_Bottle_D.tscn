@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3 uid="uid://b8escjdrxieq4"]
+
+[ext_resource type="Script" uid="uid://dgp0gm0ajjjpx" path="res://Code/Items/Medical/Pill_Bottle_Dylovene.gd" id="1_27yoj"]
+[ext_resource type="Texture2D" uid="uid://cva3bogaarwka" path="res://Assets/Icons/Items/Medical/Pill_bottle.png" id="2_5yept"]
+[ext_resource type="Texture2D" uid="uid://eiknlosd3ukh" path="res://Assets/Icons/Items/Medical/Pill_bottle_open.png" id="3_2dw7i"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qsxap"]
+atlas = ExtResource("2_5yept")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_btapg"]
+atlas = ExtResource("3_2dw7i")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3f5a8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qsxap")
+}],
+"loop": true,
+"name": &"Closed",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_btapg")
+}],
+"loop": true,
+"name": &"Open",
+"speed": 5.0
+}]
+
+[node name="MedicalItem" type="Node2D"]
+script = ExtResource("1_27yoj")
+is_medicine_container = true
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_3f5a8")
+animation = &"Closed"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-2.1, -7.1, -2.1, -6.1, -4.1, -6.1, -4.1, -5.1, -5.1, -5.1, -5.1, -1.9, -4.1, -1.9, -4.1, 6.1, -3.1, 6.1, -3.1, 7.1, -2.1, 7.1, -2.1, 8.1, 2.1, 8.1, 2.1, 7.1, 3.1, 7.1, 3.1, 6.1, 4.1, 6.1, 4.1, -1.9, 5.1, -1.9, 5.1, -5.1, 4.1, -5.1, 4.1, -6.1, 2.1, -6.1, 2.1, -7.1)

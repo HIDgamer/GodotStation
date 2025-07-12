@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3 uid="uid://bshkha50vscok"]
+
+[ext_resource type="Script" uid="uid://yebrwc4se1kc" path="res://Code/Items/Medical/Pill_Bottle_Tramadol.gd" id="1_vh182"]
+[ext_resource type="Texture2D" uid="uid://cva3bogaarwka" path="res://Assets/Icons/Items/Medical/Pill_bottle.png" id="2_ad24u"]
+[ext_resource type="Texture2D" uid="uid://eiknlosd3ukh" path="res://Assets/Icons/Items/Medical/Pill_bottle_open.png" id="3_ip3hj"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_raw68"]
+atlas = ExtResource("2_ad24u")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xi0nj"]
+atlas = ExtResource("3_ip3hj")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ocpll"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_raw68")
+}],
+"loop": true,
+"name": &"Closed",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xi0nj")
+}],
+"loop": true,
+"name": &"Open",
+"speed": 5.0
+}]
+
+[node name="MedicalItem" type="Node2D"]
+script = ExtResource("1_vh182")
+medical_type = 5
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ocpll")
+animation = &"Open"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-2.1, -7.1, -2.1, -6.1, -4.1, -6.1, -4.1, -5.1, -5.1, -5.1, -5.1, -1.9, -4.1, -1.9, -4.1, 6.1, -3.1, 6.1, -3.1, 7.1, -2.1, 7.1, -2.1, 8.1, 2.1, 8.1, 2.1, 7.1, 3.1, 7.1, 3.1, 6.1, 4.1, 6.1, 4.1, -1.9, 5.1, -1.9, 5.1, -5.1, 4.1, -5.1, 4.1, -6.1, 2.1, -6.1, 2.1, -7.1)

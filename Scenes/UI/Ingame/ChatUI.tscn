@@ -1,0 +1,479 @@
+[gd_scene load_steps=13 format=3 uid="uid://ctk4o3xyuqeq1"]
+
+[ext_resource type="Script" uid="uid://sgguc62p3ogt" path="res://Code/UserInterface/ChatUI.gd" id="1_ev1gm"]
+[ext_resource type="Script" uid="uid://ctn41iaa1a2r0" path="res://Code/Mobs/Controllers/ChatInputController.gd" id="2_pe313"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cvjkx"]
+bg_color = Color(0.156863, 0.156863, 0.156863, 0.784314)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.294118, 0.294118, 0.294118, 1)
+border_blend = true
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iugd9"]
+bg_color = Color(0.12549, 0.12549, 0.12549, 0.901961)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.294118, 0.294118, 0.294118, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_log"]
+bg_color = Color(0.0901961, 0.0901961, 0.0901961, 0.901961)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="Animation" id="Animation_activate"]
+resource_name = "activate_chat"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Control/ChatWindow/InputPanel:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.25, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.7), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Control/ChatWindow:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.25, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.02, 1.02)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Control/ChatWindow:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="Animation" id="Animation_deactivate"]
+resource_name = "deactivate_chat"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Control/ChatWindow/InputPanel:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 0.25),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0.7)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Control/ChatWindow:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 0.25),
+"update": 0,
+"values": [Vector2(1.02, 1.02), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_fade"]
+resource_name = "fade_chat"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Control/ChatWindow:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 0.25),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0.7)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Control/ChatWindow/InputPanel:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 0.25),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0.5)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Control/ChatWindow:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 0.25),
+"update": 0,
+"values": [Vector2(1.02, 1.02), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_hide"]
+resource_name = "hide_chat"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Control/ChatWindow:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 0.25),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Control/ChatWindow:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 0.25),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -20)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Control/ChatWindow:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.3),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_showactivate"]
+resource_name = "show_and_activate_chat"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Control/ChatWindow:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.25, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Control/ChatWindow:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.25, 1),
+"update": 0,
+"values": [Vector2(0, -20), Vector2(0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Control/ChatWindow:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.3, 0.4),
+"transitions": PackedFloat32Array(0.25, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.02, 1.02)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Control/ChatWindow:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="Animation" id="Animation_show"]
+resource_name = "show_chat"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Control/ChatWindow:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.25, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Control/ChatWindow:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.25, 1),
+"update": 0,
+"values": [Vector2(0, -20), Vector2(0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Control/ChatWindow:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ogm5p"]
+_data = {
+&"activate_chat": SubResource("Animation_activate"),
+&"deactivate_chat": SubResource("Animation_deactivate"),
+&"fade_chat": SubResource("Animation_fade"),
+&"hide_chat": SubResource("Animation_hide"),
+&"show_and_activate_chat": SubResource("Animation_showactivate"),
+&"show_chat": SubResource("Animation_show")
+}
+
+[node name="EnhancedChatUI" type="CanvasLayer"]
+script = ExtResource("1_ev1gm")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TypingIndicator" type="Panel" parent="Control"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 660.0
+offset_right = 35.0
+offset_bottom = 685.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_cvjkx")
+
+[node name="Label" type="Label" parent="Control/TypingIndicator"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 12
+text = "T"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="KeyBindIndicator" type="Label" parent="Control"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 661.0
+offset_right = 145.0
+offset_bottom = 684.0
+theme_override_colors/font_color = Color(0.698039, 0.698039, 0.698039, 0.698039)
+theme_override_font_sizes/font_size = 12
+text = "Press T to chat"
+vertical_alignment = 1
+
+[node name="ChatWindow" type="Panel" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -450.0
+offset_top = 60.0
+offset_right = 450.0
+offset_bottom = 500.0
+grow_horizontal = 2
+pivot_offset = Vector2(450, 220)
+theme_override_styles/panel = SubResource("StyleBoxFlat_iugd9")
+
+[node name="ChatPanel" type="Panel" parent="Control/ChatWindow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_log")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/ChatWindow/ChatPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Control/ChatWindow/ChatPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/ChatWindow/ChatPanel/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "A.R.E.S-1 COMMUNICATIONS"
+
+[node name="Spacer" type="Control" parent="Control/ChatWindow/ChatPanel/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SettingsButton" type="Button" parent="Control/ChatWindow/ChatPanel/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "⚙️"
+flat = true
+
+[node name="CloseButton" type="Button" parent="Control/ChatWindow/ChatPanel/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "X"
+flat = true
+
+[node name="HSeparator" type="HSeparator" parent="Control/ChatWindow/ChatPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ChannelTabs" type="TabBar" parent="Control/ChatWindow/ChatPanel/VBoxContainer"]
+layout_mode = 2
+current_tab = 0
+tab_alignment = 1
+clip_tabs = false
+tab_count = 5
+tab_0/title = "All"
+tab_1/title = "Local"
+tab_2/title = "Radio"
+tab_3/title = "OOC"
+tab_4/title = "Admin"
+
+[node name="ChatLog" type="ScrollContainer" parent="Control/ChatWindow/ChatPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="ChatMessages" type="VBoxContainer" parent="Control/ChatWindow/ChatPanel/VBoxContainer/ChatLog"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="InputPanel" type="Panel" parent="Control/ChatWindow"]
+modulate = Color(1, 1, 1, 0.7)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -50.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_log")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/ChatWindow/InputPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 5.0
+offset_right = -10.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="ChatInput" type="LineEdit" parent="Control/ChatWindow/InputPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+placeholder_text = "Type your message here..."
+caret_blink = true
+caret_blink_interval = 0.5
+
+[node name="SendButton" type="Button" parent="Control/ChatWindow/InputPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Send"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_ogm5p")
+}
+
+[node name="ChatInputController" type="Node" parent="."]
+script = ExtResource("2_pe313")
+metadata/_custom_type_script = "uid://ctn41iaa1a2r0"

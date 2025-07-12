@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://d0x5fj7wlj03n"]
+
+[ext_resource type="Shader" uid="uid://qoy6bxpdcwly" path="res://Assets/Godot Resources/Shockwave.gdshader" id="1_4hqny"]
+[ext_resource type="Script" uid="uid://cob3oht7bsxk3" path="res://Code/Effects/Shockwave.gd" id="2_1nbgr"]
+[ext_resource type="Texture2D" uid="uid://cul7hruxxsj35" path="res://Assets/Effects/Particles/shockwave.png" id="3_kkgmk"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ky7s2"]
+shader = ExtResource("1_4hqny")
+shader_parameter/wave_intensity = 0.08
+shader_parameter/wave_thickness = 0.1
+shader_parameter/wave_speed = 1.5
+shader_parameter/max_radius = 1.0
+shader_parameter/distortion_intensity = 0.2
+shader_parameter/wave_color = Color(0.8, 0.9, 1, 0.15)
+shader_parameter/invert_direction = false
+shader_parameter/use_custom_time = true
+shader_parameter/custom_time = 0.0
+shader_parameter/use_noise = true
+shader_parameter/noise_intensity = 0.02
+
+[node name="ShockwaveEffect" type="ColorRect"]
+material = SubResource("ShaderMaterial_ky7s2")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_1nbgr")
+
+[node name="RingGlow" type="Sprite2D" parent="."]
+modulate = Color(0.9, 0.95, 1, 0.3)
+texture = ExtResource("3_kkgmk")

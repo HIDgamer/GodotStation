@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://d0682hu1kgwo5"]
+
+[ext_resource type="Script" uid="uid://bynyo7tnucjkp" path="res://Code/Items/Medical/BurnKit.gd" id="1_wfanv"]
+[ext_resource type="Texture2D" uid="uid://cly2kdpv4cc5d" path="res://Assets/Icons/Items/Medical/BurnKit.png" id="2_kbnmq"]
+
+[node name="MedicalItem" type="Node2D"]
+script = ExtResource("1_wfanv")
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_kbnmq")
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4.1, -8.1, -4.1, -7.1, -5.1, -7.1, -5.1, -6.1, -6.1, -6.1, -6.1, -5.1, -7.1, -5.1, -7.1, 5.1, -6.1, 5.1, -6.1, 7.1, -5.1, 7.1, -5.1, 8.1, -4.1, 8.1, -4.1, 9.1, 5.1, 9.1, 5.1, 8.1, 6.1, 8.1, 6.1, 7.1, 7.1, 7.1, 7.1, 5.1, 8.1, 5.1, 8.1, -5.1, 7.1, -5.1, 7.1, -6.1, 6.1, -6.1, 6.1, -7.1, 5.1, -7.1, 5.1, -8.1)

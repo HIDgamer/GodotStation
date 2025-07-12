@@ -1,0 +1,125 @@
+[gd_scene load_steps=17 format=3 uid="uid://cp6jr8f1vn6h2"]
+
+[ext_resource type="Script" uid="uid://b2tlf3bphlxh5" path="res://Code/Effects/Impact.gd" id="1_vftld"]
+[ext_resource type="Texture2D" uid="uid://cgxuf57lrqig4" path="res://Assets/Effects/Particles/flare_01_0.png" id="2_fsgxa"]
+[ext_resource type="Texture2D" uid="uid://cmixb6fnhqgn6" path="res://Assets/Effects/Particles/Smoke.png" id="3_aou6w"]
+[ext_resource type="Texture2D" uid="uid://ct1jftobadr6y" path="res://Assets/Effects/Particles/debris.png" id="4_d8lqf"]
+[ext_resource type="AudioStream" uid="uid://b3pcfcrk0u52l" path="res://Sound/handling/impact.wav" id="5_u0mgm"]
+[ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="6_ww2ah"]
+
+[sub_resource type="Gradient" id="Gradient_spark"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(1, 0.9, 0.4, 1, 1, 0.8, 0.3, 0.8, 1, 0.5, 0.1, 0.5, 1, 0.3, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_spark"]
+gradient = SubResource("Gradient_spark")
+
+[sub_resource type="Curve" id="Curve_spark"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.5, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_spark"]
+curve = SubResource("Curve_spark")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_spark"]
+particle_flag_disable_z = true
+angle_max = 360.0
+direction = Vector3(0, -1, 0)
+spread = 60.0
+initial_velocity_min = 50.0
+initial_velocity_max = 150.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+gravity = Vector3(0, 98, 0)
+damping_min = 20.0
+damping_max = 40.0
+scale_min = 0.05
+scale_max = 0.15
+scale_curve = SubResource("CurveTexture_spark")
+color_ramp = SubResource("GradientTexture1D_spark")
+
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.2, 0.7, 1)
+colors = PackedColorArray(0.7, 0.7, 0.7, 0.8, 0.6, 0.6, 0.6, 0.6, 0.5, 0.5, 0.5, 0.3, 0.4, 0.4, 0.4, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dust"]
+gradient = SubResource("Gradient_dust")
+
+[sub_resource type="Curve" id="Curve_dust"]
+_data = [Vector2(0, 0.4), 0.0, 1.2, 0, 0, Vector2(0.3, 0.8), 0.4, 0.4, 0, 0, Vector2(1, 0), -1.8, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_dust"]
+curve = SubResource("Curve_dust")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dust"]
+particle_flag_disable_z = true
+angle_max = 360.0
+direction = Vector3(0, -1, 0)
+spread = 70.0
+initial_velocity_min = 20.0
+initial_velocity_max = 60.0
+angular_velocity_min = -10.0
+angular_velocity_max = 10.0
+gravity = Vector3(0, 30, 0)
+damping_min = 5.0
+damping_max = 15.0
+scale_min = 0.2
+scale_max = 0.5
+scale_curve = SubResource("CurveTexture_dust")
+color_ramp = SubResource("GradientTexture1D_dust")
+
+[node name="ImpactEffect" type="Node2D"]
+script = ExtResource("1_vftld")
+
+[node name="SparkParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 16
+texture = ExtResource("2_fsgxa")
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+randomness = 0.2
+process_material = SubResource("ParticleProcessMaterial_spark")
+
+[node name="DustParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 12
+texture = ExtResource("3_aou6w")
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.9
+randomness = 0.4
+process_material = SubResource("ParticleProcessMaterial_dust")
+
+[node name="ChipsParticles" type="GPUParticles2D" parent="."]
+emitting = false
+texture = ExtResource("4_d8lqf")
+lifetime = 0.6
+one_shot = true
+explosiveness = 1.0
+randomness = 0.3
+process_material = SubResource("ParticleProcessMaterial_spark")
+
+[node name="ImpactSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("5_u0mgm")
+volume_db = -5.0
+max_distance = 500.0
+
+[node name="ImpactFlash" type="Sprite2D" parent="."]
+modulate = Color(1, 0.9, 0.8, 0.8)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_fsgxa")
+
+[node name="ImpactLight" type="PointLight2D" parent="."]
+color = Color(1, 0.8, 0.6, 1)
+energy = 0.8
+texture = ExtResource("6_ww2ah")
+texture_scale = 0.5
+
+[node name="LightTimer" type="Timer" parent="ImpactLight"]
+wait_time = 0.1
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="ImpactLight/LightTimer" to="ImpactLight" method="queue_free"]

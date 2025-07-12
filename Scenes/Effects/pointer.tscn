@@ -1,0 +1,87 @@
+[gd_scene load_steps=13 format=3 uid="uid://cynqp6s7mqy6v"]
+
+[ext_resource type="Texture2D" uid="uid://cpaf65lpcgv1j" path="res://Assets/UI/Pointer/Pointer.png" id="1_l2n35"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_revoj"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vh3fd"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8i62a"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oowgt"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tpkt0"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fgtk5"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3r8cm"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xe6q0"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q5rp2"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(256, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o6hkt"]
+atlas = ExtResource("1_l2n35")
+region = Rect2(288, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_cl64k"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_revoj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vh3fd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8i62a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oowgt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tpkt0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fgtk5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3r8cm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xe6q0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q5rp2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o6hkt")
+}],
+"loop": true,
+"name": &"Point",
+"speed": 10.0
+}]
+
+[node name="Pointer" type="AnimatedSprite2D"]
+rotation = 1.5708
+sprite_frames = SubResource("SpriteFrames_cl64k")
+animation = &"Point"
+autoplay = "Point"

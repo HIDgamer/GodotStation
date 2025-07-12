@@ -1,0 +1,285 @@
+[gd_scene load_steps=49 format=3 uid="uid://dxxghc4fpbnmj"]
+
+[ext_resource type="Script" uid="uid://b4htlrxk6jh1m" path="res://Code/Effects/Space_Environment.gd" id="1_rl3va"]
+[ext_resource type="Script" uid="uid://cevhcusqtb7kr" path="res://Code/Effects/Star_Field.gd" id="2_tpf4w"]
+[ext_resource type="Texture2D" uid="uid://7loijch61op5" path="res://Assets/Effects/Particles/star_06.png" id="3_s6akm"]
+[ext_resource type="Script" uid="uid://xcg7v21e4g6k" path="res://Code/Effects/Planet_Generator.gd" id="4_3grnk"]
+[ext_resource type="Script" uid="uid://bsbpq2bmedjy8" path="res://Code/Effects/Astroid_Field.gd" id="5_kpkxe"]
+[ext_resource type="Texture2D" uid="uid://cjne0om8rtjuu" path="res://Assets/Effects/Planets/Planet1.png" id="6_d2y2u"]
+[ext_resource type="Script" uid="uid://cvnpfpyo77ocl" path="res://Code/Effects/Sun.gd" id="6_ejcwl"]
+[ext_resource type="Texture2D" uid="uid://bvhopgvdoyloo" path="res://Assets/Effects/Particles/star_09.png" id="6_ircby"]
+[ext_resource type="Texture2D" uid="uid://bk13ms2hlb0eu" path="res://Assets/Effects/Planets/Planet1_n.png" id="7_a5bu7"]
+[ext_resource type="Script" uid="uid://ci3drkb4qqh2a" path="res://Code/Effects/Space_Debris.gd" id="7_ik3qt"]
+[ext_resource type="Texture2D" uid="uid://cv8hudt3dxpqf" path="res://Assets/Effects/Planets/Planet1_s.png" id="8_i4irt"]
+[ext_resource type="Texture2D" uid="uid://bsk7bgww6mgsf" path="res://Assets/Effects/Particles/star.png" id="8_pbeet"]
+[ext_resource type="Texture2D" uid="uid://d18e5b6klyo5t" path="res://Assets/Effects/Planets/Planet4.png" id="9_xwiy0"]
+[ext_resource type="Texture2D" uid="uid://cgxuf57lrqig4" path="res://Assets/Effects/Particles/flare_01_0.png" id="10_1j7gh"]
+[ext_resource type="Texture2D" uid="uid://b63x716gip5yq" path="res://Assets/Effects/Planets/Planet4_n.png" id="10_plqvn"]
+[ext_resource type="Texture2D" uid="uid://k1eof18oyvi7" path="res://Assets/Effects/Particles/circle_04.png" id="10_xmk7j"]
+[ext_resource type="Texture2D" uid="uid://cyaldr5vmfnjs" path="res://Assets/Effects/Planets/Planet4_s.png" id="11_46psw"]
+[ext_resource type="Texture2D" uid="uid://uw7vmgex4ra0" path="res://Assets/Effects/Planets/Planet5.png" id="12_6dt3p"]
+[ext_resource type="Texture2D" uid="uid://y4kwf5blmr5g" path="res://Assets/Effects/Particles/Astroid.tres" id="12_egxl5"]
+[ext_resource type="Texture2D" uid="uid://bgo6ftcxhel37" path="res://Assets/Effects/Planets/Planet5_n.png" id="13_pxfpb"]
+[ext_resource type="Texture2D" uid="uid://cnbv2vow7hy5c" path="res://Assets/Effects/Planets/Planet5_s.png" id="14_8r782"]
+[ext_resource type="Texture2D" uid="uid://flthccbjn64r" path="res://Assets/Effects/Planets/Planet.png" id="15_usrjs"]
+[ext_resource type="Texture2D" uid="uid://cxxmn61dsni70" path="res://Assets/Effects/Planets/Planet_n.png" id="16_l4i3m"]
+[ext_resource type="Texture2D" uid="uid://0xjyofmcfivp" path="res://Assets/Effects/Planets/Planet_s.png" id="17_s2mre"]
+[ext_resource type="Texture2D" uid="uid://dc7fia7dyelip" path="res://Assets/Effects/Planets/Planet2.png" id="18_e6v3e"]
+[ext_resource type="Texture2D" uid="uid://c7bhdmsb2prka" path="res://Assets/Effects/Planets/Planet2_n.png" id="19_tldmn"]
+[ext_resource type="Texture2D" uid="uid://cvbrh5c8r5kph" path="res://Assets/Effects/Planets/Planet2_s.png" id="20_ufcs6"]
+[ext_resource type="Texture2D" uid="uid://dh2g3iluals1t" path="res://Assets/Effects/Planets/Moon.png" id="21_ipl03"]
+[ext_resource type="Texture2D" uid="uid://b5slwufbqkq5m" path="res://Assets/Effects/Planets/Moon_n.png" id="22_jld7e"]
+[ext_resource type="Texture2D" uid="uid://djfonn16g1pb5" path="res://Assets/Effects/Planets/Moon_s.png" id="23_xh0js"]
+[ext_resource type="Texture2D" uid="uid://dvr8r1h1qc5kw" path="res://Assets/Effects/Planets/Planet3.png" id="24_yx03c"]
+[ext_resource type="Texture2D" uid="uid://62h4ssubtxip" path="res://Assets/Effects/Planets/Planet3_n.png" id="25_mq6rd"]
+[ext_resource type="Texture2D" uid="uid://bidhj4r15hvm8" path="res://Assets/Effects/Planets/Planet3_s.png" id="26_0atkn"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_qfnlm"]
+blend_mode = 1
+
+[sub_resource type="Curve" id="Curve_2mwkk"]
+_data = [Vector2(0, 0), 0.0, 2.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_gfxo2"]
+blend_mode = 1
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_lj0at"]
+diffuse_texture = ExtResource("6_d2y2u")
+normal_texture = ExtResource("7_a5bu7")
+specular_texture = ExtResource("8_i4irt")
+specular_shininess = 0.0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_kjetc"]
+diffuse_texture = ExtResource("9_xwiy0")
+normal_texture = ExtResource("10_plqvn")
+specular_texture = ExtResource("11_46psw")
+specular_shininess = 0.0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_x08qd"]
+diffuse_texture = ExtResource("12_6dt3p")
+normal_texture = ExtResource("13_pxfpb")
+specular_texture = ExtResource("14_8r782")
+specular_shininess = 0.0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_raemf"]
+diffuse_texture = ExtResource("15_usrjs")
+normal_texture = ExtResource("16_l4i3m")
+specular_texture = ExtResource("17_s2mre")
+specular_shininess = 0.0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_jenwq"]
+diffuse_texture = ExtResource("18_e6v3e")
+normal_texture = ExtResource("19_tldmn")
+specular_texture = ExtResource("20_ufcs6")
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_idup3"]
+diffuse_texture = ExtResource("9_xwiy0")
+normal_texture = ExtResource("10_plqvn")
+specular_texture = ExtResource("11_46psw")
+specular_shininess = 0.0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_gghjb"]
+diffuse_texture = ExtResource("21_ipl03")
+normal_texture = ExtResource("22_jld7e")
+specular_texture = ExtResource("23_xh0js")
+specular_shininess = 0.0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_udi32"]
+diffuse_texture = ExtResource("24_yx03c")
+normal_texture = ExtResource("25_mq6rd")
+specular_texture = ExtResource("26_0atkn")
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_s7why"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_4uf13"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(1, 0.9, 0.7, 1, 1, 0.7, 0.2, 0.8, 1, 0.5, 0, 0.3, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_72xkh"]
+gradient = SubResource("Gradient_4uf13")
+width = 1000
+height = 1000
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_f4wub"]
+blend_mode = 1
+
+[node name="SpaceEnvironment" type="Node2D"]
+z_index = -4096
+script = ExtResource("1_rl3va")
+render_distance = 4
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+scroll_ignore_camera_zoom = true
+
+[node name="DeepStarsLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.02, 0.02)
+motion_mirroring = Vector2(4000, 4000)
+
+[node name="StarField" type="Node2D" parent="ParallaxBackground/DeepStarsLayer"]
+script = ExtResource("2_tpf4w")
+particle_count = 2000
+emission_rect = Vector2(4000, 4000)
+
+[node name="StarParticles" type="CPUParticles2D" parent="ParallaxBackground/DeepStarsLayer/StarField"]
+material = SubResource("CanvasItemMaterial_qfnlm")
+emitting = false
+amount = 2000
+texture = ExtResource("3_s6akm")
+lifetime = 60.0
+preprocess = 60.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(2000, 2000)
+gravity = Vector2(0, 0)
+scale_amount_max = 3.0
+scale_amount_curve = SubResource("Curve_2mwkk")
+
+[node name="MidStarsLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.1, 0.1)
+motion_mirroring = Vector2(3000, 3000)
+
+[node name="StarField" type="Node2D" parent="ParallaxBackground/MidStarsLayer"]
+script = ExtResource("2_tpf4w")
+emission_rect = Vector2(3000, 3000)
+size_range = Vector2(1.5, 4)
+twinkle_speed = 0.4
+twinkle_amount = 0.3
+bright_star_chance = 0.15
+
+[node name="StarParticles" type="CPUParticles2D" parent="ParallaxBackground/MidStarsLayer/StarField"]
+material = SubResource("CanvasItemMaterial_gfxo2")
+emitting = false
+amount = 1000
+texture = ExtResource("6_ircby")
+lifetime = 60.0
+preprocess = 60.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(1500, 1500)
+gravity = Vector2(0, 0)
+scale_amount_min = 1.5
+scale_amount_max = 4.0
+scale_amount_curve = SubResource("Curve_2mwkk")
+
+[node name="PlanetLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.15, 0.15)
+
+[node name="PlanetGenerator" type="Node2D" parent="ParallaxBackground/PlanetLayer"]
+script = ExtResource("4_3grnk")
+gas_planet_textures = Array[Texture2D]([SubResource("CanvasTexture_lj0at"), SubResource("CanvasTexture_kjetc"), SubResource("CanvasTexture_x08qd"), SubResource("CanvasTexture_raemf")])
+ice_planet_textures = Array[Texture2D]([SubResource("CanvasTexture_jenwq")])
+desert_planet_textures = Array[Texture2D]([SubResource("CanvasTexture_idup3")])
+moon_textures = Array[Texture2D]([SubResource("CanvasTexture_gghjb"), SubResource("CanvasTexture_udi32")])
+
+[node name="NearStarsLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.2, 0.2)
+motion_mirroring = Vector2(2000, 2000)
+
+[node name="StarField" type="Node2D" parent="ParallaxBackground/NearStarsLayer"]
+script = ExtResource("2_tpf4w")
+particle_count = 500
+size_range = Vector2(2, 6)
+twinkle_speed = 0.5
+twinkle_amount = 0.4
+bright_star_chance = 0.2
+
+[node name="StarParticles" type="CPUParticles2D" parent="ParallaxBackground/NearStarsLayer/StarField"]
+material = SubResource("CanvasItemMaterial_s7why")
+emitting = false
+amount = 500
+texture = ExtResource("8_pbeet")
+lifetime = 60.0
+preprocess = 60.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(1000, 1000)
+gravity = Vector2(0, 0)
+scale_amount_min = 2.0
+scale_amount_max = 6.0
+scale_amount_curve = SubResource("Curve_2mwkk")
+
+[node name="SunLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.05, 0.05)
+
+[node name="MidgroundLayer" type="Node2D" parent="."]
+
+[node name="AsteroidField1" type="Node2D" parent="MidgroundLayer"]
+position = Vector2(-800, -1200)
+script = ExtResource("5_kpkxe")
+
+[node name="AsteroidField2" type="Node2D" parent="MidgroundLayer"]
+position = Vector2(1500, 300)
+script = ExtResource("5_kpkxe")
+asteroid_count = 20
+size_range = Vector2(30, 150)
+field_radius = 800.0
+movement_speed_range = Vector2(10, 40)
+rotation_speed_range = Vector2(0.2, 1)
+
+[node name="ForegroundLayer" type="Node2D" parent="."]
+
+[node name="SpaceDebris" type="Node2D" parent="ForegroundLayer"]
+script = ExtResource("7_ik3qt")
+
+[node name="DebrisParticles" type="CPUParticles2D" parent="ForegroundLayer/SpaceDebris"]
+emitting = false
+amount = 80
+texture = ExtResource("12_egxl5")
+lifetime = 20.0
+preprocess = 5.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(1250, 1250)
+direction = Vector2(0, 0)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 30.0
+initial_velocity_max = 80.0
+scale_amount_max = 8.0
+color = Color(0.8, 0.8, 0.9, 0.3)
+
+[node name="Sun" type="Node2D" parent="."]
+visible = false
+position = Vector2(-4832, -936)
+script = ExtResource("6_ejcwl")
+corona_texture = SubResource("GradientTexture2D_72xkh")
+flare_texture = ExtResource("10_1j7gh")
+
+[node name="CoreSprite" type="Sprite2D" parent="Sun"]
+texture = SubResource("GradientTexture2D_72xkh")
+
+[node name="CoronaParticles" type="CPUParticles2D" parent="Sun"]
+material = SubResource("CanvasItemMaterial_f4wub")
+scale = Vector2(0.01, 0.01)
+amount = 100
+texture = ExtResource("10_xmk7j")
+lifetime = 3.0
+local_coords = true
+emission_shape = 1
+emission_sphere_radius = 400.0
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 20.0
+initial_velocity_max = 50.0
+radial_accel_min = -10.0
+radial_accel_max = 10.0
+scale_amount_min = 100.0
+scale_amount_max = 200.0
+color = Color(1, 0.7, 0.2, 0.2)
+
+[node name="Light2D" type="PointLight2D" parent="Sun"]
+z_as_relative = false
+shadow_enabled = true
+shadow_filter = 2
+shadow_filter_smooth = 1.5
+texture = SubResource("GradientTexture2D_72xkh")
+texture_scale = 50.0
+height = 20.0
+metadata/use_color_temperature = false
+metadata/color_temperature = 1000
+metadata/color_filter = Color(1, 1, 1, 0)

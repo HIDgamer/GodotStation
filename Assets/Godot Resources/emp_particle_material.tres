@@ -1,0 +1,50 @@
+[gd_resource type="ParticleProcessMaterial" load_steps=5 format=3 uid="uid://xfcab3fkkmtd"]
+
+[sub_resource type="Gradient" id="Gradient_nxrwg"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(0.7, 0.9, 1, 0.9, 0.4, 0.7, 1, 0.8, 0.2, 0.5, 0.9, 0.6, 0.1, 0.3, 0.7, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_x18a2"]
+gradient = SubResource("Gradient_nxrwg")
+
+[sub_resource type="Curve" id="Curve_82j5e"]
+_data = [Vector2(0, 0.5), 0.0, 2.0, 0, 0, Vector2(0.2, 0.9), 0.0, 0.0, 0, 0, Vector2(0.7, 0.9), 0.0, 0.0, 0, 0, Vector2(1, 0.2), -2.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_5j2qp"]
+curve = SubResource("Curve_82j5e")
+
+[resource]
+lifetime_randomness = 0.3
+emission_shape = 1
+emission_sphere_radius = 5.0
+angle_min = -180.0
+angle_max = 180.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_min = 50.0
+initial_velocity_max = 100.0
+angular_velocity_min = -30.0
+angular_velocity_max = 30.0
+orbit_velocity_min = 0.5
+orbit_velocity_max = 1.0
+gravity = Vector3(0, 0, 0)
+linear_accel_min = -10.0
+linear_accel_max = 10.0
+radial_accel_min = -10.0
+radial_accel_max = 10.0
+tangential_accel_min = -20.0
+tangential_accel_max = 20.0
+scale_min = 0.3
+scale_curve = SubResource("CurveTexture_5j2qp")
+color = Color(0.5, 0.7, 1, 0.8)
+color_ramp = SubResource("GradientTexture1D_x18a2")
+hue_variation_min = -0.1
+hue_variation_max = 0.1
+anim_speed_min = 1.0
+anim_speed_max = 5.0
+turbulence_enabled = true
+turbulence_noise_strength = 5.0
+turbulence_noise_scale = 2.0
+turbulence_noise_speed_random = 5.0
+turbulence_influence_max = 0.5
