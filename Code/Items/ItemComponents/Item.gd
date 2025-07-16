@@ -44,9 +44,7 @@ enum Slots {
 
 # Core item properties
 var item_name: String = "item"
-var description: String = "An ordinary item."
 var w_class: int = 3              # Weight class (1-5, determines storage)
-var pickupable: bool = true       # If item can be picked up
 
 # Visual properties
 var highlight_color: Color = Color(1.0, 1.0, 0.0, 0.3)  # Color when highlighted
@@ -54,11 +52,11 @@ var is_highlighted: bool = false  # Whether item is currently highlighted
 var inv_hide_flags: int = 0       # Item hide flags (for visuals)
 
 # Combat properties
-var force: int = 0                # Melee damage
-var sharp: bool = false           # Whether item cuts
-var edge: bool = false            # Whether item can dismember
-var attack_verb: Array = ["hits"] # Verbs used when attacking
-var attack_speed: float = 1.1     # Attack speed (lower is faster)
+@export var force: int = 0                # Melee damage
+@export var sharp: bool = false           # Whether item cuts
+@export var edge: bool = false            # Whether item can dismember
+@export var attack_verb: Array = ["hits"] # Verbs used when attacking
+@export var attack_speed: float = 1.1     # Attack speed (lower is faster)
 
 # Inventory properties
 var equip_slot_flags: int = Slots.LEFT_HAND | Slots.RIGHT_HAND  # Which slots this can be equipped to
@@ -68,7 +66,7 @@ var inventory_owner = null        # Reference to owner of this entity
 var wielded: bool = false         # If item is wielded (two-handed)
 var item_flags: int = 0           # Current item flags
 
-# NEW: Persistent effect properties
+# Persistent effect properties
 var has_persistent_effects: bool = false  # Whether this item has effects that persist in inventory
 var active_effects = {}                   # Dictionary of active effects
 var effect_proxy = null                  # Reference to effect proxy if created
@@ -95,8 +93,8 @@ var flight_time: float = 0.0      # Current time in flight
 var flight_duration: float = 0.0  # Total flight duration
 
 # Tool properties
-var tool_behaviour: String = ""   # What tool this functions as
-var toolspeed: float = 1.0        # Tool speed multiplier (lower is faster)
+@export var tool_behaviour: String = ""   # What tool this functions as
+@export var toolspeed: float = 1.0        # Tool speed multiplier (lower is faster)
 var usesound = null               # Sound when used as tool
 
 # Deployable properties
@@ -121,7 +119,8 @@ var actions: Array = []
 func _init():
 	super._init()  # Call parent _init
 	obj_flags |= ObjectFlags.CAN_BE_HIT  # Items can be hit by default
-	
+	entity_type = "item"
+	pickupable = true
 	# Check for persistent effects
 	_check_persistent_effects()
 

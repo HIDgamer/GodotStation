@@ -1,10 +1,11 @@
-[gd_scene load_steps=42 format=3 uid="uid://b8qfb7e3vd5yn"]
+[gd_scene load_steps=44 format=3 uid="uid://b8qfb7e3vd5yn"]
 
 [ext_resource type="Script" uid="uid://c8r6n1ndevlm3" path="res://Code/Effects/Explosion.gd" id="1_qe8ld"]
 [ext_resource type="Texture2D" uid="uid://cmixb6fnhqgn6" path="res://Assets/Effects/Particles/Smoke.png" id="2_sukcf"]
 [ext_resource type="Texture2D" uid="uid://cgxuf57lrqig4" path="res://Assets/Effects/Particles/flare_01_0.png" id="3_7balt"]
-[ext_resource type="Texture2D" uid="uid://ct1jftobadr6y" path="res://Assets/Effects/Particles/debris.png" id="3_787c6"]
-[ext_resource type="Material" path="res://Assets/Godot Resources/shockwave_particle_material.tres" id="3_plhir"]
+[ext_resource type="Texture2D" uid="uid://cul7hruxxsj35" path="res://Assets/Effects/Particles/shockwave.png" id="3_ebld0"]
+[ext_resource type="Material" uid="uid://c0oecrnp7q1a1" path="res://Assets/Godot Resources/shockwave_particle_material.tres" id="3_plhir"]
+[ext_resource type="Texture2D" uid="uid://bjroi2urfpx0p" path="res://Assets/Effects/Particles/Shrapnel.png" id="5_m8ivs"]
 [ext_resource type="AudioStream" uid="uid://ff8dyn8bbkkh" path="res://Sound/Explosions/explosion.wav" id="6_sabd7"]
 [ext_resource type="Texture2D" uid="uid://bx01jo7bajtn6" path="res://Assets/Effects/FX/explosion_spritesheet.png" id="7_ebld0"]
 [ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="8_h6mvs"]
@@ -35,12 +36,15 @@ gravity = Vector3(0, -20, 0)
 damping_min = 5.0
 damping_max = 10.0
 scale_min = 2.0
-scale_max = 4.0
+scale_max = 3.0
 scale_curve = SubResource("CurveTexture_u6q83")
 color_ramp = SubResource("GradientTexture1D_qs3rr")
 turbulence_enabled = true
 turbulence_noise_strength = 5.0
 turbulence_noise_scale = 2.0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_7bjsx"]
+normal_texture = ExtResource("3_ebld0")
 
 [sub_resource type="Gradient" id="Gradient_vl7tp"]
 offsets = PackedFloat32Array(0, 0.8, 1)
@@ -222,19 +226,20 @@ animations = [{
 
 [node name="ExplosionParticles" type="GPUParticles2D"]
 emitting = false
-amount = 100
+amount = 20
 texture = ExtResource("2_sukcf")
-lifetime = 6.0
+lifetime = 2.0
 one_shot = true
-explosiveness = 0.7
+explosiveness = 1.0
 randomness = 0.4
+fixed_fps = 60
 process_material = SubResource("ParticleProcessMaterial_wvrld")
 script = ExtResource("1_qe8ld")
 
 [node name="ShockwaveRing" type="GPUParticles2D" parent="."]
 emitting = false
 amount = 1
-texture = ExtResource("3_7balt")
+texture = SubResource("CanvasTexture_7bjsx")
 lifetime = 0.5
 one_shot = true
 explosiveness = 1.0
@@ -243,7 +248,7 @@ process_material = ExtResource("3_plhir")
 [node name="DebrisParticles" type="GPUParticles2D" parent="."]
 emitting = false
 amount = 30
-texture = ExtResource("3_787c6")
+texture = ExtResource("5_m8ivs")
 lifetime = 2.0
 one_shot = true
 explosiveness = 0.9
@@ -253,7 +258,6 @@ process_material = SubResource("ParticleProcessMaterial_j28mr")
 [node name="FlameParticles" type="GPUParticles2D" parent="."]
 emitting = false
 amount = 40
-texture = ExtResource("3_7balt")
 one_shot = true
 explosiveness = 0.8
 randomness = 0.3
@@ -275,8 +279,6 @@ stream = ExtResource("6_sabd7")
 scale = Vector2(10, 10)
 sprite_frames = SubResource("SpriteFrames_lvsv7")
 animation = &"Explosion"
-frame = 11
-frame_progress = 0.981813
 
 [node name="ExplosionLight" type="PointLight2D" parent="."]
 color = Color(1, 0.8, 0.4, 1)
@@ -286,6 +288,9 @@ shadow_filter = 1
 shadow_filter_smooth = 3.0
 texture = ExtResource("8_h6mvs")
 texture_scale = 3.0
+metadata/use_color_temperature = true
+metadata/color_temperature = 6500
+metadata/color_filter = Color(1, 1, 1, 0)
 
 [node name="SecondaryLight" type="PointLight2D" parent="."]
 color = Color(1, 0.6, 0.2, 1)
@@ -293,6 +298,9 @@ energy = 1.5
 shadow_enabled = true
 texture = ExtResource("8_h6mvs")
 texture_scale = 2.1
+metadata/use_color_temperature = true
+metadata/color_temperature = 6500
+metadata/color_filter = Color(1, 1, 1, 0)
 
 [node name="FlickerTimer" type="Timer" parent="SecondaryLight"]
 wait_time = 0.05

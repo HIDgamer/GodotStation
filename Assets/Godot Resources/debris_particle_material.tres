@@ -1,3 +1,5 @@
+[gd_resource type="ParticleProcessMaterial" load_steps=5 format=3 uid="uid://dtl1ftko4ij8t"]
+
 [sub_resource type="Gradient" id="Gradient_debris"]
 offsets = PackedFloat32Array(0, 0.7, 1)
 colors = PackedColorArray(0.6, 0.5, 0.4, 1, 0.5, 0.45, 0.4, 0.8, 0.4, 0.4, 0.4, 0)
@@ -12,7 +14,7 @@ point_count = 3
 [sub_resource type="CurveTexture" id="CurveTexture_debris"]
 curve = SubResource("Curve_debris")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_debris"]
+[resource]
 emission_shape = 1
 emission_sphere_radius = 15.0
 spread = 180.0

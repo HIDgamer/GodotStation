@@ -1,13 +1,29 @@
-[gd_scene load_steps=3 format=3 uid="uid://bihq0cctrftyj"]
+[gd_scene load_steps=5 format=3 uid="uid://bihq0cctrftyj"]
 
-[ext_resource type="Texture2D" uid="uid://dsp5uunkdetwc" path="res://Assets/Icons/Items/Medical/HealthAnalyzer.png" id="1_bkl4x"]
 [ext_resource type="Script" uid="uid://dyh5gia5px2v4" path="res://Code/Items/Medical/HealthAnalyzer.gd" id="1_ex5w8"]
+[ext_resource type="Texture2D" uid="uid://clphls5bwbewt" path="res://Assets/Icons/Items/Medical/HealthAnalyzer.tres" id="2_ex5w8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j0s4j"]
+atlas = ExtResource("2_ex5w8")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hutpd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j0s4j")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
 
 [node name="MedicalItem" type="Node2D"]
 script = ExtResource("1_ex5w8")
+medical_type = 12
 
-[node name="Icon" type="Sprite2D" parent="."]
-texture = ExtResource("1_bkl4x")
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_hutpd")
 
 [node name="InteractionArea" type="Area2D" parent="."]
 

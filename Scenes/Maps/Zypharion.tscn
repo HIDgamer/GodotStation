@@ -1,4 +1,4 @@
-[gd_scene load_steps=86 format=3 uid="uid://dwx26j3f05xb1"]
+[gd_scene load_steps=89 format=3 uid="uid://dwx26j3f05xb1"]
 
 [ext_resource type="Script" uid="uid://dhdolra15rmy3" path="res://Code/Atoms/World_Systems/World.gd" id="1_n0dfv"]
 [ext_resource type="Script" uid="uid://ddf3tjqudd13u" path="res://Code/Helpers/visual_tile_map.gd" id="2_4w5a4"]
@@ -13,7 +13,10 @@
 [ext_resource type="Texture2D" uid="uid://dgi7lpbmv75e8" path="res://Assets/Tilesets/Walls/Medbay.tres" id="7_63btk"]
 [ext_resource type="Script" uid="uid://c4urxeqw5hvo6" path="res://Code/Atoms/World_Systems/TileOccupancySystem.gd" id="7_cgiob"]
 [ext_resource type="Script" uid="uid://dheeug2eok4df" path="res://Code/Atoms/World_Systems/SpatialManager.gd" id="9_vlxk0"]
+[ext_resource type="PackedScene" uid="uid://dm2h5vbxw0n31" path="res://Scenes/Items/Grenades/HEgrenade.tscn" id="11_82gmr"]
+[ext_resource type="PackedScene" uid="uid://bxnpctlybofkh" path="res://Scenes/Objects/Machinery/MedicalVendor.tscn" id="11_mlwxp"]
 [ext_resource type="PackedScene" uid="uid://cuj34ntgy48j2" path="res://Scenes/Lighting/wall_light.tscn" id="11_ry2mu"]
+[ext_resource type="PackedScene" uid="uid://csayyiueq2vo8" path="res://Scenes/Items/Melee/telebaton.tscn" id="13_cgiob"]
 [ext_resource type="Script" uid="uid://ctk7b455p47ul" path="res://Code/OnClick/ClickSystem.gd" id="17_ry2mu"]
 [ext_resource type="PackedScene" uid="uid://ctk4o3xyuqeq1" path="res://Scenes/UI/Ingame/ChatUI.tscn" id="22_k6jxd"]
 [ext_resource type="Script" uid="uid://dilpklot1quje" path="res://Code/Helpers/SensorySystem.gd" id="25_5s2u1"]
@@ -1153,7 +1156,6 @@ dof_blur_near_enabled = true
 [node name="UILayer" type="CanvasLayer" parent="."]
 
 [node name="EnhancedChatUI" parent="UILayer" instance=ExtResource("22_k6jxd")]
-visible = false
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 color = Color(0.0478506, 0.0455295, 0.0937934, 1)
@@ -1197,134 +1199,70 @@ script = ExtResource("3_63btk")
 
 [node name="Medical_Equipment" type="Node2D" parent="World/Objects"]
 
+[node name="MedicalVendor" parent="World/Objects/Medical_Equipment" instance=ExtResource("11_mlwxp")]
+position = Vector2(112, 8)
+
 [node name="Items" type="Node2D" parent="World/Objects"]
 
-[node name="Lights" type="Node2D" parent="World"]
+[node name="HEGrenade" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
 
-[node name="Wall_Light4" parent="World/Lights" instance=ExtResource("11_ry2mu")]
-position = Vector2(504, 112)
-color = Color(1, 0.9, 0.7, 1)
-is_active = null
-facing_direction = 1
-shadow_smoothness = null
-shadow_strength = null
-use_flicker = null
-flicker_intensity = null
-flicker_speed = null
-use_pulse = null
-pulse_intensity = null
-pulse_speed = null
-use_glow = null
-is_static = null
-light_quality = null
-update_interval = null
-disable_when_offscreen = null
-shadow_distance = null
-auto_bake_on_ready = null
-auto_toggle_with_daylight = null
-turn_on_time = null
-turn_off_time = null
+[node name="HEGrenade2" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="HEGrenade3" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="HEGrenade4" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="HEGrenade5" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="HEGrenade6" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="HEGrenade7" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="HEGrenade8" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="HEGrenade9" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="HEGrenade10" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
+position = Vector2(112, 112)
+
+[node name="Telebaton" parent="World/Objects/Items" instance=ExtResource("13_cgiob")]
+position = Vector2(112, 80)
+
+[node name="Lights" type="Node2D" parent="World"]
 
 [node name="Wall_Light5" parent="World/Lights" instance=ExtResource("11_ry2mu")]
 position = Vector2(72, 112)
 color = Color(1, 0.9, 0.7, 1)
-is_active = null
+texture_scale = 0.5
 facing_direction = 3
-shadow_smoothness = null
-shadow_strength = null
-use_flicker = null
-flicker_intensity = null
-flicker_speed = null
-use_pulse = null
-pulse_intensity = null
-pulse_speed = null
-use_glow = null
-is_static = null
-light_quality = null
-update_interval = null
-disable_when_offscreen = null
-shadow_distance = null
-auto_bake_on_ready = null
-auto_toggle_with_daylight = null
-turn_on_time = null
-turn_off_time = null
+is_static = false
 
 [node name="Wall_Light6" parent="World/Lights" instance=ExtResource("11_ry2mu")]
-position = Vector2(144, 432)
+position = Vector2(504, 112)
 color = Color(1, 0.9, 0.7, 1)
-is_active = null
-facing_direction = 2
-shadow_smoothness = null
-shadow_strength = null
-use_flicker = null
-flicker_intensity = null
-flicker_speed = null
-use_pulse = null
-pulse_intensity = null
-pulse_speed = null
-use_glow = null
-is_static = null
-light_quality = null
-update_interval = null
-disable_when_offscreen = null
-shadow_distance = null
-auto_bake_on_ready = null
-auto_toggle_with_daylight = null
-turn_on_time = null
-turn_off_time = null
-
-[node name="Wall_Light7" parent="World/Lights" instance=ExtResource("11_ry2mu")]
-position = Vector2(432, 432)
-color = Color(1, 0.9, 0.7, 1)
-is_active = null
-facing_direction = 2
-shadow_smoothness = null
-shadow_strength = null
-use_flicker = null
-flicker_intensity = null
-flicker_speed = null
-use_pulse = null
-pulse_intensity = null
-pulse_speed = null
-use_glow = null
-is_static = null
-light_quality = null
-update_interval = null
-disable_when_offscreen = null
-shadow_distance = null
-auto_bake_on_ready = null
-auto_toggle_with_daylight = null
-turn_on_time = null
-turn_off_time = null
+facing_direction = 1
+is_static = false
 
 [node name="Wall_Light2" parent="World/Lights" instance=ExtResource("11_ry2mu")]
 position = Vector2(312, -144)
 color = Color(1, 0.9, 0.7, 1)
 shadow_enabled = false
-texture_scale = 0.5
+texture_scale = 0.3
 light_mode = 1
-is_active = null
 facing_direction = 1
 emergency_mode_active = true
 rotation_speed = 1.0
-shadow_smoothness = null
-shadow_strength = null
-use_flicker = null
-flicker_intensity = null
-flicker_speed = null
-use_pulse = null
-pulse_intensity = null
-pulse_speed = null
-use_glow = null
-is_static = null
-light_quality = null
-update_interval = null
-disable_when_offscreen = null
-shadow_distance = null
-auto_bake_on_ready = null
-auto_toggle_with_daylight = null
-turn_on_time = null
-turn_off_time = null
+flicker_intensity = 0.2
+is_static = false
 
 [node name="ChunkCullingSystem" type="Node" parent="World"]
 script = ExtResource("3_4i6l0")
@@ -1339,6 +1277,7 @@ metadata/_custom_type_script = "uid://dheeug2eok4df"
 
 [node name="TileOccupancySystem" type="Node2D" parent="World"]
 script = ExtResource("7_cgiob")
+debug_collisions = true
 
 [node name="ClickSystem" type="Node2D" parent="World" groups=["click_system"]]
 script = ExtResource("17_ry2mu")

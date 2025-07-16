@@ -7,6 +7,7 @@ signal entity_clicked(entity, mouse_button, shift_pressed, ctrl_pressed, alt_pre
 signal radial_menu_requested(entity, options, screen_position)
 signal click_started(position, button_index)
 signal click_ended(position, button_index)
+signal combat_mode_changed(enabled)
 signal click_dragged(from_position, to_position, button_index)
 signal middle_drag_started(position, target)
 signal context_menu_requested(position, target)
@@ -148,30 +149,31 @@ func _ready():
 	call_deferred("connect_to_systems")
 
 func connect_to_systems():
-	# Try to find player (GridMovementController) if not already set
+	print("ClickSystem: Connecting to systems...")
+	
+	# Find player with retry
 	if !player:
-		# Look in player_controller group
-		var players = get_tree().get_nodes_in_group("player_controller")
-		if players.size() > 0:
-			player = players[0]
-			print("ClickSystem: Found player controller: ", player.name)
-		else:
-			print("ClickSystem: No player controller found in group 'player_controller'")
-			
-	# Connect to tile system if world exists
+		find_player_reference()
+	
+	# Connect to world systems
 	if world:
 		tile_occupancy_system = world.get_node_or_null("TileOccupancySystem")
 		spatial_manager = world.get_node_or_null("SpatialManager")
 		sensory_system = world.get_node_or_null("SensorySystem")
+		print("ClickSystem: World systems - TileOccupancy:", !!tile_occupancy_system, " Spatial:", !!spatial_manager, " Sensory:", !!sensory_system)
 	
-	# Create or find radial menu
+	# Ensure radial menu exists
 	ensure_radial_menu_exists()
 	
-	print("ClickSystem: Connected to systems")
+	# Retry connection after delay if player not found
+	if !player:
+		print("ClickSystem: Player not found, retrying in 1 second...")
+		get_tree().create_timer(1.0).timeout.connect(connect_to_systems)
+	
+	print("ClickSystem: System connection complete")
 	print("  - Player: ", "Found" if player else "Not found")
-	print("  - TileOccupancySystem: ", "Found" if tile_occupancy_system else "Not found")
-	print("  - SpatialManager: ", "Found" if spatial_manager else "Not found")
-	print("  - CursorController: ", "Found" if cursor_controller else "Not found")
+	print("  - World: ", "Found" if world else "Not found")
+	print("  - RadialMenu: ", "Found" if radial_menu else "Not found")
 
 # === INPUT PROCESSING ===
 func _input(event):
@@ -179,26 +181,431 @@ func _input(event):
 	if not (event is InputEventMouseButton or event is InputEventMouseMotion):
 		return
 	
-	# Check if UI system is handling this input
-	var input_manager = get_node_or_null("/root/InputPriorityManager")
-	if input_manager and input_manager.is_ui_active():
-		# UI is active - don't process this event
+	# CRITICAL: Only process input if we have a valid LOCAL player
+	if not player or not is_instance_valid(player):
 		return
 	
-	# Check if this event should be intercepted by UI
-	if event is InputEventMouseButton and event.pressed:
-		if input_manager and input_manager.is_over_ui(event.position):
-			# UI will handle this - don't process
-			return
+	# Verify this is actually a local player, not an NPC
+	if player.has_meta("is_npc") and player.get_meta("is_npc"):
+		print("ClickSystem: Refusing to process input - player reference is an NPC!")
+		return
 	
-	# Process as normal - UI isn't handling this
+	# Verify player is local
+	if "is_local_player" in player and not player.is_local_player:
+		return
+	
+	# Let UI handle the event first
+	if should_ui_handle_event(event):
+		return
+	
+	# Process the event
 	if event is InputEventMouseButton:
 		handle_mouse_button(event)
 	elif event is InputEventMouseMotion:
 		handle_mouse_motion(event)
 
+# Comprehensive UI event detection
+func should_ui_handle_event(event) -> bool:
+	if not event is InputEventMouseButton:
+		return false
+	
+	if not event.pressed:
+		return false
+	
+	var mouse_pos = event.position
+	
+	# Method 1: Check PlayerUI first (highest priority)
+	if player_ui and player_ui.has_method("is_position_in_ui_element"):
+		if player_ui.is_position_in_ui_element(mouse_pos):
+			print("ClickSystem: UI click detected by PlayerUI")
+			return true
+	
+	# Method 2: Check for UI elements using viewport's GUI
+	var viewport = get_viewport()
+	if viewport:
+		# Check if there's a Control under the mouse
+		var gui = viewport.gui_get_focus_owner()
+		if gui and gui is Control:
+			var global_rect = gui.get_global_rect()
+			if global_rect.has_point(mouse_pos):
+				print("ClickSystem: UI click detected by viewport GUI")
+				return true
+	
+	# Method 3: Check specific UI groups
+	var ui_groups = ["ui_elements", "ui_buttons", "hud_elements", "interface", "menu", "windows"]
+	for group_name in ui_groups:
+		var nodes = get_tree().get_nodes_in_group(group_name)
+		for node in nodes:
+			if node is Control and node.visible and node.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+				if node.get_global_rect().has_point(mouse_pos):
+					print("ClickSystem: UI click detected in group: ", group_name)
+					return true
+	
+	# Method 4: Check CanvasLayers for UI
+	var canvas_layers = get_tree().get_nodes_in_group("canvas_layer")
+	for layer in canvas_layers:
+		if layer is CanvasLayer and layer.visible:
+			if check_canvas_layer_for_ui_simple(layer, mouse_pos):
+				print("ClickSystem: UI click detected in CanvasLayer")
+				return true
+	
+	return false
+
+func check_canvas_layer_for_ui_simple(canvas_layer: CanvasLayer, click_position: Vector2) -> bool:
+	if not canvas_layer.visible:
+		return false
+	
+	# Check direct children only
+	for child in canvas_layer.get_children():
+		if child is Control and child.visible:
+			if child.mouse_filter == Control.MOUSE_FILTER_IGNORE:
+				continue
+				
+			if child.get_global_rect().has_point(click_position):
+				return true
+	
+	return false
+
+# UI detection
+func is_clicking_on_ui(click_position: Vector2) -> bool:
+	"""Determine if a click should be intercepted by UI elements"""
+	
+	# Method 1: Check PlayerUI first (highest priority)
+	if player_ui and player_ui.has_method("is_position_in_ui_element"):
+		if player_ui.is_position_in_ui_element(click_position):
+			print("ClickSystem: PlayerUI detected click at ", click_position)
+			return true
+	
+	# Method 2: Check specific UI groups (more targeted than recursive check)
+	var ui_groups = ["ui_elements", "ui_buttons", "hud_elements", "interface", "menu"]
+	for group_name in ui_groups:
+		var nodes = get_tree().get_nodes_in_group(group_name)
+		for node in nodes:
+			if node is Control and node.visible:
+				# Respect mouse filter settings
+				if node.mouse_filter == Control.MOUSE_FILTER_IGNORE:
+					continue
+					
+				if node.get_global_rect().has_point(click_position):
+					print("ClickSystem: Found UI element in group: ", group_name, " - ", node.name)
+					return true
+	
+	# Method 3: Check Canvas Layers (but only direct children that are Controls)
+	var canvas_layers = get_tree().get_nodes_in_group("canvas_layer")
+	for layer in canvas_layers:
+		if layer is CanvasLayer and check_canvas_layer_ui(layer, click_position):
+			return true
+	
+	# Method 4: Fallback check for any CanvasLayer
+	var all_canvas_layers = get_tree().get_nodes_in_group("canvas_layer")
+	if all_canvas_layers.is_empty():
+		# If no canvas layers in group, find them manually
+		all_canvas_layers = find_canvas_layers_recursive(get_tree().root)
+	
+	for layer in all_canvas_layers:
+		if layer is CanvasLayer:
+			var layer_name = layer.name.to_lower()
+			if layer_name.contains("ui") or layer_name.contains("hud") or layer_name.contains("menu"):
+				if check_canvas_layer_ui_strict(layer, click_position):
+					return true
+	
+	return false
+
+# More restrictive canvas layer check
+func check_canvas_layer_ui_strict(canvas_layer: CanvasLayer, click_position: Vector2) -> bool:
+	"""Check CanvasLayer for UI elements with stricter filtering"""
+	if not canvas_layer.visible:
+		return false
+	
+	# Only check direct children that are actually interactive
+	for child in canvas_layer.get_children():
+		if not child is Control or not child.visible:
+			continue
+			
+		# Skip if mouse filter is set to ignore
+		if child.mouse_filter == Control.MOUSE_FILTER_IGNORE:
+			continue
+			
+		# Check if this control is at the position
+		if child.get_global_rect().has_point(click_position):
+			print("ClickSystem: Found UI control in CanvasLayer: ", child.name)
+			return true
+			
+		# Check interactive children (buttons, etc.)
+		if check_control_children_recursive(child, click_position):
+			return true
+	
+	return false
+
+# Recursive check but only for interactive UI elements
+func check_control_children_recursive(control: Control, click_position: Vector2) -> bool:
+	"""Recursively check Control children but only interactive ones"""
+	if not control.visible:
+		return false
+		
+	for child in control.get_children():
+		if not child is Control or not child.visible:
+			continue
+			
+		# Skip if mouse filter is set to ignore (respects the UI setup)
+		if child.mouse_filter == Control.MOUSE_FILTER_IGNORE:
+			# Still check children in case they can receive input
+			if check_control_children_recursive(child, click_position):
+				return true
+			continue
+		
+		# Check if this control is at the position and can actually receive input
+		if child.get_global_rect().has_point(click_position):
+			# Additional check: make sure it's actually an interactive element
+			if child is Button or child is TextureButton or child.mouse_filter == Control.MOUSE_FILTER_STOP:
+				print("ClickSystem: Found interactive UI control: ", child.name)
+				return true
+		
+		# Recursively check children
+		if check_control_children_recursive(child, click_position):
+			return true
+	
+	return false
+
+# Helper to find canvas layers
+func find_canvas_layers_recursive(node: Node) -> Array:
+	"""Find all CanvasLayer nodes in the tree"""
+	var canvas_layers = []
+	
+	if node is CanvasLayer:
+		canvas_layers.append(node)
+	
+	for child in node.get_children():
+		canvas_layers.append_array(find_canvas_layers_recursive(child))
+	
+	return canvas_layers
+
+# Recursively check UI nodes
+func check_ui_nodes_recursive(node: Node, click_position: Vector2) -> bool:
+	# Skip non-UI nodes for performance
+	if not (node is Control or node is CanvasLayer or node is Window):
+		# Only check children if this could be a UI container
+		if node.name.to_lower().contains("ui") or node.name.to_lower().contains("hud") or node.name.to_lower().contains("menu"):
+			for child in node.get_children():
+				if check_ui_nodes_recursive(child, click_position):
+					return true
+		return false
+	
+	# Check Control nodes
+	if node is Control:
+		if not node.visible:
+			return false
+			
+		# Skip if mouse filter is ignore
+		if node.mouse_filter == Control.MOUSE_FILTER_IGNORE:
+			# Still check children in case they can receive input
+			for child in node.get_children():
+				if check_ui_nodes_recursive(child, click_position):
+					return true
+			return false
+		
+		# Check if point is in this control
+		if node.get_global_rect().has_point(click_position):
+			print("ClickSystem: Found UI control: ", node.name, " at ", node.get_global_rect())
+			return true
+		
+		# Check children
+		for child in node.get_children():
+			if check_ui_nodes_recursive(child, click_position):
+				return true
+	
+	# Check CanvasLayer nodes
+	elif node is CanvasLayer:
+		if check_canvas_layer_ui(node, click_position):
+			return true
+	
+	# Check Window nodes (Godot 4)
+	elif node is Window:
+		if node.visible:
+			var window_rect = Rect2(Vector2.ZERO, node.size)
+			if window_rect.has_point(click_position):
+				return true
+	
+	return false
+
+# Check CanvasLayer for UI elements
+func check_canvas_layer_ui(canvas_layer: CanvasLayer, click_position: Vector2) -> bool:
+	if not canvas_layer.visible:
+		return false
+	
+	for child in canvas_layer.get_children():
+		if check_ui_nodes_recursive(child, click_position):
+			return true
+	
+	return false
+
+# Alternative UI detection method using viewport
+func is_over_ui_alternative(click_position: Vector2) -> bool:
+	var viewport = get_viewport()
+	if not viewport:
+		return false
+	
+	# Get the topmost object under the mouse
+	var space_state = viewport.world_2d.direct_space_state
+	if not space_state:
+		return false
+	
+	# Use viewport's gui to check for Control nodes
+	var gui = viewport.gui_get_focus_owner()
+	if gui:
+		return true
+	
+	return false
+#endregion
+
+#region CLICK HANDLING
+# button press handling
+func handle_button_press(button_index: int, mouse_pos: Vector2, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	"""Handle mouse button press with improved accuracy and UI coordination"""
+	
+	# Double-check UI interference (belt and suspenders approach)
+	if is_clicking_on_ui(mouse_pos):
+		print("ClickSystem: Last-chance UI check blocked click")
+		click_intercepted = true
+		return
+	
+	# Store click start data
+	click_start_position = mouse_pos
+	last_click_button = button_index
+	click_intercepted = false
+	
+	# Get precise global mouse position
+	var world_pos = get_global_mouse_position()
+	
+	# Check for double click
+	var current_time = Time.get_ticks_msec() / 1000.0
+	var is_double_click = false
+	
+	if double_click_enabled and button_index == last_click_button:
+		var time_since_last_click = current_time - last_click_time
+		var distance_from_last_click = mouse_pos.distance_to(last_click_position)
+		
+		if time_since_last_click < DOUBLE_CLICK_TIME and distance_from_last_click < 10:
+			var current_target = get_most_accurate_entity_at_position(world_pos)
+			if current_target == last_entity_clicked and current_target != null:
+				is_double_click = true
+				print("ClickSystem: Double-click detected on entity: ", current_target.name)
+	
+	# Update click tracking
+	last_click_position = mouse_pos
+	last_click_time = current_time
+	
+	# Emit signal
+	emit_signal("click_started", mouse_pos, button_index)
+	
+	# Get the most accurate entity at the click position
+	var click_target = get_most_accurate_entity_at_position(world_pos)
+	
+	# Store the clicked entity
+	if button_index == MOUSE_BUTTON_LEFT:
+		last_entity_clicked = click_target
+	
+	# Handle based on button type
+	match button_index:
+		MOUSE_BUTTON_LEFT:
+			if is_double_click:
+				handle_double_left_click(mouse_pos, shift_pressed, ctrl_pressed, alt_pressed)
+			else:
+				handle_left_click_press(mouse_pos, shift_pressed, ctrl_pressed, alt_pressed)
+				
+		MOUSE_BUTTON_RIGHT:
+			handle_right_click_press(mouse_pos, shift_pressed, ctrl_pressed, alt_pressed)
+			
+		MOUSE_BUTTON_MIDDLE:
+			handle_middle_click_press(mouse_pos, shift_pressed, ctrl_pressed, alt_pressed)
+			
+		MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN:
+			handle_scroll(button_index == MOUSE_BUTTON_WHEEL_UP, shift_pressed, ctrl_pressed, alt_pressed)
+
+# click handlers
+func click_on_entity(entity, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	if !entity:
+		return
+	
+	print("ClickSystem: Clicking on entity: ", entity.name, " with button: ", button_index)
+	
+	# Emit entity clicked signal
+	emit_signal("entity_clicked", entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	
+	# Track entity
+	last_entity_clicked = entity
+	
+	# Route to player's interaction system
+	if player and player.has_method("process_interaction"):
+		player.process_interaction(entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	else:
+		# Fallback to old method
+		handle_entity_interaction_fallback(entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+
+func click_on_tile(tile_coords: Vector2i, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	print("ClickSystem: Clicking on tile: ", tile_coords, " with button: ", button_index)
+	
+	# Emit tile clicked signal
+	emit_signal("tile_clicked", tile_coords, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	
+	# Let player handle the click on the tile
+	if player and player.has_method("_on_tile_clicked"):
+		player._on_tile_clicked(tile_coords, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	else:
+		handle_tile_interaction_fallback(tile_coords, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+
+# Fallback interaction handling for backwards compatibility
+func handle_entity_interaction_fallback(entity, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	if !player:
+		return
+	
+	# Handle modifier-based interactions
+	if shift_pressed and not ctrl_pressed and not alt_pressed:
+		# Examine
+		if player.has_method("handle_examine_interaction"):
+			player.handle_examine_interaction(entity)
+		return
+	
+	if ctrl_pressed and not shift_pressed and not alt_pressed:
+		# Pull/drag
+		if player.has_method("handle_ctrl_interaction"):
+			player.handle_ctrl_interaction(entity)
+		return
+	
+	# Standard interaction based on player's current intent
+	if button_index == MOUSE_BUTTON_LEFT:
+		if player.has_method("handle_intent_interaction"):
+			player.handle_intent_interaction(entity)
+		elif player.has_method("on_entity_clicked"):
+			player.on_entity_clicked(entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	
+	# If the entity has a specific interaction method, use it
+	if button_index == MOUSE_BUTTON_LEFT and entity.has_method("interact"):
+		entity.interact(player)
+
+func handle_tile_interaction_fallback(tile_coords: Vector2i, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	if !player:
+		return
+	
+	# Handle right click on tile
+	if button_index == MOUSE_BUTTON_RIGHT and player.has_method("handle_tile_context_menu"):
+		player.handle_tile_context_menu(tile_coords, player.current_z_level if "current_z_level" in player else 0)
+	
+	# Handle middle click on tile (point)
+	elif button_index == MOUSE_BUTTON_MIDDLE and player.has_method("point_to"):
+		var world_pos = tile_to_world(tile_coords)
+		player.point_to(world_pos)
+
 # Process hover effects and cooldowns
 func _process(delta):
+	# CRITICAL: Don't process if no valid local player
+	if not player or not is_instance_valid(player):
+		return
+	
+	# Don't process for NPCs
+	if player.has_meta("is_npc") and player.get_meta("is_npc"):
+		return
+	
 	# Update click cooldown timer
 	if click_cooldown_timer > 0:
 		click_cooldown_timer -= delta
@@ -216,6 +623,19 @@ func _process(delta):
 
 # === MOUSE EVENT HANDLERS ===
 func handle_mouse_button(event: InputEventMouseButton):
+	# CRITICAL: Validate player before processing
+	if not player or not is_instance_valid(player):
+		return
+	
+	# Reject input from NPCs
+	if player.has_meta("is_npc") and player.get_meta("is_npc"):
+		print("ClickSystem: ERROR - Rejecting input from NPC!")
+		return
+	
+	# Verify local player
+	if "is_local_player" in player and not player.is_local_player:
+		return
+	
 	# Ignore if click cooldown is active
 	if click_cooldown_timer > 0:
 		return
@@ -274,67 +694,6 @@ func handle_mouse_motion(event: InputEventMouseMotion):
 				cursor_controller.set_cursor_mode("default")
 
 # === BUTTON HANDLERS ===
-func handle_button_press(button_index: int, mouse_pos: Vector2, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
-	"""Handle mouse button press with improved accuracy"""
-	# Check if UI should intercept this click
-	if is_click_intercepted_by_ui(mouse_pos):
-		click_intercepted = true
-		return
-	
-	# Store click start data
-	click_start_position = mouse_pos
-	last_click_button = button_index
-	click_intercepted = false
-	
-	# Get precise global mouse position
-	var world_pos = get_global_mouse_position()
-	
-	# Check for double click with improved accuracy
-	var current_time = Time.get_ticks_msec() / 1000.0
-	var is_double_click = false
-	
-	if double_click_enabled and button_index == last_click_button:
-		var time_since_last_click = current_time - last_click_time
-		var distance_from_last_click = mouse_pos.distance_to(last_click_position)
-		
-		# More accurate double-click criteria
-		if time_since_last_click < DOUBLE_CLICK_TIME and distance_from_last_click < 10:
-			# Check if the same entity is clicked twice
-			var current_target = get_most_accurate_entity_at_position(world_pos)
-			if current_target == last_entity_clicked and current_target != null:
-				is_double_click = true
-				print("ClickSystem: Double-click detected on entity: ", current_target.name)
-	
-	# Update click tracking
-	last_click_position = mouse_pos
-	last_click_time = current_time
-	
-	# Emit signal
-	emit_signal("click_started", mouse_pos, button_index)
-	
-	# Get the most accurate entity at the click position
-	var click_target = get_most_accurate_entity_at_position(world_pos)
-	
-	# Store the clicked entity
-	if button_index == MOUSE_BUTTON_LEFT:
-		last_entity_clicked = click_target
-	
-	# Handle based on button type
-	match button_index:
-		MOUSE_BUTTON_LEFT:
-			if is_double_click:
-				handle_double_left_click(mouse_pos, shift_pressed, ctrl_pressed, alt_pressed)
-			else:
-				handle_left_click_press(mouse_pos, shift_pressed, ctrl_pressed, alt_pressed)
-				
-		MOUSE_BUTTON_RIGHT:
-			handle_right_click_press(mouse_pos, shift_pressed, ctrl_pressed, alt_pressed)
-			
-		MOUSE_BUTTON_MIDDLE:
-			handle_middle_click_press(mouse_pos, shift_pressed, ctrl_pressed, alt_pressed)
-			
-		MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN:
-			handle_scroll(button_index == MOUSE_BUTTON_WHEEL_UP, shift_pressed, ctrl_pressed, alt_pressed)
 
 func handle_button_release(button_index: int, mouse_pos: Vector2, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
 	# Calculate distance moved since click start
@@ -380,23 +739,158 @@ func handle_button_release(button_index: int, mouse_pos: Vector2, shift_pressed:
 
 # === CLICK TYPE HANDLERS ===
 func handle_left_click_press(mouse_pos: Vector2, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	print("ClickSystem: Left click at ", mouse_pos)
+	
 	# Get entity or tile at position
 	var world_pos = get_global_mouse_position()
-	var click_target = get_clickable_at_position(world_pos)
+	var click_target = get_most_accurate_entity_at_position(world_pos)
 	
-	# First, try to fire weapon if we have one and are in combat mode or holding Shift
-	if try_fire_active_weapon(world_pos, shift_pressed):
-		# Weapon fired, don't do normal click handling
-		return
+	print("ClickSystem: Click target found: ", click_target.name if click_target else "none")
 	
-	# Regular click handling for entities and tiles
+	# Try to fire weapon only if in combat mode and no modifiers
+	if is_in_combat_mode and not shift_pressed and not ctrl_pressed and not alt_pressed:
+		if try_fire_active_weapon(world_pos, false):
+			print("ClickSystem: Weapon fired, skipping normal interaction")
+			return
+	
+	# Regular click handling
 	if click_target:
-		click_on_entity(click_target, MOUSE_BUTTON_LEFT, shift_pressed, ctrl_pressed, alt_pressed)
+		print("ClickSystem: Routing entity click to player")
+		route_entity_click(click_target, MOUSE_BUTTON_LEFT, shift_pressed, ctrl_pressed, alt_pressed)
 		drag_source = click_target
 	else:
 		# Click on tile instead
 		var tile_pos = get_tile_at_position(world_pos)
-		click_on_tile(tile_pos, MOUSE_BUTTON_LEFT, shift_pressed, ctrl_pressed, alt_pressed)
+		print("ClickSystem: Routing tile click to player at ", tile_pos)
+		route_tile_click(tile_pos, MOUSE_BUTTON_LEFT, shift_pressed, ctrl_pressed, alt_pressed)
+
+func route_entity_click(entity, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	if !entity:
+		print("ClickSystem: Cannot route click - entity is null")
+		return
+	
+	print("ClickSystem: Routing entity click - ", entity.name, " button:", button_index)
+	
+	# Emit entity clicked signal first
+	emit_signal("entity_clicked", entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	
+	# Track entity
+	last_entity_clicked = entity
+	
+	# Ensure we have a valid player reference
+	if !player:
+		print("ClickSystem: Error - No player reference set!")
+		find_player_reference()
+		if !player:
+			print("ClickSystem: Critical error - Cannot find player!")
+			return
+	
+	# Route to player's interaction system
+	if player.has_method("process_interaction"):
+		print("ClickSystem: Calling player.process_interaction")
+		var result = player.process_interaction(entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+		print("ClickSystem: Interaction result: ", result)
+	elif player.has_method("_on_entity_clicked"):
+		print("ClickSystem: Calling player._on_entity_clicked (fallback)")
+		player._on_entity_clicked(entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	else:
+		print("ClickSystem: Error - Player has no interaction methods!")
+		# Emergency fallback
+		handle_entity_interaction_emergency_fallback(entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+
+func route_tile_click(tile_coords: Vector2i, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	print("ClickSystem: Routing tile click - ", tile_coords, " button:", button_index)
+	
+	# Emit tile clicked signal
+	emit_signal("tile_clicked", tile_coords, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	
+	# Ensure we have a valid player reference
+	if !player:
+		print("ClickSystem: Error - No player reference for tile click!")
+		find_player_reference()
+		if !player:
+			return
+	
+	# Let player handle the tile click
+	if player.has_method("_on_tile_clicked"):
+		print("ClickSystem: Calling player._on_tile_clicked")
+		player._on_tile_clicked(tile_coords, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	else:
+		print("ClickSystem: Player has no _on_tile_clicked method")
+		# Fallback tile interaction
+		handle_tile_interaction_fallback(tile_coords, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+
+func find_player_reference():
+	print("ClickSystem: Searching for LOCAL player reference...")
+	
+	var potential_players = []
+	
+	# Method 1: Check player_controller group - EXCLUDE NPCs
+	potential_players = get_tree().get_nodes_in_group("player_controller")
+	for p in potential_players:
+		# Skip NPCs
+		if p.is_in_group("npcs"):
+			continue
+		if p.has_meta("is_npc") and p.get_meta("is_npc"):
+			continue
+		# Prefer local players
+		if "is_local_player" in p and p.is_local_player:
+			player = p
+			print("ClickSystem: Found LOCAL player in player_controller group: ", player.name)
+			return
+	
+	# Method 2: Check players group - EXCLUDE NPCs
+	potential_players = get_tree().get_nodes_in_group("players")
+	for p in potential_players:
+		# Skip NPCs
+		if p.is_in_group("npcs"):
+			continue
+		if p.has_meta("is_npc") and p.get_meta("is_npc"):
+			continue
+		# Prefer local players
+		if "is_local_player" in p and p.is_local_player:
+			player = p
+			print("ClickSystem: Found LOCAL player in players group: ", player.name)
+			return
+	
+	# Method 3: Look for nodes
+	potential_players = get_tree().get_nodes_in_group("entities")
+	for entity in potential_players:
+		# Skip NPCs
+		if entity.is_in_group("npcs"):
+			continue
+		if entity.has_meta("is_npc") and entity.get_meta("is_npc"):
+			continue
+		
+		# Check for player-like methods
+		if entity.has_method("process_interaction") and entity.has_method("get_active_item"):
+			# Prefer local players
+			if "is_local_player" in entity and entity.is_local_player:
+				player = entity
+				print("ClickSystem: Found LOCAL player by entity methods: ", player.name)
+				return
+	
+	print("ClickSystem: Could not find LOCAL player reference!")
+
+func handle_entity_interaction_emergency_fallback(entity, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	print("ClickSystem: Using emergency fallback for entity interaction")
+	
+	# Try to call the entity's interaction methods directly
+	if button_index == MOUSE_BUTTON_LEFT:
+		if shift_pressed:
+			# Examine
+			examine_entity(entity)
+		elif entity.has_method("attack_hand") and player:
+			# Try basic interaction
+			entity.attack_hand(player)
+		elif entity.has_method("interact") and player:
+			entity.interact(player)
+		else:
+			print("ClickSystem: Entity ", entity.name, " has no interaction methods")
+	elif button_index == MOUSE_BUTTON_RIGHT:
+		# Show context menu if available
+		if radial_menu:
+			show_radial_menu(entity, get_viewport().get_mouse_position())
 
 func handle_left_click_release(mouse_pos: Vector2, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
 	# Normal clicks are already handled in the press handler
@@ -611,24 +1105,56 @@ func cancel_middle_drag():
 # === WEAPON HANDLING ===
 
 # Try to fire the player's active weapon
-func try_fire_active_weapon(target_position, force_fire = false) -> bool:
+func try_fire_active_weapon(target_position: Vector2, force_fire: bool = false) -> bool:
 	if !player:
+		print("ClickSystem: Cannot fire weapon - no player reference")
 		return false
 	
-	# Get active weapon
+	# Only try to fire if we're in combat mode or force_fire is true
+	if !is_in_combat_mode and !force_fire:
+		return false
+	
+	# Get active weapon with multiple fallback methods
 	var weapon = get_active_weapon()
 	if !weapon:
+		print("ClickSystem: No active weapon found")
 		return false
 	
-	# Try to fire the weapon
+	print("ClickSystem: Attempting to fire weapon: ", weapon.name)
+	
+	# Check if weapon can actually fire
+	if !weapon.has_method("try_fire") and !weapon.has_method("fire") and !weapon.has_method("attack"):
+		print("ClickSystem: Weapon has no firing methods")
+		return false
+	
+	# Try to fire the weapon using different methods
+	var fired = false
+	
 	if weapon.has_method("try_fire"):
-		if weapon.try_fire(target_position):
-			# Weapon fired successfully
-			emit_signal("weapon_fired", target_position, weapon)
-			
-			# Add small cooldown to prevent double fires
-			click_cooldown_timer = CLICK_COOLDOWN * 2
-			return true
+		print("ClickSystem: Using try_fire method")
+		fired = weapon.try_fire(target_position)
+	elif weapon.has_method("fire"):
+		print("ClickSystem: Using fire method")
+		fired = weapon.fire(target_position)
+	elif weapon.has_method("attack"):
+		# For melee weapons or items that attack
+		print("ClickSystem: Using attack method")
+		var target_entity = get_most_accurate_entity_at_position(target_position)
+		if target_entity:
+			fired = weapon.attack(target_entity, player)
+		else:
+			fired = false
+	
+	if fired:
+		print("ClickSystem: Weapon fired successfully")
+		# Weapon fired successfully
+		emit_signal("weapon_fired", target_position, weapon)
+		
+		# Add small cooldown to prevent double fires
+		click_cooldown_timer = CLICK_COOLDOWN * 2
+		return true
+	else:
+		print("ClickSystem: Weapon failed to fire")
 	
 	return false
 
@@ -637,97 +1163,77 @@ func get_active_weapon():
 	if !player:
 		return null
 	
-	# Try to get active item
 	var active_item = null
 	
-	# First try WeaponController
+	# Method 1: Try WeaponController
 	var weapon_controller = player.get_node_or_null("WeaponController")
-	if weapon_controller and weapon_controller.has_method("get_active_weapon"):
-		active_item = weapon_controller.get_active_weapon()
+	if weapon_controller:
+		if weapon_controller.has_method("get_active_weapon"):
+			active_item = weapon_controller.get_active_weapon()
+		elif weapon_controller.has_method("get_active_item"):
+			active_item = weapon_controller.get_active_item()
 	
-	# Fall back to inventory system
+	# Method 2: Try player's get_active_item method
 	if !active_item and player.has_method("get_active_item"):
 		active_item = player.get_active_item()
-	elif !active_item and player.has_node("InventorySystem"):
-		var inventory = player.get_node("InventorySystem")
-		if inventory.has_method("get_active_item"):
+	
+	# Method 3: Try inventory system
+	if !active_item:
+		var inventory = null
+		if player.has_node("InventorySystem"):
+			inventory = player.get_node("InventorySystem")
+		elif "inventory_system" in player and player.inventory_system:
+			inventory = player.inventory_system
+		
+		if inventory and inventory.has_method("get_active_item"):
 			active_item = inventory.get_active_item()
 	
-	# Check if the active item is a weapon
+	# Method 4: Check held_items array
+	if !active_item and "held_items" in player and player.held_items.size() > 0:
+		var active_hand_index = player.get("active_hand_index", 0)
+		if active_hand_index < player.held_items.size():
+			active_item = player.held_items[active_hand_index]
+	
+	# Check if the active item is actually a weapon
 	if active_item:
-		if ("tool_behaviour" in active_item and active_item.tool_behaviour == "weapon") or active_item.has_method("try_fire"):
+		var is_weapon = false
+		
+		# Check for weapon tool behaviour
+		if "tool_behaviour" in active_item and active_item.tool_behaviour == "weapon":
+			is_weapon = true
+		
+		# Check for weapon methods
+		elif active_item.has_method("try_fire") or active_item.has_method("fire"):
+			is_weapon = true
+		
+		# Check for force value (can be used as weapon)
+		elif "force" in active_item and active_item.force > 0:
+			is_weapon = true
+		
+		if is_weapon:
+			print("ClickSystem: Found active weapon: ", active_item.name)
 			return active_item
 	
 	return null
 
 # === INTERACTION HANDLERS ===
-func click_on_entity(entity, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
-	if !entity:
-		return
+# Set combat mode from external systems
+func set_combat_mode(enabled: bool):
+	var old_mode = is_in_combat_mode
+	is_in_combat_mode = enabled
 	
-	# Emit entity clicked signal
-	emit_signal("entity_clicked", entity, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+	print("ClickSystem: Combat mode ", "enabled" if enabled else "disabled")
 	
-	# Track entity
-	last_entity_clicked = entity
-	
-	# Let player handle the click on the entity
-	if player:
-		# Determine interaction based on modifier keys
-		if shift_pressed and ctrl_pressed:
-			if player.has_method("CtrlShiftClickOn"):
-				player.CtrlShiftClickOn(entity)
-		elif shift_pressed:
-			if player.has_method("ShiftClickOn"):
-				player.ShiftClickOn(entity)
-		elif ctrl_pressed:
-			if player.has_method("CtrlClickOn"):
-				player.CtrlClickOn(entity)
-		elif alt_pressed:
-			if player.has_method("AltClickOn"):
-				player.AltClickOn(entity)
+	# Update cursor if we have a cursor controller
+	if cursor_controller:
+		if enabled:
+			cursor_controller.set_cursor_mode("target")
 		else:
-			# Standard interaction - check for combat mode first
-			if is_in_combat_mode and button_index == MOUSE_BUTTON_LEFT:
-				handle_attack(player, entity)
-			else:
-				# Normal interaction
-				if button_index == MOUSE_BUTTON_LEFT:
-					# First check on_entity_clicked which is more explicit
-					if player.has_method("on_entity_clicked"):
-						player.on_entity_clicked(entity)
-					else:
-						# Fall back to ClickOn which is more general
-						player.ClickOn(entity)
-				elif button_index == MOUSE_BUTTON_RIGHT:
-					if player.has_method("RightClickOn"):
-						player.RightClickOn(entity)
-				elif button_index == MOUSE_BUTTON_MIDDLE:
-					if player.has_method("MiddleClickOn"):
-						player.MiddleClickOn(entity)
+			cursor_controller.set_cursor_mode("default")
 	
-	# If the entity has a specific interaction method, use it
-	if button_index == MOUSE_BUTTON_LEFT and entity.has_method("interact"):
-		entity.interact(player)
-
-func click_on_tile(tile_coords: Vector2i, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
-	# Emit tile clicked signal
-	emit_signal("tile_clicked", tile_coords, button_index, shift_pressed, ctrl_pressed, alt_pressed)
-	
-	# Let player handle the click on the tile
-	if player:
-		# Handle clicks on tiles
-		if player.has_method("_on_tile_clicked"):
-			player._on_tile_clicked(tile_coords, button_index, shift_pressed, ctrl_pressed, alt_pressed)
-		else:
-			# Handle right click on tile
-			if button_index == MOUSE_BUTTON_RIGHT and player.has_method("handle_tile_context_menu"):
-				player.handle_tile_context_menu(tile_coords, player.current_z_level)
-			
-			# Handle middle click on tile
-			elif button_index == MOUSE_BUTTON_MIDDLE and player.has_method("point_to"):
-				var world_pos = tile_to_world(tile_coords)
-				player.point_to(world_pos)
+	# Emit signal if mode actually changed
+	if old_mode != enabled:
+		emit_signal("combat_mode_changed", enabled)
 
 func handle_mouse_drop(source, target):
 	# Check if source can be dropped on target
@@ -1081,7 +1587,8 @@ func tile_to_world(tile_pos: Vector2i) -> Vector2:
 	)
 
 func get_clickable_at_position(world_pos: Vector2):
-	return find_best_entity_under_cursor(world_pos)
+	var entity = find_best_entity_under_cursor(world_pos)
+	return entity
 
 func is_position_interactable(world_pos: Vector2) -> bool:
 	# Check if there's a clickable entity
@@ -1098,136 +1605,177 @@ func is_position_interactable(world_pos: Vector2) -> bool:
 	return false
 
 func is_point_inside_sprite(sprite: Node2D, global_point: Vector2) -> bool:
-	"""Perform pixel-perfect hit testing for a sprite or sprite-like node"""
-	var texture = null
-	var use_pixel_test = false
+	"""Simple hit testing"""
 	
-	# Get the texture based on node type
-	if sprite is Sprite2D:
-		texture = sprite.texture
-		use_pixel_test = true
-	elif sprite is HumanSpriteSystem and sprite.sprite_frames:
-		var frames = sprite.sprite_frames
-		if frames.has_animation(sprite.animation):
-			texture = frames.get_frame_texture(sprite.animation, sprite.frame)
-			use_pixel_test = true
-	elif "texture" in sprite and sprite.texture != null:
-		texture = sprite.texture
-		use_pixel_test = true
+	# For HumanSpriteSystem, check if point is within any visible body part
+	if sprite is HumanSpriteSystem:
+		return is_point_inside_human_sprite_system(sprite, global_point)
 	
-	# If we couldn't get a texture or shouldn't do pixel testing
-	if not texture or not use_pixel_test:
+	# For regular Sprite2D nodes, do simple bounds checking
+	elif sprite is Sprite2D:
+		return is_point_inside_sprite2d(sprite, global_point)
+	
+	# For other Node2D types, just check if they have a position and are reasonably close
+	else:
+		var distance = global_point.distance_to(sprite.global_position)
+		return distance <= 32.0  # Within one tile
+
+func is_point_inside_human_sprite_system(human_sprite_system: HumanSpriteSystem, global_point: Vector2) -> bool:
+	"""Check if point hits any visible body part of the character"""
+	
+	# Quick distance check first - if too far away, definitely not a hit
+	var distance = global_point.distance_to(human_sprite_system.global_position)
+	if distance > 48.0:  # 1.5 tiles max distance
 		return false
 	
-	# Convert global point to local coordinates
+	# Check each visible body part sprite
+	var sprites_container = human_sprite_system.get_node_or_null("Sprites")
+	if not sprites_container:
+		return false
+	
+	# Check body parts in order of visual priority
+	var body_part_names = ["BodySprite", "HeadSprite", "LeftArmSprite", "RightArmSprite", 
+						   "LeftHandSprite", "RightHandSprite", "LeftLegSprite", "RightLegSprite",
+						   "LeftFootSprite", "RightFootSprite"]
+	
+	for part_name in body_part_names:
+		var sprite = sprites_container.get_node_or_null(part_name)
+		if sprite and sprite.visible and sprite.texture:
+			if is_point_inside_sprite2d(sprite, global_point):
+				return true
+	
+	# Also check equipment sprites if visible
+	var equipment_container = human_sprite_system.get_node_or_null("EquipmentContainer")
+	if equipment_container:
+		for child in equipment_container.get_children():
+			if child is Node2D:
+				for equipment_child in child.get_children():
+					if equipment_child is Sprite2D and equipment_child.visible and equipment_child.texture:
+						if is_point_inside_sprite2d(equipment_child, global_point):
+							return true
+	
+	return false
+
+func is_point_inside_sprite2d(sprite: Sprite2D, global_point: Vector2) -> bool:
+	"""Simple bounds-based hit testing for Sprite2D"""
+	
+	if not sprite.visible or not sprite.texture:
+		return false
+	
+	# Convert global point to sprite's local coordinates
 	var local_point = sprite.to_local(global_point)
 	
-	# Get sprite dimensions and scale
-	var sprite_width = texture.get_width()
-	var sprite_height = texture.get_height()
-	var sprite_scale = Vector2(1, 1)
+	# Get sprite bounds
+	var texture_size = sprite.texture.get_size()
+	var sprite_size = texture_size
 	
-	if "scale" in sprite:
-		sprite_scale = sprite.scale
+	# Account for region if enabled
+	if sprite.region_enabled:
+		sprite_size = sprite.region_rect.size
 	
-	# Adjust for sprite's origin, offset and scale
-	var sprite_offset = Vector2.ZERO
-	if "offset" in sprite:
-		sprite_offset = sprite.offset
+	# Account for scale
+	sprite_size *= sprite.scale
 	
-	# Calculate texture coordinates
-	var tex_x = (local_point.x / sprite_scale.x) + (sprite_width * 0.5) - sprite_offset.x
-	var tex_y = (local_point.y / sprite_scale.y) + (sprite_height * 0.5) - sprite_offset.y
+	# Since sprite is centered, bounds are from -size/2 to size/2
+	var half_size = sprite_size / 2.0
 	
-	# Check if outside texture bounds
-	if tex_x < 0 or tex_x >= sprite_width or tex_y < 0 or tex_y >= sprite_height:
-		return false
-	
-	# If we have image data available, check pixel transparency
-	var img = null
-	
-	# Try to get image data
-	if texture.get_class() == "ImageTexture" or texture.get_class() == "CompressedTexture2D":
-		# In Godot 4, get_image() returns a copy of the image
-		img = texture.get_image() if texture.has_method("get_image") else null
-	
-	# Check pixel alpha if we have image data
-	if img != null and not img.is_empty():
-		# Get pixel alpha at that position
-		var color = img.get_pixel(int(tex_x), int(tex_y))
-		return color.a > 0.1  # Require at least 10% opacity to be clickable
-	
-	# Fallback: no image data available, assume opaque
-	return true
+	# Check if point is within bounds
+	return (local_point.x >= -half_size.x and local_point.x <= half_size.x and
+			local_point.y >= -half_size.y and local_point.y <= half_size.y)
 
 func get_most_accurate_entity_at_position(world_pos: Vector2):
-	"""Get the most accurately clicked entity using pixel-perfect testing when possible"""
-	# Get candidates using the existing method
+	print("ClickSystem: Looking for entity at ", world_pos)
+	
 	var candidates = []
-	var z_level = player.current_z_level if player else 0
+	var max_distance = 20.0
 	
-	# Use spatial partitioning if available
-	if spatial_manager and spatial_manager.has_method("get_entities_in_radius"):
-		candidates = spatial_manager.get_entities_in_radius(world_pos, 20, z_level)
-	else:
-		# Fall back to checking all clickable entities
-		var clickables = get_tree().get_nodes_in_group("clickable_entities")
-		for entity in clickables:
-			if is_instance_valid(entity):
-				var entity_pos = Vector2.ZERO
-				if "global_position" in entity:
-					entity_pos = entity.global_position
-				elif "position" in entity:
-					entity_pos = entity.position
-				else:
-					continue
-				
-				if world_pos.distance_to(entity_pos) <= 20:
-					candidates.append(entity)
+	var clickables = get_tree().get_nodes_in_group("clickable_entities")
 	
-	# No candidates found
+	for entity in clickables:
+		if not is_instance_valid(entity):
+			continue
+		
+		# CRITICAL: Skip ALL NPCs - multiple checks
+		if entity.has_meta("npc_entity") and entity.get_meta("npc_entity"):
+			continue
+		if entity.has_meta("is_npc") and entity.get_meta("is_npc"):
+			continue
+		if entity.is_in_group("npcs"):
+			continue
+		if entity.is_in_group("npc_entities"):
+			continue
+			
+		var entity_pos = Vector2.ZERO
+		if "global_position" in entity:
+			entity_pos = entity.global_position
+		elif "position" in entity:
+			entity_pos = entity.position
+		else:
+			continue
+		
+		var distance = world_pos.distance_to(entity_pos)
+		if distance <= max_distance:
+			candidates.append({
+				"entity": entity,
+				"distance": distance,
+				"priority": get_entity_click_priority(entity)
+			})
+			print("ClickSystem: Found candidate: ", entity.name, " distance: ", distance)
+	
 	if candidates.size() == 0:
+		print("ClickSystem: No clickable entities found")
 		return null
 	
-	# First check for sprites that have pixel-perfect hit detection
-	for entity in candidates:
-		var sprite = null
-		
-		# Find the sprite component
-		if entity is Sprite2D:
-			sprite = entity
-		elif entity.has_node("HumanSpriteSystem"):
-			sprite = entity.get_node("HumanSpriteSystem")
-		elif entity.has_node("HumanSpriteSystem"):
-			var visual = entity.get_node("HumanSpriteSystem")
-			if visual is Sprite2D:
-				sprite = visual
-		
-		# If entity has a sprite, try pixel-perfect detection
-		if sprite:
-			if is_point_inside_sprite(sprite, world_pos):
-				return entity
+	# Sort by priority first, then by distance
+	candidates.sort_custom(func(a, b): 
+		if a.priority != b.priority:
+			return a.priority > b.priority  # Higher priority first
+		return a.distance < b.distance     # Closer distance if same priority
+	)
 	
-	# Fall back to the top candidate based on priority
-	return candidates[0]
+	var best_candidate = candidates[0]
+	print("ClickSystem: Selected entity: ", best_candidate.entity.name, " (priority: ", best_candidate.priority, ", distance: ", best_candidate.distance, ")")
+	
+	return best_candidate.entity
+
+func get_entity_click_priority(entity) -> int:
+	var priority = 0
+	
+	# Check if entity has explicit click priority
+	if "click_priority" in entity:
+		priority = entity.click_priority
+	elif entity.has_meta("click_priority"):
+		priority = entity.get_meta("click_priority")
+	
+	# Boost priority for certain entity types
+	if "entity_type" in entity:
+		match entity.entity_type:
+			"character", "mob":
+				priority += 20  # Characters are high priority
+			"item":
+				priority += 10  # Items are medium priority
+			"structure":
+				priority += 5   # Structures are lower priority
+	
+	# Boost priority for items that can be picked up
+	if "pickupable" in entity and entity.pickupable:
+		priority += 15
+	
+	# Boost priority for interactive objects
+	if entity.has_method("interact") or entity.has_method("attack_hand"):
+		priority += 5
+	
+	return priority
 
 func find_best_entity_under_cursor(position: Vector2) -> Node:
-	"""Find the most relevant entity under the cursor in Godot 4"""
-	# Priority queue for entities (will be sorted by priority)
-	var entities = []
-	
-	# Step 1: Get all entities in clickable_entities group
 	var clickable_nodes = get_tree().get_nodes_in_group("clickable_entities")
-	
-	# Filter down to those close to the click
-	var max_click_distance = 32.0  # Max distance to consider for clicking
+	var best_entity = null
+	var closest_distance = 32.0  # Max click distance (1 tile)
 	
 	for node in clickable_nodes:
-		# Skip invalid nodes
 		if not is_instance_valid(node):
 			continue
 			
-		# Get node position
 		var node_pos = Vector2.ZERO
 		if "global_position" in node:
 			node_pos = node.global_position
@@ -1236,71 +1784,12 @@ func find_best_entity_under_cursor(position: Vector2) -> Node:
 		else:
 			continue
 			
-		# Check distance
 		var distance = position.distance_to(node_pos)
-		if distance > max_click_distance:
-			continue
-			
-		# Get node priority
-		var priority = 0
-		if "click_priority" in node:
-			priority = node.click_priority
-		elif node is Node2D:
-			# Use z_index for Node2D
-			priority = node.z_index
-			
-		# Check for sprite for potential pixel-perfect testing
-		var has_sprite = false
-		var sprite_node = null
-		
-		if node is Sprite2D or node is AnimatedSprite2D:
-			has_sprite = true
-			sprite_node = node
-		elif node.has_node("Sprite2D"):
-			has_sprite = true
-			sprite_node = node.get_node("Sprite2D")
-		elif node.has_node("AnimatedSprite2D"):
-			has_sprite = true
-			sprite_node = node.get_node("AnimatedSprite2D")
-			
-		# Do pixel-perfect testing if possible
-		var is_pixel_perfect = false
-		if has_sprite and sprite_node:
-			is_pixel_perfect = is_point_inside_sprite(sprite_node, position)
-			# Boost priority for pixel-perfect hits
-			if is_pixel_perfect:
-				priority += 1000  # Large priority boost for pixel-perfect
-				
-		# Add to candidates list with metadata
-		entities.append({
-			"node": node,
-			"distance": distance,
-			"priority": priority,
-			"pixel_perfect": is_pixel_perfect
-		})
+		if distance < closest_distance:
+			closest_distance = distance
+			best_entity = node
 	
-	# No entities found
-	if entities.size() == 0:
-		return null
-		
-	# Sort entities by priority (higher is better)
-	entities.sort_custom(func(a, b): 
-		# Pixel-perfect hits get highest priority
-		if a.pixel_perfect and not b.pixel_perfect:
-			return true
-		if b.pixel_perfect and not a.pixel_perfect:
-			return false
-			
-		# Then check priority value
-		if a.priority != b.priority:
-			return a.priority > b.priority
-			
-		# Then check distance (closer is better)
-		return a.distance < b.distance
-	)
-	
-	# Return the highest priority entity
-	return entities[0].node
+	return best_entity
 
 func is_click_intercepted_by_ui(click_position: Vector2) -> bool:
 	"""Determine if a click should be intercepted by UI elements"""
@@ -1440,8 +1929,38 @@ func _get_settings():
 
 # === PUBLIC API ===
 func set_player_reference(player_node):
+	# Validate that this is actually a player, not an NPC
+	if not player_node:
+		player = null
+		print("ClickSystem: Player reference cleared")
+		return
+	
+	# CRITICAL: Reject NPCs
+	if player_node.has_meta("is_npc") and player_node.get_meta("is_npc"):
+		print("ClickSystem: ERROR - Attempted to set NPC as player reference! Rejecting.")
+		return
+	
+	# Verify this is marked as a player
+	if not (player_node.has_meta("is_player") and player_node.get_meta("is_player")):
+		print("ClickSystem: WARNING - Player node not properly marked as player")
+	
+	# Verify it's a local player
+	if "is_local_player" in player_node and not player_node.is_local_player:
+		print("ClickSystem: WARNING - Setting non-local player as reference")
+	
 	player = player_node
-	print("ClickSystem: Player reference set to: ", player.name if player else "NULL")
+	print("ClickSystem: Player reference set to: ", player.name)
+	
+	# Validate that the player has required methods
+	if not player.has_method("process_interaction"):
+		print("ClickSystem: Warning - Player missing process_interaction method!")
+	if not player.has_method("get_active_item"):
+		print("ClickSystem: Warning - Player missing get_active_item method!")
+
+func register_player_ui(ui_instance):
+	"""Register the PlayerUI to ensure proper coordination"""
+	player_ui = ui_instance
+	print("ClickSystem: PlayerUI registered: ", ui_instance.name if ui_instance else "NULL")
 
 func set_grid_controller_reference(controller):
 	# For backward compatibility - in our structure, player IS the grid controller
@@ -1464,8 +1983,3 @@ func toggle_combat_mode(enabled: bool):
 # Check if the player is in combat mode
 func is_combat_mode_active() -> bool:
 	return is_in_combat_mode
-
-func register_player_ui(ui_instance):
-	"""Register the PlayerUI to ensure proper coordination"""
-	player_ui = ui_instance
-	print("ClickSystem: PlayerUI registered for click coordination")

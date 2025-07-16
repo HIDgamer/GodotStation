@@ -75,10 +75,6 @@ signal player_disconnected(peer_id)
 signal connection_failed()
 signal server_disconnected()
 signal systems_initialized()
-signal ghost_mode_activated(ghost)
-signal ghost_mode_deactivated(ghost, entity)
-signal entity_possessed(ghost, entity)
-signal possession_ended(ghost, entity)
 
 # ==== INITIALIZATION ====
 func _ready():
@@ -109,7 +105,7 @@ func load_core_scenes():
 			push_error("GameManager: Could not load player scene from: " + PLAYER_SCENE_PATH)
 
 # ==== WORLD LOADING ====
-# Load the game world with enhanced setup
+# Load the game world
 func load_world(map_path = WORLD_SCENE):
 	print("GameManager: Loading world:", map_path)
 	
@@ -244,15 +240,21 @@ func setup_singleplayer():
 		if player_scene == null:
 			push_error("GameManager: Could not load player scene for singleplayer!")
 			return
+	
+	# Setup main player
 	setup_normal_player()
 	
 	print("GameManager: Singleplayer setup complete")
 
-# Normal player setup (non-debug mode)
+# Normal player setup
 func setup_normal_player():
 	# Create player instance
 	var player_instance = player_scene.instantiate()
 	player_instance.name = "LocalPlayer"
+	
+	# IMPORTANT: Mark as player BEFORE any setup
+	player_instance.set_meta("is_player", true)
+	player_instance.set_meta("is_npc", false)
 	
 	# Get spawn position
 	var spawn_pos = get_spawn_position(1)  # Use ID 1 for singleplayer
@@ -275,111 +277,76 @@ func setup_normal_player():
 	# Store local player reference
 	local_player_instance = player_instance
 	
-	# Check for existing camera in the player
-	var existing_camera = player_instance.get_node_or_null("Camera2D")
-	if existing_camera:
-		# Use existing camera
-		print("GameManager: Using existing camera on player")
-		existing_camera.enabled = true
-		player_camera = existing_camera
+	# Wait for GridMovementController and its components to initialize
+	await get_tree().create_timer(0.2).timeout
 	
-	# Initialize player for singleplayer
-	print("GameManager: Setting up player for singleplayer")
-	var grid_controller = player_instance
+	# Get the GridMovementController
+	var grid_controller = player_instance.get_node_or_null("GridMovementController")
+	if not grid_controller:
+		# If player IS the GridMovementController
+		grid_controller = player_instance
+	
 	if grid_controller:
-		# Setup for singleplayer
+		# The new GridMovementController should already have all components created
+		# Just ensure it's set up for singleplayer
 		if grid_controller.has_method("setup_singleplayer"):
 			grid_controller.setup_singleplayer()
 			print("GameManager: Player setup complete via setup_singleplayer()")
 		else:
 			print("GameManager: WARNING - GridMovementController has no setup_singleplayer method!")
-			# Fallback manual setup
-			grid_controller.set_local_player(true)
 	else:
 		print("GameManager: WARNING - Player has no GridMovementController!")
 	
-	# Setup input controller if not already present
-	var input_controller = player_instance.get_node_or_null("InputController")
-	if input_controller == null:
-		setup_input_controller_for_entity(player_instance)
-	else:
-		# Ensure input controller is connected to entity
-		if input_controller.has_method("connect_to_entity"):
-			input_controller.connect_to_entity(grid_controller)
+	# Check for existing camera
+	var existing_camera = player_instance.get_node_or_null("Camera2D")
+	if existing_camera:
+		print("GameManager: Using existing camera on player")
+		existing_camera.enabled = true
+		player_camera = existing_camera
 	
-	# Register with systems after a short delay
+	# Register with systems after components are ready
 	await get_tree().create_timer(0.2).timeout
-	_notify_systems_of_player_spawn(player_instance)
+	_notify_systems_of_entity_spawn(grid_controller, false)  # false = is_npc
 
-# Helper function to setup input controller for any entity
-func setup_input_controller_for_entity(entity_instance):
-	print("GameManager: Setting up InputController for entity")
+# notification system that works for both players and NPCs
+func _notify_systems_of_entity_spawn(entity_controller, is_npc: bool = false):
+	var entity_type = "NPC" if is_npc else "PLAYER"
+	print("GameManager: Notifying systems of %s spawn" % entity_type)
 	
-	# Check for GridMovementController
-	var grid_controller = entity_instance
-	if grid_controller == null:
-		push_error("GameManager: Cannot setup InputController - no GridMovementController found!")
-		return
+	# Register with TileOccupancySystem (all entities need this)
+	if tile_occupancy_system and tile_occupancy_system.has_method("register_entity_at_tile"):
+		var pos = entity_controller.get_current_tile_position()
+		var z_level = entity_controller.current_z_level
+		tile_occupancy_system.register_entity_at_tile(entity_controller, pos, z_level)
+		print("GameManager: Registered %s with TileOccupancySystem" % entity_type)
 	
-	# Check for existing InputController
-	var input_controller = entity_instance.get_node_or_null("InputController")
-	if input_controller == null:
-		# Create input controller
-		var InputControllerClass = load("res://Scripts/InputController.gd")
-		if InputControllerClass == null:
-			push_error("GameManager: Could not load InputController script!")
-			return
-		
-		input_controller = InputControllerClass.new()
-		input_controller.name = "InputController"
-		entity_instance.add_child(input_controller)
-	
-	# Connect to GridMovementController
-	if input_controller.has_method("connect_to_entity"):
-		input_controller.connect_to_entity(grid_controller)
-	
-	print("GameManager: InputController setup complete for", entity_instance.name)
-
-# Notify all necessary systems about player spawn
-func _notify_systems_of_player_spawn(player_instance):
-	print("GameManager: Notifying systems of player spawn")
-	
-	# Find grid controller
-	var grid_controller = player_instance
-	if grid_controller == null:
-		push_error("GameManager: Cannot notify systems - player has no GridMovementController!")
-		return
-	
-	# Register with TileOccupancySystem
-	if tile_occupancy_system and tile_occupancy_system.has_method("register_entity"):
-		tile_occupancy_system.register_entity(grid_controller)
-		print("GameManager: Registered player with TileOccupancySystem")
-	
-	# Register with SpatialManager
+	# Register with SpatialManager (all entities need this)
 	if spatial_manager and spatial_manager.has_method("register_entity"):
-		spatial_manager.register_entity(grid_controller)
-		print("GameManager: Registered player with SpatialManager")
+		spatial_manager.register_entity(entity_controller)
+		print("GameManager: Registered %s with SpatialManager" % entity_type)
 	
-	# Register with InteractionSystem
-	if interaction_system and interaction_system.has_method("register_player"):
-		interaction_system.register_player(player_instance, true)  # true = is local player
-		print("GameManager: Registered player with InteractionSystem")
+	# Player-specific registrations
+	if not is_npc:
+		# Register with InteractionSystem
+		if interaction_system and interaction_system.has_method("register_player"):
+			interaction_system.register_player(entity_controller, true)  # true = is local player
+			print("GameManager: Registered PLAYER with InteractionSystem")
+		
+		# Register with click systems
+		var click_handlers = get_tree().get_nodes_in_group("click_system")
+		for handler in click_handlers:
+			if handler.has_method("set_player_reference"):
+				handler.set_player_reference(entity_controller)
+				print("GameManager: Set PLAYER reference in ClickSystem")
+		
+		# Register with other player-aware systems
+		var player_systems = get_tree().get_nodes_in_group("player_aware_system")
+		for system in player_systems:
+			if system.has_method("register_player"):
+				system.register_player(entity_controller)
+				print("GameManager: Registered PLAYER with system: " + system.name)
 	
-	# Find click handlers and set player reference
-	var click_handlers = get_tree().get_nodes_in_group("click_system")
-	for handler in click_handlers:
-		if handler.has_method("set_player_reference"):
-			handler.set_player_reference(player_instance)
-			print("GameManager: Set player reference in ClickHandler")
-	
-	# Find other systems
-	var other_systems = get_tree().get_nodes_in_group("player_aware_system")
-	for system in other_systems:
-		if system.has_method("register_player"):
-			system.register_player(player_instance)
-			print("GameManager: Registered player with system: " + system.name)
-	
-	# Emit systems initialized signal for any listeners
+	# Emit systems initialized signal
 	emit_signal("systems_initialized")
 
 # Reload systems when needed (e.g., after scene change)
@@ -388,26 +355,98 @@ func reload_systems():
 	
 	# If we have a local player, ensure it's properly set up
 	if local_player_instance and is_instance_valid(local_player_instance):
-		_notify_systems_of_player_spawn(local_player_instance)
+		var grid_controller = local_player_instance.get_node_or_null("GridMovementController")
+		if not grid_controller:
+			grid_controller = local_player_instance
+		
+		if grid_controller:
+			_notify_systems_of_entity_spawn(grid_controller, false)
 	
 	emit_signal("systems_initialized")
 
-# ==== CAMERA MANAGEMENT ==== 
-# Helper function to explicitly toggle between cameras
-func toggle_active_camera(active_entity_node, inactive_entity_node):
-	print("GameManager: Toggling camera from", inactive_entity_node.name, "to", active_entity_node.name)
-	
-	if local_player_instance and is_instance_valid(local_player_instance) and local_player_instance.has_node("Camera2D"):
-		local_player_instance.get_node("Camera2D").enabled = false
-	# Now enable only the active camera
-	var active_camera = active_entity_node.get_node_or_null("Camera2D")
-	if active_camera:
-		active_camera.enabled = true
-		print("GameManager: Enabled camera on", active_entity_node.name)
-	else:
-		print("GameManager: WARNING - No camera found on", active_entity_node.name)
-
 # ==== MULTIPLAYER ====
+# Spawn a player instance in the world
+@rpc("authority", "call_local", "reliable")
+func spawn_player_on_network(peer_id: int, spawn_position: Vector2):
+	print("GameManager: Spawning player on network for peer", peer_id)
+	
+	# Check if we have a valid player scene    
+	if player_scene == null:
+		print("GameManager: ERROR - Could not load player scene!")
+		player_scene = load(PLAYER_SCENE_PATH)
+		if player_scene == null:
+			print("GameManager: CRITICAL ERROR - Failed to load player scene!")
+			return
+	
+	# Create player instance
+	var player_instance = player_scene.instantiate()
+	
+	# Set unique name based on peer ID
+	player_instance.name = str(peer_id)
+	
+	# IMPORTANT: Mark as player for multiplayer
+	player_instance.set_meta("is_player", true)
+	player_instance.set_meta("is_npc", false)
+	
+	# Set initial position
+	player_instance.position = spawn_position
+	
+	# Get player customization
+	var customization = {}
+	if peer_id in players and "customization" in players[peer_id]:
+		customization = players[peer_id].customization
+	
+	# Add player to the world
+	var world = get_tree().current_scene
+	if is_instance_valid(world):
+		world.add_child(player_instance)
+		
+		# Wait for components to initialize
+		await get_tree().create_timer(0.2).timeout
+		
+		# Get GridMovementController
+		var grid_controller = player_instance.get_node_or_null("GridMovementController")
+		if not grid_controller:
+			grid_controller = player_instance
+		
+		# Initialize player for multiplayer
+		if grid_controller and grid_controller.has_method("setup_multiplayer"):
+			grid_controller.setup_multiplayer(peer_id)
+		else:
+			# Fallback - set up as local player if this is our peer
+			if grid_controller:
+				if peer_id == multiplayer.get_unique_id():
+					if grid_controller.has_method("setup_singleplayer"):
+						grid_controller.setup_singleplayer()
+				else:
+					# Remote player - disable input
+					grid_controller.is_local_player = false
+		
+		# Store player instance
+		if peer_id in players:
+			players[peer_id].instance = player_instance
+		
+		# Apply customization
+		if grid_controller.sprite_system and customization.size() > 0:
+			var sprite_system = grid_controller.sprite_system
+			if sprite_system.has_method("apply_character_data"):
+				print("GameManager: Applying customization via apply_character_data")
+				sprite_system.apply_character_data(customization)
+			elif sprite_system.has_method("apply_customization"):
+				print("GameManager: Applying customization via apply_customization")
+				sprite_system.apply_customization(customization)
+		
+		# Register with systems as PLAYER
+		await get_tree().create_timer(0.1).timeout
+		_notify_systems_of_entity_spawn(grid_controller, false)
+	else:
+		print("GameManager: No valid world to add player to")
+		player_instance.queue_free()
+
+# The rest of the GameManager remains the same...
+# [All other methods stay unchanged from the original]
+
+# ==== REMAINING METHODS (Unchanged) ====
 # Host a new game
 func host_game(port: int = DEFAULT_PORT, use_upnp: bool = true) -> bool:
 	print("GameManager: Attempting to host on port", port)
@@ -536,65 +575,6 @@ func spawn_player(peer_id: int):
 	# Use MultiplayerSpawner to spawn the player across the network
 	# This RPC call should trigger the MultiplayerSpawner
 	spawn_player_on_network.rpc(peer_id, get_spawn_position(peer_id))
-
-# Create a new RPC method that signals the MultiplayerSpawner
-@rpc("authority", "call_local", "reliable")
-func spawn_player_on_network(peer_id: int, spawn_position: Vector2):
-	print("GameManager: Spawning player on network for peer", peer_id)
-	
-	# The MultiplayerSpawner will handle the instantiation,
-	# but we need to instantiate the scene ourselves that will be replicated
-	
-	# Check if we have a valid player scene    
-	if player_scene == null:
-		print("GameManager: ERROR - Could not load player scene!")
-		player_scene = load(PLAYER_SCENE_PATH)
-		if player_scene == null:
-			print("GameManager: CRITICAL ERROR - Failed to load player scene!")
-			return
-	
-	# Create player instance
-	var player_instance = player_scene.instantiate()
-	
-	# Set unique name based on peer ID
-	player_instance.name = str(peer_id)
-	
-	# Set initial position
-	player_instance.position = spawn_position
-	
-	# Get player customization
-	var customization = {}
-	if peer_id in players and "customization" in players[peer_id]:
-		customization = players[peer_id].customization
-	
-	# Add player to the world
-	var world = get_tree().current_scene
-	if is_instance_valid(world):
-		world.add_child(player_instance)
-		
-		# Initialize player
-		if player_instance.has_method("setup_multiplayer"):
-			player_instance.setup_multiplayer(peer_id)
-		
-		# Store player instance
-		if peer_id in players:
-			players[peer_id].instance = player_instance
-		
-		# Apply customization if possible
-		if player_instance.has_node("HumanSpriteSystem"):
-			var sprite_system = player_instance.get_node("HumanSpriteSystem")
-			if customization.size() > 0:
-				# Try apply_character_data first (correct method)
-				if sprite_system.has_method("apply_character_data"):
-					print("GameManager: Applying customization via apply_character_data")
-					sprite_system.apply_character_data(customization)
-				# Fallback to apply_customization (in case method was renamed)
-				elif sprite_system.has_method("apply_customization"):
-					print("GameManager: Applying customization via apply_customization")
-					sprite_system.apply_customization(customization)
-	else:
-		print("GameManager: No valid world to add player to")
-		player_instance.queue_free()
 
 # Remove player instance
 func remove_player_instance(peer_id: int):
@@ -1158,8 +1138,6 @@ func handle_debug_command(command: String):
 		"help":
 			print("Debug commands:")
 			print("teleport X Y - Teleport player to coordinates")
-			print("toggle_admin - Toggle admin mode")
-			print("toggle_debug - Toggle debug mode")
 			print("reload_systems - Reload system references")
 			print("print_systems - Print system status")
 
@@ -1172,3 +1150,9 @@ func teleport_player(position: Vector2):
 			grid_controller.current_tile_position = grid_controller.world_to_tile(position)
 			grid_controller.previous_tile_position = grid_controller.current_tile_position
 			print("GameManager: Teleported player to ", position)
+
+func snap_to_grid(pos: Vector2) -> Vector2:
+	return Vector2(
+		round(pos.x / 32.0) * 32.0 + 16.0,
+		round(pos.y / 32.0) * 32.0 + 16.0
+	)

@@ -93,7 +93,7 @@ func use_on(user, target, targeted_limb = ""):
 				charges -= 1
 				
 				# Attempt to revive
-				var success = health_system.revive(false)
+				var success = health_system.revive("defibrillation")
 				if success:
 					if user.has_method("display_message"):
 						user.display_message("%s's heart starts beating again!" % target.name)

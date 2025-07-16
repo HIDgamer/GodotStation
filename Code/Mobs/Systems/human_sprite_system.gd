@@ -296,6 +296,8 @@ var facial_hair_sprite: Sprite2D = null
 
 # Current active tweens for animations
 var active_tweens = {}
+var thrust_tween = null
+var is_thrusting = false
 
 # Race information
 var race_index: int = 0
@@ -1515,55 +1517,34 @@ func set_direction(direction: int):
 	if current_direction == direction:
 		return
 	
-	# Store previous direction for potential reversion
 	var previous_direction = current_direction
+	current_direction = direction
+
+	# Update frame regions for all sprites based on direction
+	update_sprite_frames()
 	
-	# Check if we have authority to change direction
-	var has_authority = true
-	if Entity and Entity.has_node("MultiplayerSynchronizer"):
-		var synchronizer = Entity.get_node("MultiplayerSynchronizer")
-		has_authority = synchronizer.get_multiplayer_authority() == multiplayer.get_unique_id()
+	# Update z-ordering based on direction
+	update_sprite_z_ordering()
 	
-	if has_authority:
-		# We have authority to change direction locally
-		current_direction = direction
-		
-		# Update frame regions for all sprites based on direction
-		update_sprite_frames()
-		
-		# Update z-ordering based on direction
-		update_sprite_z_ordering()
-		
-		# Update clothing sprites if any
-		update_clothing_frames()
-		
-		# Update customization sprites like hair and facial hair
-		update_customization_frames()
-		
-		# Update equipment sprites
-		update_equipment_sprites()
-		
-		# Update underwear and undershirt frames
-		update_undergarment_frames()
-		
-		# If lying, update lying rotation based on new direction
-		if is_lying:
-			# CHANGE THIS LINE: Instead of calling set_lying_state(true)
-			# Call our new function which updates rotation immediately
-			update_lying_rotation_for_direction_change(direction)
-		
-		# Notify that direction has changed
-		direction_changed_this_frame = true
-		emit_signal("sprite_direction_changed", direction)
-		
-		# If this is the locally controlled entity, sync to network
-		if Entity and Entity.has_node("MultiplayerSynchronizer"):
-			# Call our custom RPC to sync sprite direction
-			sync_sprite_direction.rpc(direction)
-	else:
-		# Without authority, we only accept direction changes from the network
-		# This happens via the network_set_direction method
-		pass
+	# Update clothing sprites if any
+	update_clothing_frames()
+	
+	# Update customization sprites like hair and facial hair
+	update_customization_frames()
+	
+	# Update equipment sprites
+	update_equipment_sprites()
+	
+	# Update underwear and undershirt frames
+	update_undergarment_frames()
+	
+	# If lying, update lying rotation based on new direction
+	if is_lying:
+		update_lying_rotation_for_direction_change(direction)
+	
+	# Notify that direction has changed
+	direction_changed_this_frame = true
+	emit_signal("sprite_direction_changed", direction)
 
 @rpc("any_peer", "call_local")
 func sync_sprite_direction(direction: int):
@@ -1703,7 +1684,7 @@ func update_sprite_z_ordering():
 		if undershirt_sprite and undershirt_sprite.visible:
 			undershirt_sprite.z_index = 3  # Under body
 
-# Set the character's sex with enhanced logging
+# Set the character's sex
 func set_sex(sex: int):
 	print("HumanSpriteSystem: Setting character sex to: ", "Female" if sex == 1 else "Male")
 	character_sex = sex
@@ -2279,6 +2260,154 @@ func get_item_in_slot(slot: int):
 	return equipped_items.get(slot)
 
 # ========== LYING STATE MANAGEMENT ==========
+
+func show_interaction_feedback(interaction_type: String = "default", direction: Vector2 = Vector2.ZERO):
+	# Map interaction type to intent number
+	var intent_num = 0
+	match interaction_type:
+		"help", "use":
+			intent_num = 0
+		"disarm":
+			intent_num = 1
+		"grab":
+			intent_num = 2
+		"harm", "attack":
+			intent_num = 3
+	
+	# Add thrust effect if direction provided
+	if direction != Vector2.ZERO:
+		show_interaction_thrust(direction, intent_num)
+	else:
+		# Default thrust forward based on character facing
+		var facing_direction = Vector2.ZERO
+		match current_direction:
+			Direction.SOUTH:
+				facing_direction = Vector2(0, 1)
+			Direction.NORTH:
+				facing_direction = Vector2(0, -1)
+			Direction.EAST:
+				facing_direction = Vector2(1, 0)
+			Direction.WEST:
+				facing_direction = Vector2(-1, 0)
+		
+		show_interaction_thrust(facing_direction, intent_num)
+
+func show_interaction_thrust_to_position(world_position: Vector2, intent_type: int = 0):
+	var my_position = global_position if has_method("global_position") else position
+	var direction = (world_position - my_position).normalized()
+	show_interaction_thrust(direction, intent_type)
+
+# Show interaction thrust in specified direction
+func show_interaction_thrust(direction: Vector2, intent_type: int = 0):
+	if is_thrusting:
+		return # Already thrusting, skip
+	
+	print("HumanSpriteSystem: Showing interaction thrust in direction: ", direction)
+	
+	# Cancel any existing thrust animation
+	if thrust_tween and thrust_tween.is_valid():
+		thrust_tween.kill()
+	
+	is_thrusting = true
+	
+	# Calculate thrust distance and duration based on intent
+	var thrust_distance = 6.0
+	var thrust_duration = 0.2
+	var return_duration = 0.1
+	
+	# Adjust based on intent type
+	match intent_type:
+		0: # HELP - gentle thrust
+			thrust_distance = 6.0
+			thrust_duration = 0.25
+		1: # DISARM - quick thrust
+			thrust_distance = 6.0
+			thrust_duration = 0.25
+		2: # GRAB - reaching thrust
+			thrust_distance = 6.0
+			thrust_duration = 0.25
+		3: # HARM - aggressive thrust
+			thrust_distance = 6.0
+			thrust_duration = 0.25
+	
+	# Calculate thrust offset
+	var thrust_offset = direction * thrust_distance
+	
+	# Get intent-specific color tint
+	var intent_colors = [
+		Color(0.9, 1.1, 0.9), # HELP - slight green tint
+		Color(1.1, 1.1, 0.8), # DISARM - yellow tint
+		Color(0.9, 0.9, 1.1), # GRAB - blue tint
+		Color(1.2, 0.8, 0.8)  # HARM - red tint
+	]
+	var thrust_color = intent_colors[intent_type] if intent_type < intent_colors.size() else Color.WHITE
+	
+	# Create main thrust animation
+	thrust_tween = create_tween()
+	thrust_tween.set_ease(Tween.EASE_OUT)
+	thrust_tween.set_trans(Tween.TRANS_BACK)
+	
+	# Store original positions and colors
+	var original_positions = {}
+	var original_colors = {}
+	
+	# Animate all visible sprites
+	var sprites_to_animate = []
+	
+	# Add body part sprites
+	for limb_type in limb_sprites:
+		var sprite = limb_sprites[limb_type]
+		if sprite and sprite.visible and limbs_attached[limb_type]:
+			sprites_to_animate.append(sprite)
+			original_positions[sprite] = sprite.position
+			original_colors[sprite] = sprite.modulate
+	
+	# Add equipment sprites
+	for slot in equipment_sprites:
+		var sprite = equipment_sprites[slot]
+		if sprite and sprite.visible:
+			sprites_to_animate.append(sprite)
+			original_positions[sprite] = sprite.position
+			original_colors[sprite] = sprite.modulate
+	
+	# Add customization sprites
+	if hair_sprite and hair_sprite.visible:
+		sprites_to_animate.append(hair_sprite)
+		original_positions[hair_sprite] = hair_sprite.position
+		original_colors[hair_sprite] = hair_sprite.modulate
+	
+	if facial_hair_sprite and facial_hair_sprite.visible:
+		sprites_to_animate.append(facial_hair_sprite)
+		original_positions[facial_hair_sprite] = facial_hair_sprite.position
+		original_colors[facial_hair_sprite] = facial_hair_sprite.modulate
+	
+	# Add undergarment sprites
+	if underwear_sprite and underwear_sprite.visible:
+		sprites_to_animate.append(underwear_sprite)
+		original_positions[underwear_sprite] = underwear_sprite.position
+		original_colors[underwear_sprite] = underwear_sprite.modulate
+	
+	if undershirt_sprite and undershirt_sprite.visible:
+		sprites_to_animate.append(undershirt_sprite)
+		original_positions[undershirt_sprite] = undershirt_sprite.position
+		original_colors[undershirt_sprite] = undershirt_sprite.modulate
+	
+	# Phase 1: Thrust forward with color tint
+	for sprite in sprites_to_animate:
+		var target_pos = original_positions[sprite] + thrust_offset
+		thrust_tween.parallel().tween_property(sprite, "position", target_pos, thrust_duration)
+		thrust_tween.parallel().tween_property(sprite, "modulate", thrust_color, thrust_duration * 0.5)
+	
+	# Phase 2: Return to original position
+	for sprite in sprites_to_animate:
+		thrust_tween.parallel().tween_property(sprite, "position", original_positions[sprite], return_duration).set_delay(thrust_duration)
+		thrust_tween.parallel().tween_property(sprite, "modulate", original_colors[sprite], return_duration).set_delay(thrust_duration * 0.5)
+	
+	# Reset thrusting flag when animation completes
+	thrust_tween.tween_callback(func(): 
+		is_thrusting = false
+		print("HumanSpriteSystem: Thrust animation completed")
+	).set_delay(thrust_duration + return_duration)
 
 # Apply rotation to a specific sprite based on lying state and direction
 func apply_sprite_rotation_for_lying(sprite: Sprite2D, transition_time: float = 0.3):
@@ -2893,6 +3022,20 @@ func _on_entity_clicked(entity, mouse_button, shift_pressed, ctrl_pressed, alt_p
 	if entity != Entity:
 		return
 	
+	# Get intent from grid controller
+	var grid_controller = Entity.get_node_or_null("GridMovementController")
+	var intent_type = 0
+	if grid_controller and "intent" in grid_controller:
+		intent_type = grid_controller.intent
+	
+	# Calculate direction from character to mouse
+	var mouse_pos = get_global_mouse_position()
+	var my_pos = global_position if has_method("global_position") else position
+	var direction = (mouse_pos - my_pos).normalized()
+	
+	# Show thrust effect
+	show_interaction_thrust(direction, intent_type)
+	
 	# Show different feedback based on mouse button
 	if mouse_button == MOUSE_BUTTON_LEFT:
 		show_interaction_feedback("use")
@@ -2911,7 +3054,7 @@ func _on_interaction_started(entity, interaction_type):
 	if entity != Entity:
 		return
 	
-	# Show interaction feedback based on type
+	# Show interaction feedback based on type with thrust
 	match interaction_type:
 		"use":
 			show_interaction_feedback("use")
@@ -2947,6 +3090,25 @@ func _on_interaction_completed(entity, interaction_type, success):
 		tween.set_trans(Tween.TRANS_CUBIC)
 		tween.tween_property(self, "modulate", Color(1.2, 0.8, 0.8), 0.1)
 		tween.tween_property(self, "modulate", Color(1.0, 1.0, 1.0), 0.2)
+
+func stop_thrust_animation():
+	if thrust_tween and thrust_tween.is_valid():
+		thrust_tween.kill()
+	
+	is_thrusting = false
+	
+	# Reset all sprite positions and colors
+	for limb_type in limb_sprites:
+		var sprite = limb_sprites[limb_type]
+		if sprite:
+			sprite.position = Vector2.ZERO
+			sprite.modulate = Color.WHITE
+	
+	for slot in equipment_sprites:
+		var sprite = equipment_sprites[slot]
+		if sprite:
+			sprite.position = Vector2.ZERO
+			sprite.modulate = Color.WHITE
 
 # Show entity as highlighted (when mouse hovers or for targeted actions)
 func set_highlighted(highlight: bool):
@@ -3006,33 +3168,6 @@ func set_selected(selected: bool):
 			tween.set_trans(Tween.TRANS_CUBIC)
 			tween.tween_property(selection_outline, "modulate:a", 0, 0.2)
 			tween.tween_callback(func(): selection_outline.visible = false)
-
-# Show visual feedback for an interaction
-func show_interaction_feedback(interaction_type: String = "default"):
-	if !interaction_flash:
-		return
-	
-	current_interaction_feedback = interaction_type
-	interaction_feedback_timer = INTERACTION_FLASH_DURATION
-
-	# Get feedback color based on interaction type
-	var color = INTERACTION_FEEDBACK_COLORS.get(interaction_type, INTERACTION_FEEDBACK_COLORS.default)
-	
-	# Show flash with animation
-	interaction_flash.modulate = color
-	interaction_flash.scale = Vector2(1.3, 1.3)  # Start larger
-	interaction_flash.modulate.a = 0.8
-	interaction_flash.visible = true
-	
-	# Animate flash
-	var tween = create_tween()
-	tween.set_ease(Tween.EASE_OUT)
-	tween.set_trans(Tween.TRANS_CUBIC)
-	tween.tween_property(interaction_flash, "scale", Vector2(1.0, 1.0), INTERACTION_FLASH_DURATION)
-	tween.parallel().tween_property(interaction_flash, "modulate:a", 0, INTERACTION_FLASH_DURATION)
-	
-	# Emit feedback signal
-	emit_signal("interaction_feedback", interaction_type, 1.0)
 
 # Hide interaction feedback
 func hide_interaction_feedback():

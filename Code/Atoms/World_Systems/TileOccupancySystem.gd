@@ -1,11 +1,6 @@
 extends Node2D
 class_name TileOccupancySystem
 
-## ImprovedTileOccupancySystem
-# A robust spatial partitioning system that tracks entities at tile level
-# Optimized for efficient collision detection, entity queries, and spatial relationships
-# Integrates with SpatialManager for comprehensive spatial awareness
-
 #region CONSTANTS AND ENUMS
 const TILE_SIZE = 32  # Size of a tile in pixels
 const MAX_Z_LEVELS = 10  # Maximum number of z-levels
@@ -400,6 +395,23 @@ func remove_entity(entity, tile_pos: Vector2i, z_level: int) -> bool:
 		print_log("Entity removed from " + str(tile_pos) + ", z=" + str(z_level), 4)
 		
 		return true
+	
+	return false
+
+func has_lying_entity_at(tile_pos: Vector2i, z_level: int) -> bool:
+	"""Check if a tile has any lying entities"""
+	if not z_level in _occupancy or not tile_pos in _occupancy[z_level]:
+		return false
+	
+	for entity in _occupancy[z_level][tile_pos]:
+		if not is_instance_valid(entity):
+			continue
+		
+		if "is_lying" in entity and entity.is_lying:
+			return true
+		elif entity.has_method("get") and entity.get("is_lying"):
+			if entity.get("is_lying"):
+				return true
 	
 	return false
 

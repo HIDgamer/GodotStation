@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://c3fccwi3awirt"]
 
 [ext_resource type="Script" uid="uid://cxjcjl3pgve67" path="res://Code/UserInterface/settings.gd" id="1_4hxq3"]
-[ext_resource type="PackedScene" uid="uid://cyvl4cqdahpxx" path="res://Scenes/UI/Ingame/optimization_tap.tscn" id="2_yqapu"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Menus/optimization_tap.tscn" id="2_yqapu"]
 
 [node name="SettingsScene" type="CanvasLayer"]
 layer = 10

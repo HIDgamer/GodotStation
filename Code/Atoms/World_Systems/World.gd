@@ -198,7 +198,7 @@ func update_player_tracking():
 			# Check void status
 			check_entity_void_status(
 				player, 
-				grid_controller.current_tile_position, 
+				grid_controller.movement_component.current_tile_position, 
 				grid_controller.current_z_level
 			)
 			
@@ -1238,12 +1238,9 @@ func is_valid_tile(coords, z_level = current_z_level) -> bool:
 
 # Check if a tile has a wall
 func is_wall_at(tile_coords: Vector2i, z_level: int = current_z_level) -> bool:
-	# First check the actual wall tilemap - most reliable source
-	if wall_tilemap != null and z_level == 0:
-		# Get the cell at this position
-		var cell_source_id = wall_tilemap.get_cell_source_id(0, tile_coords)
-		if cell_source_id != -1:
-			return true
+	var cell_source_id = wall_tilemap.get_cell_source_id(0, tile_coords)
+	if cell_source_id != -1:
+		return true
 	
 	# Fallback to world_data if needed
 	var tile_data = get_tile_data(tile_coords, z_level)
@@ -2572,16 +2569,6 @@ func get_tile_terrain_type(tilemap: TileMap, tile_coords: Vector2i, terrain_mapp
 
 # Check if a position has a closed door
 func is_closed_door_at(tile_coords: Vector2i, z_level: int = current_z_level) -> bool:
-	# Get tile data
-	var tile = get_tile_data(tile_coords, z_level)
-	if not tile:
-		return false
-	
-	# Check for door data
-	if "door" in tile and "closed" in tile.door:
-		return tile.door.closed
-	
-	# Also check for door entity
 	var entity = get_door_entity_at(tile_coords, z_level)
 	if entity and "is_open" in entity:
 		return !entity.is_open

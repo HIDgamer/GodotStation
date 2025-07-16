@@ -1,0 +1,62 @@
+[gd_scene load_steps=7 format=3 uid="uid://csayyiueq2vo8"]
+
+[ext_resource type="Script" uid="uid://bdcvqj104fn4c" path="res://Code/Items/Melee/telebaton.gd" id="1_g4rvn"]
+[ext_resource type="Texture2D" uid="uid://dig2lyi31focd" path="res://Assets/Icons/Items/Lethal/TeleBaton.png" id="2_amq1v"]
+[ext_resource type="AudioStream" uid="uid://471grdq2lxme" path="res://Sound/handling/combistick_close.ogg" id="3_5sk76"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g4rvn"]
+atlas = ExtResource("2_amq1v")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5sk76"]
+atlas = ExtResource("2_amq1v")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_idjvk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g4rvn")
+}],
+"loop": true,
+"name": &"Closed",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5sk76")
+}],
+"loop": true,
+"name": &"Open",
+"speed": 5.0
+}]
+
+[node name="Telebaton" type="Node2D"]
+script = ExtResource("1_g4rvn")
+force = 20
+attack_speed = 1.0
+tool_behaviour = "weapon"
+entity_type = "item"
+entity_name = "Telebaton"
+pickupable = true
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_idjvk")
+animation = &"Closed"
+
+[node name="Icon2" type="Sprite2D" parent="."]
+texture = ExtResource("2_amq1v")
+hframes = 2
+frame = 1
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="Opened" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(10, -11, 10, -10, 9, -10, 9, -9, 8, -9, 8, -8, 7, -8, 7, -7, 6, -7, 6, -6, 5, -6, 5, -5, 4, -5, 4, -4, 3, -4, 3, -3, 2, -3, 2, -2, 1, -2, 1, -1, 0, -1, 0, 0, -1, 0, -1, 1, -2, 1, -2, 2, -3, 2, -3, 3, -5, 3, -5, 2, -6, 2, -6, 1, -8, 1, -8, 2, -9, 2, -9, 3, -10, 3, -10, 4, -11, 4, -11, 5, -12, 5, -12, 7, -11, 7, -11, 8, -10, 8, -10, 9, -11, 9, -11, 11, -10, 11, -10, 12, -8, 12, -8, 11, -7, 11, -7, 10, -6, 10, -6, 9, -5, 9, -5, 8, -4, 8, -4, 7, -3, 7, -3, 6, -2, 6, -2, 4, -1, 4, -1, 3, 0, 3, 0, 2, 1, 2, 1, 1, 2, 1, 2, 0, 3, 0, 3, -1, 4, -1, 4, -2, 5, -2, 5, -3, 6, -3, 6, -4, 7, -4, 7, -5, 8, -5, 8, -6, 9, -6, 9, -7, 10, -7, 10, -8, 12, -8, 12, -11)
+disabled = true
+
+[node name="Closed" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-8, 2, -9, 2, -9, 3, -10, 3, -10, 4, -11, 4, -11, 5, -12, 5, -12, 7, -11, 7, -11, 8, -10, 8, -10, 9, -11, 9, -11, 11, -10, 11, -10, 12, -8, 12, -8, 11, -7, 11, -7, 10, -6, 10, -6, 9, -5, 9, -5, 8, -4, 8, -4, 7, -3, 7, -3, 6, -2, 6, -2, 5, -1, 5, -1, 2, -3, 2, -3, 3, -5, 3, -5, 2, -6, 2, -6, 1, -8, 1)
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_5sk76")

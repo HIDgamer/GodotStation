@@ -1,6 +1,6 @@
-[gd_scene load_steps=37 format=3 uid="uid://c6mxm7u3f5n4g"]
+[gd_scene load_steps=40 format=3 uid="uid://c6mxm7u3f5n4g"]
 
-[ext_resource type="Script" uid="uid://cuul5o6lshrwn" path="res://Code/Mobs/Controllers/Controller.gd" id="1_uwpdh"]
+[ext_resource type="Script" uid="uid://b2bi0dloqd2xs" path="res://Code/Mobs/Controllers/Controller.gd" id="1_uwpdh"]
 [ext_resource type="Script" uid="uid://chnw437ejhnj4" path="res://Code/Mobs/Systems/CameraSystem.gd" id="2_8mbkt"]
 [ext_resource type="PackedScene" uid="uid://dnrsljtlvb77j" path="res://Scenes/UI/Player/PlayerUI.tscn" id="2_s6v5g"]
 [ext_resource type="PackedScene" uid="uid://duso7e10esk50" path="res://Scenes/Sprites/human_sprite_system.tscn" id="3_lq0mj"]
@@ -9,13 +9,20 @@
 [ext_resource type="Texture2D" uid="uid://d1wjahb2n7uqs" path="res://Assets/Effects/FX/Gib.tres" id="4_vqrbj"]
 [ext_resource type="Script" uid="uid://n6okxpmeivpv" path="res://Code/Mobs/Systems/OrganSystem.gd" id="5_3dn6y"]
 [ext_resource type="Script" uid="uid://dj4qyr2yg1rim" path="res://Code/Mobs/Controllers/HealthConnector.gd" id="5_ntngp"]
-[ext_resource type="Script" uid="uid://dl43baac3sdav" path="res://Code/Helpers/WeaponController.gd" id="5_y51ba"]
 [ext_resource type="Script" uid="uid://dh2tm0dwjxdiw" path="res://Code/Mobs/Systems/HealthSystem.gd" id="6_nypa4"]
 [ext_resource type="Script" uid="uid://b3sqlcsn2t3cm" path="res://Code/Mobs/Systems/LimbSystem.gd" id="6_vb0nj"]
 [ext_resource type="Script" uid="uid://c0mhsjbd8b3v5" path="res://Code/Mobs/Systems/BloodSystem.gd" id="7_38qpi"]
 [ext_resource type="Script" uid="uid://cvtfpennx1u12" path="res://Code/Mobs/Systems/StatusEffectManager.gd" id="8_3u27n"]
 [ext_resource type="Script" uid="uid://bkltdxstbpjc6" path="res://Code/Mobs/Systems/BodyChemicalSystem.gd" id="12_3u27n"]
 [ext_resource type="Script" uid="uid://6uvjhn3a3stj" path="res://Code/Mobs/Systems/IntentSystem.gd" id="14_38qpi"]
+[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Mobs/Systems/MovementComponent.gd" id="16_gwepp"]
+[ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Mobs/Systems/ZLevelMovementComponent.gd" id="17_o264j"]
+[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Mobs/Systems/InteractionComponent.gd" id="17_sjx5i"]
+[ext_resource type="Script" uid="uid://c3u73hjth48ct" path="res://Code/Mobs/Systems/ItemInteractionComponent.gd" id="18_3dn6y"]
+[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Mobs/Systems/StatusEffectComponent.gd" id="19_vb0nj"]
+[ext_resource type="Script" uid="uid://dahxqtbwo8bw7" path="res://Code/Mobs/Systems/BodyTargetingComponent.gd" id="20_38qpi"]
+[ext_resource type="Script" uid="uid://57gv3jq6b82j" path="res://Code/Mobs/Systems/GrabPullComponent.gd" id="21_3u27n"]
+[ext_resource type="Script" uid="uid://crcieeppmdsku" path="res://Code/Mobs/Systems/PostureComponent.gd" id="22_3dn6y"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gwepp"]
 atlas = ExtResource("4_vqrbj")
@@ -123,9 +130,6 @@ animations = [{
 "speed": 15.0
 }]
 
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_3u27n"]
-light_mode = 2
-
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_bgoxp"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
@@ -164,24 +168,10 @@ properties/11/path = NodePath(".:intent")
 properties/11/spawn = true
 properties/11/replication_mode = 1
 
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_g04u3"]
-light_mode = 2
-
-[sub_resource type="Gradient" id="Gradient_g04u3"]
-colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_vqrbj"]
-gradient = SubResource("Gradient_g04u3")
-width = 100
-height = 100
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 1)
-metadata/_snap_enabled = true
-
-[node name="GridMovementController" type="Node2D" groups=["player_controller"]]
-z_index = 5
+[node name="GridMovementController" type="Node2D"]
 script = ExtResource("1_uwpdh")
+npc_ai_enabled = false
+entity_type = "mob"
 
 [node name="PlayerUI" parent="." instance=ExtResource("2_s6v5g")]
 layer = 128
@@ -200,7 +190,6 @@ camera_transition = 0
 default_zoom = Vector2(3, 3)
 
 [node name="Effect" type="AnimatedSprite2D" parent="."]
-visible = false
 sprite_frames = SubResource("SpriteFrames_sq5fq")
 animation = &"Gib"
 frame = 13
@@ -238,10 +227,6 @@ metadata/_custom_type_script = "uid://bkltdxstbpjc6"
 script = ExtResource("3_lyye4")
 metadata/_custom_type_script = "uid://by1xcc5dbrila"
 
-[node name="WeaponController" type="Node" parent="."]
-script = ExtResource("5_y51ba")
-metadata/_custom_type_script = "uid://dl43baac3sdav"
-
 [node name="IntentSystem" type="Node" parent="."]
 script = ExtResource("14_38qpi")
 metadata/_custom_type_script = "uid://6uvjhn3a3stj"
@@ -250,22 +235,40 @@ metadata/_custom_type_script = "uid://6uvjhn3a3stj"
 script = ExtResource("4_8gj18")
 metadata/_custom_type_script = "uid://djrs5msigc2l0"
 
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("16_gwepp")
+metadata/_custom_type_script = "uid://cl82bkxuc28j"
+
+[node name="InteractionComponent" type="Node" parent="."]
+script = ExtResource("17_sjx5i")
+metadata/_custom_type_script = "uid://ca4n5hj0ijsn6"
+
+[node name="ZLevelMovementComponent" type="Node" parent="."]
+script = ExtResource("17_o264j")
+metadata/_custom_type_script = "uid://bbv4x26754up"
+
+[node name="ItemInteractionComponent" type="Node" parent="."]
+script = ExtResource("18_3dn6y")
+metadata/_custom_type_script = "uid://c3u73hjth48ct"
+
+[node name="StatusEffectComponent" type="Node" parent="."]
+script = ExtResource("19_vb0nj")
+metadata/_custom_type_script = "uid://ceqlv6f14jwgs"
+
+[node name="BodyTargetingComponent" type="Node" parent="."]
+script = ExtResource("20_38qpi")
+metadata/_custom_type_script = "uid://dahxqtbwo8bw7"
+
+[node name="GrabPullComponent" type="Node" parent="."]
+script = ExtResource("21_3u27n")
+metadata/_custom_type_script = "uid://57gv3jq6b82j"
+
+[node name="PostureComponent" type="Node" parent="."]
+script = ExtResource("22_3dn6y")
+metadata/_custom_type_script = "uid://crcieeppmdsku"
+
 [node name="HumanSpriteSystem" parent="." instance=ExtResource("3_lq0mj")]
-material = SubResource("CanvasItemMaterial_3u27n")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_bgoxp")
 visibility_update_mode = 1
-
-[node name="PointLight2D" type="PointLight2D" parent="."]
-visible = false
-material = SubResource("CanvasItemMaterial_g04u3")
-shadow_enabled = true
-shadow_filter = 2
-shadow_filter_smooth = 20.0
-texture = SubResource("GradientTexture2D_vqrbj")
-texture_scale = 3.0
-height = 1024.0
-metadata/use_color_temperature = true
-metadata/color_temperature = 6500
-metadata/color_filter = Color(1, 1, 1, 0)

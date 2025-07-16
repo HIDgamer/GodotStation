@@ -7,6 +7,7 @@ signal toggle_run_requested(is_running)
 signal toggle_throw_requested()
 signal swap_hand_requested()
 signal drop_item_requested()
+signal cancel_action_requested()
 signal pickup_requested()
 signal attack_self_requested()
 signal cycle_intent_requested()
@@ -23,7 +24,7 @@ signal toggle_pause_menu_requested()
 signal reload_weapon_requested()
 signal examine_mode_requested()
 signal toggle_rest_requested()
-signal toggle_ghost_requested()
+signal use_requested()
 
 # Weapon system signals
 signal toggle_firing_mode_requested()
@@ -32,7 +33,7 @@ signal unload_weapon_requested()
 signal toggle_weapon_wielding_requested()
 
 # The entity controlled by this input controller
-var entity: Node2D
+var entity
 var pause_handling_enabled: bool = true
 
 # Input mapping (action names that should be defined in project settings)
@@ -50,6 +51,7 @@ const INPUT_ACTIONS = {
 	"attack_self": "interact",
 	"toggle_throw": "throw_mode",
 	"drop_item": "drop_item",
+	"cancel": "drop_item",
 	"pickup_item": "pickup",
 	"swap_hand": "switch_hand",
 	"intent_help": "mode_help",
@@ -59,6 +61,7 @@ const INPUT_ACTIONS = {
 	"cycle_intent": "cycle_intent",
 	"toggle_combat": "mode_harm",
 	"reload_weapon": "reload",
+	"use": "interact",
 	"examine_mode": "examine_mode",
 	
 	# Weapon controls
@@ -80,7 +83,6 @@ const INPUT_ACTIONS = {
 	"toggle_point": "point_mode",
 	"toggle_pull": "toggle_pull",
 	"toggle_pause": "esc",
-	"toggle_ghost": "ghost_mode",
 	"toggle_rest": "rest"
 }
 
@@ -101,8 +103,9 @@ func _ready():
 	check_input_actions()
 	
 	# Try to connect to entity if we're a child of one
-	if get_parent() and (get_parent().has_method("handle_move_input") or get_parent().has_node("GridMovementController")):
-		call_deferred("connect_to_entity", get_parent())
+	var parent = get_parent()
+	if parent and (parent.has_node("MovementComponent") or parent.name == "GridMovementController"):
+		call_deferred("connect_to_entity", parent)
 	
 	initialized = true
 
@@ -169,16 +172,6 @@ func process_movement_input():
 		input_dir.y += 1
 	if Input.is_action_pressed(INPUT_ACTIONS["move_up"]):
 		input_dir.y -= 1
-		
-	# Gamepad movement (if using analog stick)
-	var joy_analog = Vector2(
-		Input.get_axis("joy_analog_left_x_neg", "joy_analog_left_x_pos"),
-		Input.get_axis("joy_analog_left_y_neg", "joy_analog_left_y_pos")
-	)
-	
-	# Apply deadzone
-	if joy_analog.length() > ANALOG_DEADZONE:
-		input_dir = joy_analog
 	
 	# Normalize for consistent speed in all directions
 	if input_dir.length() > 1.0:
@@ -206,12 +199,15 @@ func process_action_input():
 		print("InputController: ESC key pressed, toggling pause menu")
 		emit_signal("toggle_pause_menu_requested")
 	
-	if Input.is_action_just_pressed(INPUT_ACTIONS["toggle_ghost"]):
-		emit_signal("toggle_ghost_requested")
-	
 	# Item manipulation
 	if Input.is_action_just_pressed(INPUT_ACTIONS["swap_hand"]):
 		emit_signal("swap_hand_requested")
+	
+	if Input.is_action_just_pressed(INPUT_ACTIONS["cancel"]):
+		emit_signal("cancel_action_requested")
+	
+	if Input.is_action_just_pressed(INPUT_ACTIONS["use"]):
+		emit_signal("use_requested")
 	
 	if Input.is_action_just_pressed(INPUT_ACTIONS["drop_item"]):
 		emit_signal("drop_item_requested")
@@ -305,7 +301,7 @@ func check_run_toggle():
 		running = run_key_pressed
 		emit_signal("toggle_run_requested", running)
 
-# Connect this input controller to a character controller
+# Connect this input controller to a GridMovementController
 func connect_to_entity(target_entity: Node):
 	# If entity is null, setup a deferred connection
 	if target_entity == null:
@@ -347,30 +343,43 @@ func connect_to_entity(target_entity: Node):
 	else:
 		print("InputController: Could not find GameManager at /root/GameManager")
 	
-	# Connect to CharacterController methods
-	connect_if_available("move_requested", "handle_move_input")
-	connect_if_available("toggle_run_requested", "toggle_run")
-	connect_if_available("swap_hand_requested", "swap_active_hand")
-	connect_if_available("drop_item_requested", "drop_active_item")
-	connect_if_available("pickup_requested", "try_pickup_nearest_item")
+	# Movement - handled by MovementComponent through GridMovementController
+	connect_if_available_to_component("move_requested", "handle_move_input", "MovementComponent")
+	connect_if_available_to_component("toggle_run_requested", "toggle_run", "MovementComponent")
+	
+	# Item interaction - handled by ItemInteractionComponent
+	connect_if_available_to_component("swap_hand_requested", "swap_active_hand", "ItemInteractionComponent")
+	connect_if_available_to_component("drop_item_requested", "drop_active_item", "ItemInteractionComponent")
+	connect_if_available_to_component("pickup_requested", "try_pickup_nearest_item", "ItemInteractionComponent")
+	connect_if_available_to_component("toggle_throw_requested", "toggle_throw_mode", "ItemInteractionComponent")
+	
+	# Grab/Pull - handled by GrabPullComponent
+	connect_if_available_to_component("cancel_action_requested", "release_grab", "GrabPullComponent")
+	connect_if_available_to_component("use_requested", "upgrade_grab", "GrabPullComponent")
+	
+	# Intent - handled by IntentComponent
+	connect_if_available_to_component("cycle_intent_requested", "cycle_intent", "InteractionComponent")
+	connect_if_available_to_component("set_intent_requested", "set_intent", "InteractionComponent")
+	
+	# Body targeting - handled by BodyTargetingComponent
+	connect_if_available_to_component("body_part_selected", "handle_body_part_selection", "BodyTargetingComponent")
+	
+	# Z-level movement - handled by ZLevelMovementComponent
+	connect_if_available_to_component("move_up_requested", "move_up", "ZLevelMovementComponent")
+	connect_if_available_to_component("move_down_requested", "move_down", "ZLevelMovementComponent")
+	
+	# Posture - handled by PostureComponent
+	connect_if_available_to_component("toggle_rest_requested", "handle_rest_toggle", "PostureComponent")
+	
+	# Direct controller methods
 	connect_if_available("attack_self_requested", "attack_self")
-	connect_if_available("toggle_throw_requested", "toggle_throw_mode")
-	connect_if_available("cycle_intent_requested", "cycle_intent")
-	connect_if_available("set_intent_requested", "set_intent")
-	connect_if_available("body_part_selected", "handle_body_part_selection")
-	connect_if_available("move_up_requested", "move_up")
-	connect_if_available("move_down_requested", "move_down")
 	connect_if_available("toggle_combat_mode_requested", "toggle_combat_mode")
 	connect_if_available("toggle_point_mode_requested", "toggle_point_mode")
 	connect_if_available("toggle_pull_requested", "toggle_pull")
 	connect_if_available("reload_weapon_requested", "handle_weapon_reload")
 	connect_if_available("examine_mode_requested", "set_examine_mode")
-	connect_if_available("toggle_rest_requested", "handle_rest_key_pressed")
 	
-	# Connect ghost mode toggle
-	connect_if_available("toggle_ghost_requested", "enter_ghost_mode")
-	
-	# Connect new weapon system methods
+	# Weapon system methods
 	connect_if_available("toggle_firing_mode_requested", "toggle_weapon_firing_mode")
 	connect_if_available("toggle_weapon_safety_requested", "toggle_weapon_safety")
 	connect_if_available("unload_weapon_requested", "unload_weapon")
@@ -380,7 +389,7 @@ func connect_to_entity(target_entity: Node):
 	if deferred_connection_timer != null and deferred_connection_timer.is_inside_tree():
 		deferred_connection_timer.stop()
 	
-	print("InputController: Successfully connected to entity")
+	print("InputController: Successfully connected to entity: ", entity.name if entity else "NULL")
 
 func attempt_deferred_connection():
 	# Increment connection attempts counter
@@ -402,13 +411,9 @@ func attempt_deferred_connection():
 	var potential_entity = null
 	
 	# Check if we're a child of an entity already
-	if get_parent() and (get_parent().has_method("handle_move_input") or get_parent().has_node("GridMovementController")):
-		potential_entity = get_parent()
-	else:
-		# Try to find a player in the scene
-		var players = get_tree().get_nodes_in_group("player_controller")
-		if players.size() > 0:
-			potential_entity = players[0]
+	var parent = get_parent()
+	if parent:
+		potential_entity = parent
 	
 	# If we found an entity, connect to it
 	if potential_entity:
@@ -417,8 +422,27 @@ func attempt_deferred_connection():
 	else:
 		print("InputController: No potential entity found, will retry")
 
+# Connect to a specific component's method through the GridMovementController
+func connect_if_available_to_component(signal_name: String, method_name: String, component_name: String) -> bool:
+	if entity == null:
+		print("InputController: Cannot connect signal " + signal_name + " - entity is null")
+		return false
+	
+	# Get the component from the entity
+	var component = entity.get_node_or_null(component_name)
+	if component:
+		if is_connected(signal_name, Callable(component, method_name)):
+			disconnect(signal_name, Callable(component, method_name))
+		
+		connect(signal_name, Callable(component, method_name))
+		print("InputController: Connected signal " + signal_name + " to " + component_name + "." + method_name)
+		return true
+	else:
+		# Try direct method on entity as fallback
+		return connect_if_available(signal_name, method_name)
+
 # Utility method to connect signals if the target method exists
-func connect_if_available(signal_name: String, method_name: String):
+func connect_if_available(signal_name: String, method_name: String) -> bool:
 	# Safety check - make sure entity is valid
 	if entity == null:
 		print("InputController: Cannot connect signal " + signal_name + " - entity is null")
@@ -433,29 +457,19 @@ func connect_if_available(signal_name: String, method_name: String):
 		print("InputController: Connected signal " + signal_name + " to method " + method_name)
 		return true
 	
-	# Try to find GridMovementController if the entity doesn't have the method directly
-	var grid_controller = entity.get_node_or_null("GridMovementController")
-	if grid_controller and grid_controller.has_method(method_name):
-		if is_connected(signal_name, Callable(grid_controller, method_name)):
-			disconnect(signal_name, Callable(grid_controller, method_name))
-		
-		connect(signal_name, Callable(grid_controller, method_name))
-		print("InputController: Connected signal " + signal_name + " to GridMovementController." + method_name)
-		return true
-	
-	print("InputController: Method " + method_name + " not found in entity or GridMovementController")
+	print("InputController: Method " + method_name + " not found in entity")
 	return false
 
-# This would be called when the player is deactivated
 func set_active(active: bool):
 	set_process(active)
+
+func disable_for_npc():
+	set_active(false)
+	entity = null  # Clear entity reference
+	print("InputController: Disabled for NPC")
 
 func _exit_tree():
 	# Clean up timer
 	if deferred_connection_timer and deferred_connection_timer.is_inside_tree():
 		deferred_connection_timer.stop()
 		deferred_connection_timer.queue_free()
-	
-	# Disconnect all signals to avoid errors
-	for connection in get_signal_connection_list("toggle_ghost_requested"):
-		disconnect("toggle_ghost_requested", connection.callable)

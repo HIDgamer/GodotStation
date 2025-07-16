@@ -125,6 +125,7 @@ stretch_mode = 5
 [node name="TooltipPanel" type="Panel" parent="Control"]
 visible = false
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_cvjkx")
 
 [node name="TooltipLabel" type="Label" parent="Control/TooltipPanel"]
@@ -145,6 +146,7 @@ autowrap_mode = 3
 [node name="NotificationPanel" type="Panel" parent="Control"]
 visible = false
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_notif")
 
 [node name="NotificationLabel" type="Label" parent="Control/NotificationPanel"]

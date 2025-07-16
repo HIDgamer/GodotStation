@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cyfk5vl8i1o73"]
+[gd_scene load_steps=10 format=3 uid="uid://cyfk5vl8i1o73"]
 
 [ext_resource type="Script" uid="uid://bgpwnvq3gdeai" path="res://Code/Effects/Smoke.gd" id="1_lrwp0"]
 [ext_resource type="Texture2D" uid="uid://cmixb6fnhqgn6" path="res://Assets/Effects/Particles/Smoke.png" id="1_wsyh7"]
@@ -46,11 +46,12 @@ turbulence_noise_scale = 3.5
 [node name="SmokeParticles" type="GPUParticles2D"]
 z_index = 100
 z_as_relative = false
-amount = 400
+amount = 100
 texture = ExtResource("1_wsyh7")
-lifetime = 15.0
+lifetime = 10.0
 explosiveness = 0.3
 randomness = 0.6
+fixed_fps = 60
 process_material = SubResource("ParticleProcessMaterial_jwcoe")
 script = ExtResource("1_lrwp0")
 
@@ -66,6 +67,9 @@ energy = 0.3
 blend_mode = 1
 texture = ExtResource("4_2gy5v")
 texture_scale = 3.5
+metadata/use_color_temperature = true
+metadata/color_temperature = 6500
+metadata/color_filter = Color(1, 1, 1, 0)
 
 [node name="SmokeSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("2_pwkrs")

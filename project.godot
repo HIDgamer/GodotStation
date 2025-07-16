@@ -23,17 +23,10 @@ MultiplayerManager="*res://Code/Network/MultiplayerManager.gd"
 OptimizationManager="*res://Code/Managers/OptimizationManager.gd"
 TileDefinitions="*res://StationForge/TileDefinitions.gd"
 InputPriorityManager="*res://Code/Managers/InputPriorityManager.gd"
-LightManager="*res://Code/Managers/LightManager.gd"
-
-[debug]
-
-settings/stdout/print_fps=true
 
 [display]
 
-window/size/initial_position_type=0
-window/energy_saving/keep_screen_on=false
-window/stretch/aspect="expand"
+window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
@@ -329,7 +322,6 @@ common/physics_interpolation=true
 
 textures/canvas_textures/default_texture_filter=0
 2d/shadow_atlas/size=8192
-anti_aliasing/quality/msaa_2d=3
 limits/opengl/max_lights_per_object=150
 environment/defaults/default_clear_color=Color(0.05, 0.05, 0.05, 1)
 lightmapping/bake_performance/region_size=2048

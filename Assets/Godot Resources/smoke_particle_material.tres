@@ -1,3 +1,5 @@
+[gd_resource type="ParticleProcessMaterial" load_steps=5 format=3 uid="uid://6c1squwg7d7m"]
+
 [sub_resource type="Gradient" id="Gradient_smoke"]
 offsets = PackedFloat32Array(0, 0.1, 0.4, 0.7, 1)
 colors = PackedColorArray(0.8, 0.7, 0.6, 0.2, 0.6, 0.5, 0.4, 0.8, 0.4, 0.4, 0.4, 0.7, 0.2, 0.2, 0.2, 0.5, 0.1, 0.1, 0.1, 0)
@@ -12,7 +14,7 @@ point_count = 4
 [sub_resource type="CurveTexture" id="CurveTexture_smoke"]
 curve = SubResource("Curve_smoke")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_smoke"]
+[resource]
 emission_shape = 1
 emission_sphere_radius = 20.0
 spread = 180.0
@@ -31,5 +33,4 @@ turbulence_enabled = true
 turbulence_noise_strength = 8.0
 turbulence_noise_scale = 2.5
 turbulence_noise_speed_random = 0.5
-turbulence_influence_min = 0.1
 turbulence_influence_max = 0.3

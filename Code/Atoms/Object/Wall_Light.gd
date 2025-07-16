@@ -79,28 +79,17 @@ enum LightMode {
 @export var max_energy: float = 0.7
 
 # Shadow properties
+# Shadow properties
 @export_group("Shadow Properties")
 @export var cast_shadows: bool = true:
 	set(value):
 		cast_shadows = value
-		shadow_enabled = cast_shadows
-		if _ambient_light:
-			_ambient_light.shadow_enabled = cast_shadows
-		if _cone_light1:
-			_cone_light1.shadow_enabled = cast_shadows
-		if _cone_light2:
-			_cone_light2.shadow_enabled = cast_shadows
+		_update_all_shadows()
 		
 @export var shadow_smoothness: float = 5.0:
 	set(value):
 		shadow_smoothness = value
-		shadow_filter_smooth = shadow_smoothness
-		if _ambient_light:
-			_ambient_light.shadow_filter_smooth = shadow_smoothness
-		if _cone_light1:
-			_cone_light1.shadow_filter_smooth = shadow_smoothness
-		if _cone_light2:
-			_cone_light2.shadow_filter_smooth = shadow_smoothness
+		_update_shadow_smoothness()
 		
 @export var shadow_strength: float = 1.0:
 	set(value):
@@ -127,6 +116,12 @@ enum LightMode {
 		if has_node("GlowEffect"):
 			$GlowEffect.visible = use_glow && is_active
 
+@export_group("Entity Culling")
+@export var enable_entity_culling: bool = true
+@export var entity_detection_radius: float = 300.0
+@export var entity_groups: Array[String] = ["entities", "players", "mobs"]
+@export var culling_check_interval: float = 0.5
+
 # Performance settings
 @export_group("Performance")
 @export var is_static: bool = false
@@ -134,8 +129,6 @@ enum LightMode {
 @export var update_interval: float = 0.05
 @export var disable_when_offscreen: bool = true
 @export var shadow_distance: float = 250.0
-@export var auto_bake_on_ready: bool = false
-@export var baked_light_texture: Texture2D
 
 # Day/Night Cycle Integration
 @export_group("Day/Night Cycle")
@@ -144,12 +137,15 @@ enum LightMode {
 @export var turn_off_time: float = 6.0   # 24-hour format (6:00 AM)
 
 # Internal variables
-var _flicker_time: float = 0.0
 var _base_energy: float
+var _flicker_time: float = 0.0
+var _time: float = 0.0
+var _culling_timer: float = 0.0
+var _should_be_active: bool = true
+var _manual_override: bool = false
 var _is_baked: bool = false
 var _original_texture: Texture2D
 var _light_map_node: Sprite2D
-var _time: float = 0.0
 var _update_timer: float = 0.0
 var _player_camera: Camera2D = null
 var _effects_energy_modifier: float = 0.0
@@ -183,10 +179,6 @@ func _ready() -> void:
 	if texture:
 		_original_texture = texture
 	
-	# Bake light if requested
-	if auto_bake_on_ready && is_static && light_mode == LightMode.WALL_LIGHT:
-		call_deferred("bake_light")
-	
 	# Connect to day/night cycle if available
 	if auto_toggle_with_daylight && has_node("/root/DayNightCycle"):
 		var day_night_cycle = get_node("/root/DayNightCycle")
@@ -200,9 +192,30 @@ func _ready() -> void:
 		_set_light_quality(light_quality)
 
 func _process(delta: float) -> void:
-	# Skip processing if in editor or baked
-	if Engine.is_editor_hint() || (_is_baked && light_mode == LightMode.WALL_LIGHT):
+	if Engine.is_editor_hint():
 		return
+	
+	_time += delta
+	_culling_timer += delta
+	
+	# Entity culling check
+	if enable_entity_culling && _culling_timer >= culling_check_interval:
+		_culling_timer = 0.0
+		_check_nearby_entities()
+	
+	# Only process effects if the light should be active
+	if !_should_be_active || !is_active:
+		return
+	
+	# Visual effects processing
+	if use_flicker:
+		_flicker_time += delta * flicker_speed
+		var flicker_value = sin(_flicker_time) * flicker_intensity
+		energy = _base_energy + flicker_value
+	
+	if use_pulse:
+		var pulse_value = pulse_intensity * sin(_time * pulse_speed)
+		energy = _base_energy + pulse_value
 	
 	if light_mode == LightMode.WALL_LIGHT:
 		# Wall light mode processing
@@ -243,6 +256,56 @@ func _update_rotation(delta: float) -> void:
 		_cone_light1.rotation -= TAU
 	if _cone_light2.rotation > TAU:
 		_cone_light2.rotation -= TAU
+
+func _update_all_shadows() -> void:
+	if light_mode == LightMode.WALL_LIGHT:
+		shadow_enabled = cast_shadows
+	# Emergency lights always have shadows disabled for performance
+
+func _update_shadow_smoothness() -> void:
+	shadow_filter_smooth = shadow_smoothness
+
+func _check_nearby_entities() -> void:
+	var entities_nearby = false
+	
+	# Check each entity group
+	for group_name in entity_groups:
+		var entities = get_tree().get_nodes_in_group(group_name)
+		for entity in entities:
+			if entity && entity.has_method("get_global_position"):
+				var distance = global_position.distance_to(entity.get_global_position())
+				if distance <= entity_detection_radius:
+					entities_nearby = true
+					break
+		
+		if entities_nearby:
+			break
+	
+	# Update light state based on entity proximity
+	var new_state = entities_nearby || _manual_override
+	if new_state != _should_be_active:
+		_should_be_active = new_state
+		_update_actual_light_state()
+
+func _update_actual_light_state() -> void:
+	var final_active = _should_be_active && is_active
+	
+	visible = final_active
+	enabled = final_active
+	
+	if light_mode == LightMode.WALL_LIGHT:
+		if sprite_on:
+			sprite_on.visible = final_active
+		if sprite_off:
+			sprite_off.visible = not final_active
+	
+	elif light_mode == LightMode.EMERGENCY_LIGHT:
+		if _cone_light1:
+			_cone_light1.enabled = final_active
+		if _cone_light2:
+			_cone_light2.enabled = final_active
+		if _ambient_light:
+			_ambient_light.enabled = final_active
 
 # Update all other effects and optimizations on interval
 func _update_effects_and_optimizations(delta: float) -> void:
@@ -452,22 +515,23 @@ func _update_light_setup() -> void:
 			sprite_off.rotation = 0
 
 func _update_light_state() -> void:
-	# Update light visibility
-	visible = is_active
-	enabled = is_active
-	
-	if light_mode == LightMode.WALL_LIGHT:
-		# Update sprites if they exist
-		if sprite_on:
-			sprite_on.visible = is_active
-		if sprite_off:
-			sprite_off.visible = not is_active
+	if enable_entity_culling && !Engine.is_editor_hint():
+		_update_actual_light_state()
+	else:
+		# Direct state update when culling is disabled
+		visible = is_active
+		enabled = is_active
 		
+		if light_mode == LightMode.WALL_LIGHT:
+			if sprite_on:
+				sprite_on.visible = is_active
+			if sprite_off:
+				sprite_off.visible = not is_active
 		# Update glow effect if it exists
 		if has_node("GlowEffect"):
 			$GlowEffect.visible = use_glow and is_active
 	
-	elif light_mode == LightMode.EMERGENCY_LIGHT:
+	if light_mode == LightMode.EMERGENCY_LIGHT:
 		# Update emergency light components
 		if _cone_light1:
 			_cone_light1.enabled = is_active
@@ -567,119 +631,24 @@ func _on_day_night_time_changed(time: float) -> void:
 		else:
 			turn_off()
 
-# Light baking functionality (only for Wall Light mode)
-func bake_light() -> void:
-	if light_mode != LightMode.WALL_LIGHT:
-		push_warning("Light baking is only available for Wall Light mode.")
-		return
-		
-	if !is_static:
-		push_warning("Attempting to bake a non-static light. Set 'is_static' to true first.")
-		return
-	
-	if _is_baked:
-		push_warning("Light already baked.")
-		return
-	
-	var viewport = SubViewport.new()
-	viewport.size = Vector2(light_range * 2, light_range * 2)
-	viewport.transparent_bg = true
-	
-	viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_ONCE
-	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-	
-	# Create a duplicate of this light for the viewport
-	var temp_light = duplicate()
-	temp_light.position = Vector2(light_range, light_range)
-	
-	# Add to the scene temporarily
-	viewport.add_child(temp_light)
-	get_tree().root.add_child(viewport)
-	
-	# Wait for the viewport to render
-	await get_tree().process_frame
-	await get_tree().process_frame
-	
-	# Get the rendered texture
-	var img = viewport.get_texture().get_image()
-	var tex = ImageTexture.create_from_image(img)
-	
-	# Create or get light map node
-	if !_light_map_node:
-		_light_map_node = Sprite2D.new()
-		_light_map_node.name = "BakedLight"
-		_light_map_node.centered = true
-		add_child(_light_map_node)
-	
-	# Apply the baked texture
-	_light_map_node.texture = tex
-	_light_map_node.modulate = light_color
-	_light_map_node.modulate.a = energy
-	baked_light_texture = tex
-	
-	# Disable the dynamic light
-	enabled = false
-	_is_baked = true
-	
-	var node_name = name.replace(" ", "_")
-	var file_path = "user://baked_light_" + node_name + ".res"
-	
-	# Store the baked texture for later use
-	ResourceSaver.save(tex, file_path)
-	
-	# Clean up
-	viewport.queue_free()
-	
-	print("Light baked successfully!")
+func _cleanup_emergency_lights() -> void:
+	if _cone_light1:
+		_cone_light1.queue_free()
+		_cone_light1 = null
+	if _cone_light2:
+		_cone_light2.queue_free()
+		_cone_light2 = null
+	if _ambient_light:
+		_ambient_light.queue_free()
+		_ambient_light = null
 
-# Use a pre-baked texture
-func use_baked_texture(texture_path: String = "") -> void:
-	if light_mode != LightMode.WALL_LIGHT:
-		push_warning("Baked textures are only available for Wall Light mode.")
-		return
-		
-	if texture_path.is_empty() && baked_light_texture:
-		# Use the assigned texture
-		_apply_baked_texture(baked_light_texture)
-	elif !texture_path.is_empty():
-		# Load and apply the texture
-		var tex = load(texture_path)
-		if tex:
-			_apply_baked_texture(tex)
-		else:
-			push_error("Failed to load baked texture from: " + texture_path)
+func force_on(override: bool = true) -> void:
+	"""Force the light to stay on regardless of entity culling"""
+	_manual_override = override
+	if override:
+		_should_be_active = true
+		_update_actual_light_state()
 
-func _apply_baked_texture(tex: Texture2D) -> void:
-	if !_light_map_node:
-		_light_map_node = Sprite2D.new()
-		_light_map_node.name = "BakedLight"
-		_light_map_node.centered = true
-		add_child(_light_map_node)
-	
-	_light_map_node.texture = tex
-	_light_map_node.modulate = light_color
-	_light_map_node.modulate.a = energy
-	
-	# Disable the dynamic light
-	enabled = false
-	_is_baked = true
-
-# Utility to batch bake all static lights in a scene
-static func bake_all_static_lights(root_node: Node) -> void:
-	var lights = []
-	_find_all_static_lights(root_node, lights)
-	
-	print("Found " + str(lights.size()) + " static lights to bake")
-	
-	for light in lights:
-		if light is AdvancedLight && light.light_mode == LightMode.WALL_LIGHT:
-			light.bake_light()
-			# Wait a bit between bakes to avoid overloading
-			await light.get_tree().create_timer(0.1).timeout
-
-static func _find_all_static_lights(node: Node, result: Array) -> void:
-	if node is AdvancedLight && node.is_static:
-		result.append(node)
-	
-	for child in node.get_children():
-		_find_all_static_lights(child, result)
+func force_off() -> void:
+	"""Remove manual override and return to normal culling behavior"""
+	_manual_override = false

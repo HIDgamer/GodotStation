@@ -23,7 +23,7 @@ enum EntityFlags {
 }
 
 # === SPATIAL PARTITIONING ===
-# Enhanced spatial grid using dictionary for O(1) lookups with better structure
+# Spatial grid using dictionary for O(1) lookups with better structure
 # Format: _spatial_grid[z_level][cell_coords][entity_type] = [entities]
 var _spatial_grid = {}
 
@@ -1038,10 +1038,8 @@ func _get_entity_tile_position(entity) -> Vector2i:
 		return _entity_current_tile[entity.entity_id]
 		
 	# Next try the entity's own properties
-	if entity is GridMovementController:
-		return entity.current_tile_position
-	elif "current_tile_position" in entity:
-		return entity.current_tile_position
+	if entity:
+		return entity.movement_component.current_tile_position
 	
 	# Fallback: Calculate from world position
 	return world_to_tile(entity.position)

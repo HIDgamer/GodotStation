@@ -1,7 +1,7 @@
 extends Node2D
 class_name BaseObject
 
-# Object behavior flags (similar to obj_flags in SS13)
+# Object behavior flags
 enum ObjectFlags {
 	IN_USE = 1,               # Object is currently being used by someone
 	CAN_BE_HIT = 2,           # Can be hit by items
@@ -22,7 +22,7 @@ enum ResistanceFlags {
 	PROJECTILE_IMMUNE = 64   # Cannot be hit by projectiles
 }
 
-# Properties
+# Core Properties (always present)
 var obj_name: String = "object"
 var obj_desc: String = "An object."
 var obj_flags: int = ObjectFlags.CAN_BE_HIT
@@ -31,7 +31,6 @@ var obj_integrity: float = 100.0
 var max_integrity: float = 100.0
 var integrity_failure: float = 0.0  # Threshold where the object starts behaving differently
 var anchored: bool = false          # Whether the object is anchored to the ground
-var density: bool = true            # Whether the object blocks movement
 var throwforce: int = 1
 var throw_speed: int = 3
 var throw_range: int = 7
@@ -40,6 +39,19 @@ var destroy_sound: AudioStream = null # Sound when destroyed
 var layer_z: int = 0                # Z-layer ordering
 var allow_pass_flags: int = 0       # Flags for what types of things can pass through
 var last_thrower = null             # Reference to who last threw this object
+
+@export var entity_type: String = "object"  # Type of entity (object, item, character, etc.)
+@export var entity_dense: bool = true
+@export var entity_name: String = ""        # Display name
+@export var description: String = ""        # Examine description
+@export var pickupable: bool = false        # Can be picked up
+@export var no_grab: bool = false          # Cannot be grabbed
+@export var grabbed_by = null              # Who is grabbing this object
+@export var is_lying: bool = false         # Is lying down (for characters)
+@export var is_stunned: bool = false       # Is stunned (for characters)
+@export var health: float = 100.0          # Health (for living things)
+@export var max_health: float = 100.0      # Maximum health
+@export var active_equipment: Dictionary = {} # Equipment worn (for characters)
 
 # Armor values
 var soft_armor = {
@@ -91,9 +103,17 @@ func _init():
 	# Initialize obj_integrity if it's null
 	if obj_integrity == null:
 		obj_integrity = max_integrity
+	
+	# Set default entity_name if empty
+	if entity_name == "":
+		entity_name = obj_name
 
 func _ready():
-	# Add to appropriate groups based on flags
+	# Add to appropriate groups
+	add_to_group("clickable_entities")
+	add_to_group("entities")
+	
+	# Add to specific groups based on flags
 	if has_flag(resistance_flags, ResistanceFlags.INDESTRUCTIBLE):
 		add_to_group("indestructible")
 	
@@ -149,37 +169,6 @@ func set_flag(flags_var: String, flag: int, enabled: bool = true) -> void:
 	else:
 		set(flags_var, get(flags_var) & ~flag)
 
-# Handle taking damage
-func take_damage(damage_amount: float, damage_type: String = "brute", armor_type: String = "", effects: bool = true, armour_penetration: float = 0.0, attacker = null) -> float:
-	if damage_amount <= 0:
-		return 0
-		
-	if has_flag(resistance_flags, ResistanceFlags.INDESTRUCTIBLE) or obj_integrity <= 0:
-		return 0
-	
-	# Apply armor reduction if armor_type is specified
-	if armor_type != "":
-		damage_amount = modify_by_armor(damage_amount, armor_type, armour_penetration)
-	
-	if damage_amount < 0.1:  # Minimal damage threshold
-		return 0
-	
-	var old_integrity = obj_integrity
-	obj_integrity = max(obj_integrity - damage_amount, 0)
-	
-	emit_signal("integrity_changed", old_integrity, obj_integrity)
-	
-	# Check for breaking threshold
-	if integrity_failure and obj_integrity <= integrity_failure and old_integrity > integrity_failure:
-		obj_break(armor_type)
-	
-	# Check for destruction
-	if obj_integrity <= 0:
-		obj_destruction(damage_amount, damage_type, armor_type, attacker)
-	
-	update_appearance()
-	return damage_amount
-
 # Apply armor to reduce damage
 func modify_by_armor(damage: float, armor_type: String, penetration: float = 0) -> float:
 	var armor_value = soft_armor[armor_type] if armor_type in soft_armor else 0
@@ -187,7 +176,7 @@ func modify_by_armor(damage: float, armor_type: String, penetration: float = 0) 
 	# Apply penetration
 	armor_value = max(0, armor_value - penetration)
 	
-	# Calculate damage reduction (simplifying the formula used in SS13)
+	# Calculate damage reduction
 	var damage_reduction = min(armor_value / 100.0, 0.9)  # Cap at 90% reduction
 	
 	return damage * (1 - damage_reduction)
@@ -233,28 +222,6 @@ func set_anchored(anchor_value: bool) -> void:
 	anchored = anchor_value
 	emit_signal("anchored_changed", anchored)
 
-# Handle examination
-func examine(examiner) -> String:
-	var examine_text = obj_desc
-	
-	# Add integrity status
-	if obj_integrity < max_integrity:
-		var damage_percent = obj_integrity / max_integrity * 100
-		if damage_percent < 25:
-			examine_text += "\nIt looks severely damaged!"
-		elif damage_percent < 50:
-			examine_text += "\nIt looks badly damaged."
-		elif damage_percent < 75:
-			examine_text += "\nIt looks damaged."
-		elif damage_percent < 95:
-			examine_text += "\nIt has a few scratches."
-	
-	# Add resistance information
-	if has_flag(resistance_flags, ResistanceFlags.INDESTRUCTIBLE):
-		examine_text += "\nIt appears to be indestructible."
-	
-	return examine_text
-
 # Handle explosions hitting the object
 func ex_act(severity: int) -> void:
 	if has_flag(resistance_flags, ResistanceFlags.INDESTRUCTIBLE):
@@ -279,16 +246,464 @@ func hitby(thrown_item, speed: float = 5) -> void:
 	# Signal that we were hit
 	emit_signal("object_hit", thrown_item, tforce)
 
-# Handle generic attack
-func attack_generic(attacker, damage_amount: float = 0, damage_type: String = "brute", 
-				   armor_type: String = "melee", effects: bool = true, armor_penetration: float = 0) -> float:
-	# Fixed parameter order to match take_damage function
-	return take_damage(damage_amount, damage_type, armor_type, effects, armor_penetration, attacker)
+# Main interaction method - called when someone uses an item on this object
+func attackby(item, user, params = null) -> bool:
+	"""Called when someone uses an item on this entity"""
+	print(name, ": attackby called with item ", item.name if "name" in item else "unknown", " by user ", user.name if "name" in user else "unknown")
+	
+	if !item or !user:
+		return false
+	
+	# Let the item handle the interaction first
+	if item.has_method("attack"):
+		return item.attack(self, user)
+	
+	# Handle based on item type/tool behaviour
+	if "tool_behaviour" in item:
+		match item.tool_behaviour:
+			"weapon":
+				# Being attacked with a weapon
+				if user.has_method("get") and user.get("intent") == user.get("Intent").HARM:
+					return handle_being_attacked(item, user)
+				else:
+					# Not harm intent - maybe they're trying to use it for something else
+					return handle_tool_usage(item, user)
+			"medical":
+				# Medical treatment
+				return handle_medical_treatment(item, user)
+			"tool":
+				# Being worked on with a tool
+				return handle_tool_usage(item, user)
+			_:
+				# Unknown tool type
+				return handle_generic_item_usage(item, user)
+	
+	# Check for specific item interactions
+	if "item_type" in item:
+		match item.item_type:
+			"food":
+				return handle_food_usage(item, user)
+			"drink":
+				return handle_drink_usage(item, user)
+			"chemical":
+				return handle_chemical_usage(item, user)
+			_:
+				return handle_generic_item_usage(item, user)
+	
+	# Generic item usage
+	return handle_generic_item_usage(item, user)
 
-# Interaction handling (to be overridden by derived classes)
+# Main hand interaction method - called when someone interacts without an item
+func attack_hand(user, params = null) -> bool:
+	"""Called when someone interacts with this entity without an item"""
+	print(name, ": attack_hand called by user ", user.name if "name" in user else "unknown")
+	
+	if !user:
+		return false
+	
+	# Check user's intent if they have one
+	var user_intent = get_user_intent(user)
+	
+	# Handle based on user's intent
+	match user_intent:
+		0:  # HELP
+			return handle_help_interaction_received(user)
+		1:  # DISARM
+			return handle_disarm_interaction_received(user)
+		2:  # GRAB
+			return handle_grab_interaction_received(user)
+		3:  # HARM
+			return handle_harm_interaction_received(user)
+		_:
+			return handle_help_interaction_received(user)
+
+# Get user's intent safely
+func get_user_intent(user) -> int:
+	if "intent" in user:
+		return user.intent
+	elif user.has_method("get_intent"):
+		return user.get_intent()
+	else:
+		return 0  # Default to HELP
+
+# Handle being attacked with a weapon
+func handle_being_attacked(weapon, attacker) -> bool:
+	"""Handle when someone attacks us with a weapon"""
+	var damage = 5.0
+	if "force" in weapon:
+		damage = weapon.force
+	
+	# Apply damage
+	take_damage(damage, "brute")
+	
+	# Show combat message
+	var weapon_name = weapon.name if "name" in weapon else "something"
+	var attacker_name = get_entity_name(attacker)
+	
+	show_interaction_message(attacker_name + " hits " + get_entity_name(self) + " with " + weapon_name + "!")
+	
+	# Play hit sound
+	var audio_manager = get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		audio_manager.play_positioned_sound("hit", global_position, 0.5)
+	
+	return true
+
+# Handle medical treatment
+func handle_medical_treatment(medical_item, user) -> bool:
+	"""Handle medical items being used on us"""
+	if medical_item.has_method("treat_patient"):
+		return medical_item.treat_patient(self, user)
+	
+	# Default medical treatment - only if this is a living entity
+	if entity_type == "character" or entity_type == "mob":
+		var health_system = get_node_or_null("HealthSystem")
+		if health_system and health_system.has_method("apply_healing"):
+			health_system.apply_healing(10.0, "medical")
+			
+			var item_name = medical_item.name if "name" in medical_item else "medical item"
+			show_interaction_message("The " + item_name + " helps heal the damage.")
+			
+			return true
+	
+	# Not a valid target for medical treatment
+	var user_name = get_entity_name(user)
+	var item_name = medical_item.name if "name" in medical_item else "medical item"
+	show_user_message(user, "You can't use " + item_name + " on " + get_entity_name(self) + ".")
+	
+	return false
+
+# Handle tool usage
+func handle_tool_usage(tool, user) -> bool:
+	"""Handle tools being used on us"""
+	var tool_name = tool.name if "name" in tool else "tool"
+	var user_name = get_entity_name(user)
+	
+	show_user_message(user, "You use " + tool_name + " on " + get_entity_name(self) + ".")
+	
+	return true
+
+# Handle generic item usage
+func handle_generic_item_usage(item, user) -> bool:
+	"""Default handler for items being used on us"""
+	var item_name = item.name if "name" in item else "something"
+	var user_name = get_entity_name(user)
+	
+	show_user_message(user, "You use " + item_name + " on " + get_entity_name(self) + ".")
+	
+	return true
+
+# Handle food being used
+func handle_food_usage(food_item, user) -> bool:
+	"""Handle food items being used on us"""
+	# Only living entities can be fed
+	if entity_type != "character" and entity_type != "mob":
+		show_user_message(user, "You can't feed that!")
+		return false
+	
+	# Only allow feeding if we're the same entity as the user (feeding self)
+	# or if we're incapacitated
+	var can_be_fed = (user == self or user == get_parent())
+	
+	if is_stunned or is_lying:
+		can_be_fed = true
+	
+	if not can_be_fed:
+		show_user_message(user, "They won't let you feed them!")
+		return false
+	
+	# Feed logic here
+	if food_item.has_method("feed_to"):
+		return food_item.feed_to(self, user)
+	
+	show_user_message(user, "You feed " + get_entity_name(self) + " the " + food_item.name + ".")
+	return true
+
+# Handle drink being used
+func handle_drink_usage(drink_item, user) -> bool:
+	"""Handle drink items being used on us"""
+	# Only living entities can drink
+	if entity_type != "character" and entity_type != "mob":
+		show_user_message(user, "You can't give that a drink!")
+		return false
+	
+	# Similar logic to food
+	var can_be_given_drink = (user == self or user == get_parent())
+	
+	if is_stunned:
+		can_be_given_drink = true
+	
+	if not can_be_given_drink:
+		show_user_message(user, "They won't let you give them a drink!")
+		return false
+	
+	if drink_item.has_method("give_drink_to"):
+		return drink_item.give_drink_to(self, user)
+	
+	show_user_message(user, "You give " + get_entity_name(self) + " the " + drink_item.name + " to drink.")
+	return true
+
+# Handle chemical usage
+func handle_chemical_usage(chemical_item, user) -> bool:
+	"""Handle chemical items being used on us"""
+	# Chemicals can be applied to most things
+	if chemical_item.has_method("apply_chemical_to"):
+		return chemical_item.apply_chemical_to(self, user)
+	
+	show_user_message(user, "You apply " + chemical_item.name + " to " + get_entity_name(self) + ".")
+	return true
+
+# Handle help intent interaction received
+func handle_help_interaction_received(user) -> bool:
+	"""Handle when someone interacts with us using help intent"""
+	# Check if this is an item that can be picked up
+	if entity_type == "item" and pickupable:
+		# Let the user try to pick us up
+		if user.has_method("try_pick_up_item"):
+			return user.try_pick_up_item(self)
+	
+	# Check if we have a specific friendly interaction
+	if has_method("friendly_interact"):
+		return friendly_interact(user)
+	
+	# Default: just show a message
+	var user_name = get_entity_name(user)
+	show_interaction_message(user_name + " touches " + get_entity_name(self) + " gently.")
+	show_user_message(user, "You touch " + get_entity_name(self) + " gently.")
+	
+	return true
+
+# Handle disarm intent interaction received
+func handle_disarm_interaction_received(user) -> bool:
+	"""Handle when someone tries to disarm us"""
+	# Only characters can be disarmed
+	if entity_type == "character" or entity_type == "mob":
+		# Check if we have items - use safe method access
+		if has_method("get_active_item"):
+			var active_item = get_active_item()
+			if active_item:
+				# User is trying to disarm us - this is handled in the user's disarm logic
+				return false  # Let the user handle the disarm attempt
+	
+	# If we're not holding anything or not a character, they're just pushing us
+	if has_method("apply_knockback"):
+		var push_dir = (global_position - user.global_position).normalized()
+		apply_knockback(push_dir, 10.0)
+		
+		var user_name = get_entity_name(user)
+		show_interaction_message(user_name + " pushes " + get_entity_name(self) + "!")
+		
+		return true
+	
+	# Can't be pushed
+	show_user_message(user, "You can't push that!")
+	return false
+
+# Handle grab intent interaction received  
+func handle_grab_interaction_received(user) -> bool:
+	"""Handle when someone tries to grab us"""
+	# Check if we can be grabbed
+	if no_grab:
+		show_user_message(user, "You can't grab that!")
+		return false
+	
+	# Check if we're already being grabbed
+	if grabbed_by != null:
+		show_user_message(user, "Someone else is already grabbing that!")
+		return false
+	
+	# Allow the grab - this is handled by the user's grab logic
+	return false  # Let the user handle the grab attempt
+
+# Handle harm intent interaction received
+func handle_harm_interaction_received(user) -> bool:
+	"""Handle when someone attacks us with harm intent"""
+	# This is handled by the user's attack logic
+	# We just need to be able to receive damage
+	return false  # Let the user handle the attack
+
+# examine method with safe property access
+func examine(examiner) -> String:
+	"""Return examine text for this entity"""
+	var examine_text = ""
+	
+	# Basic description
+	if description != "":
+		examine_text = description
+	elif entity_name != "":
+		examine_text = "This is " + entity_name + "."
+	else:
+		examine_text = "This is " + name + "."
+	
+	# Add health status if this is a character
+	if entity_type == "character" or entity_type == "mob":
+		var health_system = get_node_or_null("HealthSystem")
+		if health_system and "health" in health_system and "max_health" in health_system:
+			var health_percent = (health_system.health / health_system.max_health) * 100.0
+			if health_percent < 25:
+				examine_text += " They look severely injured."
+			elif health_percent < 50:
+				examine_text += " They look hurt."
+			elif health_percent < 75:
+				examine_text += " They look slightly injured."
+			else:
+				examine_text += " They look healthy."
+		elif health < max_health:
+			var health_percent = (health / max_health) * 100.0
+			if health_percent < 25:
+				examine_text += " It looks severely damaged."
+			elif health_percent < 50:
+				examine_text += " It looks damaged."
+			elif health_percent < 75:
+				examine_text += " It looks slightly damaged."
+	
+	# Status effects (only for characters)
+	if entity_type == "character" or entity_type == "mob":
+		if is_lying:
+			examine_text += " They are lying down."
+		
+		if is_stunned:
+			examine_text += " They appear to be stunned."
+		
+		# Held items
+		if has_method("get_active_item"):
+			var active_item = get_active_item()
+			if active_item:
+				var item_name = active_item.name if "name" in active_item else "something"
+				examine_text += " They are holding " + item_name + "."
+		
+		# Equipment if visible
+		if active_equipment.size() > 0:
+			examine_text += " They are wearing some equipment."
+	
+	return examine_text
+
+# Take damage with safe method calls
+func take_damage(damage_amount: float, damage_type: String = "brute", armor_type: String = "", effects: bool = true, armour_penetration: float = 0.0, attacker = null):
+	if damage_amount <= 0:
+		return
+	
+	print(name, " taking ", damage_amount, " ", damage_type, " damage")
+	
+	# Apply armor if we have it
+	if armor_type != "":
+		damage_amount = modify_by_armor(damage_amount, armor_type, armour_penetration)
+	
+	# Apply to object integrity
+	var old_integrity = obj_integrity
+	obj_integrity = max(0, obj_integrity - damage_amount)
+	
+	if old_integrity != obj_integrity:
+		emit_signal("integrity_changed", old_integrity, obj_integrity)
+	
+	# Play damage sound
+	var audio_manager = get_node_or_null("/root/AudioManager")
+	if audio_manager:
+		var sound_name = "hit"
+		match damage_type:
+			"burn":
+				sound_name = "burn"
+			"toxin":
+				sound_name = "poison"
+			"oxygen":
+				sound_name = "gasp"
+			_:
+				sound_name = "hit"
+		
+		audio_manager.play_positioned_sound(sound_name, global_position, min(0.3 + (damage_amount / 20.0), 0.9))
+	
+	# Stun briefly for high damage (only for characters)
+	if damage_amount > 15 and (entity_type == "character" or entity_type == "mob"):
+		if has_method("stun") and not is_stunned:
+			stun(0.5)
+	
+	# Handle health system if available
+	var health_system = get_node_or_null("HealthSystem")
+	if health_system and health_system.has_method("take_damage"):
+		health_system.take_damage(damage_amount, damage_type)
+	elif entity_type == "character" or entity_type == "mob":
+		# Fallback health handling
+		health = max(0, health - damage_amount)
+		
+		# Die if health reaches 0
+		if health <= 0 and has_method("die"):
+			die()
+	
+	# Check for object destruction
+	if obj_integrity <= 0:
+		obj_destruction(damage_amount, damage_type, "", attacker)
+
+# STUB METHODS - Override these in child classes as needed
+
+# Basic interaction method - override in child classes
 func interact(user) -> bool:
 	emit_signal("interacted_with", user)
+	# Default friendly interaction without recursion
+	show_user_message(user, "You interact with " + get_entity_name(self) + ".")
 	return true
+
+# Friendly interaction stub - override in child classes for specific behavior
+func friendly_interact(user) -> bool:
+	# Default friendly interaction without calling attack_hand to avoid recursion
+	var user_name = get_entity_name(user)
+	show_interaction_message(user_name + " interacts with " + get_entity_name(self) + " in a friendly manner.")
+	show_user_message(user, "You interact with " + get_entity_name(self) + " in a friendly way.")
+	emit_signal("interacted_with", user)
+	return true
+
+# Get active item stub (for characters)
+func get_active_item():
+	return null
+
+# Apply knockback stub (for physics objects)
+func apply_knockback(direction: Vector2, force: float):
+	# Default implementation - just move slightly
+	global_position += direction * force * 0.1
+
+# Stun method stub (for characters)
+func stun(duration: float):
+	if entity_type == "character" or entity_type == "mob":
+		is_stunned = true
+		# Create a timer to remove stun
+		var timer = get_tree().create_timer(duration)
+		timer.timeout.connect(func(): is_stunned = false)
+
+# Die method stub (for living things)
+func die():
+	if entity_type == "character" or entity_type == "mob":
+		print(get_entity_name(self), " has died!")
+		# Override in child classes for specific death behavior
+
+# UTILITY METHODS
+
+# Safe way to get entity name
+func get_entity_name(entity) -> String:
+	if "entity_name" in entity and entity.entity_name != "":
+		return entity.entity_name
+	elif "name" in entity:
+		return entity.name
+	else:
+		return "something"
+
+# Show interaction message helper
+func show_interaction_message(message: String):
+	"""Display a message visible to nearby entities"""
+	print(message)  # Always print for debugging
+	
+	# Try to use sensory system if available
+	var sensory_system = get_node_or_null("/root/SensorySystem")
+	if sensory_system and sensory_system.has_method("display_message_to_nearby"):
+		sensory_system.display_message_to_nearby(global_position, message)
+
+# Show message to specific user
+func show_user_message(user, message: String):
+	"""Display a message to a specific user"""
+	if user.has_method("show_interaction_message"):
+		user.show_interaction_message(message)
+	elif "sensory_system" in user and user.sensory_system:
+		user.sensory_system.display_message(message)
+	else:
+		print(get_entity_name(user), " message: ", message)
 
 # Check if a user can interact with this object
 func can_interact(user) -> bool:
@@ -297,13 +712,16 @@ func can_interact(user) -> bool:
 		return false
 	
 	# Check if user is able to interact (not incapacitated)
-	if "can_interact" in user and not user.can_interact():
+	if user.has_method("can_interact") and not user.can_interact():
 		return false
 		
 	return true
 
 # Check if a user is in range to interact
 func is_user_in_range(user, interaction_range: float = 1.5) -> bool:
+	if not "global_position" in user:
+		return false
+	
 	var distance = global_position.distance_to(user.global_position)
 	return distance <= interaction_range * 32  # Convert tiles to pixels
 
@@ -311,6 +729,14 @@ func is_user_in_range(user, interaction_range: float = 1.5) -> bool:
 func update_appearance() -> void:
 	# To be overridden by child classes
 	pass
+
+# Handle generic attack
+func attack_generic(attacker, damage_amount: float = 0, damage_type: String = "brute", 
+				   armor_type: String = "melee", effects: bool = true, armor_penetration: float = 0) -> float:
+	take_damage(damage_amount, damage_type, armor_type, effects, armor_penetration, attacker)
+	return damage_amount
+
+# PHYSICS METHODS (unchanged)
 
 # Setup physical collision for throws
 func setup_collision():
@@ -361,8 +787,10 @@ func apply_throw_force(direction: Vector2, speed: float, thrower = null):
 	# Apply random angular velocity for spin
 	angular_velocity = randf_range(-180, 180)
 	
-	# Make sure we're not flagged as landed
+	# Enable physics simulation
+	is_physically_simulated = true
 	landed = false
+	set_physics_process(true)
 
 # Apply force when dropped
 func apply_drop_force(direction: Vector2 = Vector2.DOWN, initial_speed: float = 30.0):
@@ -372,12 +800,14 @@ func apply_drop_force(direction: Vector2 = Vector2.DOWN, initial_speed: float = 
 	# Slight random spin
 	angular_velocity = randf_range(-30, 30)
 	
-	# Not landed yet
+	# Enable physics simulation
+	is_physically_simulated = true
 	landed = false
+	set_physics_process(true)
 
 # Move and collide wrapper for physics-based movement
 func move_and_collide(delta_movement: Vector2):
-	# This is a simple implementation - can be enhanced with an actual KinematicBody
+	# This is a simple implementation
 	var new_position = global_position + delta_movement
 	
 	# Check for collisions with world first
@@ -404,4 +834,7 @@ func play_audio(stream: AudioStream, volume_db: float = 0.0) -> void:
 
 # Get direction to another node
 func get_direction_to(other_node) -> Vector2:
-	return (other_node.global_position - global_position).normalized()
+	if "global_position" in other_node:
+		return (other_node.global_position - global_position).normalized()
+	else:
+		return Vector2.ZERO

@@ -1,0 +1,240 @@
+[gd_scene load_steps=3 format=3 uid="uid://bk4vn5l1yg2yi"]
+
+[ext_resource type="Script" uid="uid://cvg4k70wiq5cc" path="res://Code/UserInterface/HealthAnalyzerUI.gd" id="1_x9t2v"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0.1, 0.1, 0.1, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 0.8, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="HealthAnalyzerUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_x9t2v")
+
+[node name="MainPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.422
+anchor_top = 0.321
+anchor_right = 0.717
+anchor_bottom = 0.963
+offset_left = 271.856
+offset_top = -80.008
+offset_right = 272.016
+offset_bottom = -80.024
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1")
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="HBoxContainer" parent="MainPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TitleLabel" type="Label" parent="MainPanel/VBoxContainer/Header/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "Health Analyzer"
+
+[node name="PatientNameLabel" type="Label" parent="MainPanel/VBoxContainer/Header/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Patient: Unknown"
+
+[node name="CloseButton" type="Button" parent="MainPanel/VBoxContainer/Header"]
+layout_mode = 2
+text = "X"
+
+[node name="HSeparator" type="HSeparator" parent="MainPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ContentContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VitalSignsContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="VitalSignsHeader" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/VitalSignsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "═══ VITAL SIGNS ═══"
+
+[node name="HealthBar" type="ProgressBar" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/VitalSignsContainer"]
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="HealthLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/VitalSignsContainer"]
+layout_mode = 2
+text = "Overall Health: 100%"
+
+[node name="PulseLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/VitalSignsContainer"]
+layout_mode = 2
+text = "Pulse: 70 BPM"
+
+[node name="TempLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/VitalSignsContainer"]
+layout_mode = 2
+text = "Temperature: 37.0°C (98.6°F)"
+
+[node name="BPLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/VitalSignsContainer"]
+layout_mode = 2
+text = "Blood Pressure: 120/80"
+
+[node name="VSeparator1" type="HSeparator" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="DamageContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="DamageHeader" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "═══ DAMAGE ANALYSIS ═══"
+
+[node name="BruteContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer"]
+layout_mode = 2
+
+[node name="BruteLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/BruteContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Brute: 0.0"
+
+[node name="BruteBar" type="ProgressBar" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/BruteContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+show_percentage = false
+
+[node name="BurnContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer"]
+layout_mode = 2
+
+[node name="BurnLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/BurnContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Burn: 0.0"
+
+[node name="BurnBar" type="ProgressBar" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/BurnContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+show_percentage = false
+
+[node name="ToxinContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer"]
+layout_mode = 2
+
+[node name="ToxinLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/ToxinContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Toxin: 0.0"
+
+[node name="ToxinBar" type="ProgressBar" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/ToxinContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+show_percentage = false
+
+[node name="OxygenContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer"]
+layout_mode = 2
+
+[node name="OxygenLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/OxygenContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Oxygen: 0.0"
+
+[node name="OxygenBar" type="ProgressBar" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/OxygenContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+show_percentage = false
+
+[node name="VSeparator2" type="HSeparator" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="BloodContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="BloodHeader" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/BloodContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "═══ BLOOD ANALYSIS ═══"
+
+[node name="BloodVolumeLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/BloodContainer"]
+layout_mode = 2
+text = "Blood Volume: 500/560 mL (89.3%)"
+
+[node name="BloodTypeLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/BloodContainer"]
+layout_mode = 2
+text = "Blood Type: O+"
+
+[node name="BleedingLabel" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/BloodContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+text = "⚠ BLEEDING (Rate: 2.5 mL/min)"
+
+[node name="VSeparator3" type="HSeparator" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="LimbsContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="LimbsHeader" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/LimbsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "═══ LIMB STATUS ═══"
+
+[node name="VSeparator4" type="HSeparator" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="ChemicalsContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="ChemicalsHeader" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/ChemicalsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "═══ CHEMICAL ANALYSIS ═══"
+
+[node name="VSeparator5" type="HSeparator" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="AdviceContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer"]
+layout_mode = 2
+
+[node name="AdviceHeader" type="Label" parent="MainPanel/VBoxContainer/ScrollContainer/ContentContainer/AdviceContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "═══ MEDICAL RECOMMENDATIONS ═══"

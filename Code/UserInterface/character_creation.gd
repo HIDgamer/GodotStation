@@ -52,9 +52,6 @@ var preview_direction = Direction.SOUTH
 var direction_names = ["South", "North", "East", "West"]
 
 func _ready():
-	# Initialize hair color materials
-	_initialize_hair_materials()
-	
 	# Load assets dynamically
 	_load_assets()
 	
@@ -273,12 +270,6 @@ func _initialize_legacy_character_preview():
 		if sprite_data[key].path:
 			if ResourceLoader.exists(sprite_data[key].path):
 				sprite.texture = load(sprite_data[key].path)
-			
-		# Apply hair shader material if appropriate
-		if key == "hair":
-			sprite.material = hair_material
-		elif key == "facial_hair":
-			sprite.material = facial_hair_material
 		
 		preview_node.add_child(sprite)
 		preview_sprites[key] = sprite
@@ -321,44 +312,6 @@ func _preload_critical_assets():
 	if not asset_manager:
 		push_error("Asset manager not found")
 		return
-		
-	# The asset manager now handles preloading essential assets
-
-# Initialize hair coloring materials
-func _initialize_hair_materials():
-	# Create a shader material for hair coloring
-	hair_material = ShaderMaterial.new()
-	
-	# Try to load the shader, but use a fallback if not found
-	var shader_path = "res://Assets/Godot Resources/hair_color.gdshader"
-	if ResourceLoader.exists(shader_path):
-		hair_material.shader = load(shader_path)
-	else:
-		print("WARNING: Hair color shader not found at", shader_path)
-		# Create a minimal fallback shader
-		var fallback_shader = Shader.new()
-		fallback_shader.code = """
-		shader_type canvas_item;
-		uniform vec4 hair_color : source_color = vec4(0.5, 0.25, 0.0, 1.0);
-		
-		void fragment() {
-			vec4 color = texture(TEXTURE, UV);
-			if (color.a > 0.0) {
-				color.rgb = hair_color.rgb;
-				COLOR = color;
-			} else {
-				COLOR = color;
-			}
-		}
-		"""
-		hair_material.shader = fallback_shader
-	
-	hair_material.set_shader_parameter("hair_color", character_data.hair_color)
-	
-	# Create a shader material for facial hair coloring
-	facial_hair_material = ShaderMaterial.new()
-	facial_hair_material.shader = hair_material.shader # Reuse the same shader
-	facial_hair_material.set_shader_parameter("hair_color", character_data.facial_hair_color)
 
 # Setup UI elements with values
 func _setup_ui():

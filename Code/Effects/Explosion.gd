@@ -1,8 +1,8 @@
 extends GPUParticles2D
 
 # Constants
-const LIFETIME = 6.0  # How long the main particles live
-const PARTICLE_COUNT = 100
+const LIFETIME = 2.0  # How long the main particles live
+const PARTICLE_COUNT = 30
 const LIGHT_FLICKER_INTENSITY_MIN = 0.7
 const LIGHT_FLICKER_INTENSITY_MAX = 1.2
 const LIGHT_FLICKER_INTERVAL_MIN = 0.03

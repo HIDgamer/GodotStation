@@ -45,10 +45,12 @@ animations = [{
 
 [node name="HEGrenade" type="Node2D" groups=["grenades", "items", "objects"]]
 script = ExtResource("1_owvcl")
+entity_type = "item"
+pickupable = true
 
 [node name="Icon" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_vxvdv")
-animation = &"Primed"
+animation = &"Pin"
 
 [node name="InteractionArea" type="Area2D" parent="."]
 collision_layer = 8

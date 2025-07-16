@@ -194,7 +194,7 @@ func apply_explosion_damage(pos: Vector2) -> void:
 			entity.get_parent().apply_knockback(knockback_dir, knockback_strength)
 		
 		# Apply stun/paralyze effect based on distance with smoother falloff
-		if entity.has_method("stun"):
+		if "stun" in entity:
 			var stun_time = (1.0 - pow(distance_tiles / light_impact_range, 0.6)) * 5.0
 			entity.stun(stun_time)
 		elif entity.has_method("apply_effects"):
@@ -284,14 +284,6 @@ func throw_impact(hit_atom, speed: float = 5) -> bool:
 		var detonation_chance = 0.25 + (speed / 20.0) * 0.25  # Up to 50% at high speeds
 		if not active and randf() < detonation_chance:
 			activate()
-			
-	# Spawn impact particle effect if moving fast enough
-	if speed > 3 and hit_atom:
-		var impact_effect = preload("res://Scenes/Effects/Impact.tscn").instantiate()
-		if impact_effect:
-			impact_effect.global_position = global_position
-			impact_effect.scale = Vector2(0.5, 0.5)  # Small impact
-			get_tree().get_root().add_child(impact_effect)
 			
 	return super.throw_impact(hit_atom, speed)
 

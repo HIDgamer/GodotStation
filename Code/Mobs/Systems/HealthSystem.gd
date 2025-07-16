@@ -2,24 +2,34 @@ extends Node
 class_name HealthSystem
 
 # === SIGNALS ===
-signal health_changed(new_health, max_health)
-signal damage_taken(amount, type)
-signal status_effect_added(effect_name, duration)
+signal health_changed(new_health, max_health, health_percent)
+signal damage_taken(amount, type, zone, source)
+signal status_effect_added(effect_name, duration, intensity)
 signal status_effect_removed(effect_name)
-signal died(cause_of_death)
-signal revived()
-signal entered_critical()
-signal exited_critical()
-signal organ_damaged(organ_name, amount)
-signal limb_damaged(limb_name, amount)
-signal blood_level_changed(new_amount, max_amount)
+signal status_effect_updated(effect_name, remaining_time)
+signal died(cause_of_death, death_time)
+signal revived(revival_method)
+signal entered_critical(health_percent)
+signal exited_critical(new_state)
+signal organ_damaged(organ_name, damage_amount, total_damage)
+signal organ_healed(organ_name, heal_amount, remaining_damage)
+signal limb_damaged(limb_name, damage_amount, damage_type)
+signal limb_healed(limb_name, heal_amount, damage_type)
+signal blood_level_changed(new_amount, max_amount, blood_percent, status)
+signal pulse_changed(new_pulse, pulse_status)
+signal temperature_changed(new_temp, temp_status)
+signal consciousness_changed(is_conscious, reason)
+signal pain_level_changed(pain_level, pain_status)
+signal breathing_status_changed(breathing_rate, status)
 
 # === CONSTANTS ===
 # Health states
 enum HealthState {
 	ALIVE,
+	UNCONSCIOUS,
 	CRITICAL,
-	DEAD
+	DEAD,
+	GIBBED
 }
 
 # Damage types
@@ -30,37 +40,115 @@ enum DamageType {
 	OXYGEN,
 	CLONE,
 	STAMINA,
-	BRAIN
+	BRAIN,
+	CELLULAR,
+	GENETIC,
+	RADIATION
+}
+
+# Pain levels
+enum PainLevel {
+	NONE,
+	MILD,
+	MODERATE,
+	SEVERE,
+	EXTREME,
+	UNBEARABLE
+}
+
+# Blood status
+enum BloodStatus {
+	NORMAL,
+	SLIGHTLY_LOW,
+	LOW,
+	CRITICALLY_LOW,
+	FATAL
+}
+
+# Pulse status
+enum PulseStatus {
+	NO_PULSE,
+	VERY_WEAK,
+	WEAK,
+	NORMAL,
+	ELEVATED,
+	RAPID,
+	DANGEROUS
+}
+
+# Temperature status
+enum TemperatureStatus {
+	HYPOTHERMIC,
+	COLD,
+	NORMAL,
+	WARM,
+	HYPERTHERMIC,
+	CRITICAL
 }
 
 # Critical thresholds
 const HEALTH_THRESHOLD_CRIT = 0
 const HEALTH_THRESHOLD_DEAD = -100
-const HEALTH_THRESHOLD_GIBBED = -200  # Added gibbing threshold
+const HEALTH_THRESHOLD_GIBBED = -200
+const HEALTH_THRESHOLD_UNCONSCIOUS = 20
+
+# Blood constants
 const BLOOD_VOLUME_NORMAL = 560
 const BLOOD_VOLUME_SAFE = 475
 const BLOOD_VOLUME_OKAY = 336
 const BLOOD_VOLUME_BAD = 224
 const BLOOD_VOLUME_SURVIVE = 122
+const BLOOD_REGEN_RATE = 0.1
 
-# Organs
-const ORGAN_SLOTS = ["heart", "lungs", "liver", "stomach", "eyes", "brain"]
+# Temperature constants (in Kelvin)
+const BODY_TEMP_NORMAL = 310.15  # 37°C
+const BODY_TEMP_COLD_DAMAGE = 280.15  # 7°C
+const BODY_TEMP_HEAT_DAMAGE = 343.15  # 70°C
+const BODY_TEMP_CRITICAL_LOW = 270.15  # -3°C
+const BODY_TEMP_CRITICAL_HIGH = 373.15  # 100°C
 
-# Limbs
-const LIMBS = ["head", "chest", "l_arm", "r_arm", "l_leg", "r_leg", "groin"]
+# Organ definitions
+const ORGANS = {
+	"heart": {"vital": true, "max_damage": 100, "affects": ["pulse", "circulation"]},
+	"lungs": {"vital": true, "max_damage": 100, "affects": ["breathing", "oxygen"]},
+	"liver": {"vital": false, "max_damage": 100, "affects": ["toxin_processing"]},
+	"kidneys": {"vital": false, "max_damage": 100, "affects": ["toxin_filtering"]},
+	"brain": {"vital": true, "max_damage": 100, "affects": ["consciousness", "motor"]},
+	"eyes": {"vital": false, "max_damage": 80, "affects": ["vision"]},
+	"stomach": {"vital": false, "max_damage": 80, "affects": ["digestion"]},
+	"intestines": {"vital": false, "max_damage": 80, "affects": ["nutrition_processing"]}
+}
 
-# === MEMBER VARIABLES ===
-# Basic health
+# Limb definitions
+const LIMBS = {
+	"head": {"vital": true, "max_damage": 100, "dismemberable": false},
+	"chest": {"vital": true, "max_damage": 120, "dismemberable": false},
+	"groin": {"vital": false, "max_damage": 100, "dismemberable": false},
+	"l_arm": {"vital": false, "max_damage": 80, "dismemberable": true},
+	"r_arm": {"vital": false, "max_damage": 80, "dismemberable": true},
+	"l_leg": {"vital": false, "max_damage": 80, "dismemberable": true},
+	"r_leg": {"vital": false, "max_damage": 80, "dismemberable": true},
+	"l_hand": {"vital": false, "max_damage": 60, "dismemberable": true},
+	"r_hand": {"vital": false, "max_damage": 60, "dismemberable": true},
+	"l_foot": {"vital": false, "max_damage": 60, "dismemberable": true},
+	"r_foot": {"vital": false, "max_damage": 60, "dismemberable": true}
+}
+
+# === CORE HEALTH VARIABLES ===
 var max_health: float = 100.0
 var health: float = 100.0
 var current_state = HealthState.ALIVE
+var previous_state = HealthState.ALIVE
 
 # Status flags
 var godmode: bool = false
 var in_stasis: bool = false
 var no_pain: bool = false
+var is_synthetic: bool = false
+var is_dead: bool = false
+var is_unconscious: bool = false
 
-# Damage variables
+# === DAMAGE VARIABLES ===
 var bruteloss: float = 0.0
 var fireloss: float = 0.0
 var toxloss: float = 0.0
@@ -70,220 +158,272 @@ var staminaloss: float = 0.0
 var brainloss: float = 0.0
 var max_stamina: float = 100.0
 
-# Blood system
+# === VITAL SIGNS ===
 var blood_type: String = "O+"
 var blood_volume: float = BLOOD_VOLUME_NORMAL
-var max_blood_volume: float = BLOOD_VOLUME_NORMAL
+var blood_volume_maximum: float = BLOOD_VOLUME_NORMAL
 var bleeding_rate: float = 0.0
-var in_cardiac_arrest: bool = false
-var pulse: int = 60  # Heartbeats per minute
+var pulse: int = 70
+var body_temperature: float = BODY_TEMP_NORMAL
+var breathing_rate: int = 16
+var blood_pressure_systolic: int = 120
+var blood_pressure_diastolic: int = 80
 
-# Organ system
+# === ORGAN AND LIMB SYSTEMS ===
 var organs: Dictionary = {}
 var limbs: Dictionary = {}
-var limb_damage_multipliers: Dictionary = {}
+var prosthetics: Dictionary = {}
 
-# Body temperature
-var body_temperature: float = 310.15  # Kelvin (37°C/98.6°F)
-var temp_resistance: float = 1.0
-
-# Status effects and modifiers
+# === STATUS EFFECTS ===
 var status_effects: Dictionary = {}
-var incoming_damage_modifiers: Dictionary = {}
+var pain_level: float = 0.0
+var shock_level: float = 0.0
+var consciousness_level: float = 100.0
 
-# Armor values
-var soft_armor: Dictionary = {
-	"melee": 0,
-	"bullet": 0,
-	"laser": 0,
-	"energy": 0,
-	"bomb": 0,
-	"bio": 0,
-	"rad": 0,
-	"fire": 0,
-	"acid": 0
+# === ARMOR AND RESISTANCES ===
+var armor: Dictionary = {
+	"melee": 0, "bullet": 0, "laser": 0, "energy": 0,
+	"bomb": 0, "bio": 0, "rad": 0, "fire": 0, "acid": 0
 }
 
-var hard_armor: Dictionary = {
-	"melee": 0,
-	"bullet": 0,
-	"laser": 0,
-	"energy": 0,
-	"bomb": 0,
-	"bio": 0,
-	"rad": 0,
-	"fire": 0,
-	"acid": 0
+var damage_resistances: Dictionary = {
+	DamageType.BRUTE: 1.0,
+	DamageType.BURN: 1.0,
+	DamageType.TOXIN: 1.0,
+	DamageType.OXYGEN: 1.0,
+	DamageType.CLONE: 1.0,
+	DamageType.BRAIN: 1.0,
+	DamageType.STAMINA: 1.0
 }
 
-# Internal trackers
+# === MEDICAL HISTORY ===
 var death_time: int = 0
-var can_be_revived: bool = true
+var revival_count: int = 0
 var cause_of_death: String = ""
-var traumatic_shock: float = 0.0  # Pain level
-var shock_stage: int = 0  # Progressive shock
-var damage_mute_counter: int = 0  # For preventing spam
-var dead_threshold_passed: bool = false
-var overheal: float = 0.0  # Buffer before damage is taken
+var medical_notes: Array = []
+var diseases: Array = []
+var allergies: Array = []
+var medications: Array = []
 
-# References to other systems
-var entity = null  # The parent entity
-var inventory_system = null  # The entity's inventory system
-var sprite_system = null  # For visual damage updates
-var audio_system = null  # For sound effects
-var ui_system = null  # For UI updates
-var effect = null
+# === SYSTEM REFERENCES ===
+var entity = null
+var health_connector = null
+var inventory_system = null
+var sprite_system = null
+var audio_system = null
+var ui_system = null
+var effect_system = null
+
+# === PERFORMANCE OPTIMIZATION ===
+var update_timer: float = 0.0
+var ui_update_timer: float = 0.0
+var last_health_update: float = 0.0
+var damage_sound_cooldown: float = 0.0
 
 # === INITIALIZATION ===
 func _ready():
-	# Find parent entity
+	# Find parent entity and connector
 	entity = get_parent()
-	effect = entity.get_node("Effect")
+	health_connector = get_node_or_null("../HealthConnector")
 	
-	# Set up connections to other systems
-	_find_systems()
+	# Initialize systems
+	_find_and_connect_systems()
 	
-	# Initialize organ dictionary
+	# Initialize health components
 	_initialize_organs()
-	
-	# Initialize limb dictionary
 	_initialize_limbs()
+	_initialize_vital_signs()
 	
-	# Set up initial health
-	health = max_health
+	# Set up timers
+	_setup_update_timers()
 	
-	# Connect to timer for periodic updates
-	var timer = Timer.new()
-	timer.wait_time = 1.0
-	timer.autostart = true
-	timer.timeout.connect(_on_update_tick)
-	add_child(timer)
+	# Generate random blood type if not set
+	if blood_type == "O+":
+		_generate_blood_type()
+	
+	# Initial health calculation
+	updatehealth()
+	
+	print("HealthSystem: Initialized successfully")
 
-func _find_systems():
-	# Try to find inventory system
-	inventory_system = entity.get_node_or_null("InventorySystem")
+func _find_and_connect_systems():
+	"""Find and connect to other entity systems"""
+	# Try to find systems in parent entity
+	if entity:
+		inventory_system = entity.get_node_or_null("InventorySystem")
+		sprite_system = entity.get_node_or_null("UpdatedHumanSpriteSystem")
+		if not sprite_system:
+			sprite_system = entity.get_node_or_null("HumanSpriteSystem")
+		audio_system = entity.get_node_or_null("AudioSystem")
+		ui_system = entity.get_node_or_null("UISystem")
+		effect_system = entity.get_node_or_null("Effect")
 	
-	# Try to find sprite system
-	sprite_system = entity.get_node_or_null("SpriteSystem")
+	# Connect to health connector if available
+	if health_connector:
+		# Connect relevant signals
+		health_changed.connect(health_connector._on_health_changed)
+		damage_taken.connect(health_connector._on_damage_taken)
+		status_effect_added.connect(health_connector._on_status_effect_added)
+		status_effect_removed.connect(health_connector._on_status_effect_removed)
+		died.connect(health_connector._on_entity_died)
+		revived.connect(health_connector._on_entity_revived)
+		entered_critical.connect(health_connector._on_entered_critical)
+		exited_critical.connect(health_connector._on_exited_critical)
+		blood_level_changed.connect(health_connector._on_blood_level_changed)
 	
-	# Try to find audio system
-	audio_system = entity.get_node_or_null("AudioSystem")
-	
-	# Try to find UI system
-	ui_system = entity.get_node_or_null("UISystem")
-	
-	print("HealthSystem: Connected to systems")
-	print("  - Inventory: ", "Found" if inventory_system else "Not found")
-	print("  - Sprite: ", "Found" if sprite_system else "Not found")
-	print("  - Audio: ", "Found" if audio_system else "Not found")
-	print("  - UI: ", "Found" if ui_system else "Not found")
+	print("HealthSystem: System connections established")
 
 func _initialize_organs():
-	for organ_name in ORGAN_SLOTS:
+	"""Initialize organ system"""
+	for organ_name in ORGANS:
+		var organ_data = ORGANS[organ_name]
 		organs[organ_name] = {
 			"name": organ_name,
-			"max_damage": 100.0,
+			"max_damage": organ_data.max_damage,
 			"damage": 0.0,
-			"is_vital": organ_name in ["heart", "brain"],
+			"is_vital": organ_data.vital,
 			"is_damaged": false,
-			"is_failing": false
+			"is_failing": false,
+			"is_infected": false,
+			"affects": organ_data.affects,
+			"efficiency": 1.0
 		}
 
 func _initialize_limbs():
+	"""Initialize limb system"""
 	for limb_name in LIMBS:
+		var limb_data = LIMBS[limb_name]
 		limbs[limb_name] = {
 			"name": limb_name,
-			"max_damage": 100.0,
+			"max_damage": limb_data.max_damage,
 			"brute_damage": 0.0,
 			"burn_damage": 0.0,
-			"status": "normal",  # normal, wounded, mangled, missing
+			"status": "healthy",
+			"is_vital": limb_data.vital,
+			"dismemberable": limb_data.dismemberable,
+			"attached": true,
+			"is_bleeding": false,
+			"is_bandaged": false,
+			"is_splinted": false,
+			"is_infected": false,
 			"wounds": [],
-			"attached": true
+			"scars": []
 		}
-		
-	# Set up damage multipliers for limbs
-	limb_damage_multipliers = {
-		"head": 1.5,
-		"chest": 1.0,
-		"l_arm": 0.8,
-		"r_arm": 0.8,
-		"l_leg": 0.8,
-		"r_leg": 0.8,
-		"groin": 1.0
-	}
+
+func _initialize_vital_signs():
+	"""Initialize vital signs to normal ranges"""
+	pulse = 70 + randi() % 20  # 70-90 BPM
+	breathing_rate = 14 + randi() % 6  # 14-20 RPM
+	blood_pressure_systolic = 110 + randi() % 20  # 110-130
+	blood_pressure_diastolic = 70 + randi() % 20  # 70-90
+	body_temperature = BODY_TEMP_NORMAL + randf_range(-1.0, 1.0)  # Slight variation
+
+func _generate_blood_type():
+	"""Generate a random blood type"""
+	var types = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"]
+	var probabilities = [38, 7, 34, 6, 9, 2, 3, 1]  # Real-world distribution
+	
+	var roll = randi() % 100
+	var cumulative = 0
+	
+	for i in range(types.size()):
+		cumulative += probabilities[i]
+		if roll < cumulative:
+			blood_type = types[i]
+			break
+
+func _setup_update_timers():
+	"""Set up various update timers for performance"""
+	var main_timer = Timer.new()
+	main_timer.wait_time = 1.0  # Main update every second
+	main_timer.autostart = true
+	main_timer.timeout.connect(_on_main_update_tick)
+	add_child(main_timer)
+	
+	var fast_timer = Timer.new()
+	fast_timer.wait_time = 0.1  # Fast updates for critical systems
+	fast_timer.autostart = true
+	fast_timer.timeout.connect(_on_fast_update_tick)
+	add_child(fast_timer)
 
 # === PROCESS FUNCTIONS ===
 func _process(delta):
+	"""Main process function - handles time-sensitive updates"""
+	update_timer += delta
+	ui_update_timer += delta
+	
+	# Update sound cooldowns
+	if damage_sound_cooldown > 0:
+		damage_sound_cooldown -= delta
+	
 	# Process status effects
 	_process_status_effects(delta)
 	
 	# Process bleeding
 	if bleeding_rate > 0:
-		adjust_blood_volume(-bleeding_rate * delta)
+		_process_bleeding(delta)
 	
 	# Process temperature effects
-	_process_temperature(delta)
+	if update_timer >= 0.5:  # Every half second
+		_process_temperature_effects(delta)
 	
 	# Process organ effects
-	_process_organs(delta)
+	_process_organ_effects(delta)
 	
-	# Process shock
-	_process_shock(delta)
+	# Process pain and shock
+	_process_pain_and_shock(delta)
+	
+	# Reset update timer
+	if update_timer >= 1.0:
+		update_timer = 0.0
 
-func _on_update_tick():
-	# Every second updates
+func _on_main_update_tick():
+	"""Main update tick - runs every second"""
 	if current_state == HealthState.DEAD:
 		_process_death_effects()
 		return
 	
-	# Blood regeneration if alive
-	if current_state == HealthState.ALIVE and blood_volume < BLOOD_VOLUME_NORMAL:
-		adjust_blood_volume(0.1)  # Regenerate blood slowly
+	# Natural healing and regeneration
+	_process_natural_healing()
 	
-	# Natural healing
-	if current_state == HealthState.ALIVE and bruteloss + fireloss < 30:
-		adjustBruteLoss(-0.1)
-		adjustFireLoss(-0.1)
+	# Vital sign updates
+	_update_vital_signs()
 	
-	# Process organ slow damage for failing organs
-	for organ_name in organs:
-		var organ = organs[organ_name]
-		if organ.is_failing:
-			apply_organ_damage(organ_name, 0.2)
+	# Organ maintenance
+	_process_organ_maintenance()
+	
+	# Update UI if needed
+	if ui_update_timer >= 1.0:
+		_update_health_ui()
+		ui_update_timer = 0.0
 
-# Process status effects, removing expired ones
+func _on_fast_update_tick():
+	"""Fast update tick - runs every 0.1 seconds for critical systems"""
+	# Only process critical updates here
+	if current_state == HealthState.CRITICAL:
+		_process_critical_condition()
+	
+	# Process cardiac arrest
+	if _is_in_cardiac_arrest():
+		_process_cardiac_arrest()
+
 func _process_status_effects(delta):
+	"""Process all active status effects"""
 	var effects_to_remove = []
 	
 	for effect_name in status_effects:
 		var effect = status_effects[effect_name]
+		var old_duration = effect.duration
 		effect.duration -= delta
 		
-		# Process effect-specific behaviors
-		match effect_name:
-			"poisoned":
-				adjustToxLoss(effect.intensity * delta)
-			"bleeding":
-				# Already handled via bleeding_rate
-				pass
-			"burned":
-				adjustFireLoss(effect.intensity * delta * 0.1)
-			"irradiated":
-				adjustToxLoss(effect.intensity * delta * 0.05)
-				if randf() < 0.01 * effect.intensity:
-					# Random mutations or cell damage
-					adjustCloneLoss(1.0)
-			"stunned":
-				# Visual effects are handled by sprite system
-				pass
-			"confused":
-				# Confusion effects handled by movement controller
-				pass
-			"slowed":
-				# Slowdown handled by movement controller
-				pass
+		# Process effect-specific logic
+		_process_individual_effect(effect_name, effect, delta)
 		
-		# Remove expired effects
+		# Emit update signal if duration changed significantly
+		if abs(old_duration - effect.duration) > 0.1:
+			emit_signal("status_effect_updated", effect_name, effect.duration)
+		
+		# Mark for removal if expired
 		if effect.duration <= 0:
 			effects_to_remove.append(effect_name)
 	
@@ -291,177 +431,325 @@ func _process_status_effects(delta):
 	for effect_name in effects_to_remove:
 		remove_status_effect(effect_name)
 
-# Process temperature effects
-func _process_temperature(delta):
-	# Temperature regulation
-	var normal_temp = 310.15  # 37°C in Kelvin
-	
-	if body_temperature > normal_temp + 30:  # Hyperthermia
-		apply_damage(delta * (body_temperature - normal_temp - 30) * 0.1, DamageType.BURN)
-		add_status_effect("hyperthermia", 2.0, (body_temperature - normal_temp) / 10)
-	elif body_temperature < normal_temp - 30:  # Hypothermia
-		apply_damage(delta * (normal_temp - 30 - body_temperature) * 0.1, DamageType.BURN)
-		add_status_effect("hypothermia", 2.0, (normal_temp - body_temperature) / 10)
-	else:
-		# Move slowly toward normal temperature
-		body_temperature = lerp(body_temperature, normal_temp, 0.01 * delta)
+func _process_individual_effect(effect_name: String, effect: Dictionary, delta: float):
+	"""Process a specific status effect"""
+	match effect_name:
+		"bleeding":
+			# Handled separately in _process_bleeding
+			pass
+		"poisoned":
+			adjustToxLoss(effect.intensity * delta * 2.0)
+		"burning":
+			adjustFireLoss(effect.intensity * delta * 0.5)
+		"irradiated":
+			adjustToxLoss(effect.intensity * delta * 0.3)
+			if randf() < 0.01 * effect.intensity:
+				adjustCloneLoss(1.0)
+		"infected":
+			if randf() < 0.1:
+				adjustToxLoss(effect.intensity * 0.5)
+				body_temperature += effect.intensity * 0.1
+		"hypothermic":
+			body_temperature = max(body_temperature - delta * effect.intensity, BODY_TEMP_CRITICAL_LOW)
+		"hyperthermic":
+			body_temperature = min(body_temperature + delta * effect.intensity, BODY_TEMP_CRITICAL_HIGH)
+		"confused":
+			# Handled by movement system
+			pass
+		"stunned":
+			# Handled by movement system
+			pass
+		"unconscious":
+			consciousness_level = max(0, consciousness_level - delta * 10)
 
-# Process organs
-func _process_organs(delta):
-	# Process heart
-	if organs.has("heart"):
-		var heart = organs["heart"]
-		
-		# Heart calculations
-		if heart.is_failing or in_cardiac_arrest:
-			pulse = 0
-			# No heartbeat means oxygen deprivation
-			adjustOxyLoss(1.0 * delta)
-		else:
-			# Normal pulse based on health
-			var health_percent = health / max_health
-			pulse = int(60 + (1.0 - health_percent) * 40)
-	
-	# Process lungs
-	if organs.has("lungs"):
-		var lungs = organs["lungs"]
-		if lungs.is_failing:
-			adjustOxyLoss(1.0 * delta)
-	
-	# Process liver
-	if organs.has("liver"):
-		var liver = organs["liver"]
-		if liver.is_failing:
-			adjustToxLoss(0.3 * delta)
-	
-	# Process brain
-	if organs.has("brain"):
-		var brain = organs["brain"]
-		if brain.damage > 60:
-			add_status_effect("confused", 1.0, brain.damage / 20)
-		if brain.is_failing and current_state != HealthState.DEAD:
-			# Brain death
-			die("brain damage")
-
-# Process shock from traumatic injury
-func _process_shock(delta):
-	# Skip if no pain
-	if no_pain:
+func _process_bleeding(delta):
+	"""Process bleeding effects"""
+	if bleeding_rate <= 0:
 		return
+	
+	var blood_loss = bleeding_rate * delta
+	adjust_blood_volume(-blood_loss)
+	
+	# Natural clotting reduces bleeding over time
+	if not status_effects.has("anticoagulant"):
+		bleeding_rate = max(0, bleeding_rate - delta * 0.1)
 		
-	# Calculate shock value based on damage
-	var damage_based_shock = (bruteloss + fireloss) * 0.5
-	
-	# Update traumatic shock value
-	traumatic_shock = max(0, damage_based_shock)
-	
-	# Process shock stages
-	if traumatic_shock > 30:
-		shock_stage += delta
-	else:
-		shock_stage = max(0, shock_stage - (delta * 0.5))
-	
-	# Apply shock effects based on stages
-	if shock_stage >= 10 and shock_stage < 30:
-		if randf() < 0.05:
-			add_status_effect("dizzy", 2.0)
-	elif shock_stage >= 30 and shock_stage < 60:
-		if randf() < 0.1:
-			add_status_effect("stunned", 2.0)
-	elif shock_stage >= 60 and shock_stage < 120:
-		if randf() < 0.2:
-			adjustOxyLoss(1.0)
-	elif shock_stage >= 120:
-		adjustOxyLoss(2.0 * delta)
-		if randf() < 0.1:
-			enter_cardiac_arrest()
+		if bleeding_rate <= 0.1:
+			set_bleeding_rate(0)
 
-# Process effects that happen while dead
+func _process_temperature_effects(delta):
+	"""Process body temperature effects"""
+	var normal_temp = BODY_TEMP_NORMAL
+	
+	# Temperature regulation towards normal
+	var temp_diff = body_temperature - normal_temp
+	var regulation_rate = 0.5 * delta
+	
+	if abs(temp_diff) > 1.0:
+		body_temperature = lerp(body_temperature, normal_temp, regulation_rate)
+	
+	# Temperature damage
+	if body_temperature <= BODY_TEMP_COLD_DAMAGE:
+		var damage = (BODY_TEMP_COLD_DAMAGE - body_temperature) * delta * 0.1
+		apply_damage(damage, DamageType.BURN, 0, "chest")
+		if not status_effects.has("hypothermic"):
+			add_status_effect("hypothermic", 10.0, abs(temp_diff))
+	elif body_temperature >= BODY_TEMP_HEAT_DAMAGE:
+		var damage = (body_temperature - BODY_TEMP_HEAT_DAMAGE) * delta * 0.1
+		apply_damage(damage, DamageType.BURN, 0, "chest")
+		if not status_effects.has("hyperthermic"):
+			add_status_effect("hyperthermic", 10.0, temp_diff)
+	
+	# Emit temperature change signal
+	var temp_status = _get_temperature_status()
+	emit_signal("temperature_changed", body_temperature, temp_status)
+
+func _process_organ_effects(delta):
+	"""Process organ-specific effects"""
+	for organ_name in organs:
+		var organ = organs[organ_name]
+		
+		if organ.is_failing:
+			_process_failing_organ(organ_name, organ, delta)
+		elif organ.is_damaged:
+			_process_damaged_organ(organ_name, organ, delta)
+
+func _process_failing_organ(organ_name: String, organ: Dictionary, delta: float):
+	"""Process effects of a failing organ"""
+	match organ_name:
+		"heart":
+			# Cardiac issues
+			if randf() < 0.1:
+				_trigger_cardiac_event()
+			pulse = max(0, pulse - delta * 10)
+		
+		"lungs":
+			# Respiratory failure
+			adjustOxyLoss(delta * 5.0)
+			breathing_rate = max(0, breathing_rate - delta * 2)
+		
+		"liver":
+			# Toxin processing failure
+			adjustToxLoss(delta * 2.0)
+		
+		"kidneys":
+			# Toxin buildup
+			adjustToxLoss(delta * 1.0)
+		
+		"brain":
+			# Neurological failure
+			adjustBrainLoss(delta * 1.0)
+			consciousness_level = max(0, consciousness_level - delta * 5)
+			if consciousness_level <= 0 and current_state != HealthState.DEAD:
+				die("brain death")
+
+func _process_damaged_organ(organ_name: String, organ: Dictionary, delta: float):
+	"""Process effects of a damaged but not failing organ"""
+	var efficiency_loss = organ.damage / organ.max_damage
+	organ.efficiency = max(0.1, 1.0 - efficiency_loss)
+	
+	match organ_name:
+		"heart":
+			pulse = int(pulse * organ.efficiency)
+		"lungs":
+			breathing_rate = int(breathing_rate * organ.efficiency)
+		"liver":
+			if randf() < 0.05 * efficiency_loss:
+				adjustToxLoss(0.5)
+
+func _process_pain_and_shock(delta):
+	"""Process pain and shock effects"""
+	# Calculate pain from damage
+	var damage_pain = (bruteloss + fireloss) * 0.5
+	var limb_pain = 0.0
+	
+	for limb_name in limbs:
+		var limb = limbs[limb_name]
+		limb_pain += (limb.brute_damage + limb.burn_damage) * 0.3
+	
+	var target_pain = damage_pain + limb_pain
+	
+	# Apply pain resistance
+	if no_pain:
+		target_pain = 0
+	
+	# Smooth pain changes
+	pain_level = lerp(pain_level, target_pain, delta * 2.0)
+	
+	# Calculate shock from severe pain
+	if pain_level > 30:
+		shock_level = min(100, shock_level + delta * (pain_level - 30))
+	else:
+		shock_level = max(0, shock_level - delta * 10)
+	
+	# Apply shock effects
+	if shock_level > 50:
+		if randf() < 0.1:
+			add_status_effect("stunned", 2.0, shock_level / 50)
+	
+	if shock_level > 80:
+		adjustOxyLoss(delta * 2.0)
+		if randf() < 0.05:
+			_trigger_cardiac_event()
+	
+	# Emit pain signal
+	var pain_status = _get_pain_status()
+	emit_signal("pain_level_changed", pain_level, pain_status)
+
+func _process_natural_healing():
+	"""Process natural healing and regeneration"""
+	if current_state != HealthState.ALIVE:
+		return
+	
+	# Slow natural healing for minor damage
+	if bruteloss > 0 and bruteloss < 20:
+		adjustBruteLoss(-0.1)
+	
+	if fireloss > 0 and fireloss < 20:
+		adjustFireLoss(-0.1)
+	
+	# Blood regeneration
+	if blood_volume < blood_volume_maximum:
+		adjust_blood_volume(BLOOD_REGEN_RATE)
+	
+	# Stamina regeneration (faster when resting)
+	if staminaloss > 0:
+		var regen_rate = 2.0
+		if entity and "is_lying" in entity and entity.is_lying:
+			regen_rate *= 2.0
+		adjustStaminaLoss(-regen_rate)
+
+func _update_vital_signs():
+	"""Update vital signs based on current health state"""
+	# Calculate pulse based on health and blood loss
+	var base_pulse = 70
+	var health_factor = 1.0 - (health / max_health)
+	var blood_factor = 1.0 - (blood_volume / blood_volume_maximum)
+	
+	pulse = int(base_pulse + (health_factor * 30) + (blood_factor * 40))
+	pulse = clamp(pulse, 0, 200)
+	
+	# Breathing rate
+	var base_breathing = 16
+	breathing_rate = int(base_breathing + (oxyloss * 0.2))
+	breathing_rate = clamp(breathing_rate, 0, 40)
+	
+	# Blood pressure
+	blood_pressure_systolic = int(120 - (blood_volume / blood_volume_maximum) * 40)
+	blood_pressure_diastolic = int(80 - (blood_volume / blood_volume_maximum) * 20)
+	
+	# Emit vital sign signals
+	var pulse_status = _get_pulse_status()
+	emit_signal("pulse_changed", pulse, pulse_status)
+	
+	var breathing_status = _get_breathing_status()
+	emit_signal("breathing_status_changed", breathing_rate, breathing_status)
+
+func _process_critical_condition():
+	"""Process effects while in critical condition"""
+	# Random damage accumulation
+	if randf() < 0.1:
+		adjustOxyLoss(0.5)
+	
+	# Possible cardiac arrest
+	if randf() < 0.05:
+		_trigger_cardiac_event()
+
+func _process_cardiac_arrest():
+	"""Process cardiac arrest effects"""
+	pulse = 0
+	adjustOxyLoss(2.0)
+	consciousness_level = max(0, consciousness_level - 5.0)
+
 func _process_death_effects():
-	# Increment death time
+	"""Process effects while dead"""
 	death_time += 1
 	
-	# After certain time, decay effects would begin
-	if death_time > 600:  # 10 minutes
-		# Start body decay
-		if randf() < 0.05:
-			# Corpse decay effects
-			adjustCloneLoss(0.2)
-	
-	# Make revival harder over time
+	# Body decay after extended time
 	if death_time > 1800:  # 30 minutes
-		can_be_revived = false
+		if randf() < 0.01:
+			adjustCloneLoss(0.1)
+
+func _process_organ_maintenance():
+	"""Maintain organ health and status"""
+	for organ_name in organs:
+		var organ = organs[organ_name]
+		
+		# Update organ status based on damage
+		if organ.damage > organ.max_damage * 0.8:
+			organ.is_failing = true
+		elif organ.damage > organ.max_damage * 0.3:
+			organ.is_damaged = true
+		else:
+			organ.is_damaged = false
+			organ.is_failing = false
 
 # === DAMAGE FUNCTIONS ===
-# Apply damage of specified type
-func apply_damage(amount, damage_type, penetration = 0, limb = null, source = null):
-	if godmode:
-		return 0
+func apply_damage(amount: float, damage_type: int, penetration: float = 0, zone: String = "", source = null) -> float:
+	"""Apply damage with comprehensive calculation"""
+	if godmode or amount <= 0:
+		return 0.0
 	
-	# Skip if dead unless the damage is being applied to a specific limb
-	if current_state == HealthState.DEAD and limb == null:
-		return 0
+	# Don't apply damage to already dead entities unless forced
+	if current_state == HealthState.DEAD and zone == "":
+		return 0.0
 	
-	# Calculate actual damage after modifiers
-	var actual_damage = calculate_damage_with_modifiers(amount, damage_type, penetration)
+	# Calculate actual damage after resistances and armor
+	var actual_damage = _calculate_final_damage(amount, damage_type, penetration, zone)
 	
 	if actual_damage <= 0:
-		return 0
+		return 0.0
 	
-	# Apply damage to specific limb if specified
-	if limb != null and limbs.has(limb):
-		return apply_limb_damage(limb, actual_damage, damage_type)
-		
-	# Otherwise apply to general health pool
-	match damage_type:
-		DamageType.BRUTE:
-			adjustBruteLoss(actual_damage)
-		DamageType.BURN:
-			adjustFireLoss(actual_damage)
-		DamageType.TOXIN:
-			adjustToxLoss(actual_damage)
-		DamageType.OXYGEN:
-			adjustOxyLoss(actual_damage)
-		DamageType.CLONE:
-			adjustCloneLoss(actual_damage)
-		DamageType.BRAIN:
-			adjustBrainLoss(actual_damage)
-		DamageType.STAMINA:
-			adjustStaminaLoss(actual_damage)
+	# Apply damage to specific zone or general health
+	if zone != "" and limbs.has(zone):
+		_apply_limb_damage(zone, actual_damage, damage_type)
+	else:
+		_apply_general_damage(actual_damage, damage_type)
 	
-	# Check for blood splatter for physical damage types
-	if damage_type == DamageType.BRUTE and actual_damage > 10:
-		check_blood_splatter(actual_damage)
+	# Special damage effects
+	_process_damage_effects(actual_damage, damage_type, zone, source)
 	
-	# Emit signal
-	emit_signal("damage_taken", actual_damage, damage_type)
-	
-	# Update health after damage
+	# Update health and check thresholds
 	updatehealth()
+	
+	# Emit signals
+	emit_signal("damage_taken", actual_damage, damage_type, zone, source)
 	
 	# Play damage sounds
 	_play_damage_sound(damage_type, actual_damage)
 	
-	# Check for gibbing if massive damage taken at once
-	if actual_damage > 75 and damage_type in [DamageType.BRUTE, DamageType.BURN]:
-		check_for_gibbing(actual_damage, damage_type)
-	
 	return actual_damage
 
-# Calculate damage after modifiers and armor
-func calculate_damage_with_modifiers(amount, damage_type, penetration = 0):
-	if amount <= 0:
-		return 0
+func _calculate_final_damage(amount: float, damage_type: int, penetration: float, zone: String) -> float:
+	"""Calculate final damage after all modifiers"""
+	var modified_damage = amount
 	
-	var modified_amount = amount
+	# Apply damage resistance
+	if damage_resistances.has(damage_type):
+		modified_damage *= damage_resistances[damage_type]
 	
-	# Apply incoming damage modifiers from status effects
-	for modifier in incoming_damage_modifiers:
-		if incoming_damage_modifiers[modifier].damage_type == damage_type:
-			modified_amount *= incoming_damage_modifiers[modifier].multiplier
+	# Apply armor if applicable
+	var armor_reduction = _calculate_armor_reduction(damage_type, penetration)
+	modified_damage *= (1.0 - armor_reduction)
 	
-	# Apply armor reduction if applicable
+	# Zone-specific multipliers
+	if zone != "":
+		modified_damage *= _get_zone_damage_multiplier(zone)
+	
+	# Synthetic resistance
+	if is_synthetic:
+		match damage_type:
+			DamageType.TOXIN:
+				modified_damage *= 0.5  # Synthetics resist toxins
+			DamageType.OXYGEN:
+				modified_damage = 0  # Synthetics don't need oxygen
+	
+	return max(0, modified_damage)
+
+func _calculate_armor_reduction(damage_type: int, penetration: float) -> float:
+	"""Calculate armor damage reduction"""
 	var armor_type = ""
+	
 	match damage_type:
 		DamageType.BRUTE:
 			armor_type = "melee"
@@ -469,249 +757,159 @@ func calculate_damage_with_modifiers(amount, damage_type, penetration = 0):
 			armor_type = "fire"
 		DamageType.TOXIN:
 			armor_type = "bio"
+		_:
+			return 0.0
 	
-	if armor_type != "":
-		# Apply soft armor (percentage reduction)
-		var armor_value = soft_armor.get(armor_type, 0)
-		var effective_penetration = max(0, penetration)
-		
-		# Calculate damage reduction from armor
-		var reduction = (armor_value - effective_penetration) * 0.01
-		reduction = clamp(reduction, 0, 0.9)  # Cap at 90% reduction
-		modified_amount *= (1.0 - reduction)
-		
-		# Apply hard armor (flat reduction)
-		var hard_armor_value = hard_armor.get(armor_type, 0)
-		modified_amount = max(0, modified_amount - max(0, hard_armor_value - effective_penetration))
+	if not armor.has(armor_type):
+		return 0.0
 	
-	# Apply overheal reduction if available
-	if overheal > 0:
-		var reduction = min(overheal, modified_amount)
-		modified_amount -= reduction
-		overheal -= reduction
+	var armor_value = armor[armor_type]
+	var effective_armor = max(0, armor_value - penetration)
 	
-	return modified_amount
+	# Convert armor value to percentage reduction (cap at 90%)
+	return min(0.9, effective_armor * 0.01)
 
-# Apply damage to a specific limb
-func apply_limb_damage(limb_name, amount, damage_type):
-	if !limbs.has(limb_name) or amount <= 0:
-		return 0
-	
-	var limb = limbs[limb_name]
-	var damage_mult = limb_damage_multipliers.get(limb_name, 1.0)
-	var applied_damage = amount * damage_mult
-	
-	# Apply damage based on type
+func _get_zone_damage_multiplier(zone: String) -> float:
+	"""Get damage multiplier for specific body zone"""
+	match zone:
+		"head":
+			return 1.5
+		"chest":
+			return 1.2
+		"groin":
+			return 1.1
+		_:
+			return 1.0
+
+func _apply_general_damage(amount: float, damage_type: int):
+	"""Apply damage to general health pools"""
 	match damage_type:
 		DamageType.BRUTE:
-			limb.brute_damage += applied_damage
+			adjustBruteLoss(amount)
 		DamageType.BURN:
-			limb.burn_damage += applied_damage
-		_:
-			# For other damage types, distribute to general health
-			apply_damage(applied_damage, damage_type)
-			return applied_damage
-	
-	# Update limb status
-	_update_limb_status(limb_name)
-	
-	# Emit signal
-	emit_signal("limb_damaged", limb_name, applied_damage)
-	
-	# Check for blood splatter
-	if damage_type == DamageType.BRUTE and applied_damage > 10:
-		check_blood_splatter(applied_damage)
-	
-	# Apply a portion of limb damage to overall health pool
-	var health_damage = applied_damage * 0.5
-	
-	if damage_type == DamageType.BRUTE:
-		adjustBruteLoss(health_damage)
-	else:
-		adjustFireLoss(health_damage)
-	
-	# Check for limb loss/dismemberment
-	check_for_dismemberment(limb_name, applied_damage, damage_type)
-	
-	# Update health
-	updatehealth()
-	
-	return applied_damage
+			adjustFireLoss(amount)
+		DamageType.TOXIN:
+			adjustToxLoss(amount)
+		DamageType.OXYGEN:
+			adjustOxyLoss(amount)
+		DamageType.CLONE:
+			adjustCloneLoss(amount)
+		DamageType.BRAIN:
+			adjustBrainLoss(amount)
+		DamageType.STAMINA:
+			adjustStaminaLoss(amount)
 
-# Check for gibbing based on damage
-func check_for_gibbing(damage_amount, damage_type):
-	# Multiple conditions for gibbing:
-	# 1. Massive single hit
-	if damage_amount > 100:
-		if randf() < 0.7:  # 70% chance
-			gib("massive damage")
-			return true
-			
-	# 2. Explosive damage
-	if damage_type == DamageType.BRUTE and damage_amount > 75:
-		if "bomb" in soft_armor and soft_armor["bomb"] < 50:  # Low bomb armor
-			if randf() < 0.5:  # 50% chance
-				gib("explosion")
-				return true
-				
-	# 3. Already very damaged and took significant hit
-	if health < -50 and damage_amount > 30:
-		if randf() < 0.3:  # 30% chance
-			gib("trauma")
-			return true
-			
-	return false
-
-# Check for dismemberment of a limb
-func check_for_dismemberment(limb_name, damage_amount, damage_type):
-	var limb = limbs[limb_name]
-	var total_damage = limb.brute_damage + limb.burn_damage
-	
-	# Don't check for torso or head dismemberment
-	if limb_name in ["head", "chest", "groin"]:
-		return false
-	
-	# 1. High damage on already damaged limb
-	if total_damage > 90 and damage_amount > 25:
-		var chance = (total_damage - 90) * 0.2
-		if randf() < chance:
-			dismember_limb(limb_name)
-			return true
-			
-	# 2. Sharp objects with high damage (would need to pass this from weapon)
-	if damage_type == DamageType.BRUTE and damage_amount > 50:
-		var sharp_factor = 0.3  # This would be higher for weapons flagged as sharp
-		if randf() < sharp_factor:
-			dismember_limb(limb_name)
-			return true
-			
-	return false
-
-# Dismember a limb
-func dismember_limb(limb_name):
-	if !limbs.has(limb_name):
-		return false
-		
-	var limb = limbs[limb_name]
-	
-	# Apply massive damage to base health
-	adjustBruteLoss(30)
-	
-	# Set limb as detached
-	limb.attached = false
-	
-	# Mark limb as missing
-	limb.status = "missing"
-	
-	# Cause massive bleeding
-	set_bleeding_rate(bleeding_rate + 5.0)
-	
-	# Emit effects and signals
-	emit_signal("limb_damaged", limb_name, 100.0)
-	
-	# Update sprite if possible
-	if sprite_system and sprite_system.has_method("update_dismemberment"):
-		sprite_system.update_dismemberment(limb_name)
-		
-	# Play sound effect
-	if audio_system:
-		audio_system.play_sound("dismember")
-	
-	# Create the dismembered limb as an object (would need entity spawning system)
-	# spawn_dismembered_limb(limb_name)
-	
-	return true
-
-# Apply damage to a specific organ
-func apply_organ_damage(organ_name, amount):
-	if !organs.has(organ_name) or amount <= 0:
-		return 0
-	
-	var organ = organs[organ_name]
-	organ.damage += amount
-	
-	# Cap at max damage
-	organ.damage = min(organ.damage, organ.max_damage)
-	
-	# Update organ status
-	_update_organ_status(organ_name)
-	
-	# Vital organ failure can cause death
-	if organ.is_vital and organ.is_failing and current_state != HealthState.DEAD:
-		die(organ_name + " failure")
-	
-	# Emit signal
-	emit_signal("organ_damaged", organ_name, amount)
-	
-	return amount
-
-# === ADJUSTMENT FUNCTIONS ===
-# Adjust brute loss (physical damage)
-func adjustBruteLoss(amount, update_health = true):
-	if godmode and amount > 0:
+func _apply_limb_damage(zone: String, amount: float, damage_type: int):
+	"""Apply damage to a specific limb"""
+	if not limbs.has(zone):
 		return
 	
-	# Handle overheal
-	if overheal > 0 and amount > 0:
-		var reduction = min(amount, overheal)
-		amount -= reduction
-		overheal -= reduction
+	var limb = limbs[zone]
+	var applied_damage = 0.0
+	
+	match damage_type:
+		DamageType.BRUTE:
+			limb.brute_damage += amount
+			applied_damage = amount
+		DamageType.BURN:
+			limb.burn_damage += amount
+			applied_damage = amount
+		_:
+			# Non-physical damage goes to general pools
+			_apply_general_damage(amount, damage_type)
+			return
+	
+	# Update limb status
+	_update_limb_status(zone)
+	
+	# Apply portion of limb damage to general health
+	var general_damage = applied_damage * 0.4
+	if damage_type == DamageType.BRUTE:
+		adjustBruteLoss(general_damage)
+	else:
+		adjustFireLoss(general_damage)
+	
+	# Check for bleeding
+	if applied_damage > 15 and not limb.is_bleeding:
+		_start_limb_bleeding(zone, applied_damage)
+	
+	# Check for dismemberment
+	if limb.dismemberable:
+		_check_dismemberment(zone, applied_damage, damage_type)
+	
+	emit_signal("limb_damaged", zone, applied_damage, damage_type)
+
+func _process_damage_effects(amount: float, damage_type: int, zone: String, source):
+	"""Process special effects from damage"""
+	# Blood splatter for brute damage
+	if damage_type == DamageType.BRUTE and amount > 10:
+		_create_blood_splatter(amount)
+	
+	# Pain from physical damage
+	if damage_type in [DamageType.BRUTE, DamageType.BURN] and not no_pain:
+		var pain_amount = amount * 0.8
+		pain_level = min(100, pain_level + pain_amount)
+	
+	# Check for massive damage effects
+	if amount > 50:
+		_check_massive_damage_effects(amount, damage_type)
+
+func _check_massive_damage_effects(amount: float, damage_type: int):
+	"""Check for effects from massive damage"""
+	# Shock from massive damage
+	shock_level = min(100, shock_level + amount)
+	
+	# Possible unconsciousness
+	if amount > 60 and randf() < 0.3:
+		add_status_effect("unconscious", 5.0, amount / 20)
+	
+	# Possible cardiac arrest from severe trauma
+	if amount > 80 and randf() < 0.2:
+		_trigger_cardiac_event()
+
+# === ADJUSTMENT FUNCTIONS ===
+func adjustBruteLoss(amount: float, update_health: bool = true):
+	"""Adjust brute damage"""
+	if godmode and amount > 0:
+		return
 	
 	bruteloss = max(0, bruteloss + amount)
 	
 	if update_health:
 		updatehealth()
 
-# Adjust burn loss (fire/heat damage)
-func adjustFireLoss(amount, update_health = true):
+func adjustFireLoss(amount: float, update_health: bool = true):
+	"""Adjust burn damage"""
 	if godmode and amount > 0:
 		return
-	
-	# Handle overheal
-	if overheal > 0 and amount > 0:
-		var reduction = min(amount, overheal)
-		amount -= reduction
-		overheal -= reduction
 	
 	fireloss = max(0, fireloss + amount)
 	
 	if update_health:
 		updatehealth()
 
-# Adjust toxin loss (poison damage)
-func adjustToxLoss(amount, update_health = true):
+func adjustToxLoss(amount: float, update_health: bool = true):
+	"""Adjust toxin damage"""
 	if godmode and amount > 0:
 		return
-	
-	# Handle overheal
-	if overheal > 0 and amount > 0:
-		var reduction = min(amount, overheal)
-		amount -= reduction
-		overheal -= reduction
 	
 	toxloss = max(0, toxloss + amount)
 	
 	if update_health:
 		updatehealth()
 
-# Adjust oxygen loss (suffocation damage)
-func adjustOxyLoss(amount, update_health = true):
+func adjustOxyLoss(amount: float, update_health: bool = true):
+	"""Adjust oxygen damage"""
 	if godmode and amount > 0:
 		return
-	
-	# Handle overheal
-	if overheal > 0 and amount > 0:
-		var reduction = min(amount, overheal)
-		amount -= reduction
-		overheal -= reduction
 	
 	oxyloss = max(0, oxyloss + amount)
 	
 	if update_health:
 		updatehealth()
 
-# Adjust clone loss (cellular damage)
-func adjustCloneLoss(amount, update_health = true):
+func adjustCloneLoss(amount: float, update_health: bool = true):
+	"""Adjust clone damage"""
 	if godmode and amount > 0:
 		return
 	
@@ -720,770 +918,790 @@ func adjustCloneLoss(amount, update_health = true):
 	if update_health:
 		updatehealth()
 
-# Adjust brain loss (neurological damage)
-func adjustBrainLoss(amount, update_health = true):
+func adjustBrainLoss(amount: float, update_health: bool = true):
+	"""Adjust brain damage with neurological effects"""
 	if godmode and amount > 0:
 		return
 	
 	brainloss = max(0, brainloss + amount)
 	
-	# Higher brain damage means more severe effects
+	# Apply brain damage effects
 	if brainloss > 20:
-		add_status_effect("confused", 5.0, brainloss / 20)
+		add_status_effect("confused", 10.0, brainloss / 50)
 	
-	if brainloss > 50:
-		add_status_effect("slurred_speech", 5.0, brainloss / 20)
+	if brainloss > 40:
+		consciousness_level = max(0, consciousness_level - amount)
 	
-	if brainloss > 80 and organs.has("brain"):
-		organs["brain"].is_failing = true
+	if brainloss > 80:
+		if organs.has("brain"):
+			organs["brain"].is_failing = true
 	
 	if update_health:
 		updatehealth()
 
-# Adjust stamina loss (exhaustion)
-func adjustStaminaLoss(amount, update_health = true):
+func adjustStaminaLoss(amount: float, update_health: bool = true):
+	"""Adjust stamina damage"""
 	if godmode and amount > 0:
 		return
 	
-	staminaloss = clamp(staminaloss + amount, 0, 100)
+	staminaloss = clamp(staminaloss + amount, 0, max_stamina)
 	
-	# Apply exhaustion effects if stamina is depleted
-	if staminaloss >= 100 and !status_effects.has("exhausted"):
-		add_status_effect("exhausted", 5.0)
+	# Apply exhaustion effects
+	if staminaloss >= max_stamina * 0.9:
+		add_status_effect("exhausted", 5.0, 2.0)
 	
 	if update_health:
 		updatehealth()
 
-# Adjust blood volume
-func adjust_blood_volume(amount):
-	blood_volume = clamp(blood_volume + amount, 0, max_blood_volume)
+func adjust_blood_volume(amount: float):
+	"""Adjust blood volume with status effects"""
+	var old_volume = blood_volume
+	blood_volume = clamp(blood_volume + amount, 0, blood_volume_maximum)
 	
-	# Handle effects based on blood level
-	if blood_volume < BLOOD_VOLUME_SAFE and blood_volume >= BLOOD_VOLUME_OKAY:
-		# Slight effects
-		if !status_effects.has("pale"):
-			add_status_effect("pale", 10.0)
-	elif blood_volume < BLOOD_VOLUME_OKAY and blood_volume >= BLOOD_VOLUME_BAD:
-		# Moderate effects
-		add_status_effect("dizzy", 5.0, 1.0)
-	elif blood_volume < BLOOD_VOLUME_BAD:
-		# Severe effects
+	# Calculate blood status
+	var blood_percent = blood_volume / blood_volume_maximum
+	var status = _get_blood_status()
+	
+	# Apply blood loss effects
+	if blood_percent < 0.8 and blood_percent >= 0.6:
+		if not status_effects.has("pale"):
+			add_status_effect("pale", 30.0, 1.0)
+	elif blood_percent < 0.6 and blood_percent >= 0.4:
+		add_status_effect("dizzy", 10.0, 2.0)
 		adjustOxyLoss(0.5)
-		add_status_effect("weak", 5.0, 2.0)
+	elif blood_percent < 0.4:
+		add_status_effect("weak", 10.0, 3.0)
+		adjustOxyLoss(1.0)
 		
-		if blood_volume < BLOOD_VOLUME_SURVIVE:
-			# Fatal blood loss
-			apply_damage(1.0, DamageType.OXYGEN)
-			
-			if current_state != HealthState.DEAD and blood_volume < BLOOD_VOLUME_SURVIVE / 2:
-				die("blood loss")
+		if blood_percent < 0.2 and current_state != HealthState.DEAD:
+			die("blood loss")
 	
 	# Emit signal
-	emit_signal("blood_level_changed", blood_volume, max_blood_volume)
-
-# Set bleeding rate
-func set_bleeding_rate(rate):
-	bleeding_rate = max(0, rate)
-	
-	if bleeding_rate > 0 and !status_effects.has("bleeding"):
-		add_status_effect("bleeding", 10.0, bleeding_rate)
-	elif bleeding_rate == 0 and status_effects.has("bleeding"):
-		remove_status_effect("bleeding")
+	emit_signal("blood_level_changed", blood_volume, blood_volume_maximum, blood_percent, status)
 
 # === HEALTH UPDATE FUNCTIONS ===
-# Update overall health value
 func updatehealth():
+	"""Update overall health and check state transitions"""
 	if godmode:
 		health = max_health
 		return
 	
+	var old_health = health
+	var old_state = current_state
+	
 	# Calculate health
 	health = max_health - bruteloss - fireloss - toxloss - oxyloss - cloneloss
 	
-	# Check for gibbing threshold
-	if health <= HEALTH_THRESHOLD_GIBBED and !dead_threshold_passed:
-		gib("extreme damage")
-		return
+	# Check for state transitions
+	_check_health_state_transitions()
 	
-	# Check health thresholds
+	# Update consciousness based on health and other factors
+	_update_consciousness()
+	
+	# Emit health change signal
+	var health_percent = health / max_health
+	emit_signal("health_changed", health, max_health, health_percent)
+	
+	# Update UI if health changed significantly
+	if abs(old_health - health) > 1.0 or old_state != current_state:
+		_update_health_ui()
+
+func _check_health_state_transitions():
+	"""Check and handle health state transitions"""
+	var new_state = current_state
+	
+	# Death threshold
 	if health <= HEALTH_THRESHOLD_DEAD and current_state != HealthState.DEAD:
 		die("damage")
-	elif health <= HEALTH_THRESHOLD_CRIT and current_state == HealthState.ALIVE:
-		enter_critical()
-	elif health > HEALTH_THRESHOLD_CRIT and current_state == HealthState.CRITICAL:
-		exit_critical()
-	
-	# Force lying state when at critical health
-	if health <= HEALTH_THRESHOLD_CRIT and entity.has_method("lie_down") and !entity.is_lying:
-		entity.lie_down(true)  # Force lying down
-	
-	# Update UI
-	_update_health_ui()
-	
-	# Emit signal
-	emit_signal("health_changed", health, max_health)
-
-# Start dying
-func enter_critical():
-	if current_state == HealthState.CRITICAL:
 		return
 	
-	current_state = HealthState.CRITICAL
+	# Critical threshold
+	if health <= HEALTH_THRESHOLD_CRIT and current_state == HealthState.ALIVE:
+		new_state = HealthState.CRITICAL
+	elif health > HEALTH_THRESHOLD_CRIT and current_state == HealthState.CRITICAL:
+		new_state = HealthState.ALIVE
 	
-	# Apply critical effects
-	add_status_effect("unconscious", 10.0)
+	# Unconsciousness threshold
+	if health <= HEALTH_THRESHOLD_UNCONSCIOUS and current_state == HealthState.ALIVE:
+		new_state = HealthState.UNCONSCIOUS
+	elif consciousness_level <= 0 and current_state != HealthState.DEAD:
+		new_state = HealthState.UNCONSCIOUS
+	elif consciousness_level > 30 and current_state == HealthState.UNCONSCIOUS:
+		new_state = HealthState.ALIVE
 	
-	# Random damage when critical
-	if randf() < 0.1:
-		adjustOxyLoss(1.0)
+	# Handle state changes
+	if new_state != current_state:
+		_change_health_state(new_state)
+
+func _change_health_state(new_state: int):
+	"""Change health state with appropriate effects"""
+	var old_state = current_state
+	previous_state = current_state
+	current_state = new_state
+	
+	match new_state:
+		HealthState.ALIVE:
+			is_unconscious = false
+			if old_state == HealthState.CRITICAL:
+				emit_signal("exited_critical", new_state)
+			elif old_state == HealthState.UNCONSCIOUS:
+				emit_signal("consciousness_changed", true, "recovered")
+		
+		HealthState.UNCONSCIOUS:
+			is_unconscious = true
+			add_status_effect("unconscious", 999999)
+			emit_signal("consciousness_changed", false, "health_loss")
+		
+		HealthState.CRITICAL:
+			add_status_effect("unconscious", 999999)
+			emit_signal("entered_critical", health / max_health)
+		
+		HealthState.DEAD:
+			# Handled by die() function
+			pass
+
+func _update_consciousness():
+	"""Update consciousness level based on various factors"""
+	if current_state == HealthState.DEAD:
+		consciousness_level = 0
+		return
+	
+	var target_consciousness = 100.0
+	
+	# Health factor
+	var health_factor = health / max_health
+	target_consciousness *= max(0.1, health_factor)
+	
+	# Blood loss factor
+	var blood_factor = blood_volume / blood_volume_maximum
+	target_consciousness *= max(0.1, blood_factor)
+	
+	# Brain damage factor
+	if brainloss > 0:
+		target_consciousness *= max(0.1, 1.0 - (brainloss / 100.0))
+	
+	# Oxygen deprivation factor
+	if oxyloss > 30:
+		target_consciousness *= max(0.1, 1.0 - ((oxyloss - 30) / 70.0))
+	
+	# Apply changes smoothly
+	consciousness_level = lerp(consciousness_level, target_consciousness, 0.1)
+
+# === STATUS EFFECT FUNCTIONS ===
+func add_status_effect(effect_name: String, duration: float, intensity: float = 1.0):
+	"""Add or update a status effect"""
+	if godmode and effect_name in ["poisoned", "burning", "bleeding"]:
+		return
+	
+	var was_new = not status_effects.has(effect_name)
+	var old_duration = 0.0
+	
+	if not was_new:
+		old_duration = status_effects[effect_name].duration
+	
+	# Add or update effect
+	status_effects[effect_name] = {
+		"duration": max(duration, old_duration),  # Take longer duration
+		"intensity": max(intensity, status_effects.get(effect_name, {}).get("intensity", 0)),
+		"start_time": Time.get_ticks_msec() / 1000.0
+	}
+	
+	# Apply immediate effects
+	_apply_status_effect_start(effect_name, intensity)
 	
 	# Emit signal
-	emit_signal("entered_critical")
+	if was_new:
+		emit_signal("status_effect_added", effect_name, duration, intensity)
+
+func remove_status_effect(effect_name: String):
+	"""Remove a status effect"""
+	if not status_effects.has(effect_name):
+		return
 	
-	# Update UI
-	_update_health_ui()
+	# Apply removal effects
+	_apply_status_effect_end(effect_name)
+	
+	# Remove from dictionary
+	status_effects.erase(effect_name)
+	
+	# Emit signal
+	emit_signal("status_effect_removed", effect_name)
+
+func _apply_status_effect_start(effect_name: String, intensity: float):
+	"""Apply effects when status effect starts"""
+	match effect_name:
+		"bleeding":
+			set_bleeding_rate(max(bleeding_rate, intensity))
+		"unconscious":
+			consciousness_level = 0
+			if entity and entity.has_method("lie_down"):
+				entity.lie_down(true)
+		"confused":
+			if entity and entity.has_method("add_status_effect"):
+				entity.add_status_effect(effect_name, 0, intensity)
+		"stunned":
+			if entity and entity.has_method("stun"):
+				entity.stun(intensity)
+
+func _apply_status_effect_end(effect_name: String):
+	"""Apply effects when status effect ends"""
+	match effect_name:
+		"bleeding":
+			set_bleeding_rate(0)
+		"unconscious":
+			if current_state == HealthState.ALIVE:
+				consciousness_level = 50.0
+		"confused":
+			if entity and entity.has_method("remove_status_effect"):
+				entity.remove_status_effect(effect_name)
+
+# === ORGAN AND LIMB FUNCTIONS ===
+func apply_organ_damage(organ_name: String, amount: float) -> float:
+	"""Apply damage to a specific organ"""
+	if not organs.has(organ_name) or amount <= 0:
+		return 0.0
+	
+	var organ = organs[organ_name]
+	var old_damage = organ.damage
+	
+	organ.damage = min(organ.max_damage, organ.damage + amount)
+	var actual_damage = organ.damage - old_damage
+	
+	# Update organ status
+	_update_organ_status(organ_name)
+	
+	# Check for organ failure
+	if organ.is_vital and organ.is_failing and current_state != HealthState.DEAD:
+		die(organ_name + " failure")
+	
+	emit_signal("organ_damaged", organ_name, actual_damage, organ.damage)
+	
+	return actual_damage
+
+func heal_organ_damage(organ_name: String, amount: float) -> float:
+	"""Heal damage to a specific organ"""
+	if not organs.has(organ_name) or amount <= 0:
+		return 0.0
+	
+	var organ = organs[organ_name]
+	var old_damage = organ.damage
+	
+	organ.damage = max(0, organ.damage - amount)
+	var healed_amount = old_damage - organ.damage
+	
+	# Update organ status
+	_update_organ_status(organ_name)
+	
+	emit_signal("organ_healed", organ_name, healed_amount, organ.damage)
+	
+	return healed_amount
+
+func _update_organ_status(organ_name: String):
+	"""Update organ status based on damage"""
+	var organ = organs[organ_name]
+	
+	var damage_percent = organ.damage / organ.max_damage
+	
+	organ.is_damaged = damage_percent > 0.3
+	organ.is_failing = damage_percent > 0.8
+	organ.efficiency = max(0.1, 1.0 - damage_percent)
+
+func heal_limb_damage(limb_name: String, brute_amount: float = 0, burn_amount: float = 0) -> float:
+	"""Heal damage to a specific limb"""
+	if not limbs.has(limb_name):
+		return 0.0
+	
+	var limb = limbs[limb_name]
+	var healed_total = 0.0
+	
+	if brute_amount > 0:
+		var healed = min(limb.brute_damage, brute_amount)
+		limb.brute_damage -= healed
+		healed_total += healed
+		
+		if healed > 0:
+			emit_signal("limb_healed", limb_name, healed, DamageType.BRUTE)
+	
+	if burn_amount > 0:
+		var healed = min(limb.burn_damage, burn_amount)
+		limb.burn_damage -= healed
+		healed_total += healed
+		
+		if healed > 0:
+			emit_signal("limb_healed", limb_name, healed, DamageType.BURN)
+	
+	# Update limb status
+	_update_limb_status(limb_name)
+	
+	return healed_total
+
+func _update_limb_status(limb_name: String):
+	"""Update limb status based on damage"""
+	var limb = limbs[limb_name]
+	var total_damage = limb.brute_damage + limb.burn_damage
+	
+	if total_damage < 20:
+		limb.status = "healthy"
+	elif total_damage < 40:
+		limb.status = "bruised"
+	elif total_damage < 60:
+		limb.status = "wounded"
+	elif total_damage < 80:
+		limb.status = "mangled"
+	else:
+		limb.status = "critical"
+	
+	# Update sprite system if available
+	if sprite_system and sprite_system.has_method("update_limb_damage"):
+		sprite_system.update_limb_damage(limb_name, limb.status, limb.brute_damage, limb.burn_damage)
+
+func _start_limb_bleeding(limb_name: String, damage_amount: float):
+	"""Start bleeding from a limb"""
+	if not limbs.has(limb_name):
+		return
+	
+	var limb = limbs[limb_name]
+	limb.is_bleeding = true
+	
+	# Calculate bleeding rate based on damage
+	var bleed_rate = damage_amount * 0.1
+	set_bleeding_rate(bleeding_rate + bleed_rate)
+	
+	add_status_effect("bleeding", 60.0, bleed_rate)
+
+func _check_dismemberment(limb_name: String, damage_amount: float, damage_type: int):
+	"""Check if limb should be dismembered"""
+	var limb = limbs[limb_name]
+	var total_damage = limb.brute_damage + limb.burn_damage
+	
+	# High chance with massive damage
+	if damage_amount > 60 and randf() < 0.4:
+		_dismember_limb(limb_name)
+		return
+	
+	# Gradual chance with accumulated damage
+	if total_damage > limb.max_damage * 0.9:
+		var chance = (total_damage - limb.max_damage * 0.9) / (limb.max_damage * 0.1)
+		if randf() < chance * 0.3:
+			_dismember_limb(limb_name)
+
+func _dismember_limb(limb_name: String):
+	"""Dismember a limb"""
+	if not limbs.has(limb_name):
+		return
+	
+	var limb = limbs[limb_name]
+	limb.attached = false
+	limb.status = "missing"
+	
+	# Apply massive bleeding and damage
+	adjustBruteLoss(25.0)
+	set_bleeding_rate(bleeding_rate + 8.0)
+	add_status_effect("bleeding", 120.0, 8.0)
+	
+	# Pain and shock
+	if not no_pain:
+		pain_level = min(100, pain_level + 40)
+		shock_level = min(100, shock_level + 30)
+	
+	# Update visuals
+	if sprite_system and sprite_system.has_method("update_dismemberment"):
+		sprite_system.update_dismemberment(limb_name)
 	
 	# Play sound
 	if audio_system:
-		audio_system.play_sound("critical_condition")
+		audio_system.play_sound("dismember", 0.8)
+	
+	emit_signal("limb_damaged", limb_name, 100.0, DamageType.BRUTE)
 
-# Exit critical condition
-func exit_critical():
-	if current_state != HealthState.CRITICAL:
+# === BLOOD AND CIRCULATION ===
+func set_bleeding_rate(rate: float):
+	"""Set bleeding rate with effects"""
+	bleeding_rate = max(0, rate)
+	
+	if bleeding_rate > 0:
+		if not status_effects.has("bleeding"):
+			add_status_effect("bleeding", 60.0, bleeding_rate)
+		
+		# Update any bleeding limbs
+		for limb_name in limbs:
+			var limb = limbs[limb_name]
+			if limb.is_bleeding and bleeding_rate == 0:
+				limb.is_bleeding = false
+	else:
+		remove_status_effect("bleeding")
+
+func _create_blood_splatter(damage_amount: float):
+	"""Create blood splatter effects"""
+	if blood_volume <= 0:
 		return
 	
-	current_state = HealthState.ALIVE
+	var splatter_chance = min(80, damage_amount * 2)
 	
-	# Remove critical effects
-	remove_status_effect("unconscious")
-	
-	# Emit signal
-	emit_signal("exited_critical")
-	
-	# Update UI
-	_update_health_ui()
+	if randf() * 100 < splatter_chance:
+		# Create visual blood effect
+		if sprite_system and sprite_system.has_method("create_blood_splatter"):
+			sprite_system.create_blood_splatter()
+		
+		# Reduce blood volume slightly
+		adjust_blood_volume(-0.5)
 
-# === STATE CHANGE FUNCTIONS ===
-# Handle death
-func die(cause = "unknown"):
+# === CARDIAC FUNCTIONS ===
+func _is_in_cardiac_arrest() -> bool:
+	"""Check if in cardiac arrest"""
+	return pulse == 0 and current_state != HealthState.DEAD
+
+func _trigger_cardiac_event():
+	"""Trigger a cardiac event"""
+	pulse = 0
+	add_status_effect("cardiac_arrest", 60.0, 1.0)
+	
+	if audio_system:
+		audio_system.play_sound("heart_stop", 0.6)
+
+func apply_cpr(effectiveness: float = 1.0) -> bool:
+	"""Apply CPR with variable effectiveness"""
+	if current_state == HealthState.DEAD:
+		return false
+	
+	# Provide oxygen
+	adjustOxyLoss(-3.0 * effectiveness)
+	
+	# Chance to restart heart if in cardiac arrest
+	if _is_in_cardiac_arrest():
+		if randf() < 0.15 * effectiveness:
+			pulse = 40  # Weak pulse from CPR
+			remove_status_effect("cardiac_arrest")
+			return true
+	
+	return false
+
+func apply_defibrillation(power: float = 1.0) -> bool:
+	"""Apply defibrillation"""
+	if current_state == HealthState.DEAD and death_time > 300:
+		return false  # Too late
+	
+	# Higher chance to restart heart
+	if _is_in_cardiac_arrest() or current_state == HealthState.DEAD:
+		if randf() < 0.7 * power:
+			pulse = 60
+			remove_status_effect("cardiac_arrest")
+			
+			if current_state == HealthState.DEAD:
+				revive("defibrillation")
+			
+			if audio_system:
+				audio_system.play_sound("heart_start", 0.6)
+			
+			return true
+	
+	return false
+
+# === DEATH AND REVIVAL ===
+func die(cause: String = "unknown"):
+	"""Handle death with comprehensive effects"""
 	if current_state == HealthState.DEAD or godmode:
 		return
 	
+	print("HealthSystem: Entity died. Cause: " + cause)
+	
+	# Update state
+	previous_state = current_state
 	current_state = HealthState.DEAD
+	is_dead = true
 	cause_of_death = cause
 	death_time = 0
 	
-	# Log death
-	print("HealthSystem: Character died. Cause: " + cause)
+	# Reset vital signs
+	pulse = 0
+	breathing_rate = 0
+	consciousness_level = 0
 	
-	# Apply death effects
+	# Add death status effects
 	add_status_effect("unconscious", 999999)
 	
-	# Drop all items
-	_drop_all_items()
+	# Stop bleeding (blood pressure = 0)
+	set_bleeding_rate(0)
 	
-	# Stop movement
-	if entity.has_method("set_state"):
-		entity.set_state(entity.MovementState.IDLE)
+	# Force lying down
+	if entity and entity.has_method("lie_down"):
+		entity.lie_down(true)
+	
+	# Drop items
+	_drop_all_items()
 	
 	# Update visuals
 	if sprite_system and sprite_system.has_method("update_death_state"):
 		sprite_system.update_death_state(true)
 	
-	# Emit signal
-	emit_signal("died", cause_of_death)
-	
 	# Play death sound
 	if audio_system:
-		audio_system.play_sound("death")
+		audio_system.play_sound("death", 0.8)
+	
+	# Emit signal
+	emit_signal("died", cause_of_death, death_time)
+	emit_signal("consciousness_changed", false, "death")
 	
 	# Update UI
 	_update_health_ui()
-	
-	# Reset pulse
-	pulse = 0
 
-# Gib the entity
-func gib(cause = "unknown"):
-	if godmode:
-		return
-		
-	# If already dead, update cause of death
-	if current_state == HealthState.DEAD:
-		cause_of_death = "gibbed: " + cause
-	else:
-		# Kill first, then gib
-		die("gibbed: " + cause)
-	
-	# Mark as gibbed
-	dead_threshold_passed = true
-	
-	# Play sound effect
-	if audio_system:
-		audio_system.play_sound("gib")
-	
-	# Update sprite if available
-	if sprite_system and sprite_system.has_method("update_gibbed_state"):
-		sprite_system.update_gibbed_state(true)
-	
-	# Spawn gibs
-	spawn_gibs()
-	
-	# Handle removal of the entity
-	await get_tree().create_timer(0.5).timeout
-	
-	# Emit signal for gibbing
-	emit_signal("died", cause_of_death)  # Re-emit for potential listeners
-	
-	# Queue the entity for removal
-	entity.queue_free()
-
-# Spawn gibs at current location
-func spawn_gibs():
-	effect.visible = true
-	effect.play("Gib")
-	
-	print("HealthSystem: Spawning gibs at position ", entity.position)
-
-# Handle revival
-func revive(admin_revive = false):
+func revive(method: String = "unknown") -> bool:
+	"""Revive the entity"""
 	if current_state != HealthState.DEAD:
 		return false
 	
-	if !can_be_revived and !admin_revive:
+	# Check if revival is possible
+	if death_time > 1800 and method != "admin":  # 30 minutes
 		return false
 	
-	# Reset damage
-	if admin_revive:
-		bruteloss = 0
-		fireloss = 0
-		toxloss = 0
-		oxyloss = 0
-		cloneloss = 0
-		brainloss = 0
-		staminaloss = 0
-	else:
-		# Partial healing for normal revival
-		bruteloss = max(0, bruteloss - 30)
-		fireloss = max(0, fireloss - 30)
-		toxloss = max(0, toxloss - 20)
-		oxyloss = 0
-		
-		# Restore blood
-		blood_volume = max(blood_volume, BLOOD_VOLUME_OKAY)
+	revival_count += 1
 	
-	# Reset cardiac arrest
-	in_cardiac_arrest = false
+	# Partial healing based on method
+	match method:
+		"admin":
+			full_heal(true)
+		"defibrillation":
+			_partial_revival_heal()
+		"advanced_medical":
+			_advanced_revival_heal()
+		_:
+			_basic_revival_heal()
 	
-	# Heal organs
-	for organ_name in organs:
-		if admin_revive:
-			organs[organ_name].damage = 0
-			organs[organ_name].is_failing = false
-		else:
-			organs[organ_name].damage = max(0, organs[organ_name].damage - 30)
-			_update_organ_status(organ_name)
+	# Reset death state
+	current_state = HealthState.CRITICAL  # Start in critical
+	is_dead = false
+	death_time = 0
+	cause_of_death = ""
 	
-	# Heal limbs
-	for limb_name in limbs:
-		if admin_revive:
-			limbs[limb_name].brute_damage = 0
-			limbs[limb_name].burn_damage = 0
-			limbs[limb_name].status = "normal"
-		else:
-			limbs[limb_name].brute_damage = max(0, limbs[limb_name].brute_damage - 30)
-			limbs[limb_name].burn_damage = max(0, limbs[limb_name].burn_damage - 30)
-			_update_limb_status(limb_name)
+	# Restore basic vital signs
+	pulse = 40  # Weak pulse initially
+	breathing_rate = 10
+	consciousness_level = 20
 	
-	# Reset bleeding
-	bleeding_rate = 0
-	
-	# Remove death status effects
+	# Remove death effects
 	remove_status_effect("unconscious")
-	
-	# Update health
-	current_state = HealthState.ALIVE
-	updatehealth()
 	
 	# Update visuals
 	if sprite_system and sprite_system.has_method("update_death_state"):
 		sprite_system.update_death_state(false)
 	
-	# Reset death time
-	death_time = 0
-	cause_of_death = ""
-	
-	# Emit signal
-	emit_signal("revived")
-	
 	# Play revival sound
 	if audio_system:
-		audio_system.play_sound("revive")
+		audio_system.play_sound("revive", 0.6)
+	
+	# Update health
+	updatehealth()
+	
+	# Emit signals
+	emit_signal("revived", method)
+	emit_signal("consciousness_changed", true, "revived")
+	
+	print("HealthSystem: Entity revived via " + method)
 	
 	return true
 
-# Enter cardiac arrest
-func enter_cardiac_arrest():
-	if in_cardiac_arrest or current_state == HealthState.DEAD:
-		return
-	
-	in_cardiac_arrest = true
-	
-	# Heart stops
-	pulse = 0
-	
-	# Begin oxygen loss
-	add_status_effect("suffocating", 999999, 1.0)
-	
-	# Play heart stop sound
-	if audio_system:
-		audio_system.play_sound("heart_stop")
+func _partial_revival_heal():
+	"""Healing for basic revival methods"""
+	oxyloss = max(0, oxyloss - 40)
+	bruteloss = max(0, bruteloss - 20)
+	fireloss = max(0, fireloss - 20)
+	blood_volume = max(blood_volume, BLOOD_VOLUME_OKAY)
 
-# Exit cardiac arrest
-func exit_cardiac_arrest():
-	if !in_cardiac_arrest:
-		return
-	
-	in_cardiac_arrest = false
-	
-	# Heart resumes
-	pulse = 60
-	
-	# Stop suffocation
-	remove_status_effect("suffocating")
-	
-	# Play heart start sound
-	if audio_system:
-		audio_system.play_sound("heart_start")
-
-# Apply CPR
-func apply_cpr(amount = 3):
-	# CPR can help if in cardiac arrest
-	if in_cardiac_arrest and current_state != HealthState.DEAD:
-		# Chance to restart heart
-		if randf() < 0.2:
-			exit_cardiac_arrest()
-		
-		# Provide oxygen
-		adjustOxyLoss(-amount)
-		return true
-	
-	# If in critical, provide some oxygen
-	if current_state == HealthState.CRITICAL:
-		adjustOxyLoss(-amount * 0.5)
-		return true
-	
-	return false
-
-# Apply defibrillation
-func apply_defibrillation():
-	# Only works in cardiac arrest or recently dead
-	if in_cardiac_arrest and current_state != HealthState.DEAD:
-		# Good chance to restart heart
-		if randf() < 0.7:
-			exit_cardiac_arrest()
-			return true
-	elif current_state == HealthState.DEAD and death_time < 300 and cause_of_death == "cardiac arrest":
-		# Can revive from cardiac arrest within 5 minutes
-		exit_cardiac_arrest()
-		revive()
-		return true
-	
-	return false
-
-# === STATUS EFFECT FUNCTIONS ===
-# Add a status effect
-func add_status_effect(effect_name, duration, intensity = 1.0):
-	# Skip if in godmode
-	if godmode:
-		return
-	
-	var was_new = !status_effects.has(effect_name)
-	
-	# Add or update the effect
-	status_effects[effect_name] = {
-		"duration": duration,
-		"intensity": intensity,
-		"start_time": Time.get_ticks_msec() / 1000.0
-	}
-	
-	# Apply effect-specific behaviors
-	match effect_name:
-		"bleeding":
-			# Update bleeding rate based on intensity
-			bleeding_rate = max(bleeding_rate, intensity)
-		"poisoned":
-			# Apply initial toxin damage
-			adjustToxLoss(intensity)
-		"unconscious":
-			# Make character lie down
-			if entity.has_method("set_resting"):
-				entity.set_resting(true)
-		"slowed":
-			# Apply movement speed modifier
-			if entity.has_method("add_movement_modifier"):
-				entity.add_movement_modifier("slowed", 0.5)
-		"confused":
-			# Apply confusion effect
-			if entity.has_method("add_confusion"):
-				entity.add_confusion(intensity)
-	
-	# Add status effect to entity if it supports it
-	if entity.has_method("add_status_effect"):
-		entity.add_status_effect(effect_name, duration, intensity)
-	
-	# Emit signal if it's a new effect
-	if was_new:
-		emit_signal("status_effect_added", effect_name, duration)
-
-# Remove a status effect
-func remove_status_effect(effect_name):
-	if !status_effects.has(effect_name):
-		return
-	
-	# Remove the effect
-	status_effects.erase(effect_name)
-	
-	# Apply effect-specific cleanup
-	match effect_name:
-		"bleeding":
-			bleeding_rate = 0
-		"unconscious":
-			# Only wake up if alive
-			if current_state == HealthState.ALIVE:
-				if entity.has_method("set_resting"):
-					entity.set_resting(false)
-		"slowed":
-			# Remove movement speed modifier
-			if entity.has_method("remove_movement_modifier"):
-				entity.remove_movement_modifier("slowed")
-		"confused":
-			# Remove confusion effect
-			if entity.has_method("clear_confusion"):
-				entity.clear_confusion()
-	
-	# Remove from entity if it supports it
-	if entity.has_method("remove_status_effect"):
-		entity.remove_status_effect(effect_name)
-	
-	# Emit signal
-	emit_signal("status_effect_removed", effect_name)
-
-# Add a damage modifier
-func add_damage_modifier(modifier_name, damage_type, multiplier, duration = -1):
-	incoming_damage_modifiers[modifier_name] = {
-		"damage_type": damage_type,
-		"multiplier": multiplier,
-		"duration": duration,
-		"start_time": Time.get_ticks_msec() / 1000.0
-	}
-
-# Remove a damage modifier
-func remove_damage_modifier(modifier_name):
-	if incoming_damage_modifiers.has(modifier_name):
-		incoming_damage_modifiers.erase(modifier_name)
-
-# === BLOOD EFFECTS ===
-# Check for blood splatter
-func check_blood_splatter(damage, damtype = "brute", chancemod = 0, radius = 1):
-	if damage <= 0 or current_state == HealthState.DEAD or blood_volume <= 0:
-		return
-	
-	var chance = 25 # base chance
-	
-	if damtype == "brute":
-		chance += 5
-	
-	chance += chancemod + (damage * 0.33)
-	
-	# Add to base chance from blood loss
-	if blood_volume < BLOOD_VOLUME_NORMAL:
-		chance += 10
-	
-	if randf() * 100 < chance:
-		# Create blood effect
-		_create_blood_effect(radius)
-		
-		# Reduce blood level
-		adjust_blood_volume(-0.1 * damage)
-
-# Create visual blood effect
-func _create_blood_effect(radius = 1):
-	# Handle blood splatter visuals
-	if sprite_system and sprite_system.has_method("create_blood_splatter"):
-		sprite_system.create_blood_splatter(radius)
-	elif entity.has_method("add_splatter_floor"):
-		# Fallback to entity method
-		entity.add_splatter_floor(entity.current_tile_position)
-
-# === VISUAL AND UI UPDATE FUNCTIONS ===
-# Update limb visual status
-func _update_limb_status(limb_name):
-	var limb = limbs[limb_name]
-	var total_damage = limb.brute_damage + limb.burn_damage
-	
-	# Update status based on damage
-	if total_damage < 30:
-		limb.status = "normal"
-	elif total_damage < 60:
-		limb.status = "wounded"
-	else:
-		limb.status = "mangled"
-	
-	# Update sprite if we have a sprite system
-	if sprite_system and sprite_system.has_method("update_limb_damage"):
-		sprite_system.update_limb_damage(limb_name, limb.status, limb.brute_damage, limb.burn_damage)
-
-# Update organ status
-func _update_organ_status(organ_name):
-	var organ = organs[organ_name]
-	
-	# Update damaged state
-	organ.is_damaged = organ.damage > 0
-	
-	# Update failure state
-	if organ.damage > organ.max_damage * 0.75:
-		organ.is_failing = true
-	else:
-		organ.is_failing = false
-	
-	# Special organ effects
-	if organ_name == "heart" and organ.is_failing:
-		enter_cardiac_arrest()
-	elif organ_name == "heart" and !organ.is_failing and in_cardiac_arrest:
-		exit_cardiac_arrest()
-
-# Update health UI
-func _update_health_ui():
-	if !ui_system:
-		return
-	
-	# Update health display
-	if ui_system.has_method("update_health_display"):
-		ui_system.update_health_display(health, max_health)
-	
-	# Update damage display
-	if ui_system.has_method("update_damage_display"):
-		ui_system.update_damage_display(bruteloss, fireloss, toxloss, oxyloss)
-	
-	# Update blood level
-	if ui_system.has_method("update_blood_display"):
-		ui_system.update_blood_display(blood_volume, max_blood_volume)
-
-# Play damage sounds
-func _play_damage_sound(damage_type, amount):
-	if !audio_system or damage_mute_counter > 0:
-		return
-	
-	var sound_name = ""
-	var volume = min(0.3 + (amount / 30.0), 0.7)
-	
-	match damage_type:
-		DamageType.BRUTE:
-			sound_name = "hit"
-		DamageType.BURN:
-			sound_name = "burn"
-		DamageType.TOXIN:
-			sound_name = "tox"
-		DamageType.OXYGEN:
-			sound_name = "gasp"
-		DamageType.CLONE:
-			sound_name = "clone"
-		DamageType.BRAIN:
-			sound_name = "brain"
-	
-	if sound_name != "":
-		audio_system.play_sound(sound_name, volume)
-		
-		# Add small cooldown to prevent sound spam
-		damage_mute_counter = 5
-		await get_tree().create_timer(0.1).timeout
-		damage_mute_counter = max(0, damage_mute_counter - 1)
-
-# Drop all items on death
-func _drop_all_items():
-	if !inventory_system:
-		return
-	
-	# Drop all equipped items
-	if inventory_system.has_method("drop_all_items"):
-		inventory_system.drop_all_items()
-	else:
-		# Fallback - try to drop individual items
-		var active_item = entity.get_active_item()
-		if active_item and entity.has_method("drop_active_item"):
-			entity.drop_active_item()
-
-# === PUBLIC API ===
-# Set max health
-func set_max_health(new_max_health):
-	max_health = max(1, new_max_health)
-	health = min(health, max_health)
-	emit_signal("health_changed", health, max_health)
-
-# Set current health directly
-func set_health(new_health):
-	if godmode:
-		health = max_health
-		return
-	
-	health = clamp(new_health, HEALTH_THRESHOLD_DEAD, max_health)
-	
-	# Recalculate damages to match new health
-	var total_damage = max_health - health
-	
-	# Distribute damage proportionally
-	var damage_sum = bruteloss + fireloss + toxloss + oxyloss + cloneloss
-	if damage_sum > 0:
-		var scale_factor = total_damage / damage_sum
-		bruteloss *= scale_factor
-		fireloss *= scale_factor
-		toxloss *= scale_factor
-		oxyloss *= scale_factor
-		cloneloss *= scale_factor
-	else:
-		# If no damage, apply as brute
-		bruteloss = total_damage
-	
-	# Update health state
-	updatehealth()
-
-# Get current health percentage
-func get_health_percent():
-	return health / max_health
-
-# Heal limb damage
-func heal_limb_damage(limb_name, brute_amount = 0, burn_amount = 0):
-	if !limbs.has(limb_name):
-		return 0
-	
-	var limb = limbs[limb_name]
-	var healed_amount = 0
-	
-	# Apply healing
-	if brute_amount > 0:
-		var brute_healed = min(limb.brute_damage, brute_amount)
-		limb.brute_damage -= brute_healed
-		healed_amount += brute_healed
-	
-	if burn_amount > 0:
-		var burn_healed = min(limb.burn_damage, burn_amount)
-		limb.burn_damage -= burn_healed
-		healed_amount += burn_healed
-	
-	# Update limb status
-	_update_limb_status(limb_name)
-	
-	return healed_amount
-
-# Heal organ damage
-func heal_organ_damage(organ_name, amount = 0):
-	if !organs.has(organ_name) or amount <= 0:
-		return 0
-	
-	var organ = organs[organ_name]
-	var healed_amount = min(organ.damage, amount)
-	
-	# Apply healing
-	organ.damage -= healed_amount
-	
-	# Update organ status
-	_update_organ_status(organ_name)
-	
-	return healed_amount
-
-# Toggle godmode
-func toggle_godmode(enable = null):
-	if enable != null:
-		godmode = enable
-	else:
-		godmode = !godmode
-	
-	if godmode:
-		health = max_health
-		updatehealth()
-	
-	return godmode
-
-# Apply full healing
-func full_heal(admin_heal = false):
-	# Reset all damage
-	bruteloss = 0
-	fireloss = 0
-	toxloss = 0
+func _advanced_revival_heal():
+	"""Healing for advanced revival methods"""
 	oxyloss = 0
-	cloneloss = 0
-	brainloss = 0
-	staminaloss = 0
+	bruteloss = max(0, bruteloss - 40)
+	fireloss = max(0, fireloss - 40)
+	toxloss = max(0, toxloss - 30)
+	blood_volume = max(blood_volume, BLOOD_VOLUME_SAFE)
+
+func _basic_revival_heal():
+	"""Minimal healing for basic revival"""
+	oxyloss = max(0, oxyloss - 30)
+	bruteloss = max(0, bruteloss - 10)
+	blood_volume = max(blood_volume, BLOOD_VOLUME_BAD)
+
+# === STATUS HELPER FUNCTIONS ===
+func _get_blood_status() -> int:
+	"""Get blood status enum"""
+	var blood_percent = blood_volume / blood_volume_maximum
 	
-	# Restore blood
-	blood_volume = max_blood_volume
-	bleeding_rate = 0
+	if blood_percent >= 0.8:
+		return BloodStatus.NORMAL
+	elif blood_percent >= 0.6:
+		return BloodStatus.SLIGHTLY_LOW
+	elif blood_percent >= 0.4:
+		return BloodStatus.LOW
+	elif blood_percent >= 0.2:
+		return BloodStatus.CRITICALLY_LOW
+	else:
+		return BloodStatus.FATAL
+
+func _get_pulse_status() -> int:
+	"""Get pulse status enum"""
+	if pulse == 0:
+		return PulseStatus.NO_PULSE
+	elif pulse < 40:
+		return PulseStatus.VERY_WEAK
+	elif pulse < 60:
+		return PulseStatus.WEAK
+	elif pulse <= 100:
+		return PulseStatus.NORMAL
+	elif pulse <= 120:
+		return PulseStatus.ELEVATED
+	elif pulse <= 150:
+		return PulseStatus.RAPID
+	else:
+		return PulseStatus.DANGEROUS
+
+func _get_temperature_status() -> int:
+	"""Get temperature status enum"""
+	var temp_c = body_temperature - 273.15
+	
+	if temp_c < 30:
+		return TemperatureStatus.HYPOTHERMIC
+	elif temp_c < 35:
+		return TemperatureStatus.COLD
+	elif temp_c <= 39:
+		return TemperatureStatus.NORMAL
+	elif temp_c <= 41:
+		return TemperatureStatus.WARM
+	elif temp_c <= 43:
+		return TemperatureStatus.HYPERTHERMIC
+	else:
+		return TemperatureStatus.CRITICAL
+
+func _get_pain_status() -> int:
+	"""Get pain status enum"""
+	if pain_level <= 0:
+		return PainLevel.NONE
+	elif pain_level <= 15:
+		return PainLevel.MILD
+	elif pain_level <= 35:
+		return PainLevel.MODERATE
+	elif pain_level <= 60:
+		return PainLevel.SEVERE
+	elif pain_level <= 85:
+		return PainLevel.EXTREME
+	else:
+		return PainLevel.UNBEARABLE
+
+func _get_breathing_status() -> String:
+	"""Get breathing status description"""
+	if breathing_rate == 0:
+		return "not_breathing"
+	elif breathing_rate < 10:
+		return "slow"
+	elif breathing_rate <= 20:
+		return "normal"
+	elif breathing_rate <= 30:
+		return "rapid"
+	else:
+		return "hyperventilating"
+
+# === UTILITY FUNCTIONS ===
+func full_heal(admin_heal: bool = false):
+	"""Completely heal the entity"""
+	# Reset all damage
+	bruteloss = 0.0
+	fireloss = 0.0
+	toxloss = 0.0
+	oxyloss = 0.0
+	cloneloss = 0.0
+	brainloss = 0.0
+	staminaloss = 0.0
+	
+	# Reset vital signs
+	blood_volume = blood_volume_maximum
+	pulse = 70
+	breathing_rate = 16
+	body_temperature = BODY_TEMP_NORMAL
+	consciousness_level = 100.0
+	pain_level = 0.0
+	shock_level = 0.0
 	
 	# Clear all status effects
-	for effect in status_effects.keys():
+	var effects_to_remove = status_effects.keys()
+	for effect in effects_to_remove:
 		remove_status_effect(effect)
-	
-	# Reset cardiac arrest
-	in_cardiac_arrest = false
 	
 	# Heal all organs
 	for organ_name in organs:
-		organs[organ_name].damage = 0
+		organs[organ_name].damage = 0.0
+		organs[organ_name].is_damaged = false
 		organs[organ_name].is_failing = false
+		organs[organ_name].efficiency = 1.0
 	
 	# Heal all limbs
 	for limb_name in limbs:
-		limbs[limb_name].brute_damage = 0
-		limbs[limb_name].burn_damage = 0
-		limbs[limb_name].status = "normal"
+		limbs[limb_name].brute_damage = 0.0
+		limbs[limb_name].burn_damage = 0.0
+		limbs[limb_name].status = "healthy"
+		limbs[limb_name].is_bleeding = false
+		limbs[limb_name].attached = true
 		_update_limb_status(limb_name)
 	
-	# Reset trauma and shock
-	traumatic_shock = 0
-	shock_stage = 0
-	
-	# Add temporary overheal buffer
-	overheal = 15
+	# Revive if dead
+	if current_state == HealthState.DEAD and admin_heal:
+		current_state = HealthState.ALIVE
+		is_dead = false
+		death_time = 0
+		cause_of_death = ""
 	
 	# Update health
-	if current_state == HealthState.DEAD and admin_heal:
-		revive(true)
-	else:
-		updatehealth()
-		
-		if current_state == HealthState.CRITICAL:
-			exit_critical()
+	updatehealth()
 	
 	# Play healing sound
 	if audio_system:
-		audio_system.play_sound("heal")
-		
-	return true
+		audio_system.play_sound("heal", 0.5)
 
-# Apply armor values
-func apply_armor(soft_armor_values, hard_armor_values = null):
-	# Apply soft armor
-	for key in soft_armor_values:
-		if soft_armor.has(key):
-			soft_armor[key] = soft_armor_values[key]
+func toggle_godmode(enabled: bool = false) -> bool:
+	"""Toggle godmode"""
+	if enabled != null:
+		godmode = enabled
+	else:
+		godmode = not godmode
 	
-	# Apply hard armor if provided
-	if hard_armor_values:
-		for key in hard_armor_values:
-			if hard_armor.has(key):
-				hard_armor[key] = hard_armor_values[key]
+	if godmode:
+		full_heal(true)
+	
+	return godmode
 
-# Get current state
-func get_state():
-	return current_state
+func get_health_percent() -> float:
+	"""Get health as percentage"""
+	return (health / max_health) * 100.0
 
-# Get full status report
-func get_status_report():
+func is_bleeding() -> bool:
+	"""Check if currently bleeding"""
+	return bleeding_rate > 0
+
+func get_pulse() -> int:
+	"""Get current pulse"""
+	return pulse
+
+func get_body_temperature() -> float:
+	"""Get body temperature in Celsius"""
+	return body_temperature - 273.15
+
+func get_blood_pressure() -> String:
+	"""Get blood pressure as string"""
+	return str(blood_pressure_systolic) + "/" + str(blood_pressure_diastolic)
+
+func get_respiratory_rate() -> int:
+	"""Get breathing rate"""
+	return breathing_rate
+
+# === DATA ACCESS FUNCTIONS ===
+func get_status_report() -> Dictionary:
+	"""Get comprehensive status report for health analyzer"""
 	var report = {
 		"health": health,
 		"max_health": max_health,
-		"state": ["alive", "critical", "dead"][current_state],
+		"health_percent": get_health_percent(),
+		"state": _get_state_string(),
+		"is_dead": is_dead,
+		"is_unconscious": is_unconscious,
+		
 		"damage": {
 			"brute": bruteloss,
 			"burn": fireloss,
@@ -1493,21 +1711,180 @@ func get_status_report():
 			"brain": brainloss,
 			"stamina": staminaloss
 		},
-		"blood": {
-			"volume": blood_volume,
-			"max": max_blood_volume,
-			"type": blood_type,
-			"bleeding_rate": bleeding_rate
-		},
+		
 		"vital_signs": {
 			"pulse": pulse,
-			"cardiac_arrest": in_cardiac_arrest,
-			"body_temp": body_temperature,
-			"shock_stage": shock_stage
+			"pulse_status": _get_pulse_status(),
+			"breathing_rate": breathing_rate,
+			"breathing_status": _get_breathing_status(),
+			"body_temperature": get_body_temperature(),
+			"temperature_status": _get_temperature_status(),
+			"blood_pressure": get_blood_pressure(),
+			"consciousness": consciousness_level,
+			"pain_level": pain_level,
+			"pain_status": _get_pain_status()
 		},
-		"status_effects": status_effects.keys(),
-		"cause_of_death": cause_of_death,
-		"death_time": death_time
+		
+		"blood": {
+			"volume": blood_volume,
+			"max_volume": blood_volume_maximum,
+			"type": blood_type,
+			"bleeding_rate": bleeding_rate,
+			"is_bleeding": is_bleeding(),
+			"blood_percent": (blood_volume / blood_volume_maximum) * 100.0,
+			"blood_status": _get_blood_status()
+		},
+		
+		"organs": _get_organ_report(),
+		"limbs": _get_limb_report(),
+		"status_effects": _get_status_effects_list(),
+		"diseases": diseases.duplicate(),
+		"medications": medications.duplicate(),
+		
+		"medical_history": {
+			"cause_of_death": cause_of_death,
+			"death_time": death_time,
+			"revival_count": revival_count,
+			"medical_notes": medical_notes.duplicate()
+		}
 	}
 	
 	return report
+
+func _get_state_string() -> String:
+	"""Get health state as string"""
+	match current_state:
+		HealthState.ALIVE:
+			return "alive"
+		HealthState.UNCONSCIOUS:
+			return "unconscious"
+		HealthState.CRITICAL:
+			return "critical"
+		HealthState.DEAD:
+			return "dead"
+		HealthState.GIBBED:
+			return "gibbed"
+		_:
+			return "unknown"
+
+func _get_organ_report() -> Dictionary:
+	"""Get detailed organ report"""
+	var report = {}
+	
+	for organ_name in organs:
+		var organ = organs[organ_name]
+		report[organ_name] = {
+			"damage": organ.damage,
+			"max_damage": organ.max_damage,
+			"damage_percent": (organ.damage / organ.max_damage) * 100.0,
+			"is_damaged": organ.is_damaged,
+			"is_failing": organ.is_failing,
+			"efficiency": organ.efficiency,
+			"status": _get_organ_status_string(organ)
+		}
+	
+	return report
+
+func _get_limb_report() -> Dictionary:
+	"""Get detailed limb report"""
+	var report = {}
+	
+	for limb_name in limbs:
+		var limb = limbs[limb_name]
+		var total_damage = limb.brute_damage + limb.burn_damage
+		
+		report[limb_name] = {
+			"brute_damage": limb.brute_damage,
+			"burn_damage": limb.burn_damage,
+			"total_damage": total_damage,
+			"max_damage": limb.max_damage,
+			"status": limb.status,
+			"attached": limb.attached,
+			"is_bleeding": limb.is_bleeding,
+			"is_bandaged": limb.is_bandaged,
+			"is_splinted": limb.is_splinted
+		}
+	
+	return report
+
+func _get_status_effects_list() -> Array:
+	"""Get list of active status effects"""
+	var effects_list = []
+	
+	for effect_name in status_effects:
+		var effect = status_effects[effect_name]
+		effects_list.append({
+			"name": effect_name,
+			"duration": effect.duration,
+			"intensity": effect.intensity
+		})
+	
+	return effects_list
+
+func _get_organ_status_string(organ: Dictionary) -> String:
+	"""Get organ status as string"""
+	if organ.is_failing:
+		return "failing"
+	elif organ.is_damaged:
+		return "damaged"
+	else:
+		return "healthy"
+
+func get_reagents() -> Array:
+	"""Get list of chemicals/reagents in bloodstream"""
+	# This would integrate with a chemistry system
+	# For now, return medications as placeholder
+	var reagents = []
+	
+	for med in medications:
+		reagents.append({
+			"name": med.name,
+			"amount": med.amount,
+			"overdose": med.get("overdose", false),
+			"dangerous": med.get("dangerous", false),
+			"color": med.get("color", "#FFFFFF")
+		})
+	
+	return reagents
+
+func get_limb_data() -> Dictionary:
+	"""Get limb data for external systems"""
+	return limbs.duplicate(true)
+
+func get_diseases() -> Array:
+	"""Get list of diseases"""
+	return diseases.duplicate()
+
+# === UI AND AUDIO FUNCTIONS ===
+func _update_health_ui():
+	"""Update health-related UI elements"""
+	if ui_system and ui_system.has_method("update_health_display"):
+		ui_system.update_health_display(health, max_health)
+
+func _play_damage_sound(damage_type: int, amount: float):
+	"""Play appropriate damage sound"""
+	if not audio_system or damage_sound_cooldown > 0:
+		return
+	
+	var sound_name = ""
+	var volume = clamp(0.2 + (amount / 50.0), 0.2, 0.8)
+	
+	match damage_type:
+		DamageType.BRUTE:
+			sound_name = "hit"
+		DamageType.BURN:
+			sound_name = "burn"
+		DamageType.TOXIN:
+			sound_name = "poison"
+		DamageType.OXYGEN:
+			sound_name = "gasp"
+		_:
+			sound_name = "damage"
+	
+	audio_system.play_sound(sound_name, volume)
+	damage_sound_cooldown = 0.2  # Prevent sound spam
+
+func _drop_all_items():
+	"""Drop all items when dying"""
+	if inventory_system and inventory_system.has_method("drop_all_items"):
+		inventory_system.drop_all_items()

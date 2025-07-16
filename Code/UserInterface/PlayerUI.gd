@@ -237,13 +237,15 @@ func _ready():
 
 func setup_ui_filtering():
 	"""Configure proper mouse filtering for UI elements"""
-	# Set the main container to pass through mouse events
+	print("PlayerUI: Setting up UI filtering...")
+	
+	# Set the main container to pass through mouse events when not over interactive elements
 	$Control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 	# Make non-interactive containers pass through events
 	var ignore_containers = [
 		$Control/HandSlots,
-		$Control/EquipmentItems,
+		$Control/EquipmentItems,  # The container passes through
 		$Control/IntentSelector,
 		$Control/MovementButtons,
 		$Control/MainSlots,
@@ -253,6 +255,27 @@ func setup_ui_filtering():
 	for container in ignore_containers:
 		if container:
 			container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			print("PlayerUI: Set ", container.name, " to MOUSE_FILTER_IGNORE")
+	
+	# Ensure interactive elements can receive mouse events
+	var interactive_elements = [
+		$Control/EquipmentItems/EquipmentButton,  # This should STOP mouse events
+		$Control/IntentSelector/HelpIntent,
+		$Control/IntentSelector/DisarmIntent,
+		$Control/IntentSelector/GrabIntent,
+		$Control/IntentSelector/HarmIntent,
+		$Control/MovementButtons/RunButton,
+		$Control/MovementButtons/WalkButton,
+		$Control/HandSlots/LeftHand,
+		$Control/HandSlots/RightHand
+	]
+	
+	for element in interactive_elements:
+		if element:
+			element.mouse_filter = Control.MOUSE_FILTER_STOP
+			print("PlayerUI: Set ", element.name, " to MOUSE_FILTER_STOP")
+	
+	print("PlayerUI: UI filtering setup complete")
 
 func validate_ui_state():
 	"""Validate UI state against inventory to catch any inconsistencies"""
@@ -1646,11 +1669,18 @@ func _on_intent_toggled(pressed, intent):
 
 # Equipment button toggle handler with animation
 func _on_equipment_button_toggled(toggled_on):
+	"""Equipment button toggle handler with dynamic slot registration"""
 	print("PlayerUI: Equipment button toggled:", toggled_on)
 	
 	var equipment_menu = $Control/EquipmentItems/EquipmentButton/EquipmentSlots
 	if !equipment_menu:
 		return
+	
+	# Manage slot registration based on visibility
+	if toggled_on:
+		register_equipment_slots()
+	else:
+		unregister_equipment_slots()
 		
 	# Cancel any active tween
 	if equipment_menu in active_tweens and active_tweens[equipment_menu].is_valid():
@@ -1680,6 +1710,56 @@ func _on_equipment_button_toggled(toggled_on):
 		tween.tween_property(equipment_menu, "modulate:a", 0, EQUIPMENT_MENU_TRANSITION_TIME)
 		tween.parallel().tween_property(equipment_menu, "scale", Vector2(0.8, 0.8), EQUIPMENT_MENU_TRANSITION_TIME)
 		tween.tween_callback(func(): equipment_menu.visible = false)
+
+func register_equipment_slots():
+	"""Register equipment slots as interactive when menu is open"""
+	print("PlayerUI: Registering equipment slots as interactive")
+	
+	var equipment_slots = [
+		"HeadSlot", "EyesSlot", "MaskSlot", "UniformSlot", 
+		"ArmorSlot", "SuitSlot", "GlovesSlot", "ShoesSlot"
+	]
+	
+	for slot_name in equipment_slots:
+		var button_path = "Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/%s/%sButton" % [slot_name, slot_name]
+		var button = get_node_or_null(button_path)
+		if button:
+			button.add_to_group("inventory_slots")
+			button.add_to_group("ui_elements")
+	
+	# Handle ear slots
+	var ear_slots = ["Ear1Slot", "Ear2Slot"]
+	for ear_slot in ear_slots:
+		var button_path = "Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/%s/EarsSlotButton" % ear_slot
+		var button = get_node_or_null(button_path)
+		if button:
+			button.add_to_group("inventory_slots")
+			button.add_to_group("ui_elements")
+
+func unregister_equipment_slots():
+	"""Unregister equipment slots when menu is closed"""
+	print("PlayerUI: Unregistering equipment slots")
+	
+	var equipment_slots = [
+		"HeadSlot", "EyesSlot", "MaskSlot", "UniformSlot", 
+		"ArmorSlot", "SuitSlot", "GlovesSlot", "ShoesSlot"
+	]
+	
+	for slot_name in equipment_slots:
+		var button_path = "Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/%s/%sButton" % [slot_name, slot_name]
+		var button = get_node_or_null(button_path)
+		if button:
+			button.remove_from_group("inventory_slots")
+			button.remove_from_group("ui_elements")
+	
+	# Handle ear slots
+	var ear_slots = ["Ear1Slot", "Ear2Slot"]
+	for ear_slot in ear_slots:
+		var button_path = "Control/EquipmentItems/EquipmentButton/EquipmentSlots/GridContainer/%s/EarsSlotButton" % ear_slot
+		var button = get_node_or_null(button_path)
+		if button:
+			button.remove_from_group("inventory_slots")
+			button.remove_from_group("ui_elements")
 
 # Run button pressed handler
 func _on_run_button_pressed():
@@ -2215,37 +2295,87 @@ func add_slot_buttons_to_array(buttons_array):
 
 # Make UI widgets register to groups
 func register_ui_widgets():
-	"""Register UI elements to appropriate interaction groups"""
+	"""Register UI elements to appropriate interaction groups with better organization"""
+	print("PlayerUI: Registering UI widgets to groups...")
+	
 	# Add UI controls to groups for click detection
 	add_to_group("ui_root")
+	add_to_group("canvas_layer")  # Make sure ClickSystem can find this CanvasLayer
 	
-	# Make sure the Control node is in the ui_elements group
-	$Control.add_to_group("ui_elements")
+	# IMPORTANT: Make sure the main Control does NOT get added to ui_elements 
+	# since it has MOUSE_FILTER_IGNORE
+	# $Control.add_to_group("ui_elements")  # REMOVE THIS LINE
 	
-	# Add all sections to ui_elements group
-	var sections = [
-		$Control/HandSlots,
-		$Control/EquipmentItems,
-		$Control/IntentSelector,
-		$Control/MovementButtons,
-		$Control/MainSlots,
-		$Control/PouchSlots,
-		$Control/TooltipPanel
+	# Only add actually interactive sections to ui_elements group
+	var interactive_sections = [
+		$Control/EquipmentItems/EquipmentButton,  # Only the button, not the container
+		$Control/IntentSelector/HelpIntent,
+		$Control/IntentSelector/DisarmIntent,
+		$Control/IntentSelector/GrabIntent,
+		$Control/IntentSelector/HarmIntent,
+		$Control/MovementButtons/RunButton,
+		$Control/MovementButtons/WalkButton,
+		$Control/HandSlots/LeftHand,
+		$Control/HandSlots/RightHand
 	]
 	
-	for section in sections:
+	for section in interactive_sections:
 		if section:
 			section.add_to_group("ui_elements")
+			section.add_to_group("ui_buttons")
+			print("PlayerUI: Added ", section.name, " to ui_elements and ui_buttons groups")
 	
-	# Important: Add slots to a specific group for the ClickSystem to recognize
-	register_inventory_slots()
+	# Add slots to a specific group but only when they should be interactive
+	register_interactive_slots()
 	
-	# Add specific controls to ui_buttons group
-	register_ui_buttons()
+	# Add tooltips and notifications to ui_elements only if they can block clicks
+	if $Control/TooltipPanel:
+		$Control/TooltipPanel.add_to_group("ui_elements")
 	
-	# Add equipment menu to ui_elements if it exists
-	if $Control/EquipmentItems/EquipmentButton/EquipmentSlots:
-		$Control/EquipmentItems/EquipmentButton/EquipmentSlots.add_to_group("ui_elements")
+	if $Control/NotificationPanel:
+		$Control/NotificationPanel.add_to_group("ui_elements")
+	
+	print("PlayerUI: UI widget registration complete")
+
+func register_interactive_slots():
+	"""Register only actually interactive inventory slots"""
+	# Register hand slots (these are always interactive)
+	var left_hand = $Control/HandSlots/LeftHand
+	var right_hand = $Control/HandSlots/RightHand
+	
+	if left_hand:
+		left_hand.add_to_group("inventory_slots")
+		left_hand.add_to_group("ui_elements")
+		print("PlayerUI: Registered LeftHand as interactive")
+	
+	if right_hand:
+		right_hand.add_to_group("inventory_slots")
+		right_hand.add_to_group("ui_elements")
+		print("PlayerUI: Registered RightHand as interactive")
+	
+	# For equipment slots, only register them when the equipment menu is visible
+	# This will be handled dynamically in the equipment button toggle
+	
+	# Register main slots (these are always visible)
+	for slot_name in ["BackSlot", "BeltSlot", "IDSlot"]:
+		var slot_element = get_node_or_null("Control/MainSlots/" + slot_name)
+		if slot_element:
+			# Find the button inside the slot
+			var button = slot_element.get_node_or_null(slot_name + "Button")
+			if button:
+				button.add_to_group("inventory_slots")
+				button.add_to_group("ui_elements")
+				print("PlayerUI: Registered ", slot_name, " button as interactive")
+	
+	# Register pouch slots (these are always visible)
+	for i in range(1, 3):
+		var pouch_slot = get_node_or_null("Control/PouchSlots/Pouch" + str(i))
+		if pouch_slot:
+			var button = pouch_slot.get_node_or_null("Pouch" + str(i) + "Button")
+			if button:
+				button.add_to_group("inventory_slots")
+				button.add_to_group("ui_elements")
+				print("PlayerUI: Registered Pouch", i, " button as interactive")
 
 func register_inventory_slots():
 	"""Register all inventory slots for proper click detection"""
@@ -3965,38 +4095,87 @@ func update_throw_feedback(current_pos: Vector2):
 	var color = lerp(Color(0.2, 0.8, 0.2), Color(0.8, 0.2, 0.2), normalized)
 
 func is_position_in_ui_element(position: Vector2) -> bool:
-	"""Check if a position is inside any PlayerUI interactive element"""
+	"""Check if a position is inside any PlayerUI interactive element with debugging"""
+	
+	# First check if we're dragging - if so, always consider it UI
+	if dragging_item != null:
+		print("PlayerUI: Position is in UI (currently dragging)")
+		return true
+	
 	# Check hand slots
 	var left_hand = $Control/HandSlots/LeftHand if has_node("Control/HandSlots/LeftHand") else null
 	var right_hand = $Control/HandSlots/RightHand if has_node("Control/HandSlots/RightHand") else null
 	
 	if left_hand and left_hand.visible and left_hand.get_global_rect().has_point(position):
+		print("PlayerUI: Click detected on left hand slot")
 		return true
 		
 	if right_hand and right_hand.visible and right_hand.get_global_rect().has_point(position):
+		print("PlayerUI: Click detected on right hand slot")
 		return true
 	
-	# Check equipment slots
+	# Check equipment button (this might be getting detected when it shouldn't)
+	var equipment_button = $Control/EquipmentItems/EquipmentButton
+	if equipment_button and equipment_button.visible and equipment_button.get_global_rect().has_point(position):
+		print("PlayerUI: Click detected on equipment button")
+		return true
+	
+	# Check equipment slots ONLY if the equipment menu is visible
 	if $Control/EquipmentItems/EquipmentButton/EquipmentSlots.visible:
+		print("PlayerUI: Equipment menu is visible, checking slots")
 		for slot_name in slot_mapping:
 			var slot_element = find_slot_element(slot_name)
 			if slot_element and slot_element.visible and slot_element.get_global_rect().has_point(position):
+				print("PlayerUI: Click detected on equipment slot: ", slot_name)
 				return true
+	
+	# Check intent buttons
+	var intent_buttons = [
+		$Control/IntentSelector/HelpIntent,
+		$Control/IntentSelector/DisarmIntent,
+		$Control/IntentSelector/GrabIntent,
+		$Control/IntentSelector/HarmIntent
+	]
+	
+	for button in intent_buttons:
+		if button and button.visible and button.get_global_rect().has_point(position):
+			print("PlayerUI: Click detected on intent button: ", button.name)
+			return true
+	
+	# Check movement buttons
+	var movement_buttons = [
+		$Control/MovementButtons/RunButton,
+		$Control/MovementButtons/WalkButton
+	]
+	
+	for button in movement_buttons:
+		if button and button.visible and button.get_global_rect().has_point(position):
+			print("PlayerUI: Click detected on movement button: ", button.name)
+			return true
 	
 	# Check main slots (belt, backpack, ID)
 	for slot_name in ["BackSlot", "BeltSlot", "IDSlot"]:
 		var slot_element = get_node_or_null("Control/MainSlots/" + slot_name)
 		if slot_element and slot_element.visible and slot_element.get_global_rect().has_point(position):
+			print("PlayerUI: Click detected on main slot: ", slot_name)
 			return true
 	
 	# Check pouch slots
 	for i in range(1, 3):
 		var pouch_slot = get_node_or_null("Control/PouchSlots/Pouch" + str(i))
 		if pouch_slot and pouch_slot.visible and pouch_slot.get_global_rect().has_point(position):
+			print("PlayerUI: Click detected on pouch slot: Pouch", i)
 			return true
 	
-	# Check if dragging an item
-	if dragging_item != null:
+	# Check if tooltip is visible (this might be interfering)
+	if $Control/TooltipPanel.visible and $Control/TooltipPanel.get_global_rect().has_point(position):
+		print("PlayerUI: Click detected on tooltip panel")
+		return true
+	
+	# Check if notification panel is visible
+	if $Control/NotificationPanel.visible and $Control/NotificationPanel.get_global_rect().has_point(position):
+		print("PlayerUI: Click detected on notification panel")
 		return true
 		
+	print("PlayerUI: Click NOT detected on any UI element at position: ", position)
 	return false

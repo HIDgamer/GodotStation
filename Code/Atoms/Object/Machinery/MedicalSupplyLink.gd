@@ -19,7 +19,6 @@ func _ready():
 	
 	# Set physical properties
 	anchored = true
-	density = false
 	
 	# Set visual properties
 	if is_green_variant:

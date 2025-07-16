@@ -2,7 +2,6 @@ extends BaseObject
 class_name Machinery
 
 var entity_id: String = "machinery"
-var entity_type: String = "machinery"
 
 # === MACHINERY PROPERTIES ===
 var is_powered: bool = true
@@ -11,7 +10,6 @@ var power_draw_per_tick: float = 0.01
 var requires_power: bool = true
 
 # === ENTITY SYSTEM INTEGRATION ===
-var entity_dense: bool = true  # By default, machinery is dense (blocks movement)
 var can_be_bumped: bool = true  # Can be bumped into by characters
 
 # === SIGNALS ===
