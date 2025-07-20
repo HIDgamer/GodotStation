@@ -57,7 +57,7 @@ func use_on(user, target, targeted_limb = ""):
 	
 	current_ui_instance = health_analyzer_ui_scene.instantiate()
 	
-	# FIXED: Add to proper UI layer instead of world scene
+	# Add to proper UI layer instead of world scene
 	_add_ui_to_viewport(current_ui_instance, user)
 	
 	# Connect close signal

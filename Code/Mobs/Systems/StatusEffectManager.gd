@@ -692,7 +692,7 @@ func _apply_stunned(effect):
 		entity.set_can_move(false)
 	
 	# Apply visual effects
-	if sprite_system and sprite_system.has_method("show_stun_effect"):
+	if sprite_system:
 		sprite_system.show_stun_effect(true)
 	
 	# Apply status to health system if available
@@ -705,7 +705,7 @@ func _remove_stunned(effect):
 		entity.set_can_move(true)
 	
 	# Remove visual effects
-	if sprite_system and sprite_system.has_method("show_stun_effect"):
+	if sprite_system:
 		sprite_system.show_stun_effect(false)
 	
 	# Remove status from health system if available
@@ -719,7 +719,7 @@ func _update_stunned(effect, delta):
 # Poisoned effect
 func _apply_poisoned(effect):
 	# Apply visual effects
-	if sprite_system and sprite_system.has_method("show_poison_effect"):
+	if sprite_system:
 		sprite_system.show_poison_effect(true)
 	
 	# Apply to health system if available
@@ -728,7 +728,7 @@ func _apply_poisoned(effect):
 
 func _remove_poisoned(effect):
 	# Remove visual effects
-	if sprite_system and sprite_system.has_method("show_poison_effect"):
+	if sprite_system:
 		sprite_system.show_poison_effect(false)
 	
 	# Remove status from health system if available
@@ -743,7 +743,7 @@ func _update_poisoned(effect, delta):
 # Bleeding effect
 func _apply_bleeding(effect):
 	# Apply visual effects
-	if sprite_system and sprite_system.has_method("show_bleeding_effect"):
+	if sprite_system:
 		sprite_system.show_bleeding_effect(true)
 	
 	# Set bleeding rate in blood system
@@ -756,7 +756,7 @@ func _apply_bleeding(effect):
 
 func _remove_bleeding(effect):
 	# Remove visual effects
-	if sprite_system and sprite_system.has_method("show_bleeding_effect"):
+	if sprite_system:
 		sprite_system.show_bleeding_effect(false)
 	
 	# Stop bleeding in blood system

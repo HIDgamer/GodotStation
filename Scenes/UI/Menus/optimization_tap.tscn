@@ -1,6 +1,25 @@
-[gd_scene load_steps=2 format=3 uid="uid://cyvl4cqdahpxx"]
+[gd_scene load_steps=4 format=3 uid="uid://cyvl4cqdahpxx"]
 
 [ext_resource type="Script" uid="uid://bpbcph0kw33ew" path="res://Code/UserInterface/OptimizationTap.gd" id="1_mxjrs"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_input"]
+bg_color = Color(0.05, 0.1, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.4, 0.7, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider"]
+bg_color = Color(0.08, 0.15, 0.25, 0.8)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="OptimizationTab" type="VBoxContainer"]
 anchors_preset = 15
@@ -8,8 +27,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 20
 script = ExtResource("1_mxjrs")
+
+[node name="OptimizationHeader" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "PERFORMANCE OPTIMIZATION"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 2
@@ -20,19 +45,23 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 15
+theme_override_constants/separation = 20
 
 [node name="QualitySection" type="VBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
 [node name="QualityLabel" type="Label" parent="ScrollContainer/OptionsContainer/QualitySection"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Quality Preset"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Performance Preset:"
 
 [node name="QualityOption" type="OptionButton" parent="ScrollContainer/OptionsContainer/QualitySection"]
 layout_mode = 2
-tooltip_text = "Select overall quality preset - this will adjust multiple settings at once"
+tooltip_text = "Select overall quality preset - adjusts multiple settings simultaneously"
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 selected = 2
 item_count = 5
 popup/item_0/text = "Ultra Low"
@@ -49,61 +78,74 @@ popup/item_4/id = 4
 [node name="HSeparator" type="HSeparator" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
 
-[node name="AutoSection" type="GridContainer" parent="ScrollContainer/OptionsContainer"]
+[node name="AutoOptimizationSection" type="VBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
-columns = 2
+theme_override_constants/separation = 15
 
-[node name="AutoOptimizeLabel" type="Label" parent="ScrollContainer/OptionsContainer/AutoSection"]
+[node name="AutoOptimizeContainer" type="HBoxContainer" parent="ScrollContainer/OptionsContainer/AutoOptimizationSection"]
+layout_mode = 2
+
+[node name="AutoOptimizeLabel" type="Label" parent="ScrollContainer/OptionsContainer/AutoOptimizationSection/AutoOptimizeContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "Automatically adjust settings to maintain target frame rate"
-text = "Auto-Optimize"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Adaptive Performance Mode:"
 
-[node name="AutoCheck" type="CheckBox" parent="ScrollContainer/OptionsContainer/AutoSection"]
+[node name="AutoCheck" type="CheckBox" parent="ScrollContainer/OptionsContainer/AutoOptimizationSection/AutoOptimizeContainer"]
 layout_mode = 2
 tooltip_text = "Automatically adjust settings to maintain target frame rate"
 button_pressed = true
 
-[node name="FPSSection" type="HBoxContainer" parent="ScrollContainer/OptionsContainer"]
+[node name="TargetFPSContainer" type="HBoxContainer" parent="ScrollContainer/OptionsContainer/AutoOptimizationSection"]
 layout_mode = 2
-tooltip_text = "Target frame rate for auto-optimization"
+theme_override_constants/separation = 15
 
-[node name="TargetFPSLabel" type="Label" parent="ScrollContainer/OptionsContainer/FPSSection"]
+[node name="TargetFPSLabel" type="Label" parent="ScrollContainer/OptionsContainer/AutoOptimizationSection/TargetFPSContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Target FPS:"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Target Frame Rate:"
 
-[node name="TargetFPSSlider" type="HSlider" parent="ScrollContainer/OptionsContainer/FPSSection"]
+[node name="TargetFPSSlider" type="HSlider" parent="ScrollContainer/OptionsContainer/AutoOptimizationSection/TargetFPSContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 size_flags_stretch_ratio = 2.0
+tooltip_text = "Target frame rate for auto-optimization"
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider")
 min_value = 30.0
 max_value = 120.0
 value = 60.0
 
-[node name="TargetFPSValue" type="Label" parent="ScrollContainer/OptionsContainer/FPSSection"]
+[node name="TargetFPSValue" type="Label" parent="ScrollContainer/OptionsContainer/AutoOptimizationSection/TargetFPSContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
 text = "60 FPS"
 
 [node name="HSeparator2" type="HSeparator" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
 
-[node name="LightingHeader" type="Label" parent="ScrollContainer/OptionsContainer"]
+[node name="RenderingHeader" type="Label" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Lighting Settings"
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "RENDERING SYSTEMS"
 
-[node name="LightSection" type="VBoxContainer" parent="ScrollContainer/OptionsContainer"]
+[node name="LightingSection" type="VBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="LightQualityLabel" type="Label" parent="ScrollContainer/OptionsContainer/LightSection"]
+[node name="LightQualityLabel" type="Label" parent="ScrollContainer/OptionsContainer/LightingSection"]
 layout_mode = 2
-text = "Light Quality:"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Lighting Quality:"
 
-[node name="LightQualityOption" type="OptionButton" parent="ScrollContainer/OptionsContainer/LightSection"]
+[node name="LightQualityOption" type="OptionButton" parent="ScrollContainer/OptionsContainer/LightingSection"]
 layout_mode = 2
-tooltip_text = "Controls light quality, range, and effects"
+tooltip_text = "Controls lighting quality and effects intensity"
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 selected = 2
 item_count = 5
 popup/item_0/text = "Disabled"
@@ -119,14 +161,18 @@ popup/item_4/id = 4
 
 [node name="ShadowSection" type="VBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="ShadowQualityLabel" type="Label" parent="ScrollContainer/OptionsContainer/ShadowSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "Shadow Quality:"
 
 [node name="ShadowQualityOption" type="OptionButton" parent="ScrollContainer/OptionsContainer/ShadowSection"]
 layout_mode = 2
-tooltip_text = "Controls shadow quality and distance"
+tooltip_text = "Controls shadow rendering quality and distance"
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 selected = 2
 item_count = 4
 popup/item_0/text = "Disabled"
@@ -143,38 +189,45 @@ layout_mode = 2
 
 [node name="WorldHeader" type="Label" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "World Settings"
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "WORLD SIMULATION"
 
 [node name="ChunkSection" type="HBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 15
 
 [node name="ChunkDistanceLabel" type="Label" parent="ScrollContainer/OptionsContainer/ChunkSection"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Chunk Load Distance:"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Sector Load Distance:"
 
 [node name="ChunkDistanceSlider" type="HSlider" parent="ScrollContainer/OptionsContainer/ChunkSection"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 size_flags_stretch_ratio = 2.0
-tooltip_text = "Controls how many chunks to load around the player"
+tooltip_text = "Controls how many sectors to load around the player"
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider")
 min_value = 1.0
 max_value = 5.0
 value = 3.0
 
 [node name="ChunkDistanceValue" type="Label" parent="ScrollContainer/OptionsContainer/ChunkSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
 text = "3"
 
 [node name="EntitySection" type="HBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 15
 
 [node name="EntityDistanceLabel" type="Label" parent="ScrollContainer/OptionsContainer/EntitySection"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Entity Cull Distance:"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Entity Render Distance:"
 
 [node name="EntityDistanceSlider" type="HSlider" parent="ScrollContainer/OptionsContainer/EntitySection"]
 layout_mode = 2
@@ -182,32 +235,39 @@ size_flags_horizontal = 3
 size_flags_vertical = 1
 size_flags_stretch_ratio = 2.0
 tooltip_text = "Controls how far away entities are rendered"
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider")
 min_value = 5.0
 max_value = 30.0
 value = 20.0
 
 [node name="EntityDistanceValue" type="Label" parent="ScrollContainer/OptionsContainer/EntitySection"]
 layout_mode = 2
-text = "20 tiles"
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
+text = "20 units"
 
 [node name="HSeparator4" type="HSeparator" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
 
 [node name="EffectsHeader" type="Label" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Effects Settings"
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "VISUAL EFFECTS"
 
 [node name="ParticleSection" type="VBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="ParticleQualityLabel" type="Label" parent="ScrollContainer/OptionsContainer/ParticleSection"]
 layout_mode = 2
-text = "Particle Effects:"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Particle Systems:"
 
 [node name="ParticleQualityOption" type="OptionButton" parent="ScrollContainer/OptionsContainer/ParticleSection"]
 layout_mode = 2
 tooltip_text = "Controls particle effects quality and quantity"
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 selected = 2
 item_count = 4
 popup/item_0/text = "Disabled"
@@ -224,19 +284,24 @@ layout_mode = 2
 
 [node name="PhysicsHeader" type="Label" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Physics Settings"
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "PHYSICS SIMULATION"
 
 [node name="PhysicsSection" type="VBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="PhysicsRateLabel" type="Label" parent="ScrollContainer/OptionsContainer/PhysicsSection"]
 layout_mode = 2
-text = "Physics Rate:"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Physics Update Rate:"
 
 [node name="PhysicsRateOption" type="OptionButton" parent="ScrollContainer/OptionsContainer/PhysicsSection"]
 layout_mode = 2
-tooltip_text = "Controls how frequently physics are calculated"
+tooltip_text = "Controls how frequently physics calculations are performed"
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 selected = 2
 item_count = 3
 popup/item_0/text = "30 Hz"
@@ -248,6 +313,7 @@ popup/item_2/id = 2
 
 [node name="InfoSection" type="VBoxContainer" parent="ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 10
 alignment = 2
 
 [node name="HSeparator" type="HSeparator" parent="ScrollContainer/OptionsContainer/InfoSection"]
@@ -255,8 +321,8 @@ layout_mode = 2
 
 [node name="InfoLabel" type="Label" parent="ScrollContainer/OptionsContainer/InfoSection"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.678431, 0.678431, 0.678431, 1)
-theme_override_font_sizes/font_size = 12
-text = "Note: Individual settings are overridden when Auto-Optimize is enabled or when changing Quality Preset."
+theme_override_colors/font_color = Color(0.5, 0.6, 0.7, 1)
+theme_override_font_sizes/font_size = 11
+text = "Note: Individual settings may be overridden when Adaptive Performance Mode is active or when changing Performance Preset."
 horizontal_alignment = 1
 autowrap_mode = 3

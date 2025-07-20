@@ -1,15 +1,39 @@
-[gd_scene load_steps=2 format=3 uid="uid://d20saeuvatwuw"]
+[gd_scene load_steps=4 format=3 uid="uid://bm6k8x40an2pq"]
 
-[ext_resource type="Script" uid="uid://d2yxswdtbk034" path="res://Code/UserInterface/main_menu.gd" id="1_7sp8y"]
+[ext_resource type="Script" uid="uid://d2yxswdtbk034" path="res://Code/UserInterface/main_menu.gd" id="1_main"]
 
-[node name="MainMenuScene" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0.05, 0.1, 0.2, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.6, 1, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2"]
+bg_color = Color(0.1, 0.2, 0.4, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.7, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_7sp8y")
+script = ExtResource("1_main")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -18,106 +42,148 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0509804, 0.0705882, 0.109804, 1)
+color = Color(0.02, 0.05, 0.12, 1)
 
-[node name="Title" type="Label" parent="."]
-z_index = 5
+[node name="StarField" type="Control" parent="Background"]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
-offset_top = 1.0
-offset_bottom = 89.0
-grow_horizontal = 2
-theme_override_font_sizes/font_size = 64
-text = "A.R.E.S-1"
-horizontal_alignment = 1
-
-[node name="Subtitle" type="Label" parent="."]
-z_index = 5
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 77.0
-offset_bottom = 117.0
-grow_horizontal = 2
-theme_override_font_sizes/font_size = 24
-text = "Advanced Reconnaissance & Exploration System"
-horizontal_alignment = 1
-
-[node name="Version" type="Label" parent="."]
-z_index = 5
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -40.0
-offset_right = 200.0
-offset_bottom = -20.0
-grow_vertical = 0
-text = "Version 0.1.0 MP"
-
-[node name="PanelContainer" type="PanelContainer" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -200.0
-offset_right = 200.0
-offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+[node name="Star1" type="ColorRect" parent="Background/StarField"]
+layout_mode = 0
+offset_left = 100.0
+offset_top = 80.0
+offset_right = 103.0
+offset_bottom = 83.0
+color = Color(0.8, 0.9, 1, 0.7)
 
-[node name="MenuOptions" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 20
-alignment = 1
+[node name="Star2" type="ColorRect" parent="Background/StarField"]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 150.0
+offset_right = 302.0
+offset_bottom = 152.0
+color = Color(0.6, 0.8, 1, 0.5)
 
-[node name="PlayButton" type="Button" parent="PanelContainer/MarginContainer/MenuOptions"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Play"
+[node name="Star3" type="ColorRect" parent="Background/StarField"]
+layout_mode = 0
+offset_left = 600.0
+offset_top = 200.0
+offset_right = 604.0
+offset_bottom = 204.0
+color = Color(0.9, 0.9, 1, 0.8)
 
-[node name="MultiplayerButton" type="Button" parent="PanelContainer/MarginContainer/MenuOptions"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Multiplayer"
+[node name="Star4" type="ColorRect" parent="Background/StarField"]
+layout_mode = 0
+offset_left = 800.0
+offset_top = 300.0
+offset_right = 802.0
+offset_bottom = 302.0
+color = Color(0.7, 0.8, 1, 0.6)
 
-[node name="SettingsButton" type="Button" parent="PanelContainer/MarginContainer/MenuOptions"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Settings"
+[node name="Star5" type="ColorRect" parent="Background/StarField"]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 400.0
+offset_right = 203.0
+offset_bottom = 403.0
+color = Color(0.8, 0.9, 1, 0.7)
 
-[node name="HSeparator" type="HSeparator" parent="PanelContainer/MarginContainer/MenuOptions"]
-layout_mode = 2
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="QuitButton" type="Button" parent="PanelContainer/MarginContainer/MenuOptions"]
+[node name="MainPanel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(400, 500)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Quit"
+theme_override_styles/panel = SubResource("StyleBoxFlat_1")
 
-[node name="Credits" type="Label" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/MainPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/MainPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="TitleSection" type="VBoxContainer" parent="CenterContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GameTitle" type="Label" parent="CenterContainer/MainPanel/MarginContainer/VBoxContainer/TitleSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 36
+text = "STELLAR NEXUS"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContainer/MainPanel/MarginContainer/VBoxContainer/TitleSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 0.9, 0.8)
+theme_override_font_sizes/font_size = 14
+text = "Deep Space Command Interface"
+horizontal_alignment = 1
+
+[node name="MenuOptions" type="VBoxContainer" parent="CenterContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="PlayButton" type="Button" parent="CenterContainer/MainPanel/MarginContainer/VBoxContainer/MenuOptions"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2")
+text = "INITIATE MISSION"
+
+[node name="MultiplayerButton" type="Button" parent="CenterContainer/MainPanel/MarginContainer/VBoxContainer/MenuOptions"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2")
+text = "NETWORK PROTOCOL"
+
+[node name="SettingsButton" type="Button" parent="CenterContainer/MainPanel/MarginContainer/VBoxContainer/MenuOptions"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2")
+text = "SYSTEM CONFIG"
+
+[node name="QuitButton" type="Button" parent="CenterContainer/MainPanel/MarginContainer/VBoxContainer/MenuOptions"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2")
+text = "TERMINATE SESSION"
+
+[node name="VersionLabel" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -200.0
-offset_top = -40.0
+offset_left = -150.0
+offset_top = -30.0
 offset_right = -20.0
-offset_bottom = -20.0
+offset_bottom = -10.0
 grow_horizontal = 0
 grow_vertical = 0
-text = "© HIDgamer 2025"
+theme_override_colors/font_color = Color(0.4, 0.5, 0.6, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "BUILD v0.1.0-alpha"
 horizontal_alignment = 2

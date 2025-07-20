@@ -36,6 +36,7 @@ var controller: Node = null
 var sensory_system = null
 var audio_system = null
 var tile_occupancy_system = null
+var world = null
 
 # Grab state
 var grab_state: int = GrabState.NONE
@@ -61,6 +62,7 @@ var mass: float = 70.0
 func initialize(init_data: Dictionary):
 	"""Initialize the grab/pull component"""
 	controller = init_data.get("controller")
+	world = init_data.get("world")
 	sensory_system = init_data.get("sensory_system")
 	audio_system = init_data.get("audio_system")
 	tile_occupancy_system = init_data.get("tile_occupancy_system")
@@ -235,7 +237,7 @@ func release_grab() -> bool:
 		if "move_progress" in grabbed_controller:
 			grabbed_controller.move_progress = 0.0
 		if "position" in grabbed_controller:
-			grabbed_controller.position = grabbed_controller.tile_to_world(grabbed_controller.current_tile_position)
+			grabbed_controller.position = world.tile_to_world(grabbed_controller.movement_component.get_current_tile_position())
 	
 	# Disconnect signals
 	if grabbing_entity.has_signal("movement_attempt"):
@@ -383,31 +385,6 @@ func apply_grab_escalation_effects(old_state: int, new_state: int):
 			if "z_index" in grabbing_entity:
 				grabbing_entity.z_index = controller.z_index + 1
 
-func handle_grabbed_entity_following(previous_position: Vector2i):
-	"""Make grabbed entity follow when moving"""
-	if not grabbing_entity or not is_instance_valid(grabbing_entity):
-		return
-	
-	var grabbed_controller = get_entity_controller(grabbing_entity)
-	if grabbed_controller and "is_moving" in grabbed_controller and grabbed_controller.is_moving:
-		# Defer to next frame
-		controller.get_tree().process_frame.connect(_deferred_grab_follow.bind(previous_position), CONNECT_ONE_SHOT)
-		return
-	
-	# Move grabbed entity
-	var success = move_entity_to_position(grabbing_entity, previous_position, true)
-	if not success:
-		release_grab()
-
-func _deferred_grab_follow(target_position: Vector2i):
-	"""Deferred grab following"""
-	if not grabbing_entity or not is_instance_valid(grabbing_entity):
-		return
-	
-	var success = move_entity_to_position(grabbing_entity, target_position, true)
-	if not success:
-		release_grab()
-
 func _on_grabbed_movement_attempt(direction: Vector2i):
 	"""Handle when grabbed entity tries to move"""
 	if not grabbing_entity:
@@ -418,18 +395,169 @@ func _on_grabbed_movement_attempt(direction: Vector2i):
 		var restrict_chance = 30 + (grab_state * 20)
 		
 		if randf() * 100 < restrict_chance:
-			if grabbing_entity.has_method("cancel_movement"):
-				grabbing_entity.cancel_movement()
+			if grabbing_entity:
+				grabbing_entity.movement_component.complete_movement()
 			
 			if fmod(grab_time, 1.0) < 0.1:
 				var messages = ["holds you in place!", "restricts your movement!", "prevents you from moving!"]
 				var msg_index = min(grab_state - 1, messages.size() - 1)
 				
-				if grabbing_entity.has_method("show_interaction_message"):
+				if grabbing_entity:
 					grabbing_entity.show_interaction_message(controller.entity_name + " " + messages[msg_index])
 #endregion
 
 #region PULL MECHANICS
+func start_synchronized_follow(grabber_previous_position: Vector2i, grabber_move_time: float):
+	"""Start synchronized movement for grabbed entity - called when grabber starts moving"""
+	if not grabbing_entity or not is_instance_valid(grabbing_entity):
+		return
+	
+	var grabbed_controller = get_entity_controller(grabbing_entity)
+	if not grabbed_controller or not grabbed_controller.movement_component:
+		return
+	
+	var grabbed_current_pos = get_entity_tile_position(grabbing_entity)
+	
+	# Don't move if already at target position
+	if grabbed_current_pos == grabber_previous_position:
+		return
+	
+	# If grabbed entity is currently moving, complete their movement first
+	if grabbed_controller.movement_component.is_moving:
+		grabbed_controller.movement_component.complete_movement()
+	
+	# Validate target position
+	var target_position = grabber_previous_position
+	if not is_valid_target_position(target_position):
+		target_position = find_closest_valid_position(target_position, grabbed_current_pos)
+		if target_position == Vector2i(-9999, -9999):
+			show_message("Lost grip due to obstruction!")
+			release_grab()
+			return
+	
+	# Start synchronized movement with exact same timing as grabber
+	var grabbed_movement = grabbed_controller.movement_component
+	
+	# Set the exact same movement timing
+	grabbed_movement.current_move_time = grabber_move_time
+	grabbed_movement.is_moving = true
+	grabbed_movement.move_progress = 0.0
+	grabbed_movement.target_tile_position = target_position
+	
+	# Update facing direction toward the target
+	var direction = target_position - grabbed_current_pos
+	if direction != Vector2i.ZERO:
+		grabbed_movement.update_facing_from_movement(direction)
+	
+	# Update tile occupancy for grabbed entity
+	if tile_occupancy_system:
+		tile_occupancy_system.move_entity(grabbing_entity, grabbed_current_pos, target_position, controller.current_z_level)
+	
+	# Set movement state
+	if grabbed_movement.is_lying:
+		grabbed_movement.set_state(grabbed_movement.MovementState.CRAWLING)
+	else:
+		grabbed_movement.set_state(grabbed_movement.MovementState.MOVING)
+	
+	# Visual feedback (reduced frequency)
+	if sensory_system and randf() < 0.2:
+		var grabber_name = controller.entity_name if "entity_name" in controller else controller.name
+		if "sensory_system" in grabbing_entity:
+			grabbing_entity.sensory_system.display_message("You are dragged by " + grabber_name + "!")
+
+func find_closest_valid_position(target_pos: Vector2i, current_pos: Vector2i) -> Vector2i:
+	"""Find the closest valid position to the target"""
+	var offsets = [
+		Vector2i(0, 0),   # Target position itself
+		Vector2i(0, -1),  # North
+		Vector2i(1, 0),   # East  
+		Vector2i(0, 1),   # South
+		Vector2i(-1, 0),  # West
+		Vector2i(1, -1),  # Northeast
+		Vector2i(1, 1),   # Southeast
+		Vector2i(-1, 1),  # Southwest
+		Vector2i(-1, -1)  # Northwest
+	]
+	
+	# Sort by distance from current position
+	offsets.sort_custom(func(a, b): 
+		var pos_a = target_pos + a
+		var pos_b = target_pos + b
+		var dist_a = (pos_a - current_pos).length_squared()
+		var dist_b = (pos_b - current_pos).length_squared()
+		return dist_a < dist_b
+	)
+	
+	for offset in offsets:
+		var test_pos = target_pos + offset
+		if is_valid_target_position(test_pos):
+			return test_pos
+	
+	return Vector2i(-9999, -9999)  # Invalid position marker
+
+func _deferred_grab_follow(target_position: Vector2i):
+	"""Deferred grab following"""
+	if not grabbing_entity or not is_instance_valid(grabbing_entity):
+		return
+	
+	# Try the move again
+	var success = move_entity_to_position(grabbing_entity, target_position, true)
+	if not success:
+		# If still can't move, try without animation
+		success = move_entity_to_position(grabbing_entity, target_position, false)
+		if not success:
+			show_message("Lost grip during movement!")
+			release_grab()
+
+func is_valid_target_position(position: Vector2i) -> bool:
+	"""Check if the target position is valid for the grabbed entity to move to"""
+	if not world:
+		return false
+	
+	var z_level = controller.current_z_level if controller else 0
+	
+	# Check if it's a valid tile
+	if world.has_method("is_valid_tile") and not world.is_valid_tile(position, z_level):
+		return false
+	
+	# Check for walls
+	if world.has_method("is_wall_at") and world.is_wall_at(position, z_level):
+		return false
+	
+	# Check for closed doors
+	if world.has_method("is_closed_door_at") and world.is_closed_door_at(position, z_level):
+		return false
+	
+	# Check for other dense entities (except the grabber)
+	if tile_occupancy_system and tile_occupancy_system.has_method("has_dense_entity_at"):
+		if tile_occupancy_system.has_dense_entity_at(position, z_level, grabbing_entity):
+			var entity_at_pos = tile_occupancy_system.get_entity_at(position, z_level)
+			# Allow if the entity at position is the grabber
+			if entity_at_pos != controller:
+				return false
+	
+	return true
+
+func find_valid_adjacent_position(preferred_position: Vector2i) -> Vector2i:
+	"""Find a valid adjacent position if the preferred position is blocked"""
+	var offsets = [
+		Vector2i(0, -1),  # North
+		Vector2i(1, 0),   # East  
+		Vector2i(0, 1),   # South
+		Vector2i(-1, 0),  # West
+		Vector2i(1, -1),  # Northeast
+		Vector2i(1, 1),   # Southeast
+		Vector2i(-1, 1),  # Southwest
+		Vector2i(-1, -1)  # Northwest
+	]
+	
+	for offset in offsets:
+		var test_pos = preferred_position + offset
+		if is_valid_target_position(test_pos):
+			return test_pos
+	
+	return Vector2i(-9999, -9999)  # Invalid position marker
+
 func pull_entity(target: Node) -> bool:
 	"""Start pulling an entity"""
 	if not has_pull_flag:
@@ -444,8 +572,8 @@ func pull_entity(target: Node) -> bool:
 	pulling_entity = target
 	
 	# Notify target
-	if target.has_method("set_pulled_by"):
-		target.set_pulled_by(controller)
+	if target:
+		target.grab_pull_component.set_pulled_by(controller)
 	elif "pulled_by" in target:
 		target.pulled_by = controller
 	
@@ -462,8 +590,8 @@ func stop_pulling():
 		return
 	
 	# Notify target
-	if pulling_entity.has_method("set_pulled_by"):
-		pulling_entity.set_pulled_by(null)
+	if pulling_entity:
+		pulling_entity.grab_pull_component.set_pulled_by(null)
 	elif "pulled_by" in pulling_entity:
 		pulling_entity.pulled_by = null
 	
@@ -496,8 +624,11 @@ func process_being_pulled(delta: float):
 	if not pulled_by_entity:
 		return
 	
+	if pulled_by_entity != null:
+		var puller_pos = Vector2i.ZERO
+	
 	var puller_pos = get_entity_tile_position(pulled_by_entity)
-	var my_pos = controller.movement_component.current_tile_position if controller.movement_component else Vector2i.ZERO
+	var my_pos = controller.movement_component.get_current_tile_position()
 	
 	var distance = (puller_pos - my_pos).length()
 	
@@ -507,7 +638,7 @@ func process_being_pulled(delta: float):
 		var move_dir = Vector2i(round(dir_to_puller.x), round(dir_to_puller.y))
 		
 		if controller.movement_component and not controller.movement_component.is_moving and not controller.movement_component.is_stunned:
-			controller.movement_component.attempt_move(move_dir)
+			controller.movement_component.move_externally(move_dir)
 
 func update_pull_movespeed():
 	"""Update movement speed based on pulling"""
@@ -530,7 +661,7 @@ func set_grabbed_by(grabber: Node, state: int):
 #region HELPER FUNCTIONS
 func can_grab_entity(target: Node) -> bool:
 	"""Check if can grab target"""
-	if not target or target == controller or target == controller.get_parent():
+	if not target:
 		return false
 	
 	# Check entity type
@@ -611,16 +742,18 @@ func get_entity_tile_position(entity: Node) -> Vector2i:
 	return Vector2i.ZERO
 
 func move_entity_to_position(entity: Node, position: Vector2i, animated: bool = true) -> bool:
-	"""Move entity to position"""
+	"""Move entity to position - uses standard movement system for grabbed entities"""
 	if not entity or not is_instance_valid(entity):
 		return false
 	
+	# Use standard movement methods for consistency
 	if entity.has_method("move_externally"):
 		return entity.move_externally(position, animated, true)
 	
 	var entity_controller = get_entity_controller(entity)
-	if entity_controller and entity_controller.has_method("move_externally"):
-		return entity_controller.move_externally(position, animated, true)
+	if entity_controller and entity_controller.movement_component:
+		if entity_controller.movement_component.has_method("move_externally"):
+			return entity_controller.movement_component.move_externally(position, animated, true)
 	
 	return false
 

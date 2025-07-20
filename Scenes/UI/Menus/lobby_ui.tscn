@@ -1,6 +1,66 @@
-[gd_scene load_steps=2 format=3 uid="uid://de567xfmbsekw"]
+[gd_scene load_steps=7 format=3 uid="uid://de567xfmbsekw"]
 
 [ext_resource type="Script" uid="uid://ciyryobrlqvb7" path="res://Code/UserInterface/LobbyScreen.gd" id="1_d67bx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_main_panel"]
+bg_color = Color(0.03, 0.08, 0.15, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.1, 0.4, 0.8, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+bg_color = Color(0.1, 0.25, 0.45, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_input"]
+bg_color = Color(0.05, 0.1, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.4, 0.7, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidebar"]
+bg_color = Color(0.02, 0.06, 0.12, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.15, 0.35, 0.7, 0.5)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_chat_bg"]
+bg_color = Color(0.04, 0.08, 0.16, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.5, 0.9, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="LobbyScreen" type="Control"]
 layout_mode = 3
@@ -18,169 +78,607 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0509804, 0.0705882, 0.109804, 1)
+color = Color(0.02, 0.05, 0.12, 1)
 
-[node name="Title" type="Label" parent="."]
+[node name="StarField" type="Control" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Star1" type="ColorRect" parent="Background/StarField"]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 100.0
+offset_right = 153.0
+offset_bottom = 103.0
+color = Color(0.8, 0.9, 1, 0.6)
+
+[node name="Star2" type="ColorRect" parent="Background/StarField"]
+layout_mode = 0
+offset_left = 400.0
+offset_top = 200.0
+offset_right = 402.0
+offset_bottom = 202.0
+color = Color(0.6, 0.8, 1, 0.4)
+
+[node name="Star3" type="ColorRect" parent="Background/StarField"]
+layout_mode = 0
+offset_left = 800.0
+offset_top = 150.0
+offset_right = 804.0
+offset_bottom = 154.0
+color = Color(0.9, 0.9, 1, 0.7)
+
+[node name="TopBar" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 13.0
-offset_bottom = 73.0
+offset_left = -55.0
+offset_right = 56.0
+offset_bottom = 80.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 42
-text = "A.R.E.S-1 Multiplayer"
-horizontal_alignment = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_main_panel")
 
-[node name="BackButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 120.0
-offset_bottom = 60.0
-text = "< Back"
+[node name="TopBarContainer" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 20
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="LeftSection" type="HBoxContainer" parent="TopBar/TopBarContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 15
+
+[node name="BackButton" type="Button" parent="TopBar/TopBarContainer/LeftSection"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "← DISCONNECT"
+
+[node name="StationTitle" type="Label" parent="TopBar/TopBarContainer/LeftSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "NEXUS STATION - COMMAND CENTER"
+vertical_alignment = 1
+
+[node name="CenterSection" type="HBoxContainer" parent="TopBar/TopBarContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="SearchContainer" type="HBoxContainer" parent="TopBar/TopBarContainer/CenterSection"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SearchInput" type="LineEdit" parent="TopBar/TopBarContainer/CenterSection/SearchContainer"]
+custom_minimum_size = Vector2(300, 35)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+placeholder_text = "Search players, rooms, servers..."
+
+[node name="SearchButton" type="Button" parent="TopBar/TopBarContainer/CenterSection/SearchContainer"]
+custom_minimum_size = Vector2(80, 35)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "SCAN"
+
+[node name="RightSection" type="HBoxContainer" parent="TopBar/TopBarContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 15
+alignment = 2
+
+[node name="PlayerInfo" type="VBoxContainer" parent="TopBar/TopBarContainer/RightSection"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="PlayerName" type="Label" parent="TopBar/TopBarContainer/RightSection/PlayerInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "COMMANDER [CALLSIGN]"
+horizontal_alignment = 2
+
+[node name="PlayerStatus" type="Label" parent="TopBar/TopBarContainer/RightSection/PlayerInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "Status: Active • Rank: Captain"
+horizontal_alignment = 2
+
+[node name="NotificationButton" type="Button" parent="TopBar/TopBarContainer/RightSection"]
+custom_minimum_size = Vector2(50, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "⚠ 3"
+
+[node name="MainContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -250.0
-offset_right = 300.0
-offset_bottom = 250.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 85.0
+offset_bottom = -80.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 5
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+[node name="LeftSidebar" type="PanelContainer" parent="MainContainer"]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+theme_override_styles/panel = SubResource("StyleBoxFlat_sidebar")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
+[node name="LeftSidebarContent" type="VBoxContainer" parent="MainContainer/LeftSidebar"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NavigationHeader" type="Label" parent="MainContainer/LeftSidebar/LeftSidebarContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "NAVIGATION SYSTEMS"
+horizontal_alignment = 1
+
+[node name="NavigationButtons" type="VBoxContainer" parent="MainContainer/LeftSidebar/LeftSidebarContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ServerBrowserBtn" type="Button" parent="MainContainer/LeftSidebar/LeftSidebarContent/NavigationButtons"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "🌐 SERVER BROWSER"
+
+[node name="QuickMatchBtn" type="Button" parent="MainContainer/LeftSidebar/LeftSidebarContent/NavigationButtons"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "⚡ QUICK DEPLOY"
+
+[node name="CreateRoomBtn" type="Button" parent="MainContainer/LeftSidebar/LeftSidebarContent/NavigationButtons"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "🏗 CREATE MISSION"
+
+[node name="FriendsListBtn" type="Button" parent="MainContainer/LeftSidebar/LeftSidebarContent/NavigationButtons"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "👥 SQUADRON"
+
+[node name="HSeparator" type="HSeparator" parent="MainContainer/LeftSidebar/LeftSidebarContent"]
+layout_mode = 2
+
+[node name="QuickStatsHeader" type="Label" parent="MainContainer/LeftSidebar/LeftSidebarContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "STATION STATUS"
+horizontal_alignment = 1
+
+[node name="QuickStats" type="VBoxContainer" parent="MainContainer/LeftSidebar/LeftSidebarContent"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="OnlinePlayersLabel" type="Label" parent="MainContainer/LeftSidebar/LeftSidebarContent/QuickStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "Online Pilots: 2,847"
+
+[node name="ActiveServersLabel" type="Label" parent="MainContainer/LeftSidebar/LeftSidebarContent/QuickStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "Active Servers: 127"
+
+[node name="ActiveGamesLabel" type="Label" parent="MainContainer/LeftSidebar/LeftSidebarContent/QuickStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "Active Missions: 89"
+
+[node name="HSeparator2" type="HSeparator" parent="MainContainer/LeftSidebar/LeftSidebarContent"]
+layout_mode = 2
+
+[node name="RegionSelector" type="VBoxContainer" parent="MainContainer/LeftSidebar/LeftSidebarContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RegionLabel" type="Label" parent="MainContainer/LeftSidebar/LeftSidebarContent/RegionSelector"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "SECTOR SELECTION:"
+
+[node name="RegionDropdown" type="OptionButton" parent="MainContainer/LeftSidebar/LeftSidebarContent/RegionSelector"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+selected = 0
+item_count = 5
+popup/item_0/text = "Alpha Sector (EU)"
+popup/item_0/id = 0
+popup/item_1/text = "Beta Sector (US)"
+popup/item_1/id = 1
+popup/item_2/text = "Gamma Sector (AS)"
+popup/item_2/id = 2
+popup/item_3/text = "Delta Sector (AU)"
+popup/item_3/id = 3
+popup/item_4/text = "Global Network"
+popup/item_4/id = 4
+
+[node name="CenterArea" type="PanelContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_main_panel")
+
+[node name="CenterContent" type="VBoxContainer" parent="MainContainer/CenterArea"]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="PlayerSection" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="ContentHeader" type="HBoxContainer" parent="MainContainer/CenterArea/CenterContent"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="ContentTitle" type="Label" parent="MainContainer/CenterArea/CenterContent/ContentHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "SERVER BROWSER"
+
+[node name="FilterContainer" type="HBoxContainer" parent="MainContainer/CenterArea/CenterContent/ContentHeader"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GameModeFilter" type="OptionButton" parent="MainContainer/CenterArea/CenterContent/ContentHeader/FilterContainer"]
+custom_minimum_size = Vector2(150, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+selected = 0
+item_count = 5
+popup/item_0/text = "All Modes"
+popup/item_0/id = 0
+popup/item_1/text = "Standard"
+popup/item_1/id = 1
+popup/item_2/text = "Survival"
+popup/item_2/id = 2
+popup/item_3/text = "Cooperative"
+popup/item_3/id = 3
+popup/item_4/text = "PvP Arena"
+popup/item_4/id = 4
+
+[node name="PingFilter" type="OptionButton" parent="MainContainer/CenterArea/CenterContent/ContentHeader/FilterContainer"]
+custom_minimum_size = Vector2(120, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+selected = 0
+item_count = 4
+popup/item_0/text = "All Ping"
+popup/item_0/id = 0
+popup/item_1/text = "< 50ms"
+popup/item_1/id = 1
+popup/item_2/text = "< 100ms"
+popup/item_2/id = 2
+popup/item_3/text = "< 200ms"
+popup/item_3/id = 3
+
+[node name="RefreshButton" type="Button" parent="MainContainer/CenterArea/CenterContent/ContentHeader/FilterContainer"]
+custom_minimum_size = Vector2(80, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "REFRESH"
+
+[node name="ServerListContainer" type="VBoxContainer" parent="MainContainer/CenterArea/CenterContent"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 5
 
-[node name="PlayersLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/PlayerSection"]
+[node name="ServerListHeader" type="HBoxContainer" parent="MainContainer/CenterArea/CenterContent/ServerListContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Connected Players:"
+theme_override_constants/separation = 10
 
-[node name="PlayerList" type="ItemList" parent="PanelContainer/MarginContainer/VBoxContainer/PlayerSection"]
+[node name="HeaderName" type="Label" parent="MainContainer/CenterArea/CenterContent/ServerListContainer/ServerListHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "SERVER NAME"
+
+[node name="HeaderPlayers" type="Label" parent="MainContainer/CenterArea/CenterContent/ServerListContainer/ServerListHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "PILOTS"
+horizontal_alignment = 1
+
+[node name="HeaderPing" type="Label" parent="MainContainer/CenterArea/CenterContent/ServerListContainer/ServerListHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "PING"
+horizontal_alignment = 1
+
+[node name="HeaderMode" type="Label" parent="MainContainer/CenterArea/CenterContent/ServerListContainer/ServerListHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.5
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "MODE"
+horizontal_alignment = 1
+
+[node name="HeaderAction" type="Label" parent="MainContainer/CenterArea/CenterContent/ServerListContainer/ServerListHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "ACTION"
+horizontal_alignment = 1
+
+[node name="ServerScrollContainer" type="ScrollContainer" parent="MainContainer/CenterArea/CenterContent/ServerListContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-auto_height = true
+horizontal_scroll_mode = 0
 
-[node name="HSeparator" type="HSeparator" parent="PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="SettingsSection" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="SettingsLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/SettingsSection"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Game Settings:"
-
-[node name="MapContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/SettingsSection"]
-layout_mode = 2
-
-[node name="MapLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/SettingsSection/MapContainer"]
+[node name="ServerList" type="VBoxContainer" parent="MainContainer/CenterArea/CenterContent/ServerListContainer/ServerScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Map:"
+theme_override_constants/separation = 3
 
-[node name="MapOption" type="OptionButton" parent="PanelContainer/MarginContainer/VBoxContainer/SettingsSection/MapContainer"]
+[node name="RightSidebar" type="PanelContainer" parent="MainContainer"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sidebar")
+
+[node name="RightSidebarContent" type="VBoxContainer" parent="MainContainer/RightSidebar"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="TabContainer" type="TabContainer" parent="MainContainer/RightSidebar/RightSidebarContent"]
+layout_mode = 2
+size_flags_vertical = 3
+tab_alignment = 1
+current_tab = 0
+
+[node name="CHAT" type="VBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+metadata/_tab_index = 0
+
+[node name="ChatContainer" type="VBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="ChatChannels" type="HBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="GlobalChatBtn" type="Button" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer/ChatChannels"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+toggle_mode = true
+button_pressed = true
+text = "GLOBAL"
+
+[node name="SquadronChatBtn" type="Button" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer/ChatChannels"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+toggle_mode = true
+text = "SQUADRON"
+
+[node name="LocalChatBtn" type="Button" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer/ChatChannels"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+toggle_mode = true
+text = "LOCAL"
+
+[node name="ChatDisplay" type="PanelContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_chat_bg")
+
+[node name="ChatScrollContainer" type="ScrollContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer/ChatDisplay"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ChatMessages" type="VBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer/ChatDisplay/ChatScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-selected = 0
-item_count = 3
-popup/item_0/text = "Station"
-popup/item_0/id = 0
-popup/item_1/text = "Outpost"
-popup/item_1/id = 1
-popup/item_2/text = "Research"
-popup/item_2/id = 2
+theme_override_constants/separation = 2
 
-[node name="ModeContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/SettingsSection"]
+[node name="ChatInputContainer" type="HBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="ModeLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/SettingsSection/ModeContainer"]
+[node name="ChatInput" type="LineEdit" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer/ChatInputContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Game Mode:"
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+placeholder_text = "Send message..."
 
-[node name="ModeOption" type="OptionButton" parent="PanelContainer/MarginContainer/VBoxContainer/SettingsSection/ModeContainer"]
+[node name="ChatSendBtn" type="Button" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/CHAT/ChatContainer/ChatInputContainer"]
+custom_minimum_size = Vector2(60, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "SEND"
+
+[node name="PLAYERS" type="VBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+metadata/_tab_index = 1
+
+[node name="PlayerSearchContainer" type="HBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/PLAYERS"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayerSearch" type="LineEdit" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/PLAYERS/PlayerSearchContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-selected = 0
-item_count = 3
-popup/item_0/text = "Standard"
-popup/item_0/id = 0
-popup/item_1/text = "Survival"
-popup/item_1/id = 1
-popup/item_2/text = "Cooperative"
-popup/item_2/id = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+placeholder_text = "Search pilots..."
 
-[node name="HSeparator2" type="HSeparator" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="PlayerFilterBtn" type="Button" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/PLAYERS/PlayerSearchContainer"]
+custom_minimum_size = Vector2(60, 30)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "FILTER"
 
-[node name="GameControls" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="PlayerListContainer" type="PanelContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/PLAYERS"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_chat_bg")
+
+[node name="PlayerScrollContainer" type="ScrollContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/PLAYERS/PlayerListContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="PlayerList" type="VBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/PLAYERS/PlayerListContainer/PlayerScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="SQUADRON" type="VBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+metadata/_tab_index = 2
+
+[node name="SquadronHeader" type="HBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/SQUADRON"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SquadronTitle" type="Label" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/SQUADRON/SquadronHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "SQUADRON ROSTER"
+
+[node name="InviteBtn" type="Button" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/SQUADRON/SquadronHeader"]
+custom_minimum_size = Vector2(60, 25)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "INVITE"
+
+[node name="SquadronListContainer" type="PanelContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/SQUADRON"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_chat_bg")
+
+[node name="SquadronScrollContainer" type="ScrollContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/SQUADRON/SquadronListContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="SquadronList" type="VBoxContainer" parent="MainContainer/RightSidebar/RightSidebarContent/TabContainer/SQUADRON/SquadronListContainer/SquadronScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="BottomBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -75.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_main_panel")
+
+[node name="BottomBarContainer" type="HBoxContainer" parent="BottomBar"]
 layout_mode = 2
 theme_override_constants/separation = 20
+
+[node name="StatusSection" type="HBoxContainer" parent="BottomBar/BottomBarContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 15
+
+[node name="ConnectionStatus" type="Label" parent="BottomBar/BottomBarContainer/StatusSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "● CONNECTED TO NEXUS STATION"
+vertical_alignment = 1
+
+[node name="SelectedServerInfo" type="Label" parent="BottomBar/BottomBarContainer/StatusSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "No server selected"
+vertical_alignment = 1
+
+[node name="ActionSection" type="HBoxContainer" parent="BottomBar/BottomBarContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 15
 alignment = 1
 
-[node name="ReadyButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/GameControls"]
+[node name="ReadyToggle" type="Button" parent="BottomBar/BottomBarContainer/ActionSection"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+toggle_mode = true
+text = "STANDBY"
+
+[node name="DeployButton" type="Button" parent="BottomBar/BottomBarContainer/ActionSection"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+disabled = true
+text = "DEPLOY TO MISSION"
+
+[node name="InfoSection" type="VBoxContainer" parent="BottomBar/BottomBarContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Ready"
+theme_override_constants/separation = 2
+alignment = 2
 
-[node name="StartGameButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/GameControls"]
+[node name="NetworkInfo" type="Label" parent="BottomBar/BottomBarContainer/InfoSection"]
 layout_mode = 2
-size_flags_horizontal = 3
-text = "Start Game"
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "Ping: 32ms • Region: Alpha Sector"
+horizontal_alignment = 2
 
-[node name="StatusLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="SystemInfo" type="Label" parent="BottomBar/BottomBarContainer/InfoSection"]
 layout_mode = 2
-size_flags_vertical = 8
-horizontal_alignment = 1
-
-[node name="CharacterInfo" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -80.0
-offset_right = 300.0
-offset_bottom = -20.0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 14
-text = "Character: Not created yet"
-vertical_alignment = 2
-
-[node name="CountdownLabel" type="Label" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -50.0
-offset_right = 150.0
-offset_bottom = 50.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 72
-text = "5"
-horizontal_alignment = 1
-vertical_alignment = 1
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "Build: v0.1.0-alpha • Uptime: 2h 34m"
+horizontal_alignment = 2

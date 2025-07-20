@@ -1,7 +1,62 @@
-[gd_scene load_steps=3 format=3 uid="uid://c3fccwi3awirt"]
+[gd_scene load_steps=8 format=3 uid="uid://c3fccwi3awirt"]
 
 [ext_resource type="Script" uid="uid://cxjcjl3pgve67" path="res://Code/UserInterface/settings.gd" id="1_4hxq3"]
-[ext_resource type="PackedScene" path="res://Scenes/UI/Menus/optimization_tap.tscn" id="2_yqapu"]
+[ext_resource type="PackedScene" uid="uid://cyvl4cqdahpxx" path="res://Scenes/UI/Menus/optimization_tap.tscn" id="2_yqapu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+bg_color = Color(0.1, 0.25, 0.45, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_main"]
+bg_color = Color(0.03, 0.08, 0.15, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.1, 0.4, 0.8, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_input"]
+bg_color = Color(0.05, 0.1, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.4, 0.7, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider"]
+bg_color = Color(0.08, 0.15, 0.25, 0.8)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dialog"]
+bg_color = Color(0.05, 0.1, 0.2, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.5, 0.9, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="SettingsScene" type="CanvasLayer"]
 layer = 10
@@ -22,415 +77,432 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0509804, 0.0705882, 0.109804, 0.9)
+color = Color(0.02, 0.05, 0.12, 0.95)
 
-[node name="Title" type="Label" parent="SettingsUI"]
+[node name="HeaderSection" type="VBoxContainer" parent="SettingsUI"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = 20.0
-offset_bottom = 80.0
+offset_bottom = 100.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 42
-text = "Settings"
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="SettingsUI/HeaderSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "SYSTEM CONFIGURATION"
 horizontal_alignment = 1
 
 [node name="BackButton" type="Button" parent="SettingsUI"]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 35.0
-offset_right = 120.0
-offset_bottom = 75.0
-text = "< Back"
+offset_left = 30.0
+offset_top = 30.0
+offset_right = 150.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "← RETURN"
 
-[node name="PanelContainer" type="PanelContainer" parent="SettingsUI"]
+[node name="CenterContainer" type="CenterContainer" parent="SettingsUI"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -400.0
-offset_top = -300.0
-offset_right = 400.0
-offset_bottom = 300.0
+offset_left = -500.0
+offset_top = -350.0
+offset_right = 500.0
+offset_bottom = 350.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="SettingsUI/PanelContainer"]
+[node name="MainPanel" type="PanelContainer" parent="SettingsUI/CenterContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+theme_override_styles/panel = SubResource("StyleBoxFlat_main")
 
-[node name="TabContainer" type="TabContainer" parent="SettingsUI/PanelContainer/MarginContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="SettingsUI/CenterContainer/MainPanel"]
 layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TabContainer" type="TabContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+tab_alignment = 1
 current_tab = 0
 
-[node name="Graphics" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer"]
+[node name="GRAPHICS" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer"]
 layout_mode = 2
 theme_override_constants/separation = 15
 metadata/_tab_index = 0
 
-[node name="ScrollContainer" type="ScrollContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics"]
+[node name="ScrollContainer" type="ScrollContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="OptionsContainer" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer"]
+[node name="OptionsContainer" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 15
+theme_override_constants/separation = 20
 
-[node name="ResolutionSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer"]
+[node name="DisplayHeader" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "DISPLAY PARAMETERS"
 
-[node name="ResolutionLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ResolutionSection"]
+[node name="ResolutionSection" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ResolutionLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "Resolution:"
 
-[node name="ResolutionOption" type="OptionButton" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ResolutionSection"]
+[node name="ResolutionOption" type="OptionButton" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 
-[node name="HSeparator" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer"]
+[node name="DisplayOptions" type="GridContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer"]
 layout_mode = 2
-
-[node name="DisplaySection" type="GridContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer"]
-layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 10
 columns = 2
 
-[node name="FullscreenLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection"]
+[node name="FullscreenLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions"]
 layout_mode = 2
-size_flags_horizontal = 3
-text = "Fullscreen"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Fullscreen Mode"
 
-[node name="FullscreenCheck" type="CheckBox" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection"]
+[node name="FullscreenCheck" type="CheckBox" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions"]
 layout_mode = 2
 
-[node name="VsyncLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection"]
+[node name="VsyncLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions"]
 layout_mode = 2
-size_flags_horizontal = 3
-text = "VSync"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Vertical Sync"
 
-[node name="VsyncCheck" type="CheckBox" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection"]
+[node name="VsyncCheck" type="CheckBox" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions"]
 layout_mode = 2
 button_pressed = true
 
-[node name="HSeparator2" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer"]
+[node name="HSeparator" type="HSeparator" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer"]
 layout_mode = 2
 
-[node name="ShadowSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer"]
+[node name="QualityHeader" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "VISUAL QUALITY"
 
-[node name="ShadowLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ShadowSection"]
+[node name="ShadowSection" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ShadowLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ShadowSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "Shadow Quality:"
 
-[node name="ShadowOption" type="OptionButton" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ShadowSection"]
+[node name="ShadowOption" type="OptionButton" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ShadowSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 
-[node name="AntiAliasingSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer"]
+[node name="AntiAliasingSection" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="AntiAliasingLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/AntiAliasingSection"]
+[node name="AntiAliasingLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/AntiAliasingSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "Anti-Aliasing:"
 
-[node name="AntiAliasingOption" type="OptionButton" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/AntiAliasingSection"]
+[node name="AntiAliasingOption" type="OptionButton" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/AntiAliasingSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 
-[node name="TextureSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer"]
+[node name="TextureSection" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="TextureLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/TextureSection"]
+[node name="TextureLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/TextureSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "Texture Quality:"
 
-[node name="TextureOption" type="OptionButton" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/TextureSection"]
+[node name="TextureOption" type="OptionButton" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/TextureSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 
-[node name="Audio" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer"]
+[node name="AUDIO" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer"]
 visible = false
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 20
 metadata/_tab_index = 1
 
-[node name="MasterSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio"]
+[node name="AudioHeader" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "AUDIO SYSTEMS"
 
-[node name="MasterLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection"]
+[node name="MasterSection" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO"]
 layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MasterLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MasterSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "Master Volume:"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection"]
+[node name="MasterVolumeSlider" type="HSlider" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MasterSection"]
 layout_mode = 2
-
-[node name="MasterVolumeSlider" type="HSlider" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection"]
-layout_mode = 2
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider")
 min_value = -80.0
 max_value = 0.0
 value = -10.0
 
-[node name="MasterVolumeValue" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection"]
+[node name="MasterVolumeValue" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MasterSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
 text = "-10 dB"
 horizontal_alignment = 2
 
-[node name="HSeparator" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio"]
+[node name="HSeparator" type="HSeparator" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO"]
 layout_mode = 2
 
-[node name="MusicSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio"]
+[node name="MusicSection" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
-[node name="MusicLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection"]
+[node name="MusicLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MusicSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "Music Volume:"
 
-[node name="MusicVolumeSlider" type="HSlider" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection"]
+[node name="MusicVolumeSlider" type="HSlider" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MusicSection"]
 layout_mode = 2
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider")
 min_value = -80.0
 max_value = 0.0
 value = -15.0
 
-[node name="MusicVolumeValue" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection"]
+[node name="MusicVolumeValue" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MusicSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
 text = "-15 dB"
 horizontal_alignment = 2
 
-[node name="HSeparator2" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio"]
+[node name="HSeparator2" type="HSeparator" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO"]
 layout_mode = 2
 
-[node name="SFXSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio"]
+[node name="SFXSection" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
-[node name="SFXLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection"]
+[node name="SFXLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/SFXSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "SFX Volume:"
 
-[node name="SFXVolumeSlider" type="HSlider" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection"]
+[node name="SFXVolumeSlider" type="HSlider" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/SFXSection"]
 layout_mode = 2
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider")
 min_value = -80.0
 max_value = 0.0
 value = -10.0
 
-[node name="SFXVolumeValue" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection"]
+[node name="SFXVolumeValue" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/SFXSection"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
 text = "-10 dB"
 horizontal_alignment = 2
 
-[node name="HSeparator3" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio"]
-layout_mode = 2
-
-[node name="AudioInfoSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio"]
-layout_mode = 2
-
-[node name="AudioInfoLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/AudioInfoSection"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 12
-text = "Note: Audio changes are applied immediately."
-horizontal_alignment = 1
-
-[node name="Controls" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer"]
+[node name="CONTROLS" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 15
 metadata/_tab_index = 2
 
-[node name="HeaderSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Controls"]
+[node name="ControlsHeader" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/CONTROLS"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="ControlsHeaderLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Controls/HeaderSection"]
+[node name="ControlsHeaderLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/CONTROLS/ControlsHeader"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Input Controls"
-horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "INPUT CONFIGURATION"
 
-[node name="ControlsInfoLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Controls/HeaderSection"]
+[node name="ControlsInfoLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/CONTROLS/ControlsHeader"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.752941, 0.752941, 0.752941, 1)
+theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 12
-text = "Click on a button to reassign its key. Press ESC to cancel."
-horizontal_alignment = 1
+text = "Select a control to reassign its key binding. Press ESC to cancel."
 
-[node name="HSeparator" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Controls"]
+[node name="HSeparator" type="HSeparator" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/CONTROLS"]
 layout_mode = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Controls"]
+[node name="ScrollContainer" type="ScrollContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/CONTROLS"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="ControlsList" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Controls/ScrollContainer"]
+[node name="ControlsList" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/CONTROLS/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 10
 
-[node name="Optimization" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer" instance=ExtResource("2_yqapu")]
-visible = false
-layout_mode = 2
-metadata/_tab_index = 3
-
-[node name="Advanced" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer"]
+[node name="OPTIMIZATION" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer" instance=ExtResource("2_yqapu")]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 15
+metadata/_tab_index = 3
+
+[node name="ADVANCED" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 20
 metadata/_tab_index = 4
 
-[node name="ScrollContainer" type="ScrollContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced"]
+[node name="AdvancedHeader" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "ADVANCED SYSTEMS"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="AdvancedOptionsContainer" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer"]
+[node name="AdvancedOptionsContainer" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 15
 
-[node name="PerformanceSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer"]
+[node name="PerformanceOptions" type="GridContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer"]
 layout_mode = 2
-
-[node name="PerformanceLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Performance Options"
-
-[node name="HSeparator" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection"]
-layout_mode = 2
-
-[node name="PhysicsSection" type="GridContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection"]
-layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 10
 columns = 2
 
-[node name="LowPhysicsLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection/PhysicsSection"]
+[node name="ShowFPSLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer/PerformanceOptions"]
 layout_mode = 2
-size_flags_horizontal = 3
-text = "Low Physics Mode"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Performance Monitor"
 
-[node name="LowPhysicsCheck" type="CheckBox" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection/PhysicsSection"]
-layout_mode = 2
-
-[node name="ParticlesLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection/PhysicsSection"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Enable Particles"
-
-[node name="ParticlesCheck" type="CheckBox" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection/PhysicsSection"]
-layout_mode = 2
-button_pressed = true
-
-[node name="PostProcessingLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection/PhysicsSection"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Post-Processing"
-
-[node name="PostProcessingCheck" type="CheckBox" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/PerformanceSection/PhysicsSection"]
-layout_mode = 2
-button_pressed = true
-
-[node name="DebugSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer"]
+[node name="ShowFPSCheck" type="CheckBox" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer/PerformanceOptions"]
 layout_mode = 2
 
-[node name="DebugLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection"]
+[node name="VerboseLoggingLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer/PerformanceOptions"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Debug Options"
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "Detailed Logging"
 
-[node name="HSeparator" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection"]
-layout_mode = 2
-
-[node name="DebugContainer" type="GridContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection"]
-layout_mode = 2
-columns = 2
-
-[node name="ShowFPSLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection/DebugContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Show FPS Counter"
-
-[node name="ShowFPSCheck" type="CheckBox" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection/DebugContainer"]
+[node name="VerboseLoggingCheck" type="CheckBox" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer/PerformanceOptions"]
 layout_mode = 2
 
-[node name="VerboseLoggingLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection/DebugContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Verbose Logging"
-
-[node name="VerboseLoggingCheck" type="CheckBox" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection/DebugContainer"]
+[node name="HSeparator" type="HSeparator" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer"]
 layout_mode = 2
 
-[node name="VersionSection" type="VBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer"]
+[node name="VersionInfo" type="VBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer"]
 layout_mode = 2
-alignment = 2
+theme_override_constants/separation = 5
 
-[node name="HSeparator" type="HSeparator" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/VersionSection"]
+[node name="VersionLabel" type="Label" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer/VersionInfo"]
 layout_mode = 2
-
-[node name="VersionLabel" type="Label" parent="SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/VersionSection"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_colors/font_color = Color(0.5, 0.6, 0.7, 1)
 theme_override_font_sizes/font_size = 12
-text = "Game Version: 0.1.0-alpha"
+text = "System Version: v0.1.0-alpha"
 horizontal_alignment = 1
 
-[node name="ButtonContainer" type="HBoxContainer" parent="SettingsUI/PanelContainer/MarginContainer"]
+[node name="ActionButtons" type="HBoxContainer" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 8
-theme_override_constants/separation = 20
+theme_override_constants/separation = 15
 alignment = 1
 
-[node name="SaveButton" type="Button" parent="SettingsUI/PanelContainer/MarginContainer/ButtonContainer"]
+[node name="SaveButton" type="Button" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons"]
+custom_minimum_size = Vector2(150, 45)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "Save Settings"
+theme_override_colors/font_color = Color(0.9, 1, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "SAVE CONFIGURATION"
 
-[node name="ResetButton" type="Button" parent="SettingsUI/PanelContainer/MarginContainer/ButtonContainer"]
+[node name="ResetButton" type="Button" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons"]
+custom_minimum_size = Vector2(150, 45)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "Reset to Default"
+theme_override_colors/font_color = Color(1, 0.8, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "RESET DEFAULTS"
 
-[node name="ResetControlsButton" type="Button" parent="SettingsUI/PanelContainer/MarginContainer/ButtonContainer"]
+[node name="ResetControlsButton" type="Button" parent="SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons"]
+custom_minimum_size = Vector2(150, 45)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "Reset Controls"
+theme_override_colors/font_color = Color(1, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "RESET CONTROLS"
 
 [node name="RemappingPopup" type="PopupPanel" parent="SettingsUI"]
-title = "Key Mapping"
-size = Vector2i(300, 100)
+title = "Key Binding Configuration"
+size = Vector2i(350, 120)
 exclusive = true
 unresizable = false
+theme_override_styles/panel = SubResource("StyleBoxFlat_dialog")
 
 [node name="MarginContainer" type="MarginContainer" parent="SettingsUI/RemappingPopup"]
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 296.0
-offset_bottom = 96.0
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 348.0
+offset_bottom = 118.0
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SettingsUI/RemappingPopup/MarginContainer"]
 layout_mode = 2
+theme_override_constants/separation = 15
 alignment = 1
 
 [node name="RemappingLabel" type="Label" parent="SettingsUI/RemappingPopup/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 text = "Press any key to bind..."
 horizontal_alignment = 1
 
 [node name="CancelRemapping" type="Button" parent="SettingsUI/RemappingPopup/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.7, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "Cancel (ESC)"
 
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="SettingsUI"]
-title = "Reset Settings"
+title = "Reset Configuration"
 initial_position = 1
-size = Vector2i(350, 100)
-ok_button_text = "Yes, Reset"
-dialog_text = "Are you sure you want to reset all settings to default values?"
+size = Vector2i(400, 120)
+ok_button_text = "Confirm Reset"
+dialog_text = "Reset all settings to default values?"
 dialog_autowrap = true

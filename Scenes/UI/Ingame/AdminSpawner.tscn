@@ -1,0 +1,164 @@
+[gd_scene load_steps=3 format=3 uid="uid://b8j7h5lam2n4p"]
+
+[ext_resource type="Script" uid="uid://dn2ia3evjtpqy" path="res://Code/UserInterface/AdminSpawner.gd" id="1_admin_spawner"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.1, 0.15, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.5, 0.8, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="AdminSpawner" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_admin_spawner")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="MainPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 16.0
+offset_top = -284.0
+offset_right = 528.0
+offset_bottom = 244.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="VBoxContainer" parent="MainPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="TitleBar" type="HBoxContainer" parent="MainPanel/VBox/Header"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MainPanel/VBox/Header/TitleBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "🛠️ Admin Spawner"
+
+[node name="CloseButton" type="Button" parent="MainPanel/VBox/Header/TitleBar"]
+layout_mode = 2
+text = "✕"
+flat = true
+
+[node name="StatusLabel" type="Label" parent="MainPanel/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MainPanel/VBox"]
+layout_mode = 2
+
+[node name="Controls" type="VBoxContainer" parent="MainPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="SearchBar" type="HBoxContainer" parent="MainPanel/VBox/Controls"]
+layout_mode = 2
+
+[node name="SearchLabel" type="Label" parent="MainPanel/VBox/Controls/SearchBar"]
+layout_mode = 2
+text = "🔍"
+
+[node name="SearchEdit" type="LineEdit" parent="MainPanel/VBox/Controls/SearchBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Search items..."
+
+[node name="FilterBar" type="HBoxContainer" parent="MainPanel/VBox/Controls"]
+layout_mode = 2
+
+[node name="CategoryLabel" type="Label" parent="MainPanel/VBox/Controls/FilterBar"]
+layout_mode = 2
+text = "Category:"
+
+[node name="CategoryOption" type="OptionButton" parent="MainPanel/VBox/Controls/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator2" type="HSeparator" parent="MainPanel/VBox"]
+layout_mode = 2
+
+[node name="ItemsContainer" type="VBoxContainer" parent="MainPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemsScroll" type="ScrollContainer" parent="MainPanel/VBox/ItemsContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ItemsList" type="VBoxContainer" parent="MainPanel/VBox/ItemsContainer/ItemsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator3" type="HSeparator" parent="MainPanel/VBox"]
+layout_mode = 2
+
+[node name="Footer" type="VBoxContainer" parent="MainPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="SelectedInfo" type="Label" parent="MainPanel/VBox/Footer"]
+layout_mode = 2
+text = "No item selected"
+horizontal_alignment = 1
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="MainPanel/VBox/Footer"]
+layout_mode = 2
+
+[node name="SpawnModeButton" type="Button" parent="MainPanel/VBox/Footer/ButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+text = "🎯 Enter Spawn Mode"
+
+[node name="QuickSpawnButton" type="Button" parent="MainPanel/VBox/Footer/ButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+text = "⚡ Quick Spawn"
+
+[connection signal="pressed" from="MainPanel/VBox/Header/TitleBar/CloseButton" to="." method="_on_close_pressed"]
+[connection signal="text_changed" from="MainPanel/VBox/Controls/SearchBar/SearchEdit" to="." method="_on_search_changed"]
+[connection signal="item_selected" from="MainPanel/VBox/Controls/FilterBar/CategoryOption" to="." method="_on_category_changed"]
+[connection signal="pressed" from="MainPanel/VBox/Footer/ButtonsContainer/SpawnModeButton" to="." method="_on_spawn_mode_pressed"]
+[connection signal="pressed" from="MainPanel/VBox/Footer/ButtonsContainer/QuickSpawnButton" to="." method="_on_quick_spawn_pressed"]

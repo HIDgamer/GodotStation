@@ -1,7 +1,8 @@
-[gd_scene load_steps=89 format=3 uid="uid://dwx26j3f05xb1"]
+[gd_scene load_steps=90 format=3 uid="uid://dwx26j3f05xb1"]
 
 [ext_resource type="Script" uid="uid://dhdolra15rmy3" path="res://Code/Atoms/World_Systems/World.gd" id="1_n0dfv"]
 [ext_resource type="Script" uid="uid://ddf3tjqudd13u" path="res://Code/Helpers/visual_tile_map.gd" id="2_4w5a4"]
+[ext_resource type="PackedScene" uid="uid://b8j7h5lam2n4p" path="res://Scenes/UI/Ingame/AdminSpawner.tscn" id="2_vlxk0"]
 [ext_resource type="Script" uid="uid://bo00c7it76j3q" path="res://Code/Atoms/World_Systems/ChunkCullingSystem.gd" id="3_4i6l0"]
 [ext_resource type="Script" uid="uid://hrh2ly2ivbaq" path="res://Code/Atoms/World_Systems/ZoneTileMap.gd" id="3_63btk"]
 [ext_resource type="Script" uid="uid://cndlcmwwlehsg" path="res://Code/Atoms/World_Systems/AtmosphereSystem.gd" id="3_k2pgl"]
@@ -1157,6 +1158,11 @@ dof_blur_near_enabled = true
 
 [node name="EnhancedChatUI" parent="UILayer" instance=ExtResource("22_k6jxd")]
 
+[node name="AdminSpawner" parent="UILayer" instance=ExtResource("2_vlxk0")]
+z_index = 5
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 color = Color(0.0478506, 0.0455295, 0.0937934, 1)
 
@@ -1275,12 +1281,12 @@ script = ExtResource("3_k2pgl")
 script = ExtResource("9_vlxk0")
 metadata/_custom_type_script = "uid://dheeug2eok4df"
 
+[node name="ClickSystem" type="Node2D" parent="World" groups=["click_system"]]
+script = ExtResource("17_ry2mu")
+
 [node name="TileOccupancySystem" type="Node2D" parent="World"]
 script = ExtResource("7_cgiob")
 debug_collisions = true
-
-[node name="ClickSystem" type="Node2D" parent="World" groups=["click_system"]]
-script = ExtResource("17_ry2mu")
 
 [node name="SensorySystem" type="Node2D" parent="World"]
 script = ExtResource("25_5s2u1")

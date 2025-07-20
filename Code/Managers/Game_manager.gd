@@ -1,6 +1,5 @@
 extends Node
 
-# ==== CONSTANTS ====
 # Scene paths
 const MAIN_MENU_SCENE = "res://Scenes/UI/Menus/Settings.tscn"
 const NETWORK_UI_SCENE = "res://Scenes/UI/Menus/network_ui.tscn"
@@ -10,13 +9,13 @@ const PLAYER_SCENE_PATH = "res://Scenes/Characters/human.tscn"
 const DEFAULT_PORT = 7777
 const MAX_PLAYERS = 16
 
-# ==== ENUMS ====
 enum GameState {MAIN_MENU, NETWORK_SETUP, LOBBY, PLAYING, GAME_OVER, SETTINGS}
+enum GameMode {SINGLE_PLAYER, MULTIPLAYER_HOST, MULTIPLAYER_CLIENT}
 
-# ==== VARIABLES ====
 # Game state
 var current_state = GameState.MAIN_MENU
 var previous_state = GameState.MAIN_MENU
+var current_game_mode = GameMode.SINGLE_PLAYER
 
 # Scene instances
 var main_menu_instance = null
@@ -29,11 +28,10 @@ var settings_instance = null
 var players = {}
 var local_player_id = 1
 var local_player_instance = null
-var player_camera = null
 
 # Game settings
 var current_map = "Station"
-var current_game_mode = "Standard"
+var current_game_mode_setting = "Standard"
 var map_paths = {
 	"Station": "res://Scenes/Maps/Zypharion.tscn",
 	"Outpost": "res://Scenes/Maps/Outpost.tscn",
@@ -45,8 +43,6 @@ var character_data = {}
 
 # Multiplayer
 var player_scene = null
-var camera_scene = null
-var is_host: bool = false
 var connected_peers = []
 var network_peer = null
 var connection_in_progress = false
@@ -62,7 +58,7 @@ var atmosphere_system = null
 var audio_manager = null
 var interaction_system = null
 
-# ==== SIGNALS ====
+# Signals
 signal game_state_changed(old_state, new_state)
 signal player_registered(player_id, player_name)
 signal player_unregistered(player_id)
@@ -76,11 +72,7 @@ signal connection_failed()
 signal server_disconnected()
 signal systems_initialized()
 
-# ==== INITIALIZATION ====
 func _ready():
-	print("GameManager: Initializing")
-	
-	# Make sure game is unpaused
 	get_tree().paused = false
 	
 	# Connect multiplayer signals
@@ -90,516 +82,638 @@ func _ready():
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-	# Pre-load necessary scenes
 	load_core_scenes()
-	
-	# Try to load character data
 	load_character_data()
 
-# Load core scenes that will be needed
 func load_core_scenes():
-	# Load player scene
 	if player_scene == null:
 		player_scene = load(PLAYER_SCENE_PATH)
 		if player_scene == null:
 			push_error("GameManager: Could not load player scene from: " + PLAYER_SCENE_PATH)
 
-# ==== WORLD LOADING ====
-# Load the game world
+# Game mode detection
+func is_single_player() -> bool:
+	return current_game_mode == GameMode.SINGLE_PLAYER
+
+func is_multiplayer_host() -> bool:
+	return current_game_mode == GameMode.MULTIPLAYER_HOST
+
+func is_multiplayer_client() -> bool:
+	return current_game_mode == GameMode.MULTIPLAYER_CLIENT
+
+func is_multiplayer() -> bool:
+	return current_game_mode == GameMode.MULTIPLAYER_HOST or current_game_mode == GameMode.MULTIPLAYER_CLIENT
+
+func setup_singleplayer_peer():
+	var peer = OfflineMultiplayerPeer.new()
+	multiplayer.multiplayer_peer = peer
+	local_player_id = 1
+	connected_peers = [1]
+
+# World loading and setup
 func load_world(map_path = WORLD_SCENE):
-	print("GameManager: Loading world:", map_path)
-	
-	# Change scene to the world
 	get_tree().change_scene_to_file(map_path)
-	
-	# Wait for the scene to be fully loaded
 	await get_tree().process_frame
-	await get_tree().process_frame  # Wait an extra frame for stability
+	await get_tree().process_frame
 	
-	# Get world reference
 	world_instance = get_tree().current_scene
 	world_ref = world_instance
-	print("GameManager: Current scene loaded: " + world_instance.name)
 	
-	# Wait for world to be ready before getting systems
 	await get_tree().create_timer(0.1).timeout
-	
-	# Find and store references to important world systems
 	find_world_systems()
-	
-	# Find spawn points in the world
 	find_spawn_points()
-	print("GameManager: Found " + str(spawn_points.size()) + " spawn points")
-	
-	# Wait a bit more for world systems to be ready
 	await get_tree().create_timer(0.2).timeout
 	
-	# Setup based on multiplayer or single player
-	if network_peer and is_host:
-		# Multiplayer host mode - spawn all connected peers
-		await get_tree().create_timer(0.3).timeout
-		for peer_id in connected_peers:
-			spawn_player(peer_id)
-	elif network_peer:
-		# Multiplayer client mode - wait for server to spawn us
-		print("GameManager: Client waiting for server to spawn player")
-	else:
-		# Singleplayer mode - spawn the local player
-		print("GameManager: Setting up singleplayer mode")
-		setup_singleplayer()
+	match current_game_mode:
+		GameMode.SINGLE_PLAYER:
+			setup_singleplayer()
+		GameMode.MULTIPLAYER_HOST:
+			await get_tree().create_timer(0.3).timeout
+			spawn_player(1)
+			for peer_id in connected_peers:
+				if peer_id != 1:
+					spawn_player(peer_id)
+		GameMode.MULTIPLAYER_CLIENT:
+			pass
 	
 	emit_signal("world_loaded")
 
-# Find and store references to important world systems
 func find_world_systems():
 	if world_instance == null:
-		push_error("GameManager: Cannot find world systems - world_instance is null")
 		return
 	
-	# Find essential systems
 	tile_occupancy_system = world_instance.get_node_or_null("TileOccupancySystem")
 	spatial_manager = world_instance.get_node_or_null("SpatialManager")
 	sensory_system = world_instance.get_node_or_null("SensorySystem")
 	atmosphere_system = world_instance.get_node_or_null("AtmosphereSystem")
 	audio_manager = world_instance.get_node_or_null("AudioManager")
 	
-	# Find interaction system (might be in different places)
 	var interaction_systems = get_tree().get_nodes_in_group("interaction_system")
 	if interaction_systems.size() > 0:
 		interaction_system = interaction_systems[0]
 	else:
 		interaction_system = world_instance.get_node_or_null("InteractionSystem")
-	
-	print("GameManager: World systems lookup complete")
-	log_system_status()
 
-# Log the status of found systems
-func log_system_status():
-	print("--- System Status ---")
-	print("TileOccupancySystem: ", "Found" if tile_occupancy_system else "Missing")
-	print("SpatialManager: ", "Found" if spatial_manager else "Missing")
-	print("SensorySystem: ", "Found" if sensory_system else "Missing")
-	print("AtmosphereSystem: ", "Found" if atmosphere_system else "Missing")
-	print("AudioManager: ", "Found" if audio_manager else "Missing")
-	print("InteractionSystem: ", "Found" if interaction_system else "Missing")
-	print("--------------------")
-
-# Find spawn points in the world
 func find_spawn_points():
 	spawn_points = []
 	next_spawn_index = 0
 	
-	# Look for spawn point nodes in the world
 	if world_instance:
-		# First try to find a SpawnPoints node that might contain spawn points
 		var spawn_points_node = world_instance.get_node_or_null("SpawnPoints")
 		if spawn_points_node:
-			# Add all children of the SpawnPoints node as spawn positions
 			for child in spawn_points_node.get_children():
 				spawn_points.append(child.global_position)
 		
-		# If no spawn points found, look for nodes named "SpawnPoint*"
 		if spawn_points.size() == 0:
 			for child in world_instance.get_children():
 				if child.name.begins_with("SpawnPoint"):
 					spawn_points.append(child.global_position)
 		
-		# If still no spawn points, add default locations
 		if spawn_points.size() == 0:
-			# Add some default spawn positions
-			spawn_points = [
-				Vector2(100, 100),
-				Vector2(200, 100),
-				Vector2(100, 200),
-				Vector2(200, 200)
-			]
-	
-	print("GameManager: Found", spawn_points.size(), "spawn points")
+			spawn_points = [Vector2(100, 100), Vector2(200, 100), Vector2(100, 200), Vector2(200, 200)]
 
-# Get a spawn position for a player
 func get_spawn_position(peer_id: int) -> Vector2:
-	# Make sure spawn points are initialized
 	if spawn_points.size() == 0:
 		find_spawn_points()
 	
-	# If we have specific spawn point for this peer, use it
-	if peer_id < spawn_points.size():
-		return spawn_points[peer_id]
+	if peer_id <= spawn_points.size():
+		return spawn_points[peer_id - 1]
 	
-	# Otherwise, use round-robin assignment
 	var pos = spawn_points[next_spawn_index]
 	next_spawn_index = (next_spawn_index + 1) % spawn_points.size()
 	return pos
 
-# ==== PLAYER SETUP ====
-# Setup singleplayer mode
+# Singleplayer setup
 func setup_singleplayer():
-	# Ensure player scene is loaded
+	current_game_mode = GameMode.SINGLE_PLAYER
+	setup_singleplayer_peer()
+	
 	if player_scene == null:
 		player_scene = load(PLAYER_SCENE_PATH)
 		if player_scene == null:
-			push_error("GameManager: Could not load player scene for singleplayer!")
 			return
 	
-	# Setup main player
-	setup_normal_player()
-	
-	print("GameManager: Singleplayer setup complete")
+	setup_local_player()
 
-# Normal player setup
-func setup_normal_player():
-	# Create player instance
+func setup_local_player():
+	if multiplayer.multiplayer_peer == null:
+		setup_singleplayer_peer()
+	
+	local_player_id = multiplayer.get_unique_id()
+	
 	var player_instance = player_scene.instantiate()
 	player_instance.name = "LocalPlayer"
 	
-	# IMPORTANT: Mark as player BEFORE any setup
 	player_instance.set_meta("is_player", true)
 	player_instance.set_meta("is_npc", false)
+	player_instance.set_meta("peer_id", local_player_id)
+	player_instance.set_multiplayer_authority(local_player_id)
 	
-	# Get spawn position
-	var spawn_pos = get_spawn_position(1)  # Use ID 1 for singleplayer
+	var spawn_pos = get_spawn_position(local_player_id)
 	player_instance.position = spawn_pos
-	print("GameManager: Player spawn position: ", spawn_pos)
 	
-	# Store player in players dictionary for singleplayer
-	players[1] = {
-		"id": 1,
+	players[local_player_id] = {
+		"id": local_player_id,
 		"name": get_player_name(),
 		"ready": true,
 		"instance": player_instance,
-		"customization": character_data.duplicate() if character_data.size() > 0 else {}
+		"customization": character_data.duplicate()
 	}
 	
-	# Add player to the current scene
-	print("GameManager: Adding player to scene: " + world_instance.name)
 	world_instance.add_child(player_instance)
-	
-	# Store local player reference
 	local_player_instance = player_instance
 	
-	# Wait for GridMovementController and its components to initialize
+	setup_player_camera(player_instance, local_player_id)
+	setup_player_controller(player_instance, local_player_id, true)
+	
+	# Apply character customization after a short delay
 	await get_tree().create_timer(0.2).timeout
+	apply_character_customization_to_player(player_instance, character_data)
 	
-	# Get the GridMovementController
-	var grid_controller = player_instance.get_node_or_null("GridMovementController")
-	if not grid_controller:
-		# If player IS the GridMovementController
-		grid_controller = player_instance
+	await get_tree().create_timer(0.1).timeout
+	_notify_systems_of_entity_spawn(player_instance, false)
+
+func setup_player_controller(player_instance: Node, peer_id: int, is_local: bool):
+	var movement_controller = get_movement_controller(player_instance)
 	
-	if grid_controller:
-		# The new GridMovementController should already have all components created
-		# Just ensure it's set up for singleplayer
-		if grid_controller.has_method("setup_singleplayer"):
-			grid_controller.setup_singleplayer()
-			print("GameManager: Player setup complete via setup_singleplayer()")
+	if movement_controller:
+		movement_controller.peer_id = peer_id
+		movement_controller.is_local_player = is_local
+		
+		if is_single_player():
+			if movement_controller.has_method("setup_singleplayer"):
+				movement_controller.setup_singleplayer()
+			elif movement_controller.has_method("initialize"):
+				var init_data = create_init_data(player_instance, peer_id, is_local)
+				movement_controller.initialize(init_data)
 		else:
-			print("GameManager: WARNING - GridMovementController has no setup_singleplayer method!")
-	else:
-		print("GameManager: WARNING - Player has no GridMovementController!")
-	
-	# Check for existing camera
-	var existing_camera = player_instance.get_node_or_null("Camera2D")
-	if existing_camera:
-		print("GameManager: Using existing camera on player")
-		existing_camera.enabled = true
-		player_camera = existing_camera
-	
-	# Register with systems after components are ready
-	await get_tree().create_timer(0.2).timeout
-	_notify_systems_of_entity_spawn(grid_controller, false)  # false = is_npc
+			if movement_controller.has_method("setup_multiplayer"):
+				movement_controller.setup_multiplayer(peer_id)
+			elif movement_controller.has_method("initialize"):
+				var init_data = create_init_data(player_instance, peer_id, is_local)
+				movement_controller.initialize(init_data)
 
-# notification system that works for both players and NPCs
-func _notify_systems_of_entity_spawn(entity_controller, is_npc: bool = false):
-	var entity_type = "NPC" if is_npc else "PLAYER"
-	print("GameManager: Notifying systems of %s spawn" % entity_type)
-	
-	# Register with TileOccupancySystem (all entities need this)
-	if tile_occupancy_system and tile_occupancy_system.has_method("register_entity_at_tile"):
-		var pos = entity_controller.get_current_tile_position()
-		var z_level = entity_controller.current_z_level
-		tile_occupancy_system.register_entity_at_tile(entity_controller, pos, z_level)
-		print("GameManager: Registered %s with TileOccupancySystem" % entity_type)
-	
-	# Register with SpatialManager (all entities need this)
-	if spatial_manager and spatial_manager.has_method("register_entity"):
-		spatial_manager.register_entity(entity_controller)
-		print("GameManager: Registered %s with SpatialManager" % entity_type)
-	
-	# Player-specific registrations
-	if not is_npc:
-		# Register with InteractionSystem
-		if interaction_system and interaction_system.has_method("register_player"):
-			interaction_system.register_player(entity_controller, true)  # true = is local player
-			print("GameManager: Registered PLAYER with InteractionSystem")
-		
-		# Register with click systems
-		var click_handlers = get_tree().get_nodes_in_group("click_system")
-		for handler in click_handlers:
-			if handler.has_method("set_player_reference"):
-				handler.set_player_reference(entity_controller)
-				print("GameManager: Set PLAYER reference in ClickSystem")
-		
-		# Register with other player-aware systems
-		var player_systems = get_tree().get_nodes_in_group("player_aware_system")
-		for system in player_systems:
-			if system.has_method("register_player"):
-				system.register_player(entity_controller)
-				print("GameManager: Registered PLAYER with system: " + system.name)
-	
-	# Emit systems initialized signal
-	emit_signal("systems_initialized")
+func get_movement_controller(player_instance: Node) -> Node:
+	var movement_controller = player_instance.get_node_or_null("MovementComponent")
+	if not movement_controller:
+		movement_controller = player_instance.get_node_or_null("GridMovementController")
+	if not movement_controller:
+		movement_controller = player_instance
+	return movement_controller
 
-# Reload systems when needed (e.g., after scene change)
-func reload_systems():
-	find_world_systems()
-	
-	# If we have a local player, ensure it's properly set up
-	if local_player_instance and is_instance_valid(local_player_instance):
-		var grid_controller = local_player_instance.get_node_or_null("GridMovementController")
-		if not grid_controller:
-			grid_controller = local_player_instance
-		
-		if grid_controller:
-			_notify_systems_of_entity_spawn(grid_controller, false)
-	
-	emit_signal("systems_initialized")
+func create_init_data(player_instance: Node, peer_id: int, is_local: bool) -> Dictionary:
+	return {
+		"controller": player_instance,
+		"world": world_instance,
+		"tile_occupancy_system": tile_occupancy_system,
+		"sensory_system": sensory_system,
+		"audio_system": audio_manager,
+		"sprite_system": get_sprite_system(player_instance),
+		"peer_id": peer_id,
+		"is_local_player": is_local
+	}
 
-# ==== MULTIPLAYER ====
-# Spawn a player instance in the world
-@rpc("authority", "call_local", "reliable")
-func spawn_player_on_network(peer_id: int, spawn_position: Vector2):
-	print("GameManager: Spawning player on network for peer", peer_id)
+func setup_player_camera(player_instance: Node, peer_id: int):
+	var camera = player_instance.get_node_or_null("Camera2D")
+	if not camera:
+		camera = player_instance.get_node_or_null("PlayerCamera")
+		if not camera:
+			camera = player_instance.get_node_or_null("Camera")
 	
-	# Check if we have a valid player scene    
-	if player_scene == null:
-		print("GameManager: ERROR - Could not load player scene!")
-		player_scene = load(PLAYER_SCENE_PATH)
-		if player_scene == null:
-			print("GameManager: CRITICAL ERROR - Failed to load player scene!")
-			return
-	
-	# Create player instance
-	var player_instance = player_scene.instantiate()
-	
-	# Set unique name based on peer ID
-	player_instance.name = str(peer_id)
-	
-	# IMPORTANT: Mark as player for multiplayer
-	player_instance.set_meta("is_player", true)
-	player_instance.set_meta("is_npc", false)
-	
-	# Set initial position
-	player_instance.position = spawn_position
-	
-	# Get player customization
-	var customization = {}
-	if peer_id in players and "customization" in players[peer_id]:
-		customization = players[peer_id].customization
-	
-	# Add player to the world
-	var world = get_tree().current_scene
-	if is_instance_valid(world):
-		world.add_child(player_instance)
+	if camera:
+		var is_local_player = false
 		
-		# Wait for components to initialize
-		await get_tree().create_timer(0.2).timeout
-		
-		# Get GridMovementController
-		var grid_controller = player_instance.get_node_or_null("GridMovementController")
-		if not grid_controller:
-			grid_controller = player_instance
-		
-		# Initialize player for multiplayer
-		if grid_controller and grid_controller.has_method("setup_multiplayer"):
-			grid_controller.setup_multiplayer(peer_id)
+		if is_single_player():
+			is_local_player = true
 		else:
-			# Fallback - set up as local player if this is our peer
-			if grid_controller:
-				if peer_id == multiplayer.get_unique_id():
-					if grid_controller.has_method("setup_singleplayer"):
-						grid_controller.setup_singleplayer()
-				else:
-					# Remote player - disable input
-					grid_controller.is_local_player = false
+			var local_id = multiplayer.get_unique_id()
+			is_local_player = (peer_id == local_id)
 		
-		# Store player instance
-		if peer_id in players:
-			players[peer_id].instance = player_instance
+		camera.enabled = is_local_player
 		
-		# Apply customization
-		if grid_controller.sprite_system and customization.size() > 0:
-			var sprite_system = grid_controller.sprite_system
-			if sprite_system.has_method("apply_character_data"):
-				print("GameManager: Applying customization via apply_character_data")
-				sprite_system.apply_character_data(customization)
-			elif sprite_system.has_method("apply_customization"):
-				print("GameManager: Applying customization via apply_customization")
-				sprite_system.apply_customization(customization)
-		
-		# Register with systems as PLAYER
-		await get_tree().create_timer(0.1).timeout
-		_notify_systems_of_entity_spawn(grid_controller, false)
-	else:
-		print("GameManager: No valid world to add player to")
-		player_instance.queue_free()
+		if is_local_player:
+			camera.make_current()
 
-# The rest of the GameManager remains the same...
-# [All other methods stay unchanged from the original]
-
-# ==== REMAINING METHODS (Unchanged) ====
-# Host a new game
+# Multiplayer hosting and joining
 func host_game(port: int = DEFAULT_PORT, use_upnp: bool = true) -> bool:
-	print("GameManager: Attempting to host on port", port)
+	current_game_mode = GameMode.MULTIPLAYER_HOST
 	
-	# Create the server peer
+	if multiplayer.multiplayer_peer != null and multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+		multiplayer.multiplayer_peer = null
+	
+	if MultiplayerManager:
+		var success = MultiplayerManager.host_game(port, use_upnp)
+		if success:
+			network_peer = multiplayer.multiplayer_peer
+			local_player_id = 1
+			connected_peers = [1]
+			
+			register_player(local_player_id, get_player_name())
+			
+			call_deferred("emit_signal", "host_ready")
+			call_deferred("show_lobby")
+			
+			return true
+		else:
+			current_game_mode = GameMode.SINGLE_PLAYER
+			return false
+	else:
+		return host_game_manual(port, use_upnp)
+
+func host_game_manual(port: int = DEFAULT_PORT, use_upnp: bool = true) -> bool:
 	var peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(port, MAX_PLAYERS)
 	
 	if error != OK:
-		print("GameManager: Failed to create server:", error)
+		current_game_mode = GameMode.SINGLE_PLAYER
 		return false
 	
-	# Configure UPNP if enabled
 	if use_upnp:
 		setup_upnp(port)
 	
-	# Set as multiplayer peer
 	multiplayer.multiplayer_peer = peer
 	network_peer = peer
-	is_host = true
-	local_player_id = 1  # Host always gets ID 1
-	connected_peers = [1]  # Host is always peer 1
+	local_player_id = 1
+	connected_peers = [1]
 	
-	# Register local player
-	register_player(1, get_player_name())
+	register_player(local_player_id, get_player_name())
 	
-	# Host ready
 	call_deferred("emit_signal", "host_ready")
-	
-	# Transition to lobby after successful host
 	call_deferred("show_lobby")
 	
-	print("GameManager: Server started successfully on port", port)
 	return true
 
-# Join an existing game
 func join_game(address: String, port: int = DEFAULT_PORT) -> bool:
-	print("GameManager: Attempting to join", address, ":", port)
-	
 	if connection_in_progress:
 		return false
 	
+	current_game_mode = GameMode.MULTIPLAYER_CLIENT
+	
+	if MultiplayerManager:
+		var success = MultiplayerManager.join_game(address, port)
+		if success:
+			network_peer = multiplayer.multiplayer_peer
+			connection_in_progress = true
+			return true
+		else:
+			current_game_mode = GameMode.SINGLE_PLAYER
+			return false
+	else:
+		return join_game_manual(address, port)
+
+func join_game_manual(address: String, port: int = DEFAULT_PORT) -> bool:
 	connection_in_progress = true
 	
-	# Create the client peer
 	var peer = ENetMultiplayerPeer.new()
 	var error = peer.create_client(address, port)
 	
 	if error != OK:
-		print("GameManager: Failed to create client:", error)
 		connection_in_progress = false
+		current_game_mode = GameMode.SINGLE_PLAYER
 		return false
 	
-	# Set as multiplayer peer
 	multiplayer.multiplayer_peer = peer
 	network_peer = peer
-	is_host = false
 	
-	print("GameManager: Client attempting to connect to", address, ":", port)
 	return true
 
-# Disconnect from current multiplayer game
 func disconnect_from_game():
-	# Clean up the multiplayer peer
+	if MultiplayerManager:
+		MultiplayerManager.disconnect_from_game()
+	
 	if multiplayer.multiplayer_peer != null:
 		multiplayer.multiplayer_peer.close()
 		multiplayer.multiplayer_peer = null
 		network_peer = null
 	
-	# Reset state
-	is_host = false
+	current_game_mode = GameMode.SINGLE_PLAYER
 	connected_peers = []
 	connection_in_progress = false
 	players.clear()
-	
-	print("GameManager: Disconnected from game")
 
-# Get local player's peer ID
-func get_local_peer_id() -> int:
-	if multiplayer.multiplayer_peer == null:
-		return 0
-	return multiplayer.get_unique_id()
-
-# Get list of connected peers
-func get_connected_peers() -> Array:
-	if multiplayer.multiplayer_peer == null:
-		return []
-	
-	var peers = multiplayer.get_peers()
-	peers.append(1)  # Add server (ID 1)
-	return peers
-
-# Setup UPnP port forwarding
-func setup_upnp(port: int) -> bool:
-	var upnp = UPNP.new()
-	var discover_result = upnp.discover()
-	
-	if discover_result != UPNP.UPNP_RESULT_SUCCESS:
-		print("GameManager: UPNP discover failed:", discover_result)
-		return false
-	
-	if upnp.get_gateway() and upnp.get_gateway().is_valid_gateway():
-		# Try to map both UDP and TCP
-		var map_result_udp = upnp.add_port_mapping(port, port, "Multiplayer Game UDP", "UDP", 0)
-		var map_result_tcp = upnp.add_port_mapping(port, port, "Multiplayer Game TCP", "TCP", 0)
-		
-		if map_result_udp != UPNP.UPNP_RESULT_SUCCESS or map_result_tcp != UPNP.UPNP_RESULT_SUCCESS:
-			print("GameManager: UPNP port mapping failed")
-			return false
-		
-		print("GameManager: UPNP port mapping successful")
-		print("GameManager: External IP:", upnp.query_external_address())
-		return true
-	
-	print("GameManager: UPNP no valid gateway found")
-	return false
-
-# Spawn a player instance in the world
+# Player spawning
 func spawn_player(peer_id: int):
-	if !is_host:
-		# Only the host can spawn players
+	if is_multiplayer() and not is_multiplayer_host():
 		return
 		
-	print("GameManager: Attempting to spawn player for peer", peer_id)
-	
-	# Use MultiplayerSpawner to spawn the player across the network
-	# This RPC call should trigger the MultiplayerSpawner
-	spawn_player_on_network.rpc(peer_id, get_spawn_position(peer_id))
+	if is_single_player():
+		if peer_id == local_player_id:
+			setup_local_player()
+	else:
+		if MultiplayerManager:
+			var spawn_pos = get_spawn_position(peer_id)
+			var customization = get_player_customization(peer_id)
+			MultiplayerManager.spawn_player(peer_id, spawn_pos, customization)
+		else:
+			spawn_player_on_network.rpc(peer_id, get_spawn_position(peer_id))
 
-# Remove player instance
-func remove_player_instance(peer_id: int):
-	# Find player instance in the world
+@rpc("authority", "call_local", "reliable")
+func spawn_player_on_network(peer_id: int, spawn_position: Vector2):
+	if MultiplayerManager:
+		var character_data = get_player_customization(peer_id)
+		MultiplayerManager.spawn_player_for_peer.rpc(peer_id, spawn_position, character_data)
+	else:
+		spawn_player_legacy(peer_id, spawn_position)
+
+func spawn_player_legacy(peer_id: int, spawn_position: Vector2):
+	if player_scene == null:
+		player_scene = load(PLAYER_SCENE_PATH)
+		if player_scene == null:
+			return
+	
+	var player_instance = player_scene.instantiate()
+	player_instance.name = str(peer_id)
+	
+	player_instance.set_meta("is_player", true)
+	player_instance.set_meta("is_npc", false)
+	player_instance.set_meta("peer_id", peer_id)
+	player_instance.set_multiplayer_authority(peer_id)
+	player_instance.position = spawn_position
+	
+	var customization = get_player_customization(peer_id)
+	
 	var world = get_tree().current_scene
 	if is_instance_valid(world):
-		var player_node = world.get_node_or_null(str(peer_id))
-		if player_node:
-			player_node.queue_free()
-			print("GameManager: Removed player instance for peer", peer_id)
-	
-	# Clear instance reference in player data
-	if peer_id in players:
-		players[peer_id].instance = null
+		world.add_child(player_instance)
+		
+		await get_tree().create_timer(0.2).timeout
+		
+		setup_player_camera(player_instance, peer_id)
+		
+		var is_local = (peer_id == multiplayer.get_unique_id())
+		setup_player_controller(player_instance, peer_id, is_local)
+		
+		if peer_id in players:
+			players[peer_id].instance = player_instance
+		
+		apply_character_customization_to_player(player_instance, customization)
+		
+		await get_tree().create_timer(0.1).timeout
+		_notify_systems_of_entity_spawn(get_movement_controller(player_instance), false)
+	else:
+		player_instance.queue_free()
 
-# Register a player with the network (called by all peers)
+func _notify_systems_of_entity_spawn(entity_controller, is_npc: bool = false):
+	if tile_occupancy_system and tile_occupancy_system.has_method("register_entity_at_tile"):
+		var pos = entity_controller.get_current_tile_position()
+		var z_level = entity_controller.current_z_level
+		tile_occupancy_system.register_entity_at_tile(entity_controller, pos, z_level)
+	
+	if spatial_manager and spatial_manager.has_method("register_entity"):
+		spatial_manager.register_entity(entity_controller)
+	
+	if not is_npc:
+		if interaction_system and interaction_system.has_method("register_player"):
+			interaction_system.register_player(entity_controller, true)
+		
+		var click_handlers = get_tree().get_nodes_in_group("click_system")
+		for handler in click_handlers:
+			if handler.has_method("set_player_reference"):
+				handler.set_player_reference(entity_controller)
+		
+		var player_systems = get_tree().get_nodes_in_group("player_aware_system")
+		for system in player_systems:
+			if system.has_method("register_player"):
+				system.register_player(entity_controller)
+	
+	emit_signal("systems_initialized")
+
+# Character customization system
+func get_sprite_system(player_instance: Node) -> Node:
+	var sprite_system = null
+	
+	var possible_paths = [
+		"SpriteSystem",
+		"sprite_system", 
+		"Sprite",
+		"CharacterSprite",
+		"Visuals/SpriteSystem",
+		"HumanSpriteSystem"
+	]
+	
+	for path in possible_paths:
+		sprite_system = player_instance.get_node_or_null(path)
+		if sprite_system:
+			break
+	
+	return sprite_system
+
+func apply_character_customization_to_player(player_instance: Node, customization: Dictionary):
+	if customization.size() == 0:
+		return
+	
+	var sprite_system = get_sprite_system(player_instance)
+	
+	if sprite_system:
+		if sprite_system.has_method("apply_character_data"):
+			sprite_system.apply_character_data(customization)
+		elif sprite_system.has_method("apply_customization"):
+			sprite_system.apply_customization(customization)
+
+# Character data management
+func set_character_data(data):
+	print("GameManager: Setting character data with ", data.size(), " properties")
+	character_data = data.duplicate()
+	
+	# Save immediately
+	save_character_data()
+	
+	# Update player data
+	var player_id = get_local_peer_id()
+	if player_id == 0:
+		player_id = 1  # Fallback for singleplayer
+	
+	if player_id in players:
+		players[player_id].customization = character_data.duplicate()
+		
+		# Update name if it changed
+		if "name" in character_data:
+			players[player_id].name = character_data.name
+	else:
+		# Create player entry if it doesn't exist
+		players[player_id] = {
+			"id": player_id,
+			"name": get_player_name(),
+			"ready": false,
+			"instance": null,
+			"customization": character_data.duplicate()
+		}
+	
+	# Sync in multiplayer
+	if is_multiplayer():
+		sync_character_data.rpc(player_id, character_data.duplicate())
+	
+	# Apply to existing player if spawned
+	if local_player_instance and is_instance_valid(local_player_instance):
+		apply_character_customization_to_player(local_player_instance, character_data)
+	
+	emit_signal("character_data_updated", character_data)
+	print("GameManager: Character data set and saved successfully")
+
+func get_character_data():
+	return character_data.duplicate()
+
+func save_character_data():
+	var file = FileAccess.open("user://character_data.json", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(character_data))
+		file.close()
+		print("GameManager: Character data saved to disk")
+	else:
+		print("GameManager: Failed to save character data to disk")
+
+func load_character_data():
+	if not FileAccess.file_exists("user://character_data.json"):
+		print("GameManager: No character data file found")
+		return false
+	
+	var file = FileAccess.open("user://character_data.json", FileAccess.READ)
+	if file:
+		var json_string = file.get_as_text()
+		file.close()
+		
+		var json_result = JSON.parse_string(json_string)
+		
+		if json_result:
+			character_data = json_result
+			print("GameManager: Character data loaded from disk with ", character_data.size(), " properties")
+			return true
+		else:
+			print("GameManager: Failed to parse character data JSON")
+	else:
+		print("GameManager: Failed to open character data file")
+	
+	return false
+
+func reapply_character_customization():
+	print("GameManager: Providing character customization data: ", character_data.size(), " items")
+	return character_data.duplicate()
+
+# Multiplayer character data sync
+@rpc("any_peer", "call_local", "reliable")
+func sync_character_data(peer_id: int, character_customization: Dictionary):
+	print("GameManager: Syncing character data for peer ", peer_id)
+	
+	if peer_id in players:
+		players[peer_id].customization = character_customization.duplicate()
+		
+		# Update name if provided
+		if "name" in character_customization:
+			players[peer_id].name = character_customization.name
+		
+		# Apply to existing player instance
+		if "instance" in players[peer_id] and players[peer_id].instance:
+			var player_instance = players[peer_id].instance
+			if is_instance_valid(player_instance):
+				apply_character_customization_to_player(player_instance, character_customization)
+	
+	# Update lobby if available
+	update_lobby_ui()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_game_settings(map_name: String, game_mode: String):
+	"""Sync game settings across all clients"""
+	print("GameManager: Syncing game settings - Map: ", map_name, " Mode: ", game_mode)
+	
+	current_map = map_name
+	current_game_mode_setting = game_mode
+	
+	# Update lobby if available
+	if lobby_instance and is_instance_valid(lobby_instance):
+		if lobby_instance.has_method("update_game_settings"):
+			lobby_instance.update_game_settings(map_name, game_mode)
+
+@rpc("any_peer", "call_local", "reliable")
+func request_character_data(requesting_peer_id: int):
+	"""Request character data from all players (called by new clients)"""
+	if is_multiplayer_host():
+		# Send all player character data to the requesting peer
+		for player_id in players:
+			if "customization" in players[player_id]:
+				sync_character_data.rpc_id(requesting_peer_id, player_id, players[player_id].customization)
+
+# Player management
+func get_local_peer_id() -> int:
+	if multiplayer.multiplayer_peer == null:
+		return 1  # Singleplayer default
+	return multiplayer.get_unique_id()
+
+func get_players():
+	return players
+
+func get_player_data(player_id):
+	if player_id in players:
+		return players[player_id]
+	return null
+
+func register_player(player_id, player_name):
+	if not player_id in players:
+		players[player_id] = {
+			"id": player_id,
+			"name": player_name,
+			"ready": false,
+			"instance": null,
+			"customization": character_data.duplicate() if character_data.size() > 0 else {}
+		}
+		
+		if is_multiplayer():
+			var player_info = {
+				"name": player_name,
+				"customization": character_data.duplicate() if character_data.size() > 0 else {}
+			}
+			network_register_player.rpc(player_id, player_info)
+		
+		emit_signal("player_registered", player_id, player_name)
+		update_lobby_ui()
+
+func unregister_player(player_id):
+	if player_id in players:
+		players.erase(player_id)
+		emit_signal("player_unregistered", player_id)
+		update_lobby_ui()
+
+func set_player_ready(player_id, is_ready):
+	"""Set a player's ready status"""
+	if player_id in players:
+		players[player_id].ready = is_ready
+		
+		# Update ready status on the network if in multiplayer
+		if is_multiplayer():
+			network_set_player_ready.rpc(player_id, is_ready)
+		
+		emit_signal("player_ready_status_changed", player_id, is_ready)
+		update_lobby_ui()
+
+func check_all_players_ready() -> bool:
+	"""Check if all players are ready"""
+	var all_ready = true
+	
+	for player_id in players:
+		if !players[player_id].ready:
+			all_ready = false
+			break
+	
+	return all_ready
+
+func get_player_name():
+	if "name" in character_data:
+		return character_data.name
+	return "Player"
+
+func get_player_customization(player_id):
+	if player_id in players and "customization" in players[player_id] and players[player_id].customization.size() > 0:
+		return players[player_id].customization
+	
+	if character_data.size() > 0:
+		return character_data
+	
+	return {}
+
 @rpc("any_peer", "call_local", "reliable")
 func network_register_player(player_id, player_info):
-	print("GameManager: RPC register player", player_id)
-	
-	# Extract info from the player_info dictionary
 	var player_name = player_info.name if "name" in player_info else "Player" + str(player_id)
 	var customization = player_info.customization if "customization" in player_info else {}
 	
-	# Register the player
 	if not player_id in players:
 		players[player_id] = {
 			"id": player_id,
@@ -610,71 +724,27 @@ func network_register_player(player_id, player_info):
 		}
 		
 		emit_signal("player_registered", player_id, player_name)
-		
-		# Update lobby if available
 		update_lobby_ui()
 
-# Set player ready status
 @rpc("any_peer", "call_local", "reliable")
 func network_set_player_ready(player_id, is_ready):
+	"""Network RPC to set player ready status"""
 	print("GameManager: RPC set player ready", player_id, is_ready)
 	
 	if player_id in players:
 		players[player_id].ready = is_ready
 		
 		emit_signal("player_ready_status_changed", player_id, is_ready)
-		
-		# Update lobby if available
 		update_lobby_ui()
 		
 		# Check if all players are ready
 		check_all_players_ready()
 
-# Update game settings
-@rpc("any_peer", "call_local", "reliable")
-func network_update_game_settings(map_name, game_mode):
-	print("GameManager: RPC update game settings", map_name, game_mode)
-	
-	current_map = map_name
-	current_game_mode = game_mode
-	
-	# Update lobby UI if available
-	if lobby_instance and is_instance_valid(lobby_instance):
-		if lobby_instance.has_method("update_game_settings"):
-			lobby_instance.update_game_settings(map_name, game_mode)
-
-# Start game countdown
-@rpc("authority", "call_local", "reliable")
-func network_start_game_countdown():
-	print("GameManager: RPC start game countdown")
-	
-	# Update lobby UI if available
-	if lobby_instance and is_instance_valid(lobby_instance):
-		if lobby_instance.has_method("start_countdown"):
-			lobby_instance.start_countdown()
-
-# Start the game
-@rpc("authority", "call_local", "reliable")
-func network_start_game(map_name):
-	print("GameManager: RPC start game", map_name)
-	
-	# Get the map path
-	var map_path = map_paths.get(map_name, WORLD_SCENE)
-	
-	# Load the world
-	load_world(map_path)
-	
-	# Change state
-	change_state(GameState.PLAYING)
-
-# ==== SIGNAL HANDLERS ====
-# Multiplayer signal handlers
+# Signal handlers
 func _on_peer_connected(peer_id: int):
-	print("GameManager: Peer connected:", peer_id)
 	connected_peers.append(peer_id)
 	
-	# If we're the host, send all player data to the new peer
-	if is_host:
+	if is_multiplayer_host():
 		# Send existing players data to the new peer
 		for pid in players:
 			var player_info = {
@@ -682,477 +752,187 @@ func _on_peer_connected(peer_id: int):
 				"customization": players[pid].customization if "customization" in players[pid] else {}
 			}
 			network_register_player.rpc_id(peer_id, pid, player_info)
-			network_set_player_ready.rpc_id(peer_id, pid, players[pid].ready)
 		
-		# Send current game settings
-		network_update_game_settings.rpc_id(peer_id, current_map, current_game_mode)
+		# If in-game, spawn players
+		if current_state == GameState.PLAYING:
+			await get_tree().create_timer(1.0).timeout
+			
+			for existing_peer_id in connected_peers:
+				if existing_peer_id != peer_id:
+					spawn_player_for_peer(existing_peer_id, peer_id)
+			
+			spawn_player(peer_id)
 	
 	emit_signal("player_connected", peer_id)
 
 func _on_peer_disconnected(peer_id: int):
-	print("GameManager: Peer disconnected:", peer_id)
-	
-	# Remove peer from connected list
 	if connected_peers.has(peer_id):
 		connected_peers.erase(peer_id)
 	
-	# Remove player instance if in game
-	remove_player_instance(peer_id)
+	if MultiplayerManager:
+		MultiplayerManager.despawn_player(peer_id)
+	else:
+		remove_player_instance(peer_id)
 	
-	# Unregister the player
 	unregister_player(peer_id)
-	
 	emit_signal("player_disconnected", peer_id)
 
 func _on_connected_to_server():
-	print("GameManager: Successfully connected to server")
 	local_player_id = multiplayer.get_unique_id()
 	connection_in_progress = false
 	
-	# Register ourselves with the server
+	# Register ourselves with the server including character data
 	var player_info = {
 		"name": get_player_name(),
 		"customization": character_data.duplicate()
 	}
 	network_register_player.rpc(local_player_id, player_info)
 	
-	# Transition to lobby after successful connection
+	# Request character data from other players
+	request_character_data.rpc(local_player_id)
+	
 	call_deferred("show_lobby")
 
 func _on_connection_failed():
-	print("GameManager: Failed to connect to server")
 	multiplayer.multiplayer_peer = null
 	network_peer = null
 	connection_in_progress = false
+	current_game_mode = GameMode.SINGLE_PLAYER
 	emit_signal("connection_failed")
 
 func _on_server_disconnected():
-	print("GameManager: Disconnected from server")
 	multiplayer.multiplayer_peer = null
 	network_peer = null
 	connection_in_progress = false
-	
-	# Clear player data
+	current_game_mode = GameMode.SINGLE_PLAYER
 	players.clear()
-	
 	emit_signal("server_disconnected")
-	
-	# Return to main menu
 	call_deferred("return_to_main_menu")
 
-# ==== PLAYER MANAGEMENT ====
-# Register a player with the game
-func register_player(player_id, player_name):
-	print("GameManager: Registering player:", player_id, player_name)
+func spawn_player_for_peer(existing_peer_id: int, new_peer_id: int):
+	if MultiplayerManager:
+		var spawn_pos = get_spawn_position(existing_peer_id)
+		var customization = get_player_customization(existing_peer_id)
+		MultiplayerManager.spawn_player_for_peer.rpc_id(new_peer_id, existing_peer_id, spawn_pos, customization)
+
+func remove_player_instance(peer_id: int):
+	var world = get_tree().current_scene
+	if is_instance_valid(world):
+		var player_node = world.get_node_or_null(str(peer_id))
+		if player_node:
+			player_node.queue_free()
 	
-	# Create player entry if it doesn't exist
-	if not player_id in players:
-		players[player_id] = {
-			"id": player_id,
-			"name": player_name,
-			"ready": false,
-			"instance": null,
-			"customization": character_data.duplicate() if character_data.size() > 0 else {}
-		}
-		
-		# Call RPC to register player with all peers if in multiplayer
-		if network_peer:
-			var player_info = {
-				"name": player_name,
-				"customization": character_data.duplicate() if character_data.size() > 0 else {}
-			}
-			network_register_player.rpc(player_id, player_info)
-		
-		emit_signal("player_registered", player_id, player_name)
-		
-		# Update lobby if available
-		update_lobby_ui()
+	if peer_id in players:
+		players[peer_id].instance = null
 
-# Remove a player from the game
-func unregister_player(player_id):
-	if player_id in players:
-		var player_name = players[player_id].name
-		players.erase(player_id)
-		
-		emit_signal("player_unregistered", player_id)
-		
-		# Update lobby if available
-		update_lobby_ui()
-
-# Set a player's ready status
-func set_player_ready(player_id, is_ready):
-	if player_id in players:
-		players[player_id].ready = is_ready
-		
-		# Update ready status on the network if in multiplayer
-		if network_peer:
-			network_set_player_ready.rpc(player_id, is_ready)
-		
-		emit_signal("player_ready_status_changed", player_id, is_ready)
-		
-		# Update lobby if available
-		update_lobby_ui()
-
-# Check if all players are ready
-func check_all_players_ready() -> bool:
-	var all_ready = true
+# Utility functions
+func setup_upnp(port: int) -> bool:
+	var upnp = UPNP.new()
+	var discover_result = upnp.discover()
 	
-	for player_id in players:
-		if !players[player_id].ready:
-			all_ready = false
-			break
+	if discover_result != UPNP.UPNP_RESULT_SUCCESS:
+		return false
 	
-	return all_ready
-
-# Get all registered players
-func get_players():
-	return players
-
-# Get data for a specific player
-func get_player_data(player_id):
-	if player_id in players:
-		return players[player_id]
-	return null
-
-# Get player data formatted for network transmission
-func get_players_data():
-	var data = {}
-	for player_id in players:
-		data[str(player_id)] = {
-			"name": players[player_id].name,
-			"ready": players[player_id].ready,
-			"customization": players[player_id].customization if "customization" in players[player_id] else {}
-		}
-	return data
-
-# Get player name (from character data or default)
-func get_player_name():
-	if "name" in character_data:
-		return character_data.name
-	return "Player"
-
-# Get customization data for a player
-func get_player_customization(player_id):
-	# Check player data first
-	if player_id in players and "customization" in players[player_id] and players[player_id].customization.size() > 0:
-		return players[player_id].customization
+	if upnp.get_gateway() and upnp.get_gateway().is_valid_gateway():
+		var map_result_udp = upnp.add_port_mapping(port, port, "Multiplayer Game UDP", "UDP", 0)
+		var map_result_tcp = upnp.add_port_mapping(port, port, "Multiplayer Game TCP", "TCP", 0)
+		
+		if map_result_udp != UPNP.UPNP_RESULT_SUCCESS or map_result_tcp != UPNP.UPNP_RESULT_SUCCESS:
+			return false
+		
+		return true
 	
-	# Use local character data if available
-	if character_data.size() > 0:
-		return character_data
-	
-	# Default customization
-	return {
-		"skin_color": Color(0.9, 0.75, 0.6),
-		"hair_style": 0,
-		"hair_color": Color(0.2, 0.1, 0.05),
-		"eye_color": Color(0.2, 0.4, 0.8),
-		"shirt_color": Color(0.2, 0.3, 0.8),
-		"pants_color": Color(0.2, 0.2, 0.3)
-	}
+	return false
 
-# Update the lobby UI
-func update_lobby_ui():
-	if lobby_instance and is_instance_valid(lobby_instance):
-		if lobby_instance.has_method("update_player_list"):
-			lobby_instance.update_player_list()
-
-# ==== UI MANAGEMENT ====
-# Change the current game state
+# UI Management
 func change_state(new_state):
 	var old_state = current_state
 	current_state = new_state
-	
-	print("GameManager: State change from ", _state_to_string(old_state), " to ", _state_to_string(new_state))
-	
-	# Emit signal for state change
 	emit_signal("game_state_changed", old_state, new_state)
 
-# Convert state enum to string for debugging
-func _state_to_string(state):
-	match state:
-		GameState.MAIN_MENU:
-			return "MAIN_MENU"
-		GameState.NETWORK_SETUP:
-			return "NETWORK_SETUP"
-		GameState.LOBBY:
-			return "LOBBY"
-		GameState.PLAYING:
-			return "PLAYING"
-		GameState.GAME_OVER:
-			return "GAME_OVER"
-		GameState.SETTINGS:
-			return "SETTINGS"
-		_:
-			return "UNKNOWN"
-
-# Show the main menu
 func show_main_menu():
-	print("GameManager: Showing main menu")
-	
-	# Clear any existing UI
 	clear_current_ui()
-	
-	# Change scene to main menu
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
-	
-	# Update state
 	change_state(GameState.MAIN_MENU)
 
-# Show the network setup UI
 func show_network_ui():
-	print("GameManager: Showing network UI")
-	
-	# Clear any existing UI
 	clear_current_ui()
-	
-	# Change scene to network UI
 	get_tree().change_scene_to_file(NETWORK_UI_SCENE)
-	
-	# Update state
 	change_state(GameState.NETWORK_SETUP)
 
-# Show the lobby
 func show_lobby():
-	print("GameManager: Showing lobby")
-	
-	# Clear any existing UI
 	clear_current_ui()
-	
-	# Change scene to lobby
 	get_tree().change_scene_to_file(LOBBY_SCENE)
 	
-	# Wait for the scene to be fully loaded and ready
 	await get_tree().process_frame
-	
-	# Now it's safe to get the scene reference
 	lobby_instance = get_tree().current_scene
 	
-	# Connect to necessary signals
 	if lobby_instance:
-		# Connect the back button
 		if lobby_instance.has_signal("back_pressed") and !lobby_instance.is_connected("back_pressed", Callable(self, "show_network_ui")):
 			lobby_instance.back_pressed.connect(show_network_ui)
 			
-		# Connect the start game signal
 		if lobby_instance.has_signal("start_game") and !lobby_instance.is_connected("start_game", Callable(self, "start_game")):
 			lobby_instance.start_game.connect(start_game)
 		
-		# Initialize the lobby with current data
 		if lobby_instance.has_method("initialize_from_game_manager"):
 			lobby_instance.initialize_from_game_manager(self)
 	
-	# Update state
 	change_state(GameState.LOBBY)
 
-# Start the game
 func start_game(map_name = "", game_mode = ""):
-	print("GameManager: Starting game")
-	
-	# Use parameters if provided, otherwise use current settings
 	if map_name == "":
 		map_name = current_map
 	
 	if game_mode == "":
-		game_mode = current_game_mode
+		game_mode = current_game_mode_setting
 	
-	# Use map path
 	var map_path = map_paths.get(map_name, WORLD_SCENE)
 	
-	# In multiplayer, only the host can start the game
-	if network_peer and is_host:
-		# Start the countdown on all clients
+	if is_multiplayer() and is_multiplayer_host():
 		network_start_game_countdown.rpc()
-		
-		# Wait for countdown and then start
 		await get_tree().create_timer(5.0).timeout
-		
-		# Start the game on all clients
 		network_start_game.rpc(map_name)
-	elif !network_peer:
-		# Direct single player start
+	elif is_single_player():
 		load_world(map_path)
-		
-		# Update state
 		change_state(GameState.PLAYING)
 
-# Return to the main menu
 func return_to_main_menu():
-	print("GameManager: Returning to main menu")
-	
-	# Disconnect multiplayer if connected
 	disconnect_from_game()
-	
-	# Clear player data
 	players.clear()
-	
-	# Change scene to main menu
 	show_main_menu()
 
-# Clear all UI instances
 func clear_current_ui():
 	main_menu_instance = null
 	network_ui_instance = null
 	lobby_instance = null
 	settings_instance = null
 
-# Pause menu handling
-func toggle_pause_menu(show_pause: bool = false):
-	var pause_menu = get_node_or_null("pause_menu")
-	
-	if !pause_menu and current_state == GameState.PLAYING:
-		# Create pause menu if it doesn't exist
-		var pause_scene = load("res://Scenes/UI/Player/pause_menu.tscn")
-		if pause_scene:
-			pause_menu = pause_scene.instantiate()
-			pause_menu.name = "pause_menu"
-			add_child(pause_menu)
-	
-	if pause_menu:
-		if show_pause:
-			pause_menu.toggle_pause()
+func update_lobby_ui():
+	if lobby_instance and is_instance_valid(lobby_instance):
+		if lobby_instance.has_method("update_player_list"):
+			lobby_instance.update_player_list()
 
-# Show settings
-func show_settings():
-	print("GameManager: Showing settings")
+# Game settings management
+func update_game_settings(map_name: String, game_mode: String):
+	"""Update game settings and sync to all clients"""
+	current_map = map_name
+	current_game_mode_setting = game_mode
 	
-	# Store the current state to return to later
-	previous_state = current_state
+	# Sync in multiplayer
+	if is_multiplayer() and is_multiplayer_host():
+		sync_game_settings.rpc(map_name, game_mode)
 	
-	# Clear any existing UI
-	clear_current_ui()
-	
-	# Load settings scene
-	var settings_scene = load("res://Scenes/UI/Menus/Settings.tscn")
-	if settings_scene:
-		settings_instance = settings_scene.instantiate()
-		get_tree().root.add_child(settings_instance)
-	else:
-		push_error("GameManager: Could not load settings scene!")
-		return
-	
-	# Update state
-	change_state(GameState.SETTINGS)
+	# Update lobby UI
+	update_lobby_ui()
 
-# Return from settings
-func return_from_settings():
-	print("GameManager: Returning from settings to previous state: " + _state_to_string(previous_state))
-	
-	# Remove settings instance
-	if settings_instance and is_instance_valid(settings_instance):
-		settings_instance.queue_free()
-	settings_instance = null
-	
-	# Return to the previous state
-	match previous_state:
-		GameState.MAIN_MENU:
-			show_main_menu()
-		GameState.NETWORK_SETUP:
-			show_network_ui()
-		GameState.LOBBY:
-			show_lobby()
-		GameState.PLAYING:
-			# If we were in the playing state, we need to make the pause menu visible again
-			var pause_menu = get_node_or_null("pause_menu")
-			if pause_menu:
-				pause_menu.visible = true
-			change_state(GameState.PLAYING)
-		_:
-			# Default to main menu if something went wrong
-			show_main_menu()
+@rpc("authority", "call_local", "reliable")
+func network_start_game_countdown():
+	if lobby_instance and is_instance_valid(lobby_instance):
+		if lobby_instance.has_method("start_countdown"):
+			lobby_instance.start_countdown()
 
-# ==== CHARACTER DATA ====
-# Save character data to disk
-func save_character_data():
-	var file = FileAccess.open("user://character_data.json", FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(character_data))
-		file.close()
-
-# Load character data from disk
-func load_character_data():
-	if not FileAccess.file_exists("user://character_data.json"):
-		return false
-	
-	var file = FileAccess.open("user://character_data.json", FileAccess.READ)
-	if file:
-		var json_string = file.get_as_text()
-		var json_result = JSON.parse_string(json_string)
-		
-		if json_result:
-			character_data = json_result
-			return true
-	
-	return false
-
-# Store character data
-func set_character_data(data):
-	character_data = data
-	
-	# Save to disk
-	save_character_data()
-	
-	# Emit signal
-	character_data_updated.emit(character_data)
-	
-	# Update in player data
-	var player_id = multiplayer.get_unique_id()
-	if player_id in players:
-		players[player_id].customization = data.duplicate()
-	
-	# Update on the network if in multiplayer
-	if network_peer:
-		var player_info = {
-			"name": get_player_name(),
-			"customization": character_data.duplicate()
-		}
-		network_register_player.rpc(player_id, player_info)
-
-# Get character data
-func get_character_data():
-	return character_data
-
-# Reapply character customization
-func reapply_character_customization():
-	print("GameManager: Providing character customization data:", character_data.size(), "items")
-	# This is used by the sprite system to get customization data
-	return character_data
-
-# ==== DEBUG UTILS ====
-# Handle debug command input
-func handle_debug_command(command: String):
-	var parts = command.split(" ")
-	if parts.size() == 0:
-		return
-	
-	match parts[0]:
-		"teleport":
-			if parts.size() >= 3:
-				var x = int(parts[1])
-				var y = int(parts[2])
-				teleport_player(Vector2(x, y))
-		"reload_systems":
-			reload_systems()
-		"print_systems":
-			log_system_status()
-		"help":
-			print("Debug commands:")
-			print("teleport X Y - Teleport player to coordinates")
-			print("reload_systems - Reload system references")
-			print("print_systems - Print system status")
-
-# Teleport player to position
-func teleport_player(position: Vector2):
-	if local_player_instance and is_instance_valid(local_player_instance):
-		local_player_instance.position = position
-		var grid_controller = local_player_instance
-		if grid_controller:
-			grid_controller.current_tile_position = grid_controller.world_to_tile(position)
-			grid_controller.previous_tile_position = grid_controller.current_tile_position
-			print("GameManager: Teleported player to ", position)
-
-func snap_to_grid(pos: Vector2) -> Vector2:
-	return Vector2(
-		round(pos.x / 32.0) * 32.0 + 16.0,
-		round(pos.y / 32.0) * 32.0 + 16.0
-	)
+@rpc("authority", "call_local", "reliable")
+func network_start_game(map_name):
+	var map_path = map_paths.get(map_name, WORLD_SCENE)
+	load_world(map_path)
+	change_state(GameState.PLAYING)

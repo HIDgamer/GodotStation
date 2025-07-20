@@ -998,10 +998,6 @@ func updatehealth():
 	# Update consciousness based on health and other factors
 	_update_consciousness()
 	
-	# Emit health change signal
-	var health_percent = health / max_health
-	emit_signal("health_changed", health, max_health, health_percent)
-	
 	# Update UI if health changed significantly
 	if abs(old_health - health) > 1.0 or old_state != current_state:
 		_update_health_ui()

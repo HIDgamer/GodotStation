@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://c6mxm7u3f5n4g"]
+[gd_scene load_steps=35 format=3 uid="uid://c6mxm7u3f5n4g"]
 
 [ext_resource type="Script" uid="uid://b2bi0dloqd2xs" path="res://Code/Mobs/Controllers/Controller.gd" id="1_uwpdh"]
 [ext_resource type="Script" uid="uid://chnw437ejhnj4" path="res://Code/Mobs/Systems/CameraSystem.gd" id="2_8mbkt"]
@@ -7,14 +7,8 @@
 [ext_resource type="Script" uid="uid://by1xcc5dbrila" path="res://Code/Mobs/Controllers/InputController.gd" id="3_lyye4"]
 [ext_resource type="Script" uid="uid://djrs5msigc2l0" path="res://Code/Mobs/Systems/InventorySystem.gd" id="4_8gj18"]
 [ext_resource type="Texture2D" uid="uid://d1wjahb2n7uqs" path="res://Assets/Effects/FX/Gib.tres" id="4_vqrbj"]
-[ext_resource type="Script" uid="uid://n6okxpmeivpv" path="res://Code/Mobs/Systems/OrganSystem.gd" id="5_3dn6y"]
 [ext_resource type="Script" uid="uid://dj4qyr2yg1rim" path="res://Code/Mobs/Controllers/HealthConnector.gd" id="5_ntngp"]
 [ext_resource type="Script" uid="uid://dh2tm0dwjxdiw" path="res://Code/Mobs/Systems/HealthSystem.gd" id="6_nypa4"]
-[ext_resource type="Script" uid="uid://b3sqlcsn2t3cm" path="res://Code/Mobs/Systems/LimbSystem.gd" id="6_vb0nj"]
-[ext_resource type="Script" uid="uid://c0mhsjbd8b3v5" path="res://Code/Mobs/Systems/BloodSystem.gd" id="7_38qpi"]
-[ext_resource type="Script" uid="uid://cvtfpennx1u12" path="res://Code/Mobs/Systems/StatusEffectManager.gd" id="8_3u27n"]
-[ext_resource type="Script" uid="uid://bkltdxstbpjc6" path="res://Code/Mobs/Systems/BodyChemicalSystem.gd" id="12_3u27n"]
-[ext_resource type="Script" uid="uid://6uvjhn3a3stj" path="res://Code/Mobs/Systems/IntentSystem.gd" id="14_38qpi"]
 [ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Mobs/Systems/MovementComponent.gd" id="16_gwepp"]
 [ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Mobs/Systems/ZLevelMovementComponent.gd" id="17_o264j"]
 [ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Mobs/Systems/InteractionComponent.gd" id="17_sjx5i"]
@@ -23,6 +17,11 @@
 [ext_resource type="Script" uid="uid://dahxqtbwo8bw7" path="res://Code/Mobs/Systems/BodyTargetingComponent.gd" id="20_38qpi"]
 [ext_resource type="Script" uid="uid://57gv3jq6b82j" path="res://Code/Mobs/Systems/GrabPullComponent.gd" id="21_3u27n"]
 [ext_resource type="Script" uid="uid://crcieeppmdsku" path="res://Code/Mobs/Systems/PostureComponent.gd" id="22_3dn6y"]
+[ext_resource type="Script" uid="uid://bu4qlco8mbb3m" path="res://Code/Mobs/Systems/IntentComponent.gd" id="23_vb0nj"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kqdsm"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(416, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gwepp"]
 atlas = ExtResource("4_vqrbj")
@@ -76,13 +75,12 @@ region = Rect2(352, 0, 32, 32)
 atlas = ExtResource("4_vqrbj")
 region = Rect2(384, 0, 32, 32)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_kqdsm"]
-atlas = ExtResource("4_vqrbj")
-region = Rect2(416, 0, 32, 32)
-
 [sub_resource type="SpriteFrames" id="SpriteFrames_sq5fq"]
 animations = [{
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kqdsm")
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_gwepp")
 }, {
@@ -134,47 +132,48 @@ animations = [{
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
 properties/0/replication_mode = 1
-properties/1/path = NodePath(".:current_state")
+properties/1/path = NodePath(".:can_be_interacted_with")
 properties/1/spawn = true
 properties/1/replication_mode = 1
-properties/2/path = NodePath(".:current_direction")
+properties/2/path = NodePath(".:entity_type")
 properties/2/spawn = true
 properties/2/replication_mode = 1
-properties/3/path = NodePath(".:current_z_level")
+properties/3/path = NodePath(".:entity_dense")
 properties/3/spawn = true
 properties/3/replication_mode = 1
-properties/4/path = NodePath(".:is_moving")
+properties/4/path = NodePath(".:no_pull")
 properties/4/spawn = true
 properties/4/replication_mode = 1
-properties/5/path = NodePath(".:current_tile_position")
+properties/5/path = NodePath(".:is_lying")
 properties/5/spawn = true
 properties/5/replication_mode = 1
-properties/6/path = NodePath(".:target_tile_position")
+properties/6/path = NodePath(".:is_stunned")
 properties/6/spawn = true
 properties/6/replication_mode = 1
-properties/7/path = NodePath(".:is_floating")
+properties/7/path = NodePath(".:health")
 properties/7/spawn = true
 properties/7/replication_mode = 1
-properties/8/path = NodePath(".:velocity")
+properties/8/path = NodePath(".:max_health")
 properties/8/spawn = true
 properties/8/replication_mode = 1
-properties/9/path = NodePath(".:entity_name")
+properties/9/path = NodePath("HumanSpriteSystem:position")
 properties/9/spawn = true
 properties/9/replication_mode = 1
-properties/10/path = NodePath("HumanSpriteSystem:current_direction")
+properties/10/path = NodePath("Effect:position")
 properties/10/spawn = true
 properties/10/replication_mode = 1
-properties/11/path = NodePath(".:intent")
+properties/11/path = NodePath("HumanSpriteSystem:rotation")
 properties/11/spawn = true
 properties/11/replication_mode = 1
 
 [node name="GridMovementController" type="Node2D"]
 script = ExtResource("1_uwpdh")
-npc_ai_enabled = false
 entity_type = "mob"
 
 [node name="PlayerUI" parent="." instance=ExtResource("2_s6v5g")]
 layer = 128
+
+[node name="HumanSpriteSystem" parent="." instance=ExtResource("3_lq0mj")]
 
 [node name="Camera2D" type="Camera2D" parent="." groups=["PlayerCamera"]]
 zoom = Vector2(2, 2)
@@ -192,24 +191,6 @@ default_zoom = Vector2(3, 3)
 [node name="Effect" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_sq5fq")
 animation = &"Gib"
-frame = 13
-frame_progress = 1.0
-
-[node name="OrganSystem" type="Node" parent="."]
-script = ExtResource("5_3dn6y")
-metadata/_custom_type_script = "uid://n6okxpmeivpv"
-
-[node name="LimbSystem" type="Node" parent="."]
-script = ExtResource("6_vb0nj")
-metadata/_custom_type_script = "uid://b3sqlcsn2t3cm"
-
-[node name="BloodSystem" type="Node" parent="."]
-script = ExtResource("7_38qpi")
-metadata/_custom_type_script = "uid://c0mhsjbd8b3v5"
-
-[node name="StatusEffectManager" type="Node" parent="."]
-script = ExtResource("8_3u27n")
-metadata/_custom_type_script = "uid://cvtfpennx1u12"
 
 [node name="HealthConnector" type="Node" parent="."]
 script = ExtResource("5_ntngp")
@@ -219,17 +200,9 @@ metadata/_custom_type_script = "uid://dj4qyr2yg1rim"
 script = ExtResource("6_nypa4")
 metadata/_custom_type_script = "uid://dh2tm0dwjxdiw"
 
-[node name="BodyChemicalSystem" type="Node" parent="."]
-script = ExtResource("12_3u27n")
-metadata/_custom_type_script = "uid://bkltdxstbpjc6"
-
 [node name="InputController" type="Node" parent="."]
 script = ExtResource("3_lyye4")
 metadata/_custom_type_script = "uid://by1xcc5dbrila"
-
-[node name="IntentSystem" type="Node" parent="."]
-script = ExtResource("14_38qpi")
-metadata/_custom_type_script = "uid://6uvjhn3a3stj"
 
 [node name="InventorySystem" type="Node" parent="."]
 script = ExtResource("4_8gj18")
@@ -267,7 +240,9 @@ metadata/_custom_type_script = "uid://57gv3jq6b82j"
 script = ExtResource("22_3dn6y")
 metadata/_custom_type_script = "uid://crcieeppmdsku"
 
-[node name="HumanSpriteSystem" parent="." instance=ExtResource("3_lq0mj")]
+[node name="IntentComponent" type="Node" parent="."]
+script = ExtResource("23_vb0nj")
+metadata/_custom_type_script = "uid://bu4qlco8mbb3m"
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_bgoxp")

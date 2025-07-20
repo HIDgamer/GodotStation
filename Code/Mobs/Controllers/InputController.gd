@@ -21,6 +21,7 @@ signal toggle_point_mode_requested()
 signal toggle_pull_requested()
 signal toggle_crouch_requested()
 signal toggle_pause_menu_requested()
+signal toggle_admin_spawner_requested()
 signal reload_weapon_requested()
 signal examine_mode_requested()
 signal toggle_rest_requested()
@@ -83,6 +84,7 @@ const INPUT_ACTIONS = {
 	"toggle_point": "point_mode",
 	"toggle_pull": "toggle_pull",
 	"toggle_pause": "esc",
+	"toggle_spawner": "adminspawn",
 	"toggle_rest": "rest"
 }
 
@@ -198,6 +200,9 @@ func process_action_input():
 	if pause_handling_enabled and Input.is_action_just_pressed(INPUT_ACTIONS["toggle_pause"]):
 		print("InputController: ESC key pressed, toggling pause menu")
 		emit_signal("toggle_pause_menu_requested")
+	
+	if Input.is_action_just_pressed(INPUT_ACTIONS["toggle_spawner"]):
+		emit_signal("toggle_admin_spawner_requested")
 	
 	# Item manipulation
 	if Input.is_action_just_pressed(INPUT_ACTIONS["swap_hand"]):
@@ -330,7 +335,7 @@ func connect_to_entity(target_entity: Node):
 	var game_manager = get_node_or_null("/root/GameManager")
 	
 	if game_manager:
-		if game_manager.has_method("toggle_pause_menu"):
+		if game_manager:
 			# Disconnect first to avoid duplicate connections
 			if is_connected("toggle_pause_menu_requested", Callable(game_manager, "toggle_pause_menu")):
 				disconnect("toggle_pause_menu_requested", Callable(game_manager, "toggle_pause_menu"))
@@ -342,6 +347,15 @@ func connect_to_entity(target_entity: Node):
 			print("InputController: GameManager does not have toggle_pause_menu method")
 	else:
 		print("InputController: Could not find GameManager at /root/GameManager")
+	
+	if game_manager:
+		if game_manager:
+			# Disconnect first to avoid duplicate connections
+			if is_connected("toggle_admin_spawner_requested", Callable(game_manager, "toggle_admin_spawner")):
+				disconnect("toggle_admin_spawner_requested", Callable(game_manager, "toggle_admin_spawner"))
+				
+			# Connect the signal
+			connect("toggle_admin_spawner_requested", Callable(game_manager, "toggle_admin_spawner"))
 	
 	# Movement - handled by MovementComponent through GridMovementController
 	connect_if_available_to_component("move_requested", "handle_move_input", "MovementComponent")
@@ -359,7 +373,7 @@ func connect_to_entity(target_entity: Node):
 	
 	# Intent - handled by IntentComponent
 	connect_if_available_to_component("cycle_intent_requested", "cycle_intent", "InteractionComponent")
-	connect_if_available_to_component("set_intent_requested", "set_intent", "InteractionComponent")
+	connect_if_available_to_component("set_intent_requested", "set_intent", "IntentComponent")
 	
 	# Body targeting - handled by BodyTargetingComponent
 	connect_if_available_to_component("body_part_selected", "handle_body_part_selection", "BodyTargetingComponent")

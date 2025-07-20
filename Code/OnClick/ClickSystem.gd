@@ -7,11 +7,9 @@ signal entity_clicked(entity, mouse_button, shift_pressed, ctrl_pressed, alt_pre
 signal radial_menu_requested(entity, options, screen_position)
 signal click_started(position, button_index)
 signal click_ended(position, button_index)
-signal combat_mode_changed(enabled)
 signal click_dragged(from_position, to_position, button_index)
 signal middle_drag_started(position, target)
 signal context_menu_requested(position, target)
-signal weapon_fired(target_position, weapon) # New signal for weapon firing
 
 # === ENUMS ===
 enum ClickType {
@@ -54,9 +52,6 @@ var drag_source = null  # Entity being dragged
 var middle_drag_source = null  # Entity/atom being middle-dragged
 var hover_entity = null  # Currently hovered entity
 var last_entity_clicked = null  # Last entity that was clicked on
-
-# Weapon tracking
-var is_in_combat_mode: bool = false  # Whether the player is in combat mode
 
 # References to other systems
 var world = null  # Reference to world node
@@ -380,6 +375,17 @@ func find_canvas_layers_recursive(node: Node) -> Array:
 	
 	return canvas_layers
 
+# Check CanvasLayer for UI elements
+func check_canvas_layer_ui(canvas_layer: CanvasLayer, click_position: Vector2) -> bool:
+	if not canvas_layer.visible:
+		return false
+	
+	for child in canvas_layer.get_children():
+		if check_ui_nodes_recursive(child, click_position):
+			return true
+	
+	return false
+
 # Recursively check UI nodes
 func check_ui_nodes_recursive(node: Node, click_position: Vector2) -> bool:
 	# Skip non-UI nodes for performance
@@ -427,36 +433,6 @@ func check_ui_nodes_recursive(node: Node, click_position: Vector2) -> bool:
 				return true
 	
 	return false
-
-# Check CanvasLayer for UI elements
-func check_canvas_layer_ui(canvas_layer: CanvasLayer, click_position: Vector2) -> bool:
-	if not canvas_layer.visible:
-		return false
-	
-	for child in canvas_layer.get_children():
-		if check_ui_nodes_recursive(child, click_position):
-			return true
-	
-	return false
-
-# Alternative UI detection method using viewport
-func is_over_ui_alternative(click_position: Vector2) -> bool:
-	var viewport = get_viewport()
-	if not viewport:
-		return false
-	
-	# Get the topmost object under the mouse
-	var space_state = viewport.world_2d.direct_space_state
-	if not space_state:
-		return false
-	
-	# Use viewport's gui to check for Control nodes
-	var gui = viewport.gui_get_focus_owner()
-	if gui:
-		return true
-	
-	return false
-#endregion
 
 #region CLICK HANDLING
 # button press handling
@@ -683,15 +659,9 @@ func handle_mouse_motion(event: InputEventMouseMotion):
 	# Update the cursor if we have a controller
 	if cursor_controller:
 		if is_position_interactable(world_pos):
-			if is_in_combat_mode:
-				cursor_controller.set_cursor_mode("target")
-			else:
-				cursor_controller.set_cursor_mode("pointer")
+			cursor_controller.set_cursor_mode("pointer")
 		else:
-			if is_in_combat_mode:
-				cursor_controller.set_cursor_mode("target")
-			else:
-				cursor_controller.set_cursor_mode("default")
+			cursor_controller.set_cursor_mode("default")
 
 # === BUTTON HANDLERS ===
 
@@ -746,12 +716,6 @@ func handle_left_click_press(mouse_pos: Vector2, shift_pressed: bool, ctrl_press
 	var click_target = get_most_accurate_entity_at_position(world_pos)
 	
 	print("ClickSystem: Click target found: ", click_target.name if click_target else "none")
-	
-	# Try to fire weapon only if in combat mode and no modifiers
-	if is_in_combat_mode and not shift_pressed and not ctrl_pressed and not alt_pressed:
-		if try_fire_active_weapon(world_pos, false):
-			print("ClickSystem: Weapon fired, skipping normal interaction")
-			return
 	
 	# Regular click handling
 	if click_target:
@@ -1102,139 +1066,7 @@ func cancel_middle_drag():
 	drag_state = DragState.NONE
 	drag_line.visible = false
 
-# === WEAPON HANDLING ===
-
-# Try to fire the player's active weapon
-func try_fire_active_weapon(target_position: Vector2, force_fire: bool = false) -> bool:
-	if !player:
-		print("ClickSystem: Cannot fire weapon - no player reference")
-		return false
-	
-	# Only try to fire if we're in combat mode or force_fire is true
-	if !is_in_combat_mode and !force_fire:
-		return false
-	
-	# Get active weapon with multiple fallback methods
-	var weapon = get_active_weapon()
-	if !weapon:
-		print("ClickSystem: No active weapon found")
-		return false
-	
-	print("ClickSystem: Attempting to fire weapon: ", weapon.name)
-	
-	# Check if weapon can actually fire
-	if !weapon.has_method("try_fire") and !weapon.has_method("fire") and !weapon.has_method("attack"):
-		print("ClickSystem: Weapon has no firing methods")
-		return false
-	
-	# Try to fire the weapon using different methods
-	var fired = false
-	
-	if weapon.has_method("try_fire"):
-		print("ClickSystem: Using try_fire method")
-		fired = weapon.try_fire(target_position)
-	elif weapon.has_method("fire"):
-		print("ClickSystem: Using fire method")
-		fired = weapon.fire(target_position)
-	elif weapon.has_method("attack"):
-		# For melee weapons or items that attack
-		print("ClickSystem: Using attack method")
-		var target_entity = get_most_accurate_entity_at_position(target_position)
-		if target_entity:
-			fired = weapon.attack(target_entity, player)
-		else:
-			fired = false
-	
-	if fired:
-		print("ClickSystem: Weapon fired successfully")
-		# Weapon fired successfully
-		emit_signal("weapon_fired", target_position, weapon)
-		
-		# Add small cooldown to prevent double fires
-		click_cooldown_timer = CLICK_COOLDOWN * 2
-		return true
-	else:
-		print("ClickSystem: Weapon failed to fire")
-	
-	return false
-
-# Get the player's active weapon if one exists
-func get_active_weapon():
-	if !player:
-		return null
-	
-	var active_item = null
-	
-	# Method 1: Try WeaponController
-	var weapon_controller = player.get_node_or_null("WeaponController")
-	if weapon_controller:
-		if weapon_controller.has_method("get_active_weapon"):
-			active_item = weapon_controller.get_active_weapon()
-		elif weapon_controller.has_method("get_active_item"):
-			active_item = weapon_controller.get_active_item()
-	
-	# Method 2: Try player's get_active_item method
-	if !active_item and player.has_method("get_active_item"):
-		active_item = player.get_active_item()
-	
-	# Method 3: Try inventory system
-	if !active_item:
-		var inventory = null
-		if player.has_node("InventorySystem"):
-			inventory = player.get_node("InventorySystem")
-		elif "inventory_system" in player and player.inventory_system:
-			inventory = player.inventory_system
-		
-		if inventory and inventory.has_method("get_active_item"):
-			active_item = inventory.get_active_item()
-	
-	# Method 4: Check held_items array
-	if !active_item and "held_items" in player and player.held_items.size() > 0:
-		var active_hand_index = player.get("active_hand_index", 0)
-		if active_hand_index < player.held_items.size():
-			active_item = player.held_items[active_hand_index]
-	
-	# Check if the active item is actually a weapon
-	if active_item:
-		var is_weapon = false
-		
-		# Check for weapon tool behaviour
-		if "tool_behaviour" in active_item and active_item.tool_behaviour == "weapon":
-			is_weapon = true
-		
-		# Check for weapon methods
-		elif active_item.has_method("try_fire") or active_item.has_method("fire"):
-			is_weapon = true
-		
-		# Check for force value (can be used as weapon)
-		elif "force" in active_item and active_item.force > 0:
-			is_weapon = true
-		
-		if is_weapon:
-			print("ClickSystem: Found active weapon: ", active_item.name)
-			return active_item
-	
-	return null
-
 # === INTERACTION HANDLERS ===
-# Set combat mode from external systems
-func set_combat_mode(enabled: bool):
-	var old_mode = is_in_combat_mode
-	is_in_combat_mode = enabled
-	
-	print("ClickSystem: Combat mode ", "enabled" if enabled else "disabled")
-	
-	# Update cursor if we have a cursor controller
-	if cursor_controller:
-		if enabled:
-			cursor_controller.set_cursor_mode("target")
-		else:
-			cursor_controller.set_cursor_mode("default")
-	
-	# Emit signal if mode actually changed
-	if old_mode != enabled:
-		emit_signal("combat_mode_changed", enabled)
-
 func handle_mouse_drop(source, target):
 	# Check if source can be dropped on target
 	if !source or !target:
@@ -1347,38 +1179,6 @@ func generate_default_options(entity):
 		"callback": func(): examine_entity(entity)
 	})
 	
-	# Add weapon-specific options if entity is a weapon
-	if "tool_behaviour" in entity and entity.tool_behaviour == "weapon":
-		# Add firing mode toggle option
-		options.append({
-			"name": "Toggle Firing Mode",
-			"icon": "mode",
-			"callback": func(): toggle_weapon_firing_mode(entity)
-		})
-		
-		# Add safety toggle option
-		options.append({
-			"name": "Toggle Safety",
-			"icon": "safety",
-			"callback": func(): toggle_weapon_safety(entity)
-		})
-		
-		# Add reload option if weapon has ammo
-		if "current_ammo" in entity and "max_rounds" in entity:
-			options.append({
-				"name": "Reload",
-				"icon": "reload",
-				"callback": func(): reload_weapon(entity)
-			})
-		
-		# Add wielding toggle for two-handed weapons
-		if "two_handed" in entity and entity.two_handed:
-			options.append({
-				"name": "Toggle Wielding",
-				"icon": "wield",
-				"callback": func(): toggle_weapon_wielding(entity)
-			})
-	
 	# Add type-specific options
 	if "entity_type" in entity:
 		match entity.entity_type:
@@ -1409,29 +1209,26 @@ func generate_default_options(entity):
 					"callback": func(): attack_entity(entity)
 				})
 	
+	# Add NPC-specific options
+	if entity.has_meta("is_npc") and entity.get_meta("is_npc"):
+		options.append({
+			"name": "Follow",
+			"icon": "follow",
+			"callback": func(): set_npc_follow(entity)
+		})
+		
+		options.append({
+			"name": "Stop",
+			"icon": "stop",
+			"callback": func(): set_npc_stop(entity)
+		})
+	
 	return options
 
 func _on_radial_option_selected(option, entity):
 	# Execute the callback
 	if "callback" in option and option.callback is Callable:
 		option.callback.call()
-
-# Weapon-specific radial menu actions
-func toggle_weapon_firing_mode(weapon):
-	if weapon.has_method("toggle_firing_mode"):
-		weapon.toggle_firing_mode()
-
-func toggle_weapon_safety(weapon):
-	if weapon.has_method("toggle_safety"):
-		weapon.toggle_safety()
-
-func reload_weapon(weapon):
-	if weapon.has_method("start_reload"):
-		weapon.start_reload()
-
-func toggle_weapon_wielding(weapon):
-	if weapon.has_method("toggle_wielding") and player:
-		weapon.toggle_wielding(player)
 
 # === TARGET ZONE HANDLING ===
 func cycle_target_zone(direction_up: bool):
@@ -1572,6 +1369,25 @@ func attack_entity(entity):
 	elif player.has_method("attack_atom"):
 		player.attack_atom(entity)
 
+# NPC-specific interaction helpers
+func set_npc_follow(npc):
+	if !npc or !player:
+		return
+	
+	if npc.has_method("set_follow_target"):
+		npc.set_follow_target(player)
+	elif npc.has_method("follow"):
+		npc.follow(player)
+
+func set_npc_stop(npc):
+	if !npc:
+		return
+	
+	if npc.has_method("stop"):
+		npc.stop()
+	elif npc.has_method("set_follow_target"):
+		npc.set_follow_target(null)
+
 # === UTILITY FUNCTIONS ===
 func get_tile_at_position(world_pos: Vector2) -> Vector2i:
 	# Convert world position to tile coordinates
@@ -1695,16 +1511,9 @@ func get_most_accurate_entity_at_position(world_pos: Vector2):
 		if not is_instance_valid(entity):
 			continue
 		
-		# CRITICAL: Skip ALL NPCs - multiple checks
-		if entity.has_meta("npc_entity") and entity.get_meta("npc_entity"):
-			continue
-		if entity.has_meta("is_npc") and entity.get_meta("is_npc"):
-			continue
-		if entity.is_in_group("npcs"):
-			continue
-		if entity.is_in_group("npc_entities"):
-			continue
-			
+		# NO LONGER FILTERING OUT NPCs - they should be clickable!
+		# This was the bug - the old code was intentionally skipping all NPCs
+		
 		var entity_pos = Vector2.ZERO
 		if "global_position" in entity:
 			entity_pos = entity.global_position
@@ -1720,7 +1529,7 @@ func get_most_accurate_entity_at_position(world_pos: Vector2):
 				"distance": distance,
 				"priority": get_entity_click_priority(entity)
 			})
-			print("ClickSystem: Found candidate: ", entity.name, " distance: ", distance)
+			print("ClickSystem: Found candidate: ", entity.name, " distance: ", distance, " is_npc: ", entity.has_meta("is_npc") and entity.get_meta("is_npc"))
 	
 	if candidates.size() == 0:
 		print("ClickSystem: No clickable entities found")
@@ -1757,6 +1566,10 @@ func get_entity_click_priority(entity) -> int:
 			"structure":
 				priority += 5   # Structures are lower priority
 	
+	# NPCs get slightly lower priority than players but are still clickable
+	if entity.has_meta("is_npc") and entity.get_meta("is_npc"):
+		priority += 15  # NPCs are high priority but slightly less than players
+	
 	# Boost priority for items that can be picked up
 	if "pickupable" in entity and entity.pickupable:
 		priority += 15
@@ -1775,7 +1588,9 @@ func find_best_entity_under_cursor(position: Vector2) -> Node:
 	for node in clickable_nodes:
 		if not is_instance_valid(node):
 			continue
-			
+		
+		# NO LONGER FILTERING OUT NPCs - they should be clickable!
+		
 		var node_pos = Vector2.ZERO
 		if "global_position" in node:
 			node_pos = node.global_position
@@ -1863,15 +1678,11 @@ func get_entity_type(entity) -> String:
 	# Check for entity_type property
 	if "entity_type" in entity:
 		return entity.entity_type
-		
-	# Check for weapon
-	if "tool_behaviour" in entity and entity.tool_behaviour == "weapon":
-		return "weapon"
 	
 	# Check for class inheritance or groups
 	if entity.is_in_group("items"):
 		return "item"
-	elif entity.is_in_group("characters"):
+	elif entity.is_in_group("characters") or entity.is_in_group("npcs"):
 		return "character"
 	elif entity.is_in_group("clickable_entities"):
 		return "entity"
@@ -1899,9 +1710,7 @@ func update_hover_entity():
 		
 		# Update cursor if we have a controller
 		if cursor_controller:
-			if is_in_combat_mode:
-				cursor_controller.set_cursor_mode("target")
-			elif hover_entity:
+			if hover_entity:
 				cursor_controller.set_cursor_mode("pointer")
 			else:
 				cursor_controller.set_cursor_mode("default")
@@ -1954,8 +1763,6 @@ func set_player_reference(player_node):
 	# Validate that the player has required methods
 	if not player.has_method("process_interaction"):
 		print("ClickSystem: Warning - Player missing process_interaction method!")
-	if not player.has_method("get_active_item"):
-		print("ClickSystem: Warning - Player missing get_active_item method!")
 
 func register_player_ui(ui_instance):
 	"""Register the PlayerUI to ensure proper coordination"""
@@ -1975,11 +1782,3 @@ func set_click_drag_enabled(enable: bool):
 
 func set_double_click_enabled(enable: bool):
 	double_click_enabled = enable
-	
-# Set combat mode
-func toggle_combat_mode(enabled: bool):
-	is_in_combat_mode = enabled
-	
-# Check if the player is in combat mode
-func is_combat_mode_active() -> bool:
-	return is_in_combat_mode

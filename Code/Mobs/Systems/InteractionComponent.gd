@@ -19,6 +19,13 @@ enum InteractionFlags {
 	HELP_INTENT = 16,
 	COMBAT_MODE = 32
 }
+
+enum CurrentIntent {
+	HELP = 0,
+	DISARM = 1,
+	GRAB = 2,
+	HARM = 3
+}
 #endregion
 
 #region SIGNALS
@@ -40,6 +47,7 @@ var world = null
 # Interaction state
 var is_local_player: bool = false
 var current_interaction_flags: int = InteractionFlags.NONE
+var current_intent: int = CurrentIntent.HELP
 var last_interaction_time: float = 0.0
 var interaction_range: float = DEFAULT_INTERACTION_RANGE
 
@@ -89,8 +97,6 @@ func process_interaction(target: Node, button_index: int = MOUSE_BUTTON_LEFT, sh
 		result = handle_ctrl_interaction(target)
 	elif alt_pressed and not shift_pressed and not ctrl_pressed:
 		result = handle_alt_interaction(target)
-	elif button_index == MOUSE_BUTTON_RIGHT:
-		result = handle_context_interaction(target)
 	elif button_index == MOUSE_BUTTON_MIDDLE:
 		result = handle_middle_interaction(target)
 	else:
@@ -185,16 +191,6 @@ func handle_alt_interaction(target: Node) -> bool:
 	
 	return false
 
-func handle_context_interaction(target: Node) -> bool:
-	"""Handle right-click (context menu)"""
-	var click_system = controller.click_system
-	if click_system and click_system.has_method("show_radial_menu"):
-		var mouse_pos = controller.get_viewport().get_mouse_position()
-		click_system.show_radial_menu(target, mouse_pos)
-		return true
-	
-	return false
-
 func handle_middle_interaction(target: Node) -> bool:
 	"""Handle middle-click (point)"""
 	var target_pos = get_entity_position(target)
@@ -209,16 +205,14 @@ func handle_intent_interaction(target: Node) -> bool:
 	# Setup flags
 	current_interaction_flags = InteractionFlags.ADJACENT
 	
-	if target == controller or target == controller.get_parent():
+	if target == self:
 		current_interaction_flags |= InteractionFlags.SELF
 	
 	var active_item = get_active_item()
 	if active_item:
 		current_interaction_flags |= InteractionFlags.WITH_ITEM
 	
-	var intent = controller.intent_component.intent if controller.intent_component else 0
-	if intent == 0: # HELP
-		current_interaction_flags |= InteractionFlags.HELP_INTENT
+	var intent = current_intent
 	
 	# Trigger visual effect
 	trigger_interaction_thrust(target, intent)
@@ -262,6 +256,12 @@ func handle_help_interaction(target: Node, active_item) -> bool:
 
 func handle_disarm_interaction(target: Node, active_item) -> bool:
 	"""Handle disarm intent interactions"""
+	# Check if it's an item to pick up
+	if "entity_type" in target and target.entity_type == "item":
+		if "pickupable" in target and target.pickupable:
+			if controller.item_interaction_component:
+				return controller.item_interaction_component.try_pick_up_item(target)
+	
 	if current_interaction_flags & InteractionFlags.SELF:
 		show_message("You can't disarm yourself!")
 		return false
@@ -282,6 +282,12 @@ func handle_disarm_interaction(target: Node, active_item) -> bool:
 
 func handle_grab_interaction(target: Node, active_item) -> bool:
 	"""Handle grab intent interactions"""
+	# Check if it's an item to pick up
+	if "entity_type" in target and target.entity_type == "item":
+		if "pickupable" in target and target.pickupable:
+			if controller.item_interaction_component:
+				return controller.item_interaction_component.try_pick_up_item(target)
+	
 	if "entity_type" in target and target.entity_type == "item":
 		return false
 	
@@ -311,6 +317,12 @@ func handle_grab_interaction(target: Node, active_item) -> bool:
 
 func handle_harm_interaction(target: Node, active_item) -> bool:
 	"""Handle harm intent interactions"""
+	# Check if it's an item to pick up
+	if "entity_type" in target and target.entity_type == "item":
+		if "pickupable" in target and target.pickupable:
+			if controller.item_interaction_component:
+				return controller.item_interaction_component.try_pick_up_item(target)
+	
 	# Self-harm check
 	if current_interaction_flags & InteractionFlags.SELF:
 		if not allow_self_harm:
@@ -825,6 +837,9 @@ func get_entity_on_tile(tile_coords: Vector2i) -> Node:
 
 func face_entity(target):
 	"""Make entity face a target"""
+	if not controller.is_multiplayer_authority():
+		return
+	
 	if not controller.movement_component:
 		return
 	
@@ -863,7 +878,7 @@ func face_entity(target):
 
 func trigger_interaction_thrust(target: Node, intent: int):
 	"""Trigger visual thrust effect"""
-	if controller.sprite_system and controller.sprite_system.has_method("show_interaction_thrust"):
+	if controller.sprite_system:
 		var direction_to_target = get_direction_to_target(target)
 		controller.sprite_system.show_interaction_thrust(direction_to_target, intent)
 
@@ -995,9 +1010,12 @@ func play_safety_sound():
 
 func _on_intent_changed(new_intent: int):
 	"""Handle intent changes"""
-	# Update help intent safety based on new intent
-	if new_intent == 0: # HELP
-		current_interaction_flags |= InteractionFlags.HELP_INTENT
-	else:
-		current_interaction_flags &= ~InteractionFlags.HELP_INTENT
+	if new_intent == 0:
+		current_intent = CurrentIntent.HELP
+	elif new_intent == 1:
+		current_intent = CurrentIntent.DISARM
+	elif new_intent == 2:
+		current_intent = CurrentIntent.GRAB
+	elif new_intent == 3:
+		current_intent = CurrentIntent.HARM
 #endregion

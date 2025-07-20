@@ -6,7 +6,7 @@ var light_impact_range = 2.5  # Light damage range in tiles
 var medium_impact_range = 1.5  # Medium damage range in tiles
 var heavy_impact_range = 0.7   # Heavy damage range in tiles (increased for better impact feeling)
 var explosion_damage = 60    # Base explosion damage
-var shrapnel_count = 8       # Number of shrapnel projectiles (increased from 6)
+var shrapnel_count = 5       # Number of shrapnel projectiles (increased from 6)
 var shrapnel_damage = 15     # Damage per shrapnel hit
 
 # Effect properties

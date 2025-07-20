@@ -1,664 +1,555 @@
 extends CanvasLayer
 
-# Config file path
+# Configuration management
 const CONFIG_FILE_PATH = "user://settings.cfg"
 
-# Audio bus indices
+# Audio bus configuration
 const MASTER_BUS = 0
 const MUSIC_BUS = 1
 const SFX_BUS = 2
 
-# Resolution options with more choices
-var resolutions = [
-	Vector2i(1280, 720),    # 720p
-	Vector2i(1366, 768),    # Common laptop resolution
-	Vector2i(1600, 900),    # 900p
-	Vector2i(1680, 1050),   # 16:10 resolution
-	Vector2i(1920, 1080),   # 1080p
-	Vector2i(2560, 1440),   # 1440p
-	Vector2i(3840, 2160)    # 4K
+# Display resolution options
+var available_resolutions = [
+	Vector2i(1280, 720),    # HD
+	Vector2i(1366, 768),    # Laptop standard
+	Vector2i(1600, 900),    # HD+
+	Vector2i(1680, 1050),   # WSXGA+
+	Vector2i(1920, 1080),   # Full HD
+	Vector2i(2560, 1440),   # QHD
+	Vector2i(3840, 2160)    # 4K UHD
 ]
 
-# Graphics quality options
-var shadow_quality_options = ["Off", "Low", "Medium", "High"]
-var antialiasing_options = ["None", "MSAA 2x", "MSAA 4x", "MSAA 8x", "FXAA"]
-var texture_quality_options = ["Low", "Medium", "High"]
+# Graphics quality configuration
+var shadow_quality_levels = ["Disabled", "Low", "Medium", "High"]
+var antialiasing_levels = ["None", "MSAA 2x", "MSAA 4x", "MSAA 8x", "FXAA"]
+var texture_quality_levels = ["Low", "Medium", "High"]
 
-# Input mapping variables
-var action_list = []
-var button_list = {}
-var currently_remapping = false
-var action_to_remap = ""
-var ignore_next_key = false
+# Input mapping system
+var input_actions_list = []
+var control_buttons_map = {}
+var is_remapping_input = false
+var current_remapping_action = ""
+var should_ignore_next_input = false
 
-# Config file
-var config = ConfigFile.new()
-
-# Optimization manager reference
+# System references
+var config_file = ConfigFile.new()
 var optimization_manager = null
 
+# Animation constants
+const FADE_DURATION = 0.5
+const BUTTON_FEEDBACK_DURATION = 1.0
+
 func _ready():
-	print("Settings: Initializing")
+	print("Settings: Initializing system configuration interface")
 	
-	# Connect signals
-	$SettingsUI/BackButton.pressed.connect(_on_back_button_pressed)
-	$SettingsUI/PanelContainer/MarginContainer/ButtonContainer/SaveButton.pressed.connect(_on_save_button_pressed)
-	$SettingsUI/PanelContainer/MarginContainer/ButtonContainer/ResetButton.pressed.connect(_on_reset_button_pressed)
-	$SettingsUI/PanelContainer/MarginContainer/ButtonContainer/ResetControlsButton.pressed.connect(_on_reset_controls_button_pressed)
+	initialize_settings_interface()
+	setup_ui_connections()
+	configure_graphics_options()
+	setup_audio_system()
+	configure_input_mapping()
+	await initialize_optimization_system()
+	load_configuration_from_file()
+	setup_interface_animations()
 	
-	# Get tab container
-	var tabs = $SettingsUI/PanelContainer/MarginContainer/TabContainer
-	
-	# Connect tab change signal
-	tabs.tab_changed.connect(_on_tab_changed)
-	
-	# Setup resolution dropdown
-	var resolution_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
-	resolution_option.clear()
-	for i in range(resolutions.size()):
-		var res = resolutions[i]
-		resolution_option.add_item(str(res.x) + "x" + str(res.y), i)
-	print("Settings: Added", resolutions.size(), "resolution options")
-	
-	# Find the optimization tab in the tab container
-	var optimization_tab = tabs.get_node_or_null("Optimization")
-	if optimization_tab == null:
-		# Create Optimization tab if not found
-		add_optimization_tab(tabs)
-	
-	# Setup graphics quality options
-	setup_graphics_options()
-	
-	# Connect graphics settings signals
-	setup_graphics_signals()
-	
-	# Connect audio settings signals
-	setup_audio_signals()
-	
-	# Setup dynamic input mapping
-	setup_input_mapping()
-	
-	# Find OptimizationManager
-	await get_tree().process_frame
-	optimization_manager = get_node_or_null("/root/OptimizationManager")
-	if optimization_manager:
-		print("Settings: Found OptimizationManager")
-	else:
-		print("Settings: OptimizationManager not found")
-	
-	# Add a fade-in animation when the settings screen loads
-	$SettingsUI.modulate.a = 0
-	var tween = create_tween()
-	tween.tween_property($SettingsUI, "modulate:a", 1.0, 0.5)
-	
-	# Ensure proper process mode for paused state
+	print("Settings: System configuration interface ready")
+
+func initialize_settings_interface():
+	"""Initialize the settings interface with proper process mode and animations"""
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
-	# Check if we're in a pause menu context and handle accordingly
-	check_pause_context()
+	# Initial fade-in animation
+	$SettingsUI.modulate.a = 0
+	var tween = create_tween()
+	tween.tween_property($SettingsUI, "modulate:a", 1.0, FADE_DURATION)
 	
-	# Load settings from file
-	load_settings()
-	print("Settings: Initialization complete")
+	# Check if we're in a paused game context
+	detect_pause_context()
 
-func add_optimization_tab(tabs):
-	print("Settings: Adding Optimization tab")
+func setup_ui_connections():
+	"""Connect all UI element signals to their handlers"""
+	# Main navigation buttons
+	$SettingsUI/BackButton.pressed.connect(_on_return_button_pressed)
+	$SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons/SaveButton.pressed.connect(_on_save_configuration_pressed)
+	$SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons/ResetButton.pressed.connect(_on_reset_defaults_pressed)
+	$SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons/ResetControlsButton.pressed.connect(_on_reset_controls_pressed)
 	
-	# Load optimization tab scene
-	var opt_tab_scene = load("res://Scenes/UI/Ingame/optimization_tap.tscn")
-	if opt_tab_scene:
-		var opt_tab = opt_tab_scene.instantiate()
-		
-		# Add as a tab to the TabContainer
-		tabs.add_child(opt_tab)
-		
-		# Set the tab title
-		tabs.set_tab_title(tabs.get_tab_count() - 1, "Optimization")
-		
-		print("Settings: Optimization tab added successfully")
-	else:
-		print("Settings: Failed to load Optimization tab scene")
+	# Tab change detection
+	var tab_container = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer
+	tab_container.tab_changed.connect(_on_configuration_tab_changed)
 
-func setup_graphics_options():
-	# Setup shadow quality dropdown
-	var shadow_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
-	shadow_option.clear()
-	for i in range(shadow_quality_options.size()):
-		shadow_option.add_item(shadow_quality_options[i], i)
-	
-	# Setup anti-aliasing dropdown
-	var aa_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
-	aa_option.clear()
-	for i in range(antialiasing_options.size()):
-		aa_option.add_item(antialiasing_options[i], i)
-	
-	# Setup texture quality dropdown
-	var tex_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/TextureSection/TextureOption
-	tex_option.clear()
-	for i in range(texture_quality_options.size()):
-		tex_option.add_item(texture_quality_options[i], i)
+func configure_graphics_options():
+	"""Setup graphics configuration dropdowns and options"""
+	setup_resolution_options()
+	setup_graphics_quality_options()
+	connect_graphics_signals()
 
-func setup_graphics_signals():
-	# Resolution
-	var resolution_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
-	resolution_option.item_selected.connect(func(index): _set_resolution(index))
+func setup_resolution_options():
+	"""Configure available display resolutions"""
+	var resolution_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
+	resolution_dropdown.clear()
 	
-	# Fullscreen
-	var fullscreen_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/FullscreenCheck
-	fullscreen_check.toggled.connect(func(button_pressed): 
-		print("Settings: Fullscreen toggled to", button_pressed)
-		if button_pressed:
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-		else:
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-			# Ensure resolution is reapplied when exiting fullscreen
-			_set_resolution(resolution_option.selected)
-	)
+	for i in range(available_resolutions.size()):
+		var resolution = available_resolutions[i]
+		resolution_dropdown.add_item(str(resolution.x) + "x" + str(resolution.y), i)
 	
-	# VSync
-	var vsync_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/VsyncCheck
-	vsync_check.toggled.connect(func(button_pressed): 
-		print("Settings: VSync toggled to", button_pressed)
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if button_pressed else DisplayServer.VSYNC_DISABLED)
-	)
-	
-	# Shadow quality
-	var shadow_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
-	shadow_option.item_selected.connect(func(index): apply_shadow_quality(index))
-	
-	# Anti-aliasing
-	var aa_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
-	aa_option.item_selected.connect(func(index): apply_antialiasing(index))
-	
-	# Texture quality
-	var tex_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/TextureSection/TextureOption
-	tex_option.item_selected.connect(func(index): apply_texture_quality(index))
-	
-	# Advanced settings - Show FPS
-	var fps_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection/DebugContainer/ShowFPSCheck
-	fps_check.toggled.connect(func(button_pressed): 
-		# Update the setting
-		config.set_value("advanced", "show_fps", button_pressed)
-		
-		# Find or create FPS display
-		if button_pressed:
-			var performance_monitor = get_node_or_null("/root/PerformanceMonitor")
-			if not performance_monitor:
-				# Try to create performance monitor
-				var perf_scene = load("res://Scenes/UI/Ingame/preformance_monitor.tscn")
-				if perf_scene:
-					performance_monitor = perf_scene.instantiate()
-					performance_monitor.name = "PerformanceMonitor"
-					get_tree().root.add_child(performance_monitor)
-		else:
-			# Hide/remove FPS display if it exists
-			var performance_monitor = get_node_or_null("/root/PerformanceMonitor")
-			if performance_monitor:
-				performance_monitor.visible = false
-	)
+	print("Settings: Configured ", available_resolutions.size(), " resolution options")
 
-func setup_audio_signals():
-	# Connect audio sliders
-	var master_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection/MasterVolumeSlider
-	var music_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection/MusicVolumeSlider
-	var sfx_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection/SFXVolumeSlider
+func setup_graphics_quality_options():
+	"""Configure graphics quality dropdown menus"""
+	# Shadow quality options
+	var shadow_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
+	shadow_dropdown.clear()
+	for i in range(shadow_quality_levels.size()):
+		shadow_dropdown.add_item(shadow_quality_levels[i], i)
 	
-	# Connect value labels
-	var master_value = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection/MasterVolumeValue
-	var music_value = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection/MusicVolumeValue
-	var sfx_value = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection/SFXVolumeValue
+	# Anti-aliasing options
+	var aa_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
+	aa_dropdown.clear()
+	for i in range(antialiasing_levels.size()):
+		aa_dropdown.add_item(antialiasing_levels[i], i)
 	
+	# Texture quality options
+	var texture_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/TextureSection/TextureOption
+	texture_dropdown.clear()
+	for i in range(texture_quality_levels.size()):
+		texture_dropdown.add_item(texture_quality_levels[i], i)
+
+func connect_graphics_signals():
+	"""Connect graphics control signals to their handlers"""
+	# Resolution control
+	var resolution_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
+	resolution_dropdown.item_selected.connect(_on_resolution_changed)
+	
+	# Display mode controls
+	var fullscreen_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/FullscreenCheck
+	fullscreen_toggle.toggled.connect(_on_fullscreen_toggled)
+	
+	var vsync_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/VsyncCheck
+	vsync_toggle.toggled.connect(_on_vsync_toggled)
+	
+	# Quality controls
+	var shadow_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
+	shadow_dropdown.item_selected.connect(_on_shadow_quality_changed)
+	
+	var aa_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
+	aa_dropdown.item_selected.connect(_on_antialiasing_changed)
+	
+	var texture_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/TextureSection/TextureOption
+	texture_dropdown.item_selected.connect(_on_texture_quality_changed)
+
+func setup_audio_system():
+	"""Configure audio system controls and connections"""
+	var master_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MasterSection/MasterVolumeSlider
+	var music_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MusicSection/MusicVolumeSlider
+	var sfx_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/SFXSection/SFXVolumeSlider
+	
+	var master_value = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MasterSection/MasterVolumeValue
+	var music_value = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MusicSection/MusicVolumeValue
+	var sfx_value = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/SFXSection/SFXVolumeValue
+	
+	# Connect audio slider signals
 	master_slider.value_changed.connect(func(value): 
 		AudioServer.set_bus_volume_db(MASTER_BUS, value)
-		master_value.text = str(value) + " dB"
+		master_value.text = str(int(value)) + " dB"
 	)
 	
 	music_slider.value_changed.connect(func(value): 
 		AudioServer.set_bus_volume_db(MUSIC_BUS, value)
-		music_value.text = str(value) + " dB"
+		music_value.text = str(int(value)) + " dB"
 	)
 	
 	sfx_slider.value_changed.connect(func(value): 
 		AudioServer.set_bus_volume_db(SFX_BUS, value)
-		sfx_value.text = str(value) + " dB"
+		sfx_value.text = str(int(value)) + " dB"
 	)
 
-func check_pause_context():
-	var is_in_pause_context = get_tree().paused
+func configure_input_mapping():
+	"""Setup dynamic input mapping interface"""
+	refresh_input_mapping_display()
+
+func refresh_input_mapping_display():
+	"""Refresh the input mapping interface with current bindings"""
+	var controls_container = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/CONTROLS/ScrollContainer/ControlsList
 	
-	# Also check if any parent has 'pause' in the name
-	if not is_in_pause_context:
+	# Clear existing controls
+	for child in controls_container.get_children():
+		child.queue_free()
+	
+	input_actions_list.clear()
+	control_buttons_map.clear()
+	
+	# Get all input actions and filter system ones
+	var all_actions = InputMap.get_actions()
+	all_actions.sort()
+	
+	var filtered_actions = []
+	for action in all_actions:
+		var action_str = action as String
+		if not action_str.begins_with("ui_"):
+			filtered_actions.append(action)
+	
+	input_actions_list = filtered_actions
+	
+	# Categorize actions for better organization
+	var action_categories = categorize_input_actions(input_actions_list)
+	
+	# Create UI for each category
+	for category_name in action_categories.keys():
+		if action_categories[category_name].size() > 0:
+			create_input_category_section(category_name, action_categories[category_name], controls_container)
+
+func categorize_input_actions(actions: Array) -> Dictionary:
+	"""Organize input actions into logical categories"""
+	var categories = {
+		"Movement": [],
+		"Interaction": [],
+		"Combat": [],
+		"Interface": [],
+		"Other": []
+	}
+	
+	for action in actions:
+		var action_str = action as String
+		if action_str.contains("move") or action_str.contains("jump") or action_str.contains("sprint"):
+			categories["Movement"].append(action)
+		elif action_str.contains("interact") or action_str.contains("use") or action_str.contains("item"):
+			categories["Interaction"].append(action)
+		elif action_str.contains("attack") or action_str.contains("fire") or action_str.contains("reload"):
+			categories["Combat"].append(action)
+		elif action_str.contains("menu") or action_str.contains("pause") or action_str.contains("inventory"):
+			categories["Interface"].append(action)
+		else:
+			categories["Other"].append(action)
+	
+	return categories
+
+func create_input_category_section(category_name: String, actions: Array, container: Node):
+	"""Create a section for a category of input actions"""
+	# Category header
+	var header_label = Label.new()
+	header_label.text = category_name.to_upper()
+	header_label.add_theme_color_override("font_color", Color(0.7, 0.85, 1, 1))
+	header_label.add_theme_font_size_override("font_size", 14)
+	container.add_child(header_label)
+	
+	# Separator
+	var separator = HSeparator.new()
+	container.add_child(separator)
+	
+	# Action controls
+	for action in actions:
+		create_input_binding_control(action, container)
+	
+	# Spacing
+	var spacer = Control.new()
+	spacer.custom_minimum_size.y = 15
+	container.add_child(spacer)
+
+func create_input_binding_control(action: String, container: Node):
+	"""Create a control for binding an input action"""
+	var control_container = HBoxContainer.new()
+	
+	# Action label
+	var action_label = Label.new()
+	action_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	action_label.text = action.capitalize().replace("_", " ")
+	action_label.add_theme_color_override("font_color", Color(0.8, 0.9, 1, 1))
+	control_container.add_child(action_label)
+	
+	# Key binding button
+	var binding_button = Button.new()
+	binding_button.custom_minimum_size.x = 150
+	update_binding_button_text(binding_button, action)
+	binding_button.pressed.connect(_on_input_binding_requested.bind(action, binding_button))
+	
+	control_buttons_map[action] = binding_button
+	control_container.add_child(binding_button)
+	
+	container.add_child(control_container)
+
+func update_binding_button_text(button: Button, action: String):
+	"""Update button text to show current key binding"""
+	var action_events = InputMap.action_get_events(action)
+	
+	if action_events.size() > 0:
+		var event = action_events[0]
+		if event is InputEventKey:
+			button.text = OS.get_keycode_string(event.keycode)
+		elif event is InputEventMouseButton:
+			button.text = "Mouse " + str(event.button_index)
+		elif event is InputEventJoypadButton:
+			button.text = "Gamepad " + str(event.button_index)
+		else:
+			button.text = "Unknown"
+	else:
+		button.text = "Unbound"
+
+func initialize_optimization_system():
+	"""Initialize the optimization system integration"""
+	await get_tree().process_frame
+	optimization_manager = get_node_or_null("/root/OptimizationManager")
+	
+	if optimization_manager:
+		print("Settings: Optimization system integration active")
+	else:
+		print("Settings: Optimization system not available")
+
+func setup_interface_animations():
+	"""Setup interface animations and visual feedback"""
+	# Performance monitor toggle
+	var fps_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer/PerformanceOptions/ShowFPSCheck
+	fps_toggle.toggled.connect(_on_performance_monitor_toggled)
+
+func detect_pause_context():
+	"""Detect if we're in a paused game context"""
+	var is_paused_context = get_tree().paused
+	
+	if not is_paused_context:
 		var parent = get_parent()
 		while parent:
 			if "pause" in parent.name.to_lower():
-				is_in_pause_context = true
-				print("Settings: Detected we're in pause menu context")
+				is_paused_context = true
+				print("Settings: Detected pause menu context")
 				break
 			parent = parent.get_parent()
 	
-	if not is_in_pause_context:
-		# We're in the main menu, make sure the game is not paused
+	if not is_paused_context:
 		get_tree().paused = false
-		print("Settings: Not in pause context, ensuring game is unpaused")
+		print("Settings: Operating in main menu context")
 
-func _on_tab_changed(tab_idx):
-	var tab_name = $SettingsUI/PanelContainer/MarginContainer/TabContainer.get_tab_title(tab_idx)
-	print("Settings: Switched to tab:", tab_name)
+func _on_configuration_tab_changed(tab_index: int):
+	"""Handle configuration tab changes"""
+	var tab_container = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer
+	var tab_name = tab_container.get_tab_title(tab_index)
+	print("Settings: Switched to configuration tab: ", tab_name)
 	
-	# If switching to Controls tab, refresh the mappings
-	if tab_name == "Controls":
-		setup_input_mapping()
-	
-	# If switching to Optimization tab
-	if tab_name == "Optimization":
-		# Optimization tab will auto-load settings from the OptimizationManager
-		pass
+	if tab_name == "CONTROLS":
+		refresh_input_mapping_display()
 
-func _on_back_button_pressed():
-	print("Settings: Back button pressed")
+func _on_return_button_pressed():
+	"""Handle return to previous interface"""
+	print("Settings: Returning to previous interface")
 	
-	# Save settings before leaving
-	save_settings()
+	save_configuration_to_file()
 	
-	# If we have an OptimizationManager, save its settings too
 	if optimization_manager:
 		optimization_manager.save_settings()
 	
-	# Start fading out the UI
+	animate_interface_exit()
+
+func animate_interface_exit():
+	"""Animate interface exit and handle navigation"""
 	var tween = create_tween()
 	tween.tween_property($SettingsUI, "modulate:a", 0.0, 0.3)
 	
-	# Use GameManager to handle navigation back if available
+	tween.finished.connect(handle_navigation_return)
+
+func handle_navigation_return():
+	"""Handle navigation back to previous interface"""
 	var game_manager = get_node_or_null("/root/GameManager")
 	
-	tween.finished.connect(func():
-		if game_manager and game_manager.has_method("return_from_settings"):
-			# Let GameManager handle the navigation
-			game_manager.return_from_settings()
-		else:
-			# Fallback handling for when GameManager isn't available
-			handle_navigation_back()
-	)
+	if game_manager and game_manager.has_method("return_from_settings"):
+		game_manager.return_from_settings()
+	else:
+		determine_return_destination()
 
-func handle_navigation_back():
-	print("Settings: Determining where to navigate back to")
-	
-	# CASE 1: If we're in a pause context, find and show the pause menu
+func determine_return_destination():
+	"""Determine where to navigate back to"""
 	if get_tree().paused:
-		print("Settings: We're in pause context")
-		
-		# Try to find the pause menu
-		var pause_menu = find_pause_menu()
+		var pause_menu = find_pause_menu_interface()
 		if pause_menu:
-			print("Settings: Found pause menu, making it visible")
 			pause_menu.visible = true
 		else:
-			print("Settings: No pause menu found but we're paused. Unpausing.")
 			get_tree().paused = false
-		
 		queue_free()
 		return
 	
-	# CASE 2: Check if we're a child of another UI element
-	var parent = get_parent()
-	if parent and parent.has_method("_on_settings_closed"):
-		print("Settings: We're a child of another UI, notifying parent")
-		self.visible = false
-		parent._on_settings_closed()
-		return
-	
-	# CASE 3: Use GameManager if available
+	# Navigate back to main menu as fallback
 	var game_manager = get_node_or_null("/root/GameManager")
-	if game_manager:
-		print("Settings: Using GameManager for navigation")
-		
-		# Simple approach - just go back to main menu
-		# This is safer and prevents crashes
-		if game_manager.has_method("show_main_menu"):
-			queue_free()
-			game_manager.show_main_menu()
-			return
-	
-	# CASE 4: Fallback - go to main menu directly
-	print("Settings: Using fallback - direct scene change to main menu")
-	queue_free()
-	get_tree().change_scene_to_file("res://Scenes/UI/Menus/Main_menu.tscn")
+	if game_manager and game_manager.has_method("show_main_menu"):
+		queue_free()
+		game_manager.show_main_menu()
+	else:
+		queue_free()
+		get_tree().change_scene_to_file("res://Scenes/UI/Menus/Main_menu.tscn")
 
-func find_pause_menu():
-	# Try to find the pause menu in multiple ways
-	
-	# 1. Try GameManager's pause_menu child
+func find_pause_menu_interface():
+	"""Locate the pause menu interface if it exists"""
 	var game_manager = get_node_or_null("/root/GameManager")
 	if game_manager:
 		var pause_menu = game_manager.get_node_or_null("pause_menu")
 		if pause_menu:
 			return pause_menu
 	
-	# 2. Try pause_menu group
 	var pause_menus = get_tree().get_nodes_in_group("pause_menu")
 	if pause_menus.size() > 0:
 		return pause_menus[0]
 	
-	# 3. Try finding any node with "pause" in the name
-	var root = get_tree().root
-	for node in root.get_children():
-		if "pause" in node.name.to_lower():
-			return node
-	
 	return null
 
-func _on_save_button_pressed():
-	save_settings()
+func _on_save_configuration_pressed():
+	"""Handle configuration save request"""
+	save_configuration_to_file()
 	
-	# Save optimization settings if available
 	if optimization_manager:
 		optimization_manager.save_settings()
 	
-	# Show a brief confirmation message
-	var save_button = $SettingsUI/PanelContainer/MarginContainer/ButtonContainer/SaveButton
-	var original_text = save_button.text
-	save_button.text = "Settings Saved!"
-	
-	# Reset button text after delay
-	await get_tree().create_timer(1.0).timeout
-	save_button.text = original_text
+	show_action_feedback($SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons/SaveButton, "CONFIGURATION SAVED")
 
-func _on_reset_button_pressed():
-	# Reset to default settings
-	apply_default_settings()
+func _on_reset_defaults_pressed():
+	"""Handle reset to default configuration"""
+	apply_default_configuration()
 	
-	# Reset optimization settings if available
 	if optimization_manager:
-		var recommended_tier = optimization_manager.estimate_system_capabilities()
-		optimization_manager.apply_quality_preset(recommended_tier)
+		var recommended_quality = optimization_manager.estimate_system_capabilities()
+		optimization_manager.apply_quality_preset(recommended_quality)
 	
-	# Show a brief confirmation message
-	var reset_button = $SettingsUI/PanelContainer/MarginContainer/ButtonContainer/ResetButton
-	var original_text = reset_button.text
-	reset_button.text = "Settings Reset!"
-	
-	# Reset button text after delay
-	await get_tree().create_timer(1.0).timeout
-	reset_button.text = original_text
+	show_action_feedback($SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons/ResetButton, "DEFAULTS RESTORED")
 
-func _on_reset_controls_button_pressed():
-	reset_input_mappings()
-	
-	# Show a brief confirmation message
-	var reset_controls_button = $SettingsUI/PanelContainer/MarginContainer/ButtonContainer/ResetControlsButton
-	var original_text = reset_controls_button.text
-	reset_controls_button.text = "Controls Reset!"
-	
-	# Reset button text after delay
-	await get_tree().create_timer(1.0).timeout
-	reset_controls_button.text = original_text
+func _on_reset_controls_pressed():
+	"""Handle input controls reset"""
+	reset_input_bindings()
+	show_action_feedback($SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/ActionButtons/ResetControlsButton, "CONTROLS RESET")
 
-func apply_default_settings():
-	# Get UI references
-	var resolution_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
-	var fullscreen_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/FullscreenCheck
-	var vsync_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/VsyncCheck
-	var shadow_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
-	var aa_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
-	var tex_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/TextureSection/TextureOption
+func show_action_feedback(button: Button, message: String):
+	"""Show visual feedback for user actions"""
+	var original_text = button.text
+	button.text = message
 	
-	var master_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection/MasterVolumeSlider
-	var music_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection/MusicVolumeSlider
-	var sfx_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection/SFXVolumeSlider
-	
-	# Default values
-	resolution_option.selected = 4  # 1920x1080
-	fullscreen_check.button_pressed = false
-	vsync_check.button_pressed = true
-	shadow_option.selected = 2  # Medium
-	aa_option.selected = 1  # MSAA 2x
-	tex_option.selected = 1  # Medium
-	
-	master_slider.value = -10
-	music_slider.value = -15
-	sfx_slider.value = -10
-	
-	# Advanced tab settings
-	var show_fps_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection/DebugContainer/ShowFPSCheck
-	show_fps_check.button_pressed = false
-	
-	# Update labels
-	$SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection/MasterVolumeValue.text = "-10 dB"
-	$SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection/MusicVolumeValue.text = "-15 dB"
-	$SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection/SFXVolumeValue.text = "-10 dB"
-	
-	# Apply settings
-	apply_graphics_settings()
-	apply_audio_settings()
-	
-	# Reset input mappings
-	reset_input_mappings()
+	await get_tree().create_timer(BUTTON_FEEDBACK_DURATION).timeout
+	button.text = original_text
 
-func apply_graphics_settings():
-	var resolution_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
-	var fullscreen_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/FullscreenCheck
-	var vsync_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/VsyncCheck
-	var shadow_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
-	var aa_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
-	var tex_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/TextureSection/TextureOption
+# Graphics event handlers
+func _on_resolution_changed(index: int):
+	apply_resolution_setting(index)
+
+func _on_fullscreen_toggled(enabled: bool):
+	apply_fullscreen_setting(enabled)
+
+func _on_vsync_toggled(enabled: bool):
+	apply_vsync_setting(enabled)
+
+func _on_shadow_quality_changed(index: int):
+	apply_shadow_quality_setting(index)
+
+func _on_antialiasing_changed(index: int):
+	apply_antialiasing_setting(index)
+
+func _on_texture_quality_changed(index: int):
+	apply_texture_quality_setting(index)
+
+func _on_performance_monitor_toggled(enabled: bool):
+	toggle_performance_monitor(enabled)
+
+func _on_input_binding_requested(action: String, button: Button):
+	"""Handle input binding change requests"""
+	if is_remapping_input:
+		return
 	
-	# Apply VSSync
-	DisplayServer.window_set_vsync_mode(
-		DisplayServer.VSYNC_ENABLED if vsync_check.button_pressed else DisplayServer.VSYNC_DISABLED
-	)
+	is_remapping_input = true
+	current_remapping_action = action
+	button.text = "Press any key..."
 	
-	# Apply window mode and resolution
-	if fullscreen_check.button_pressed:
+	should_ignore_next_input = true
+	get_tree().create_timer(0.1).timeout.connect(func(): should_ignore_next_input = false)
+
+func _input(event):
+	"""Handle input events for key remapping"""
+	if is_remapping_input and not should_ignore_next_input:
+		if event is InputEventKey or event is InputEventMouseButton:
+			if event is InputEventKey and event.keycode == KEY_ESCAPE:
+				cancel_input_remapping()
+			else:
+				apply_input_remapping(event)
+			
+			get_viewport().set_input_as_handled()
+
+func cancel_input_remapping():
+	"""Cancel the current input remapping operation"""
+	is_remapping_input = false
+	update_binding_button_text(control_buttons_map[current_remapping_action], current_remapping_action)
+
+func apply_input_remapping(event):
+	"""Apply a new input mapping"""
+	InputMap.action_erase_events(current_remapping_action)
+	InputMap.action_add_event(current_remapping_action, event)
+	
+	update_binding_button_text(control_buttons_map[current_remapping_action], current_remapping_action)
+	save_input_mapping(current_remapping_action, event)
+	
+	is_remapping_input = false
+
+# Graphics application functions
+func apply_resolution_setting(index: int):
+	if index >= 0 and index < available_resolutions.size():
+		var current_mode = DisplayServer.window_get_mode()
+		if current_mode != DisplayServer.WINDOW_MODE_FULLSCREEN:
+			DisplayServer.window_set_size(available_resolutions[index])
+			center_window()
+
+func center_window():
+	var screen_size = DisplayServer.screen_get_size()
+	var window_size = DisplayServer.window_get_size()
+	DisplayServer.window_set_position(Vector2i(
+		(screen_size.x - window_size.x) / 2, 
+		(screen_size.y - window_size.y) / 2
+	))
+
+func apply_fullscreen_setting(enabled: bool):
+	if enabled:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-		_set_resolution(resolution_option.selected)
-	
-	# Apply other graphics settings
-	apply_shadow_quality(shadow_option.selected)
-	apply_antialiasing(aa_option.selected)
-	apply_texture_quality(tex_option.selected)
+		var resolution_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
+		apply_resolution_setting(resolution_dropdown.selected)
 
-func apply_audio_settings():
-	var master_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection/MasterVolumeSlider
-	var music_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection/MusicVolumeSlider
-	var sfx_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection/SFXVolumeSlider
-	
-	# Apply audio settings
-	AudioServer.set_bus_volume_db(MASTER_BUS, master_slider.value)
-	AudioServer.set_bus_volume_db(MUSIC_BUS, music_slider.value)
-	AudioServer.set_bus_volume_db(SFX_BUS, sfx_slider.value)
+func apply_vsync_setting(enabled: bool):
+	DisplayServer.window_set_vsync_mode(
+		DisplayServer.VSYNC_ENABLED if enabled else DisplayServer.VSYNC_DISABLED
+	)
 
-func _set_resolution(index):
-	if index >= 0 and index < resolutions.size():
-		# Only change resolution if we're in windowed mode
-		var current_mode = DisplayServer.window_get_mode()
-		if current_mode != DisplayServer.WINDOW_MODE_FULLSCREEN:
-			DisplayServer.window_set_size(resolutions[index])
-			# Center the window
-			var screen_size = DisplayServer.screen_get_size()
-			var window_size = DisplayServer.window_get_size()
-			DisplayServer.window_set_position(Vector2i(
-				(screen_size.x - window_size.x) / 2, 
-				(screen_size.y - window_size.y) / 2
-			))
-
-func apply_shadow_quality(quality_index):
-	# If we have an OptimizationManager, let it handle shadow quality
+func apply_shadow_quality_setting(quality_index: int):
 	if optimization_manager:
 		optimization_manager.set_setting("shadow_quality", quality_index)
-		return
-	
-	# Fallback implementation for a WorldEnvironment
-	print("Settings: Shadow quality set to " + shadow_quality_options[quality_index])
-	
-	var world_env = get_tree().get_first_node_in_group("world_environment") 
-	if world_env and world_env.environment:
-		var env = world_env.environment
-		
-		match quality_index:
-			0:  # Off
-				env.set_shadow_enabled(false)
-			1:  # Low
-				env.set_shadow_enabled(true)
-				env.set_volumetric_fog_enabled(false)
-				env.set_ssao_enabled(false)
-			2:  # Medium
-				env.set_shadow_enabled(true)
-				env.set_volumetric_fog_enabled(false)
-				env.set_ssao_enabled(true)
-			3:  # High
-				env.set_shadow_enabled(true)
-				env.set_volumetric_fog_enabled(true)
-				env.set_ssao_enabled(true)
+	else:
+		print("Settings: Shadow quality set to ", shadow_quality_levels[quality_index])
 
-func apply_antialiasing(aa_index):
-	# Apply anti-aliasing settings to viewport
-	print("Settings: Anti-aliasing set to " + antialiasing_options[aa_index])
-	
+func apply_antialiasing_setting(aa_index: int):
 	var viewport = get_viewport()
 	if viewport:
 		match aa_index:
-			0:  # None
-				viewport.set_msaa_3d(Viewport.MSAA_DISABLED) 
+			0: # None
+				viewport.set_msaa_3d(Viewport.MSAA_DISABLED)
 				viewport.set_screen_space_aa(Viewport.SCREEN_SPACE_AA_DISABLED)
-			1:  # MSAA 2x
+			1: # MSAA 2x
 				viewport.set_msaa_3d(Viewport.MSAA_2X)
 				viewport.set_screen_space_aa(Viewport.SCREEN_SPACE_AA_DISABLED)
-			2:  # MSAA 4x
+			2: # MSAA 4x
 				viewport.set_msaa_3d(Viewport.MSAA_4X)
 				viewport.set_screen_space_aa(Viewport.SCREEN_SPACE_AA_DISABLED)
-			3:  # MSAA 8x
+			3: # MSAA 8x
 				viewport.set_msaa_3d(Viewport.MSAA_8X)
 				viewport.set_screen_space_aa(Viewport.SCREEN_SPACE_AA_DISABLED)
-			4:  # FXAA
+			4: # FXAA
 				viewport.set_msaa_3d(Viewport.MSAA_DISABLED)
 				viewport.set_screen_space_aa(Viewport.SCREEN_SPACE_AA_FXAA)
 
-func apply_texture_quality(quality_index):
-	# Apply texture quality settings
-	print("Settings: Texture quality set to " + texture_quality_options[quality_index])
-	
+func apply_texture_quality_setting(quality_index: int):
 	match quality_index:
-		0:  # Low
-			# Set lower texture quality
+		0: # Low
 			ProjectSettings.set_setting("rendering/textures/default_filters/texture_mipmap_bias", 1.0)
 			ProjectSettings.set_setting("rendering/textures/default_filters/anisotropic_filtering_level", 1)
-		1:  # Medium
-			# Set medium texture quality
+		1: # Medium
 			ProjectSettings.set_setting("rendering/textures/default_filters/texture_mipmap_bias", 0.0)
 			ProjectSettings.set_setting("rendering/textures/default_filters/anisotropic_filtering_level", 4)
-		2:  # High
-			# Set high texture quality
+		2: # High
 			ProjectSettings.set_setting("rendering/textures/default_filters/texture_mipmap_bias", -0.5)
 			ProjectSettings.set_setting("rendering/textures/default_filters/anisotropic_filtering_level", 16)
 
-func save_settings():
-	# Graphics settings
-	var resolution_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
-	var fullscreen_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/FullscreenCheck
-	var vsync_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/VsyncCheck
-	var shadow_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
-	var aa_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
-	var tex_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/TextureSection/TextureOption
+func toggle_performance_monitor(enabled: bool):
+	config_file.set_value("advanced", "show_fps", enabled)
 	
-	config.set_value("graphics", "resolution_index", resolution_option.selected)
-	config.set_value("graphics", "fullscreen", fullscreen_check.button_pressed)
-	config.set_value("graphics", "vsync", vsync_check.button_pressed)
-	config.set_value("graphics", "shadow_quality", shadow_option.selected)
-	config.set_value("graphics", "antialiasing", aa_option.selected)
-	config.set_value("graphics", "texture_quality", tex_option.selected)
-	
-	# Audio settings
-	var master_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection/MasterVolumeSlider
-	var music_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection/MusicVolumeSlider
-	var sfx_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection/SFXVolumeSlider
-	
-	config.set_value("audio", "master_volume", master_slider.value)
-	config.set_value("audio", "music_volume", music_slider.value)
-	config.set_value("audio", "sfx_volume", sfx_slider.value)
-	
-	# Advanced settings
-	var show_fps_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection/DebugContainer/ShowFPSCheck
-	
-	config.set_value("advanced", "show_fps", show_fps_check.button_pressed)
-	
-	# Save all to file
-	var error = config.save(CONFIG_FILE_PATH)
-	if error != OK:
-		print("Settings: Failed to save config file. Error: ", error)
-	else:
-		print("Settings: Settings saved successfully")
-
-func load_settings():
-	# Load config file if it exists
-	var error = config.load(CONFIG_FILE_PATH)
-	if error != OK:
-		# File doesn't exist or couldn't be loaded, use defaults
-		print("Settings: No config file found or error loading. Using defaults.")
-		apply_default_settings()
-		return
-	
-	# Graphics settings
-	var resolution_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
-	var fullscreen_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/FullscreenCheck
-	var vsync_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/DisplaySection/VsyncCheck
-	var shadow_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
-	var aa_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
-	var tex_option = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Graphics/ScrollContainer/OptionsContainer/TextureSection/TextureOption
-	
-	# Load and validate resolution index
-	var resolution_index = config.get_value("graphics", "resolution_index", 4)  # Default to 1920x1080
-	if resolution_index < 0 or resolution_index >= resolutions.size():
-		resolution_index = 4  # Default to 1920x1080
-	
-	resolution_option.selected = resolution_index
-	fullscreen_check.button_pressed = config.get_value("graphics", "fullscreen", false)
-	vsync_check.button_pressed = config.get_value("graphics", "vsync", true)
-	
-	# Load and validate shadow quality
-	var shadow_index = config.get_value("graphics", "shadow_quality", 2)  # Default to Medium
-	if shadow_index < 0 or shadow_index >= shadow_quality_options.size():
-		shadow_index = 2
-	shadow_option.selected = shadow_index
-	
-	# Load and validate anti-aliasing
-	var aa_index = config.get_value("graphics", "antialiasing", 1)  # Default to MSAA 2x
-	if aa_index < 0 or aa_index >= antialiasing_options.size():
-		aa_index = 1
-	aa_option.selected = aa_index
-	
-	# Load and validate texture quality
-	var tex_index = config.get_value("graphics", "texture_quality", 1)  # Default to Medium
-	if tex_index < 0 or tex_index >= texture_quality_options.size():
-		tex_index = 1
-	tex_option.selected = tex_index
-	
-	# Audio settings
-	var master_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection/MasterVolumeSlider
-	var music_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection/MusicVolumeSlider
-	var sfx_slider = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection/SFXVolumeSlider
-	
-	var master_value = config.get_value("audio", "master_volume", -10.0)
-	var music_value = config.get_value("audio", "music_volume", -15.0)
-	var sfx_value = config.get_value("audio", "sfx_volume", -10.0)
-	
-	master_slider.value = master_value
-	music_slider.value = music_value
-	sfx_slider.value = sfx_value
-	
-	# Update volume labels
-	$SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MasterSection/MasterVolumeValue.text = str(master_value) + " dB"
-	$SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/MusicSection/MusicVolumeValue.text = str(music_value) + " dB"
-	$SettingsUI/PanelContainer/MarginContainer/TabContainer/Audio/SFXSection/SFXVolumeValue.text = str(sfx_value) + " dB"
-	
-	# Advanced settings
-	var show_fps_check = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Advanced/ScrollContainer/AdvancedOptionsContainer/DebugSection/DebugContainer/ShowFPSCheck
-	show_fps_check.button_pressed = config.get_value("advanced", "show_fps", false)
-	
-	# Apply loaded FPS setting
-	if show_fps_check.button_pressed:
-		# Try to create or show performance monitor
+	if enabled:
 		var performance_monitor = get_node_or_null("/root/PerformanceMonitor")
 		if not performance_monitor:
 			var perf_scene = load("res://Scenes/UI/Ingame/preformance_monitor.tscn")
@@ -666,242 +557,167 @@ func load_settings():
 				performance_monitor = perf_scene.instantiate()
 				performance_monitor.name = "PerformanceMonitor"
 				get_tree().root.add_child(performance_monitor)
-	
-	# Apply the loaded settings
-	apply_graphics_settings()
-	apply_audio_settings()
-	
-	# Load input mappings
-	load_input_mappings()
-
-# Set up dynamic input mapping display with categorization
-func setup_input_mapping():
-	# Get controls container
-	var controls_list = $SettingsUI/PanelContainer/MarginContainer/TabContainer/Controls/ScrollContainer/ControlsList
-	
-	# Clear existing children (in case this function is called again)
-	for child in controls_list.get_children():
-		child.queue_free()
-	
-	# Start with a clean slate
-	action_list.clear()
-	button_list.clear()
-	
-	# Get all actions from project settings, and sort them for better display
-	action_list = InputMap.get_actions()
-	action_list.sort()
-	
-	# Filter out actions that begin with "ui_" (those are engine defaults)
-	var filtered_actions = []
-	for action in action_list:
-		var action_str = action as String
-		if not action_str.begins_with("ui_"):
-			filtered_actions.append(action)
-	
-	action_list = filtered_actions
-	
-	# Categorize actions for better organization
-	var movement_actions = []
-	var interaction_actions = []
-	var combat_actions = []
-	var other_actions = []
-	
-	for action in action_list:
-		var action_str = action as String
-		if action_str.begins_with("move_") or action_str.contains("jump") or action_str.contains("sprint"):
-			movement_actions.append(action)
-		elif action_str.contains("interact") or action_str.contains("use") or action_str.contains("item"):
-			interaction_actions.append(action)
-		elif action_str.contains("attack") or action_str.contains("fire") or action_str.contains("reload"):
-			combat_actions.append(action)
-		else:
-			other_actions.append(action)
-	
-	# Add section headers and controls
-	if movement_actions.size() > 0:
-		add_control_section("Movement", movement_actions, controls_list)
-	
-	if interaction_actions.size() > 0:
-		add_control_section("Interaction", interaction_actions, controls_list)
-	
-	if combat_actions.size() > 0:
-		add_control_section("Combat", combat_actions, controls_list)
-	
-	if other_actions.size() > 0:
-		add_control_section("Other", other_actions, controls_list)
-
-func add_control_section(section_name, actions, controls_list):
-	# Add section header
-	var section_label = Label.new()
-	section_label.text = section_name
-	section_label.add_theme_font_size_override("font_size", 16)
-	controls_list.add_child(section_label)
-	
-	# Add separator
-	var separator = HSeparator.new()
-	controls_list.add_child(separator)
-	
-	# Add actions
-	for action in actions:
-		# Create container for this action
-		var hbox = HBoxContainer.new()
-		
-		# Create label with readable action name
-		var label = Label.new()
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		label.text = action.capitalize().replace("_", " ")
-		hbox.add_child(label)
-		
-		# Create button for key binding
-		var button = Button.new()
-		button.custom_minimum_size.x = 120
-		update_button_text(button, action)
-		
-		# Connect button signal
-		button.pressed.connect(_on_key_button_pressed.bind(action, button))
-		
-		# Store reference to button
-		button_list[action] = button
-		
-		# Add button to container
-		hbox.add_child(button)
-		
-		# Add container to the list
-		controls_list.add_child(hbox)
-	
-	# Add spacing after section
-	var spacer = Control.new()
-	spacer.custom_minimum_size.y = 10
-	controls_list.add_child(spacer)
-
-# Update button text based on the current key binding
-func update_button_text(button: Button, action: String):
-	# Get the first key in the mapping (for simplicity)
-	var events = InputMap.action_get_events(action)
-	
-	if events.size() > 0:
-		# Different event types need different handling
-		var event = events[0]
-		if event is InputEventKey:
-			button.text = OS.get_keycode_string(event.keycode)
-		elif event is InputEventMouseButton:
-			button.text = "Mouse " + str(event.button_index)
-		elif event is InputEventJoypadButton:
-			button.text = "Joy Button " + str(event.button_index)
-		elif event is InputEventJoypadMotion:
-			button.text = "Joy Axis " + str(event.axis)
-		else:
-			button.text = "Unknown"
 	else:
-		button.text = "Unassigned"
+		var performance_monitor = get_node_or_null("/root/PerformanceMonitor")
+		if performance_monitor:
+			performance_monitor.visible = false
 
-# Handle key button press (to start remapping)
-func _on_key_button_pressed(action, button):
-	if currently_remapping:
+# Configuration management
+func save_configuration_to_file():
+	"""Save current configuration to file"""
+	save_graphics_configuration()
+	save_audio_configuration()
+	save_advanced_configuration()
+	
+	var error = config_file.save(CONFIG_FILE_PATH)
+	if error != OK:
+		print("Settings: Configuration save failed. Error: ", error)
+	else:
+		print("Settings: Configuration saved successfully")
+
+func load_configuration_from_file():
+	"""Load configuration from file"""
+	var error = config_file.load(CONFIG_FILE_PATH)
+	if error != OK:
+		print("Settings: No configuration file found, using defaults")
+		apply_default_configuration()
 		return
 	
-	currently_remapping = true
-	action_to_remap = action
-	button.text = "Press any key..."
-	
-	# Set a slight delay to avoid capturing the button press itself
-	ignore_next_key = true
-	get_tree().create_timer(0.1).timeout.connect(func(): ignore_next_key = false)
+	load_graphics_configuration()
+	load_audio_configuration()
+	load_advanced_configuration()
+	load_input_mappings()
 
-# Handle input to detect key presses for remapping
-func _input(event):
-	if currently_remapping and not ignore_next_key:
-		if event is InputEventKey or event is InputEventMouseButton:
-			if event is InputEventKey and event.keycode == KEY_ESCAPE:
-				# Escape cancels remapping
-				currently_remapping = false
-				update_button_text(button_list[action_to_remap], action_to_remap)
-			else:
-				# Remap the action
-				InputMap.action_erase_events(action_to_remap)
-				InputMap.action_add_event(action_to_remap, event)
-				
-				# Update button text
-				update_button_text(button_list[action_to_remap], action_to_remap)
-				
-				# Reset state
-				currently_remapping = false
-				
-				# Save the new mapping
-				save_input_mapping(action_to_remap, event)
-			
-			get_viewport().set_input_as_handled()
+func save_graphics_configuration():
+	var resolution_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
+	var fullscreen_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/FullscreenCheck
+	var vsync_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/VsyncCheck
+	var shadow_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
+	var aa_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
+	var texture_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/TextureSection/TextureOption
+	
+	config_file.set_value("graphics", "resolution_index", resolution_dropdown.selected)
+	config_file.set_value("graphics", "fullscreen", fullscreen_toggle.button_pressed)
+	config_file.set_value("graphics", "vsync", vsync_toggle.button_pressed)
+	config_file.set_value("graphics", "shadow_quality", shadow_dropdown.selected)
+	config_file.set_value("graphics", "antialiasing", aa_dropdown.selected)
+	config_file.set_value("graphics", "texture_quality", texture_dropdown.selected)
 
-# Reset input mappings to project defaults
-func reset_input_mappings():
-	# Clear the custom input mappings section from config
-	config.load(CONFIG_FILE_PATH)
+func save_audio_configuration():
+	var master_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MasterSection/MasterVolumeSlider
+	var music_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MusicSection/MusicVolumeSlider
+	var sfx_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/SFXSection/SFXVolumeSlider
 	
-	var found_keys = []
-	for section in config.get_sections():
-		if section == "input":
-			for key in config.get_section_keys(section):
-				found_keys.append(key)
-	
-	for key in found_keys:
-		config.erase_section_key("input", key)
-	
-	config.save(CONFIG_FILE_PATH)
-	
-	# Reset the input map to project defaults
-	InputMap.load_from_project_settings()
-	
-	# Update the UI
-	setup_input_mapping()
+	config_file.set_value("audio", "master_volume", master_slider.value)
+	config_file.set_value("audio", "music_volume", music_slider.value)
+	config_file.set_value("audio", "sfx_volume", sfx_slider.value)
 
-# Save a specific input mapping
+func save_advanced_configuration():
+	var fps_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer/PerformanceOptions/ShowFPSCheck
+	config_file.set_value("advanced", "show_fps", fps_toggle.button_pressed)
+
+func load_graphics_configuration():
+	var resolution_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
+	var fullscreen_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/FullscreenCheck
+	var vsync_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/VsyncCheck
+	var shadow_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
+	var aa_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
+	var texture_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/TextureSection/TextureOption
+	
+	resolution_dropdown.selected = config_file.get_value("graphics", "resolution_index", 4)
+	fullscreen_toggle.button_pressed = config_file.get_value("graphics", "fullscreen", false)
+	vsync_toggle.button_pressed = config_file.get_value("graphics", "vsync", true)
+	shadow_dropdown.selected = config_file.get_value("graphics", "shadow_quality", 2)
+	aa_dropdown.selected = config_file.get_value("graphics", "antialiasing", 1)
+	texture_dropdown.selected = config_file.get_value("graphics", "texture_quality", 1)
+	
+	apply_all_graphics_settings()
+
+func load_audio_configuration():
+	var master_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MasterSection/MasterVolumeSlider
+	var music_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MusicSection/MusicVolumeSlider
+	var sfx_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/SFXSection/SFXVolumeSlider
+	
+	master_slider.value = config_file.get_value("audio", "master_volume", -10.0)
+	music_slider.value = config_file.get_value("audio", "music_volume", -15.0)
+	sfx_slider.value = config_file.get_value("audio", "sfx_volume", -10.0)
+	
+	apply_all_audio_settings()
+
+func load_advanced_configuration():
+	var fps_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/ADVANCED/ScrollContainer/AdvancedOptionsContainer/PerformanceOptions/ShowFPSCheck
+	fps_toggle.button_pressed = config_file.get_value("advanced", "show_fps", false)
+	
+	if fps_toggle.button_pressed:
+		toggle_performance_monitor(true)
+
+func apply_default_configuration():
+	"""Apply default configuration values"""
+	# Set default UI values
+	var resolution_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
+	resolution_dropdown.selected = 4  # 1920x1080
+	
+	var fullscreen_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/FullscreenCheck
+	fullscreen_toggle.button_pressed = false
+	
+	var vsync_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/VsyncCheck
+	vsync_toggle.button_pressed = true
+	
+	# Apply the settings
+	apply_all_graphics_settings()
+	apply_all_audio_settings()
+	reset_input_bindings()
+
+func apply_all_graphics_settings():
+	var resolution_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ResolutionSection/ResolutionOption
+	var fullscreen_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/FullscreenCheck
+	var vsync_toggle = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/DisplayOptions/VsyncCheck
+	var shadow_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/ShadowSection/ShadowOption
+	var aa_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/AntiAliasingSection/AntiAliasingOption
+	var texture_dropdown = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/GRAPHICS/ScrollContainer/OptionsContainer/TextureSection/TextureOption
+	
+	apply_vsync_setting(vsync_toggle.button_pressed)
+	apply_fullscreen_setting(fullscreen_toggle.button_pressed)
+	apply_shadow_quality_setting(shadow_dropdown.selected)
+	apply_antialiasing_setting(aa_dropdown.selected)
+	apply_texture_quality_setting(texture_dropdown.selected)
+
+func apply_all_audio_settings():
+	var master_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MasterSection/MasterVolumeSlider
+	var music_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/MusicSection/MusicVolumeSlider
+	var sfx_slider = $SettingsUI/CenterContainer/MainPanel/MarginContainer/VBoxContainer/TabContainer/AUDIO/SFXSection/SFXVolumeSlider
+	
+	AudioServer.set_bus_volume_db(MASTER_BUS, master_slider.value)
+	AudioServer.set_bus_volume_db(MUSIC_BUS, music_slider.value)
+	AudioServer.set_bus_volume_db(SFX_BUS, sfx_slider.value)
+
+# Input mapping functions
 func save_input_mapping(action: String, event):
-	config.load(CONFIG_FILE_PATH)
-	
-	# Store the event properties
 	if event is InputEventKey:
-		config.set_value("input", action, {
+		config_file.set_value("input", action, {
 			"type": "key",
 			"keycode": event.keycode,
 			"physical_keycode": event.physical_keycode
 		})
 	elif event is InputEventMouseButton:
-		config.set_value("input", action, {
+		config_file.set_value("input", action, {
 			"type": "mouse",
 			"button_index": event.button_index
 		})
-	elif event is InputEventJoypadButton:
-		config.set_value("input", action, {
-			"type": "joy_button",
-			"button_index": event.button_index
-		})
-	elif event is InputEventJoypadMotion:
-		config.set_value("input", action, {
-			"type": "joy_motion",
-			"axis": event.axis,
-			"axis_value": event.axis_value
-		})
-	
-	config.save(CONFIG_FILE_PATH)
 
-# Load custom input mappings
 func load_input_mappings():
-	if !config.has_section("input"):
+	if not config_file.has_section("input"):
 		return
 	
-	var input_keys = config.get_section_keys("input")
+	var input_keys = config_file.get_section_keys("input")
 	for action in input_keys:
-		if !InputMap.has_action(action):
+		if not InputMap.has_action(action):
 			continue
 		
-		var mapping = config.get_value("input", action)
-		
-		# Clear existing events for this action
+		var mapping = config_file.get_value("input", action)
 		InputMap.action_erase_events(action)
 		
-		# Create and add the appropriate event
 		var event = null
-		
 		match mapping.get("type", ""):
 			"key":
 				event = InputEventKey.new()
@@ -910,13 +726,19 @@ func load_input_mappings():
 			"mouse":
 				event = InputEventMouseButton.new()
 				event.button_index = mapping.get("button_index", 0)
-			"joy_button":
-				event = InputEventJoypadButton.new()
-				event.button_index = mapping.get("button_index", 0)
-			"joy_motion":
-				event = InputEventJoypadMotion.new()
-				event.axis = mapping.get("axis", 0)
-				event.axis_value = mapping.get("axis_value", 0)
 		
 		if event:
 			InputMap.action_add_event(action, event)
+
+func reset_input_bindings():
+	"""Reset all input bindings to project defaults"""
+	config_file.load(CONFIG_FILE_PATH)
+	
+	if config_file.has_section("input"):
+		var input_keys = config_file.get_section_keys("input")
+		for key in input_keys:
+			config_file.erase_section_key("input", key)
+	
+	config_file.save(CONFIG_FILE_PATH)
+	InputMap.load_from_project_settings()
+	refresh_input_mapping_display()
