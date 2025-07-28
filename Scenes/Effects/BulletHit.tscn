@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://bflxc2mr2xshy"]
+
+[ext_resource type="Script" uid="uid://dhlgccjd2p6ih" path="res://Code/Effects/BulletHit.gd" id="1_4klmt"]
+
+[node name="BulletHit" type="Node2D"]
+script = ExtResource("1_4klmt")
+impact_color = Color(1, 0.647059, 0, 1)
+debris_color = Color(0.647059, 0.164706, 0.164706, 1)
+impact_type = 3

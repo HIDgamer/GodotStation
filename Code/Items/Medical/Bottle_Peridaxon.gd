@@ -1,4 +1,4 @@
-extends ReagentItem
+extends MedicalItem
 
 @onready var regant: AnimatedSprite2D = $Regant
 

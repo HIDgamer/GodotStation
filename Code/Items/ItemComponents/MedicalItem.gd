@@ -113,10 +113,6 @@ func initialize_reagents():
 	# This would be specific to each medicine type
 	pass
 
-func use(user):
-	# Default use is to apply to self
-	return await use_on(user, user)
-
 func use_on(user, target, targeted_limb = ""):
 	# Cannot use if not allowed
 	if requires_medical_skill and !has_medical_skill(user):

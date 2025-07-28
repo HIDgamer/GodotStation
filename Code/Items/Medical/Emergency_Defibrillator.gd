@@ -23,10 +23,6 @@ func _ready():
 	# Sound setup
 	use_sound = preload("res://Sound/items/defib_charge.ogg")
 
-func use(user):
-	super.use(user)
-	icon.play("Ready")
-
 func should_be_consumed() -> bool:
 	return false
 

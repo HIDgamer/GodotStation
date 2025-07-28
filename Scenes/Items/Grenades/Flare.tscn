@@ -46,6 +46,9 @@ animations = [{
 
 [node name="Flare" type="Node2D" groups=["clickable_entities", "grenades", "items", "objects"]]
 script = ExtResource("1_xrxtp")
+smoke_duration = 15.0
+entity_type = "grenade"
+pickupable = true
 
 [node name="Icon" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_ucyyk")

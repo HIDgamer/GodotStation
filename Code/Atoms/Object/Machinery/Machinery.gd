@@ -138,17 +138,6 @@ func deactivate(user = null) -> bool:
 	
 	return true
 
-# === INTERACTION OVERRIDES ===
-func interact(user) -> bool:
-	# Call parent function
-	super.interact(user)
-	
-	# Toggle activation
-	if is_active:
-		return deactivate(user)
-	else:
-		return try_activate(user)
-
 # === BUMP HANDLING ===
 func on_bump(bumper) -> bool:
 	# Default machinery doesn't do anything on bump

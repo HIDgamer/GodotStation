@@ -1,0 +1,243 @@
+[gd_scene load_steps=35 format=3 uid="uid://c6mxm7u3f5n4g"]
+
+[ext_resource type="Script" uid="uid://b2bi0dloqd2xs" path="res://Code/Mobs/Controllers/Controller.gd" id="1_uwpdh"]
+[ext_resource type="Script" uid="uid://chnw437ejhnj4" path="res://Code/Mobs/Systems/CameraSystem.gd" id="2_8mbkt"]
+[ext_resource type="PackedScene" uid="uid://dnrsljtlvb77j" path="res://Scenes/UI/Player/PlayerUI.tscn" id="2_s6v5g"]
+[ext_resource type="PackedScene" uid="uid://duso7e10esk50" path="res://Scenes/Sprites/human_sprite_system.tscn" id="3_lq0mj"]
+[ext_resource type="Script" uid="uid://by1xcc5dbrila" path="res://Code/Mobs/Controllers/InputController.gd" id="3_lyye4"]
+[ext_resource type="Script" uid="uid://djrs5msigc2l0" path="res://Code/Mobs/Systems/InventorySystem.gd" id="4_8gj18"]
+[ext_resource type="Texture2D" uid="uid://d1wjahb2n7uqs" path="res://Assets/Effects/FX/Gib.tres" id="4_vqrbj"]
+[ext_resource type="Script" uid="uid://dj4qyr2yg1rim" path="res://Code/Mobs/Controllers/HealthConnector.gd" id="5_ntngp"]
+[ext_resource type="Script" uid="uid://dh2tm0dwjxdiw" path="res://Code/Mobs/Systems/HealthSystem.gd" id="6_nypa4"]
+[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Mobs/Systems/MovementComponent.gd" id="16_gwepp"]
+[ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Mobs/Systems/ZLevelMovementComponent.gd" id="17_o264j"]
+[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Mobs/Systems/InteractionComponent.gd" id="17_sjx5i"]
+[ext_resource type="Script" uid="uid://c3u73hjth48ct" path="res://Code/Mobs/Systems/ItemInteractionComponent.gd" id="18_3dn6y"]
+[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Mobs/Systems/StatusEffectComponent.gd" id="19_vb0nj"]
+[ext_resource type="Script" uid="uid://dahxqtbwo8bw7" path="res://Code/Mobs/Systems/BodyTargetingComponent.gd" id="20_38qpi"]
+[ext_resource type="Script" uid="uid://57gv3jq6b82j" path="res://Code/Mobs/Systems/GrabPullComponent.gd" id="21_3u27n"]
+[ext_resource type="Script" uid="uid://crcieeppmdsku" path="res://Code/Mobs/Systems/PostureComponent.gd" id="22_3dn6y"]
+[ext_resource type="Script" uid="uid://bu4qlco8mbb3m" path="res://Code/Mobs/Systems/IntentComponent.gd" id="23_vb0nj"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kqdsm"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(416, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gwepp"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sjx5i"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ntngp"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nypa4"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o264j"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3dn6y"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vb0nj"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_38qpi"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3u27n"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(256, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6kg4y"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(288, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yoeyc"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(320, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gb7n1"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(352, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l4g0b"]
+atlas = ExtResource("4_vqrbj")
+region = Rect2(384, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sq5fq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kqdsm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gwepp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sjx5i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ntngp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nypa4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o264j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3dn6y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vb0nj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_38qpi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3u27n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6kg4y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yoeyc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gb7n1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l4g0b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kqdsm")
+}],
+"loop": false,
+"name": &"Gib",
+"speed": 15.0
+}]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_bgoxp"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:can_be_interacted_with")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:entity_type")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath(".:no_pull")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath(".:is_lying")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+properties/5/path = NodePath(".:is_stunned")
+properties/5/spawn = true
+properties/5/replication_mode = 1
+properties/6/path = NodePath(".:health")
+properties/6/spawn = true
+properties/6/replication_mode = 1
+properties/7/path = NodePath(".:max_health")
+properties/7/spawn = true
+properties/7/replication_mode = 1
+properties/8/path = NodePath("HumanSpriteSystem:position")
+properties/8/spawn = true
+properties/8/replication_mode = 1
+properties/9/path = NodePath("Effect:position")
+properties/9/spawn = true
+properties/9/replication_mode = 1
+
+[node name="GridMovementController" type="Node2D"]
+script = ExtResource("1_uwpdh")
+entity_type = "mob"
+
+[node name="PlayerUI" parent="." instance=ExtResource("2_s6v5g")]
+layer = 128
+
+[node name="HumanSpriteSystem" parent="." instance=ExtResource("3_lq0mj")]
+
+[node name="Camera2D" type="Camera2D" parent="." groups=["PlayerCamera"]]
+zoom = Vector2(2, 2)
+process_callback = 0
+limit_smoothed = true
+position_smoothing_enabled = true
+rotation_smoothing_enabled = true
+editor_draw_limits = true
+script = ExtResource("2_8mbkt")
+target_path = NodePath("..")
+camera_easing = 2
+camera_transition = 0
+default_zoom = Vector2(3, 3)
+
+[node name="Effect" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_sq5fq")
+animation = &"Gib"
+
+[node name="HealthConnector" type="Node" parent="."]
+script = ExtResource("5_ntngp")
+metadata/_custom_type_script = "uid://dj4qyr2yg1rim"
+
+[node name="HealthSystem" type="Node" parent="." groups=["health_system"]]
+script = ExtResource("6_nypa4")
+metadata/_custom_type_script = "uid://dh2tm0dwjxdiw"
+
+[node name="InputController" type="Node" parent="."]
+script = ExtResource("3_lyye4")
+metadata/_custom_type_script = "uid://by1xcc5dbrila"
+
+[node name="InventorySystem" type="Node" parent="."]
+script = ExtResource("4_8gj18")
+metadata/_custom_type_script = "uid://djrs5msigc2l0"
+
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("16_gwepp")
+metadata/_custom_type_script = "uid://cl82bkxuc28j"
+
+[node name="InteractionComponent" type="Node" parent="."]
+script = ExtResource("17_sjx5i")
+metadata/_custom_type_script = "uid://ca4n5hj0ijsn6"
+
+[node name="ZLevelMovementComponent" type="Node" parent="."]
+script = ExtResource("17_o264j")
+metadata/_custom_type_script = "uid://bbv4x26754up"
+
+[node name="ItemInteractionComponent" type="Node" parent="."]
+script = ExtResource("18_3dn6y")
+metadata/_custom_type_script = "uid://c3u73hjth48ct"
+
+[node name="StatusEffectComponent" type="Node" parent="."]
+script = ExtResource("19_vb0nj")
+metadata/_custom_type_script = "uid://ceqlv6f14jwgs"
+
+[node name="BodyTargetingComponent" type="Node" parent="."]
+script = ExtResource("20_38qpi")
+metadata/_custom_type_script = "uid://dahxqtbwo8bw7"
+
+[node name="GrabPullComponent" type="Node" parent="."]
+script = ExtResource("21_3u27n")
+metadata/_custom_type_script = "uid://57gv3jq6b82j"
+
+[node name="PostureComponent" type="Node" parent="."]
+script = ExtResource("22_3dn6y")
+metadata/_custom_type_script = "uid://crcieeppmdsku"
+
+[node name="IntentComponent" type="Node" parent="."]
+script = ExtResource("23_vb0nj")
+metadata/_custom_type_script = "uid://bu4qlco8mbb3m"
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_bgoxp")
+visibility_update_mode = 1

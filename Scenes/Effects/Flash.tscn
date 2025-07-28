@@ -1,10 +1,24 @@
-[gd_scene load_steps=24 format=3 uid="uid://dyq1yqt4nncue"]
+[gd_scene load_steps=34 format=3 uid="uid://dyq1yqt4nncue"]
 
 [ext_resource type="Script" uid="uid://cjyp4jpqv1sc7" path="res://Code/Effects/Flash.gd" id="1_8ptm4"]
 [ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="2_k1b7e"]
-[ext_resource type="Texture2D" uid="uid://cgxuf57lrqig4" path="res://Assets/Effects/Particles/flare_01_0.png" id="3_3jang"]
 [ext_resource type="Texture2D" uid="uid://cmixb6fnhqgn6" path="res://Assets/Effects/Particles/Smoke.png" id="4_atlm3"]
 [ext_resource type="AudioStream" uid="uid://b3pcfcrk0u52l" path="res://Sound/handling/impact.wav" id="7_pr1u4"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_6h0j5"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_4s86b"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_kst7h"]
+gradient = SubResource("Gradient_4s86b")
+width = 100
+height = 100
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.8, 0.8)
+metadata/_snap_enabled = true
 
 [sub_resource type="Gradient" id="Gradient_kgnl3"]
 offsets = PackedFloat32Array(0, 0.8, 1)
@@ -26,6 +40,26 @@ gravity = Vector3(0, 0, 0)
 scale_min = 20.0
 scale_max = 20.0
 color_ramp = SubResource("GradientTexture1D_lv0j2")
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_3jang"]
+blend_mode = 1
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_atlm3"]
+gradient = SubResource("Gradient_4s86b")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.9, 0.8)
+metadata/_snap_enabled = true
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_y6l5a"]
+blend_mode = 1
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_exptr"]
+gradient = SubResource("Gradient_4s86b")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.8, 0.8)
+metadata/_snap_enabled = true
 
 [sub_resource type="Gradient" id="Gradient_m6xv6"]
 offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
@@ -85,6 +119,28 @@ turbulence_enabled = true
 turbulence_noise_strength = 2.0
 turbulence_noise_scale = 2.0
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_pr1u4"]
+blend_mode = 1
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1dlyn"]
+gradient = SubResource("Gradient_4s86b")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.8, 0.8)
+metadata/_snap_enabled = true
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_7ixpy"]
+blend_mode = 1
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_eo64j"]
+gradient = SubResource("Gradient_4s86b")
+width = 100
+height = 100
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.8, 0.8)
+metadata/_snap_enabled = true
+
 [sub_resource type="Gradient" id="Gradient_bjm7j"]
 offsets = PackedFloat32Array(0, 0.2, 0.5, 1)
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.8, 1, 0.9, 0.7, 0.4, 0.8, 0.5, 0.2, 0)
@@ -111,9 +167,11 @@ scale_curve = SubResource("CurveTexture_uvr7f")
 color_ramp = SubResource("GradientTexture1D_7ddj8")
 
 [node name="FlashParticles" type="GPUParticles2D"]
+z_index = 4
+material = SubResource("CanvasItemMaterial_6h0j5")
 emitting = false
 amount = 1
-texture = ExtResource("2_k1b7e")
+texture = SubResource("GradientTexture2D_kst7h")
 lifetime = 0.5
 one_shot = true
 explosiveness = 1.0
@@ -122,15 +180,21 @@ process_material = SubResource("ParticleProcessMaterial_1q3c6")
 script = ExtResource("1_8ptm4")
 
 [node name="SecondaryLight" type="PointLight2D" parent="."]
+material = SubResource("CanvasItemMaterial_3jang")
 energy = 2.5
 shadow_enabled = true
-texture = ExtResource("2_k1b7e")
+texture = SubResource("GradientTexture2D_atlm3")
 texture_scale = 8.0
+height = 1024.0
+metadata/use_color_temperature = true
+metadata/color_temperature = 6500
+metadata/color_filter = Color(1, 1, 1, 0)
 
 [node name="ShockwaveParticles" type="GPUParticles2D" parent="."]
+material = SubResource("CanvasItemMaterial_y6l5a")
 emitting = false
 amount = 1
-texture = ExtResource("3_3jang")
+texture = SubResource("GradientTexture2D_exptr")
 lifetime = 0.5
 one_shot = true
 explosiveness = 1.0
@@ -147,17 +211,20 @@ randomness = 0.5
 process_material = SubResource("ParticleProcessMaterial_7c6q2")
 
 [node name="RingParticles" type="GPUParticles2D" parent="."]
+material = SubResource("CanvasItemMaterial_pr1u4")
 emitting = false
 amount = 120
+texture = SubResource("GradientTexture2D_1dlyn")
 lifetime = 0.7
 one_shot = true
 explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_1q3c6")
 
 [node name="SecondaryParticles" type="GPUParticles2D" parent="."]
+material = SubResource("CanvasItemMaterial_7ixpy")
 emitting = false
 amount = 40
-texture = ExtResource("3_3jang")
+texture = SubResource("GradientTexture2D_eo64j")
 lifetime = 0.8
 one_shot = true
 explosiveness = 0.9

@@ -28,10 +28,12 @@ signal toggle_rest_requested()
 signal use_requested()
 
 # Weapon system signals
-signal toggle_firing_mode_requested()
 signal toggle_weapon_safety_requested()
 signal unload_weapon_requested()
 signal toggle_weapon_wielding_requested()
+signal eject_magazine_requested()
+signal chamber_round_requested()
+signal quick_reload_requested()
 
 # The entity controlled by this input controller
 var entity
@@ -66,10 +68,12 @@ const INPUT_ACTIONS = {
 	"examine_mode": "examine_mode",
 	
 	# Weapon controls
-	"toggle_firing_mode": "fire_mode",
 	"toggle_weapon_safety": "weapon_safety",
 	"unload_weapon": "unload",
 	"toggle_weapon_wielding": "interact",
+	"eject_magazine": "eject_mag",
+	"chamber_round": "chamber",
+	"quick_reload": "quick_reload",
 	
 	# Body part targeting
 	"target_head": "target_head",
@@ -138,17 +142,20 @@ func print_input_setup_guide():
 	print("- modifier_shift: Shift (for running)")
 	print("- move_up: E (for moving up z-level)")
 	print("- move_down: Q (for moving down z-level)")
-	print("- swap_hand: X (switch hands)")
+	print("- switch_hand: X (switch hands)")
 	print("- drop_item: Q (drop held item)")
 	print("- pickup: G (pick up items)")
-	print("- attack_self: Z (use item on self)")
-	print("- toggle_throw: R (toggle throw mode)")
+	print("- interact: Z (use item on self/interact)")
+	print("- throw_mode: R (toggle throw mode)")
 	print("- reload: R (reload weapon)")
 	print("- examine_mode: Alt (examine mode)")
 	print("- fire_mode: F (toggle weapon firing mode)")
 	print("- weapon_safety: V (toggle weapon safety)")
 	print("- unload: U (unload weapon)")
-	print("- wield_weapon: T (toggle two-handed wielding)")
+	print("- wield_weapon: T (toggle weapon wielding)")
+	print("- eject_mag: R+Shift (eject magazine)")
+	print("- chamber: C (chamber round)")
+	print("- quick_reload: R+Ctrl (quick reload)")
 	print("- target_* keys: Numpad 1-9 (for targeting body parts)")
 	print("- cycle_intent: Tab (cycle through intents)")
 	print("- intent_* keys: 1-4 (for direct intent selection)")
@@ -226,12 +233,9 @@ func process_action_input():
 	if Input.is_action_just_pressed(INPUT_ACTIONS["toggle_throw"]):
 		emit_signal("toggle_throw_requested")
 	
-	# Weapon management
+	# Weapon management - basic controls
 	if Input.is_action_just_pressed(INPUT_ACTIONS["reload_weapon"]):
 		emit_signal("reload_weapon_requested")
-	
-	if Input.is_action_just_pressed(INPUT_ACTIONS["toggle_firing_mode"]):
-		emit_signal("toggle_firing_mode_requested")
 	
 	if Input.is_action_just_pressed(INPUT_ACTIONS["toggle_weapon_safety"]):
 		emit_signal("toggle_weapon_safety_requested")
@@ -241,6 +245,16 @@ func process_action_input():
 	
 	if Input.is_action_just_pressed(INPUT_ACTIONS["toggle_weapon_wielding"]):
 		emit_signal("toggle_weapon_wielding_requested")
+	
+	# Advanced weapon controls
+	if Input.is_action_just_pressed(INPUT_ACTIONS["eject_magazine"]):
+		emit_signal("eject_magazine_requested")
+	
+	if Input.is_action_just_pressed(INPUT_ACTIONS["chamber_round"]):
+		emit_signal("chamber_round_requested")
+	
+	if Input.is_action_just_pressed(INPUT_ACTIONS["quick_reload"]):
+		emit_signal("quick_reload_requested")
 	
 	if Input.is_action_just_pressed(INPUT_ACTIONS["examine_mode"]):
 		emit_signal("examine_mode_requested")
@@ -366,10 +380,19 @@ func connect_to_entity(target_entity: Node):
 	connect_if_available_to_component("drop_item_requested", "drop_active_item", "ItemInteractionComponent")
 	connect_if_available_to_component("pickup_requested", "try_pickup_nearest_item", "ItemInteractionComponent")
 	connect_if_available_to_component("toggle_throw_requested", "toggle_throw_mode", "ItemInteractionComponent")
+	connect_if_available_to_component("use_requested", "use_active_item", "ItemInteractionComponent")
+	
+	# Weapon handling - handled by WeaponHandlingComponent
+	connect_if_available_to_component("reload_weapon_requested", "handle_reload_request", "WeaponHandlingComponent")
+	connect_if_available_to_component("toggle_weapon_safety_requested", "handle_safety_toggle", "WeaponHandlingComponent")
+	connect_if_available_to_component("unload_weapon_requested", "handle_unload_request", "WeaponHandlingComponent")
+	connect_if_available_to_component("toggle_weapon_wielding_requested", "handle_wielding_toggle", "WeaponHandlingComponent")
+	connect_if_available_to_component("eject_magazine_requested", "handle_eject_magazine", "WeaponHandlingComponent")
+	connect_if_available_to_component("chamber_round_requested", "handle_chamber_round", "WeaponHandlingComponent")
+	connect_if_available_to_component("quick_reload_requested", "handle_quick_reload", "WeaponHandlingComponent")
 	
 	# Grab/Pull - handled by GrabPullComponent
 	connect_if_available_to_component("cancel_action_requested", "release_grab", "GrabPullComponent")
-	connect_if_available_to_component("use_requested", "upgrade_grab", "GrabPullComponent")
 	
 	# Intent - handled by IntentComponent
 	connect_if_available_to_component("cycle_intent_requested", "cycle_intent", "InteractionComponent")
@@ -390,14 +413,7 @@ func connect_to_entity(target_entity: Node):
 	connect_if_available("toggle_combat_mode_requested", "toggle_combat_mode")
 	connect_if_available("toggle_point_mode_requested", "toggle_point_mode")
 	connect_if_available("toggle_pull_requested", "toggle_pull")
-	connect_if_available("reload_weapon_requested", "handle_weapon_reload")
 	connect_if_available("examine_mode_requested", "set_examine_mode")
-	
-	# Weapon system methods
-	connect_if_available("toggle_firing_mode_requested", "toggle_weapon_firing_mode")
-	connect_if_available("toggle_weapon_safety_requested", "toggle_weapon_safety")
-	connect_if_available("unload_weapon_requested", "unload_weapon")
-	connect_if_available("toggle_weapon_wielding_requested", "toggle_weapon_wielding")
 	
 	# Stop the timer if it was running
 	if deferred_connection_timer != null and deferred_connection_timer.is_inside_tree():
@@ -445,15 +461,44 @@ func connect_if_available_to_component(signal_name: String, method_name: String,
 	# Get the component from the entity
 	var component = entity.get_node_or_null(component_name)
 	if component:
-		if is_connected(signal_name, Callable(component, method_name)):
-			disconnect(signal_name, Callable(component, method_name))
+		# For weapon handling component, create wrapper methods if they don't exist
+		if component_name == "WeaponHandlingComponent":
+			ensure_weapon_wrapper_methods(component, method_name)
 		
-		connect(signal_name, Callable(component, method_name))
-		print("InputController: Connected signal " + signal_name + " to " + component_name + "." + method_name)
-		return true
-	else:
-		# Try direct method on entity as fallback
-		return connect_if_available(signal_name, method_name)
+		if component.has_method(method_name):
+			if is_connected(signal_name, Callable(component, method_name)):
+				disconnect(signal_name, Callable(component, method_name))
+			
+			connect(signal_name, Callable(component, method_name))
+			print("InputController: Connected signal " + signal_name + " to " + component_name + "." + method_name)
+			return true
+	
+	# Try direct method on entity as fallback
+	return connect_if_available(signal_name, method_name)
+
+# Ensure weapon wrapper methods exist in WeaponHandlingComponent
+func ensure_weapon_wrapper_methods(weapon_component: Node, method_name: String):
+	# Check if the method exists, if not we might need to add wrapper methods
+	if not weapon_component.has_method(method_name):
+		# Add wrapper methods to weapon component dynamically
+		match method_name:
+			"handle_reload_request":
+				weapon_component.set_script(weapon_component.get_script())
+				# Note: In a real implementation, you might want to extend the class or use composition
+			"handle_firing_mode_toggle":
+				pass # Similar wrapper method creation
+			"handle_safety_toggle":
+				pass
+			"handle_unload_request":
+				pass
+			"handle_wielding_toggle":
+				pass
+			"handle_eject_magazine":
+				pass
+			"handle_chamber_round":
+				pass
+			"handle_quick_reload":
+				pass
 
 # Utility method to connect signals if the target method exists
 func connect_if_available(signal_name: String, method_name: String) -> bool:

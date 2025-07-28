@@ -310,18 +310,6 @@ func can_close(user = null) -> bool:
 	
 	return true
 
-# === INTERACTION HANDLERS ===
-# Override interact method
-func interact(user) -> bool:
-	print("Door: Interact called by ", user.name if "name" in user else "Unknown")
-	
-	# For doors, just toggle open/close
-	toggle_door(user)
-	
-	# Call parent interact without using its activation logic
-	interacted_with.emit(user)
-	return true
-
 # === ANIMATION HANDLERS ===
 func _on_door_animation_finished():
 	if not animated_sprite:

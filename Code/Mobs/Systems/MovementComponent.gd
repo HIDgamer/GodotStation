@@ -1,7 +1,7 @@
 extends Node
 class_name MovementComponent
 
-## Handles all grid-based movement including walking, running, crawling, and zero-G movement
+## Handles all grid-based movement including walking, running, crawling, and zero-G movement with full multiplayer sync
 
 #region CONSTANTS
 const TILE_SIZE: int = 32
@@ -63,6 +63,7 @@ signal stopped_floating()
 signal footstep(position: Vector2, floor_type: String)
 signal bump(entity: Node, bumped_entity: Node, direction: Vector2i)
 signal pushing_entity(pushed_entity: Node, direction: Vector2i)
+signal movement_attempt(direction: Vector2i)
 #endregion
 
 #region PROPERTIES
@@ -78,10 +79,11 @@ var sprite_system = null
 @export var current_state: int = MovementState.IDLE : set = _set_current_state
 @export var current_direction: int = Direction.SOUTH : set = _set_current_direction
 @export var current_tile_position: Vector2i = Vector2i.ZERO : set = _set_current_tile_position
-@export var target_tile_position: Vector2i = Vector2i.ZERO
-@export var move_progress: float = 0.0
-@export var is_moving: bool = false
-@export var is_floating: bool = false
+@export var target_tile_position: Vector2i = Vector2i.ZERO : set = _set_target_tile_position
+@export var move_progress: float = 0.0 : set = _set_move_progress
+@export var is_moving: bool = false : set = _set_is_moving
+@export var is_floating: bool = false : set = _set_is_floating
+@export var velocity: Vector2 = Vector2.ZERO : set = _set_velocity
 
 # Non-synced local properties
 var previous_tile_position: Vector2i = Vector2i.ZERO
@@ -116,8 +118,7 @@ var stamina_regen_rate: float = 5.0
 var sprint_allowed: bool = true
 var sprint_recovery_threshold: float = 25.0
 
-# Zero-G properties - Synced for floating
-@export var velocity: Vector2 = Vector2.ZERO : set = _set_velocity
+# Zero-G properties
 var gravity_strength: float = 1.0
 var inertia_dir: Vector2 = Vector2.ZERO
 var last_push_time: float = 0.0
@@ -131,6 +132,8 @@ var confusion_level: float = 0.0
 var peer_id: int = 1
 var network_position: Vector2 = Vector2.ZERO
 var network_interpolation_enabled: bool = true
+var sync_timer: float = 0.0
+var sync_interval: float = 0.1  # Sync every 100ms
 #endregion
 
 #region MULTIPLAYER SETTERS
@@ -150,6 +153,24 @@ func _set_current_tile_position(value: Vector2i):
 	current_tile_position = value
 	if old_pos != current_tile_position:
 		emit_signal("tile_changed", old_pos, current_tile_position)
+
+func _set_target_tile_position(value: Vector2i):
+	target_tile_position = value
+
+func _set_move_progress(value: float):
+	move_progress = value
+
+func _set_is_moving(value: bool):
+	is_moving = value
+
+func _set_is_floating(value: bool):
+	var old_floating = is_floating
+	is_floating = value
+	if old_floating != is_floating:
+		if is_floating:
+			emit_signal("began_floating")
+		else:
+			emit_signal("stopped_floating")
 
 func _set_velocity(value: Vector2):
 	velocity = value
@@ -175,6 +196,8 @@ func initialize(init_data: Dictionary):
 
 func _physics_process(delta: float):
 	"""Process movement physics"""
+	sync_timer += delta
+	
 	# Only process input and authoritative logic on the controlling client
 	if is_multiplayer_authority():
 		# Handle stun
@@ -191,10 +214,11 @@ func _physics_process(delta: float):
 		# Update stamina
 		process_stamina(delta)
 		
-		# Sync position if it changed significantly
-		if controller and controller.position.distance_to(network_position) > 1.0:
-			sync_position.rpc(controller.position)
+		# Sync position periodically if it changed significantly or on timer
+		if controller and (controller.position.distance_to(network_position) > 1.0 or sync_timer >= sync_interval):
+			sync_position.rpc(controller.position, current_tile_position, is_moving, move_progress)
 			network_position = controller.position
+			sync_timer = 0.0
 	
 	else:
 		# Non-authoritative clients: interpolate to received position
@@ -213,24 +237,48 @@ func interpolate_to_network_position(delta: float):
 
 #region MULTIPLAYER SYNC METHODS
 @rpc("any_peer", "unreliable_ordered", "call_local")
-func sync_position(pos: Vector2):
+func sync_position(pos: Vector2, tile_pos: Vector2i, moving: bool, progress: float):
 	"""Sync position across all clients"""
 	network_position = pos
-	if not is_multiplayer_authority() and controller:
+	
+	if not is_multiplayer_authority():
+		current_tile_position = tile_pos
+		is_moving = moving
+		move_progress = progress
+		
 		# For non-authoritative clients, update immediately if distance is large
-		if controller.position.distance_to(pos) > TILE_SIZE:
+		if controller and controller.position.distance_to(pos) > TILE_SIZE:
 			controller.position = pos
 
 @rpc("any_peer", "reliable", "call_local")
-func sync_movement_state(state: int, direction: int, tile_pos: Vector2i, target_pos: Vector2i, moving: bool, progress: float):
-	"""Sync movement state across all clients"""
+func sync_movement_start(start_tile: Vector2i, target_tile: Vector2i, direction: int, move_time: float, state: int):
+	"""Sync movement start across all clients"""
 	if not is_multiplayer_authority():
-		current_state = state
-		current_direction = direction
-		current_tile_position = tile_pos
-		target_tile_position = target_pos
-		is_moving = moving
-		move_progress = progress
+		_apply_movement_start(start_tile, target_tile, direction, move_time, state)
+
+@rpc("any_peer", "reliable", "call_local")
+func sync_movement_complete(final_tile: Vector2i, final_pos: Vector2):
+	"""Sync movement completion across all clients"""
+	if not is_multiplayer_authority():
+		_apply_movement_complete(final_tile, final_pos)
+
+@rpc("any_peer", "reliable", "call_local")
+func sync_external_movement(start_tile: Vector2i, target_tile: Vector2i, move_time: float, animated: bool):
+	"""Sync external movement (from grab/pull) across all clients"""
+	if not is_multiplayer_authority():
+		_apply_external_movement(start_tile, target_tile, move_time, animated)
+
+@rpc("any_peer", "reliable", "call_local")
+func sync_direction_change(new_direction: int):
+	"""Sync direction changes across all clients"""
+	if not is_multiplayer_authority():
+		current_direction = new_direction
+
+@rpc("any_peer", "reliable", "call_local")
+func sync_state_change(new_state: int):
+	"""Sync state changes across all clients"""
+	if not is_multiplayer_authority():
+		current_state = new_state
 
 @rpc("any_peer", "reliable", "call_local")
 func sync_zero_g_state(floating: bool, vel: Vector2):
@@ -245,6 +293,24 @@ func sync_tile_change(old_tile: Vector2i, new_tile: Vector2i):
 	if not is_multiplayer_authority():
 		emit_signal("tile_changed", old_tile, new_tile)
 		emit_signal("entity_moved", old_tile, new_tile, controller)
+
+@rpc("any_peer", "reliable", "call_local")
+func sync_collision_event(collision_type: int, target_tile: Vector2i, direction: Vector2i):
+	"""Sync collision events across all clients"""
+	if not is_multiplayer_authority():
+		handle_collision_effects(collision_type, target_tile, direction)
+
+@rpc("any_peer", "reliable", "call_local")
+func sync_entity_interaction(interaction_type: int, target_tile: Vector2i, direction: Vector2i, pusher_name: String):
+	"""Sync entity interactions (push, swap, bump)"""
+	if not is_multiplayer_authority():
+		handle_remote_entity_interaction(interaction_type, target_tile, direction, pusher_name)
+
+@rpc("any_peer", "reliable", "call_local")
+func sync_footstep(position: Vector2, floor_type: String):
+	"""Sync footstep sounds across all clients"""
+	if audio_system:
+		audio_system.play_positioned_sound("footstep_" + floor_type, position, 0.2)
 #endregion
 
 #region AUTHORITY HELPERS
@@ -299,6 +365,9 @@ func handle_move_input(direction: Vector2):
 	if normalized_dir == Vector2i.ZERO:
 		return
 	
+	# Emit movement attempt signal (for grab resistance)
+	emit_signal("movement_attempt", normalized_dir)
+	
 	if is_moving:
 		# Buffer input if near end of movement
 		if move_progress >= 0.7:
@@ -349,6 +418,7 @@ func start_move_to(target: Vector2i):
 	if tile_occupancy_system:
 		tile_occupancy_system.move_entity(controller, current_tile_position, target_tile_position, controller.current_z_level)
 	
+	# Handle grabbed entity following
 	if controller.grab_pull_component and controller.grab_pull_component.grabbing_entity:
 		controller.grab_pull_component.start_synchronized_follow(current_tile_position, current_move_time)
 	
@@ -362,7 +432,7 @@ func start_move_to(target: Vector2i):
 	
 	# Sync movement state to all clients
 	if is_multiplayer_authority():
-		sync_movement_state.rpc(current_state, current_direction, current_tile_position, target_tile_position, is_moving, move_progress)
+		sync_movement_start.rpc(current_tile_position, target_tile_position, current_direction, current_move_time, current_state)
 
 func complete_movement():
 	"""Complete the current movement"""
@@ -385,10 +455,15 @@ func complete_movement():
 		emit_signal("tile_changed", previous_tile_position, current_tile_position)
 		emit_signal("entity_moved", previous_tile_position, current_tile_position, controller)
 		sync_tile_change.rpc(previous_tile_position, current_tile_position)
-		sync_movement_state.rpc(current_state, current_direction, current_tile_position, target_tile_position, is_moving, move_progress)
+		sync_movement_complete.rpc(current_tile_position, controller.position)
 	
 	# Check environment
 	check_tile_environment()
+	
+	# Play footstep sound
+	if is_multiplayer_authority() and not is_floating:
+		var floor_type = get_floor_type(current_tile_position)
+		sync_footstep.rpc(controller.position, floor_type)
 	
 	# Update state
 	if is_lying:
@@ -418,7 +493,7 @@ func move_externally(target_position: Vector2i, animated: bool = true, force: bo
 	
 	if animated:
 		update_facing_from_movement(direction)
-		start_move_to(target_position)
+		start_external_move_to(target_position)
 		return true
 	else:
 		return perform_instant_move(target_position)
@@ -442,9 +517,60 @@ func start_external_move_to(target: Vector2i):
 	else:
 		set_state(MovementState.MOVING)
 	
-	# Sync state if authority
+	# Sync external movement if authority
 	if is_multiplayer_authority():
-		sync_movement_state.rpc(current_state, current_direction, current_tile_position, target_tile_position, is_moving, move_progress)
+		sync_external_movement.rpc(current_tile_position, target_tile_position, current_move_time, true)
+
+func _apply_movement_start(start_tile: Vector2i, target_tile: Vector2i, direction: int, move_time: float, state: int):
+	"""Apply movement start (called on all clients)"""
+	current_tile_position = start_tile
+	target_tile_position = target_tile
+	current_direction = direction
+	current_move_time = move_time
+	current_state = state
+	is_moving = true
+	move_progress = 0.0
+	
+	# Update occupancy
+	if tile_occupancy_system:
+		tile_occupancy_system.move_entity(controller, current_tile_position, target_tile_position, controller.current_z_level)
+
+func _apply_movement_complete(final_tile: Vector2i, final_pos: Vector2):
+	"""Apply movement completion (called on all clients)"""
+	is_moving = false
+	move_progress = 1.0
+	previous_tile_position = current_tile_position
+	current_tile_position = final_tile
+	
+	if controller:
+		controller.position = final_pos
+	
+	emit_signal("tile_changed", previous_tile_position, current_tile_position)
+	emit_signal("entity_moved", previous_tile_position, current_tile_position, controller)
+
+func _apply_external_movement(start_tile: Vector2i, target_tile: Vector2i, move_time: float, animated: bool):
+	"""Apply external movement (called on all clients)"""
+	current_tile_position = start_tile
+	target_tile_position = target_tile
+	current_move_time = move_time
+	
+	if animated:
+		is_moving = true
+		move_progress = 0.0
+		
+		# Update occupancy
+		if tile_occupancy_system:
+			tile_occupancy_system.move_entity(controller, current_tile_position, target_tile_position, controller.current_z_level)
+	else:
+		# Instant move
+		previous_tile_position = current_tile_position
+		current_tile_position = target_tile_position
+		
+		if controller:
+			controller.position = tile_to_world(target_tile_position)
+		
+		emit_signal("tile_changed", previous_tile_position, current_tile_position)
+		emit_signal("entity_moved", previous_tile_position, current_tile_position, controller)
 
 func perform_instant_move(target_position: Vector2i) -> bool:
 	"""Instantly move to target position"""
@@ -471,93 +597,10 @@ func perform_instant_move(target_position: Vector2i) -> bool:
 		emit_signal("tile_changed", old_pos, target_position)
 		emit_signal("entity_moved", old_pos, target_position, controller)
 		sync_tile_change.rpc(old_pos, target_position)
-		sync_position.rpc(controller.position)
+		sync_position.rpc(controller.position, current_tile_position, false, 0.0)
 		network_position = controller.position
 	
 	return true
-#endregion
-
-#region MOVEMENT HELPERS
-func calculate_move_time():
-	"""Calculate movement time based on current conditions"""
-	# Base time
-	if current_state == MovementState.RUNNING:
-		current_move_time = RUNNING_MOVE_TIME
-	elif current_state == MovementState.CRAWLING and is_lying:
-		current_move_time = CRAWLING_MOVE_TIME
-	else:
-		current_move_time = BASE_MOVE_TIME
-	
-	# Apply modifiers
-	if is_dragging_entity:
-		current_move_time /= drag_slowdown_modifier
-	
-	current_move_time /= movement_speed_modifier
-	current_move_time /= max(0.5, min(1.5, current_tile_friction))
-	
-	# Extra penalties
-	if controller.grab_pull_component and controller.grab_pull_component.pulling_entity:
-		current_move_time *= 1.2
-	
-	if is_lying:
-		current_move_time *= 1.2
-
-func get_normalized_input_direction(raw_input: Vector2) -> Vector2i:
-	"""Convert raw input to cardinal direction"""
-	if raw_input == Vector2.ZERO:
-		raw_input = last_input_direction
-	
-	if raw_input == Vector2.ZERO:
-		return Vector2i.ZERO
-	
-	# Force cardinal movement only
-	var input_dir = Vector2i.ZERO
-	if abs(raw_input.x) > abs(raw_input.y):
-		input_dir.x = 1 if raw_input.x > 0 else -1
-	else:
-		input_dir.y = 1 if raw_input.y > 0 else -1
-	
-	# Apply confusion if active
-	if confusion_level > 0:
-		input_dir = apply_confusion(input_dir)
-	
-	return input_dir
-
-func apply_confusion(input_dir: Vector2i) -> Vector2i:
-	"""Apply confusion effect to movement"""
-	if confusion_level > 40:
-		# Completely random direction
-		var dirs = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
-		return dirs[randi() % 4]
-	elif randf() < confusion_level * 0.015:
-		# 90 degree turn
-		if input_dir.x != 0:
-			return Vector2i(0, [-1, 1][randi() % 2])
-		else:
-			return Vector2i([-1, 1][randi() % 2], 0)
-	
-	return input_dir
-
-func ease_movement_progress(progress: float) -> float:
-	"""Apply easing to movement progress"""
-	return lerp(progress, progress * progress * (3.0 - 2.0 * progress), 0.3)
-
-func toggle_run(is_running: bool):
-	"""Toggle running state - only on authority"""
-	if not is_multiplayer_authority():
-		return
-		
-	if is_running and (!sprint_allowed or current_stamina <= 0):
-		if sensory_system:
-			sensory_system.display_message("You're too exhausted to run!")
-		return
-	
-	is_sprinting = is_running and sprint_allowed
-	
-	if is_sprinting and is_moving:
-		set_state(MovementState.RUNNING)
-	elif is_moving:
-		set_state(MovementState.MOVING)
 #endregion
 
 #region COLLISION HANDLING
@@ -607,24 +650,6 @@ func handle_collision_effects(collision_type: int, target_tile: Vector2i, direct
 			if audio_system:
 				audio_system.play_positioned_sound("bump", controller.position, 0.3)
 
-@rpc("any_peer", "reliable", "call_local")
-func sync_collision_event(collision_type: int, target_tile: Vector2i, direction: Vector2i):
-	"""Sync collision events across all clients"""
-	if not is_multiplayer_authority():
-		handle_collision_effects(collision_type, target_tile, direction)
-
-@rpc("any_peer", "reliable", "call_local") 
-func sync_entity_interaction(interaction_type: int, entity_id: int, target_tile: Vector2i, direction: Vector2i):
-	"""Sync entity interactions (push, swap, bump)"""
-	if not is_multiplayer_authority():
-		handle_remote_entity_interaction(interaction_type, entity_id, target_tile, direction)
-
-@rpc("any_peer", "reliable", "call_local")
-func sync_zero_g_collision(collision_pos: Vector2, collision_normal: Vector2, new_velocity: Vector2):
-	"""Sync zero-G collision effects"""
-	if not is_multiplayer_authority():
-		handle_remote_zero_g_collision(collision_pos, collision_normal, new_velocity)
-
 func handle_entity_collision(target_tile: Vector2i, direction: Vector2i):
 	"""Handle collision with an entity - authority only"""
 	if not is_multiplayer_authority() or not tile_occupancy_system:
@@ -634,20 +659,19 @@ func handle_entity_collision(target_tile: Vector2i, direction: Vector2i):
 	if not entity:
 		return
 	
-	# Get entity ID for syncing
-	var entity_id = entity.get_multiplayer_authority() if entity.has_method("get_multiplayer_authority") else 0
-	
 	# Get intent from controller
 	var intent = controller.intent_component.intent if controller.intent_component else 0
+	var pusher_name = get_entity_name(controller)
 	
 	match intent:
 		0: # HELP - Position swap
-			if handle_position_swap(entity, target_tile):
-				sync_entity_interaction.rpc(0, entity_id, target_tile, direction)
+			var swap_result = handle_position_swap(entity, target_tile)
+			var interaction_type = 0 if swap_result else 2  # 0 = swap success, 2 = bump
+			sync_entity_interaction.rpc(interaction_type, target_tile, direction, pusher_name)
 		1, 2, 3: # DISARM, GRAB, HARM - Push
 			var push_result = handle_entity_push(entity, direction, target_tile)
 			var interaction_type = 1 if push_result else 2  # 1 = push success, 2 = bump
-			sync_entity_interaction.rpc(interaction_type, entity_id, target_tile, direction)
+			sync_entity_interaction.rpc(interaction_type, target_tile, direction, pusher_name)
 
 func handle_position_swap(other_entity: Node, target_tile: Vector2i) -> bool:
 	"""Swap positions with another entity"""
@@ -669,48 +693,6 @@ func handle_position_swap(other_entity: Node, target_tile: Vector2i) -> bool:
 		return true
 	
 	return false
-
-func handle_remote_entity_interaction(interaction_type: int, entity_id: int, target_tile: Vector2i, direction: Vector2i):
-	"""Handle entity interactions on remote clients"""
-	var entity = controller
-	
-	match interaction_type:
-		0: # Position swap
-			if sensory_system and entity:
-				var name = entity.entity_name if "entity_name" in entity else entity.name
-				sensory_system.display_message("You swap places with " + name + ".")
-		1: # Push success
-			if sensory_system and entity:
-				var name = entity.entity_name if "entity_name" in entity else entity.name
-				sensory_system.display_message("You push " + name + "!")
-		2: # Bump
-			if audio_system:
-				audio_system.play_positioned_sound("bump", controller.position, 0.3)
-
-func handle_zero_g_collision(collision: Dictionary, old_position: Vector2):
-	"""Handle collision in zero-G - authority only"""
-	if not collision.collided or not is_multiplayer_authority():
-		return
-	
-	# Calculate new velocity
-	var new_velocity = velocity
-	if collision.normal != Vector2.ZERO:
-		new_velocity = velocity.bounce(collision.normal) * ZERO_G_BOUNCE_FACTOR
-		controller.position = old_position + collision.normal * 1.0
-	else:
-		new_velocity = -velocity * ZERO_G_BOUNCE_FACTOR
-		controller.position = old_position
-	
-	velocity = new_velocity
-	
-	# Sync collision effects to all clients
-	sync_zero_g_collision.rpc(collision.position, collision.normal, new_velocity)
-
-func handle_remote_zero_g_collision(collision_pos: Vector2, collision_normal: Vector2, new_velocity: Vector2):
-	"""Handle zero-G collision effects on remote clients"""
-	if audio_system:
-		var volume = min(0.3 + (new_velocity.length() * 0.1), 0.8)
-		audio_system.play_positioned_sound("space_bump", collision_pos, volume)
 
 func handle_entity_push(entity: Node, direction: Vector2i, target_tile: Vector2i) -> bool:
 	"""Push an entity - returns true if push succeeded"""
@@ -737,6 +719,19 @@ func handle_entity_push(entity: Node, direction: Vector2i, target_tile: Vector2i
 	emit_signal("bump", controller, entity, direction)
 	return false
 
+func handle_remote_entity_interaction(interaction_type: int, target_tile: Vector2i, direction: Vector2i, pusher_name: String):
+	"""Handle entity interactions on remote clients"""
+	match interaction_type:
+		0: # Position swap
+			if sensory_system:
+				sensory_system.display_message("You swap places with " + pusher_name + ".")
+		1: # Push success
+			if sensory_system:
+				sensory_system.display_message(pusher_name + " pushes you!")
+		2: # Bump
+			if audio_system:
+				audio_system.play_positioned_sound("bump", controller.position, 0.3)
+
 func handle_door_collision(target_tile: Vector2i):
 	"""Handle collision with a door"""
 	if world and world.has_method("toggle_door"):
@@ -761,6 +756,10 @@ func process_zero_g_movement(delta: float):
 		if grid_dir != Direction.NONE:
 			current_direction = grid_dir
 			update_sprite_direction(grid_dir)
+			
+			# Sync direction change
+			if is_multiplayer_authority():
+				sync_direction_change.rpc(current_direction)
 		
 		# Apply thrust (only on authority)
 		if is_multiplayer_authority():
@@ -801,96 +800,6 @@ func process_zero_g_movement(delta: float):
 			# Sync zero-G state periodically
 			if randf() < 0.1:  # 10% chance per frame to sync
 				sync_zero_g_state.rpc(is_floating, velocity)
-
-func get_zero_g_input_direction() -> Vector2:
-	"""Get input direction for zero-G movement"""
-	if not controller or not controller.input_controller:
-		return Vector2.ZERO
-	
-	var raw_input = controller.input_controller.process_movement_input()
-	if raw_input == null or raw_input.length() < 0.1:
-		return Vector2.ZERO
-	
-	return raw_input.normalized()
-
-func check_zero_g_push_possible() -> bool:
-	"""Check if we can push off something in zero-G"""
-	var check_offsets = [
-		Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
-	]
-	
-	var current_pos = world_to_tile(controller.position)
-	var z_level = controller.current_z_level if controller else 0
-	
-	for offset in check_offsets:
-		var check_pos = current_pos + offset
-		
-		if is_wall_at(check_pos, z_level) or is_closed_door_at(check_pos, z_level):
-			return true
-		
-		if tile_occupancy_system and tile_occupancy_system.has_method("has_dense_entity_at"):
-			if tile_occupancy_system.has_dense_entity_at(check_pos, z_level, controller):
-				return true
-	
-	return false
-
-func check_zero_g_collision() -> Dictionary:
-	"""Check for collision in zero-G movement"""
-	var result = {
-		"collided": false,
-		"position": Vector2.ZERO,
-		"normal": Vector2.ZERO,
-		"entity": null
-	}
-	
-	var current_pos = world_to_tile(controller.position)
-	var check_offsets = [
-		Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1),
-		Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1)
-	]
-	
-	var bounds_min = controller.position - Vector2(TILE_SIZE * 0.4, TILE_SIZE * 0.4)
-	var bounds_max = controller.position + Vector2(TILE_SIZE * 0.4, TILE_SIZE * 0.4)
-	
-	for offset in check_offsets:
-		var check_pos = current_pos + offset
-		var tile_center = tile_to_world(check_pos)
-		var tile_bounds_min = tile_center - Vector2(TILE_SIZE * 0.5, TILE_SIZE * 0.5)
-		var tile_bounds_max = tile_center + Vector2(TILE_SIZE * 0.5, TILE_SIZE * 0.5)
-		
-		if bounds_max.x > tile_bounds_min.x and bounds_min.x < tile_bounds_max.x and bounds_max.y > tile_bounds_min.y and bounds_min.y < tile_bounds_max.y:
-			var z_level = controller.current_z_level if controller else 0
-			
-			if is_wall_at(check_pos, z_level) or is_closed_door_at(check_pos, z_level):
-				var to_character = (controller.position - tile_center).normalized()
-				result.collided = true
-				result.position = tile_center
-				result.normal = to_character
-				return result
-	
-	return result
-
-func handle_zero_g_tile_change(new_tile_pos: Vector2i):
-	"""Handle tile change in zero-G"""
-	var z_level = controller.current_z_level if controller else 0
-	
-	if is_valid_tile(new_tile_pos):
-		var old_tile_pos = current_tile_position
-		previous_tile_position = current_tile_position
-		current_tile_position = new_tile_pos
-		
-		if tile_occupancy_system and tile_occupancy_system.has_method("move_entity"):
-			tile_occupancy_system.move_entity(controller, old_tile_pos, new_tile_pos, z_level)
-		
-		# Sync tile change
-		if is_multiplayer_authority():
-			emit_signal("tile_changed", old_tile_pos, new_tile_pos)
-			emit_signal("entity_moved", old_tile_pos, new_tile_pos, controller)
-			sync_tile_change.rpc(old_tile_pos, new_tile_pos)
-		
-		check_tile_environment()
-	else:
-		velocity = -velocity * 0.5
 
 func set_gravity(has_gravity: bool):
 	"""Set gravity state"""
@@ -935,27 +844,37 @@ func set_gravity(has_gravity: bool):
 		
 		# Sync gravity change
 		sync_zero_g_state.rpc(is_floating, velocity)
-
-func apply_zero_g_impulse(impulse: Vector2):
-	"""Apply impulse in zero-G"""
-	if not is_multiplayer_authority():
-		return
-		
-	if is_floating:
-		velocity += impulse / 70.0  # Assuming mass of 70
-		if velocity.length() > ZERO_G_MAX_SPEED * 1.5:
-			velocity = velocity.normalized() * ZERO_G_MAX_SPEED * 1.5
-		
-		# Sync impulse result
-		sync_zero_g_state.rpc(is_floating, velocity)
 #endregion
 
-#region STATE MANAGEMENT
+#region HELPER FUNCTIONS
+func get_entity_name(entity: Node) -> String:
+	"""Get display name for entity"""
+	if "entity_name" in entity and entity.entity_name != "":
+		return entity.entity_name
+	elif "name" in entity:
+		return entity.name
+	else:
+		return "someone"
+
+func get_floor_type(tile_pos: Vector2i) -> String:
+	"""Get floor type for footstep sounds"""
+	if world and world.has_method("get_tile_data"):
+		var z_level = controller.current_z_level if controller else 0
+		var tile_data = world.get_tile_data(tile_pos, z_level)
+		if tile_data and "floor" in tile_data:
+			return tile_data.floor.get("type", "metal")
+	
+	return "metal"  # Default floor type
+
 func set_state(new_state: int):
 	"""Set movement state"""
 	if new_state != current_state:
 		var old_state = current_state
 		current_state = new_state
+		
+		# Sync state change
+		if is_multiplayer_authority():
+			sync_state_change.rpc(new_state)
 		
 		# Reset speed when leaving crawling
 		if old_state == MovementState.CRAWLING and new_state != MovementState.CRAWLING:
@@ -971,80 +890,32 @@ func set_state(new_state: int):
 		
 		emit_signal("state_changed", old_state, new_state)
 
-func process_stun(delta: float):
-	"""Process stun effect"""
-	stun_remaining -= delta
-	if stun_remaining <= 0:
-		is_stunned = false
-		set_state(MovementState.IDLE)
+# ... (rest of the helper functions remain similar to the original but with authority checks)
 
-func process_stamina(delta: float):
-	"""Process stamina drain and recovery"""
-	if is_sprinting and is_moving:
-		current_stamina = max(0, current_stamina - stamina_drain_rate * delta)
-		
-		if current_stamina <= 0 and sprint_allowed:
-			sprint_allowed = false
-			is_sprinting = false
-			if sensory_system:
-				sensory_system.display_message("You're too exhausted to keep running!")
+func calculate_move_time():
+	"""Calculate movement time based on current conditions"""
+	# Base time
+	if current_state == MovementState.RUNNING:
+		current_move_time = RUNNING_MOVE_TIME
+	elif current_state == MovementState.CRAWLING and is_lying:
+		current_move_time = CRAWLING_MOVE_TIME
 	else:
-		if current_stamina < max_stamina:
-			var recovery_mult = 1.5 if is_lying else 1.0
-			current_stamina = min(max_stamina, current_stamina + stamina_regen_rate * recovery_mult * delta)
-			
-			if not sprint_allowed and current_stamina >= sprint_recovery_threshold:
-				sprint_allowed = true
-				if sensory_system:
-					sensory_system.display_message("You've caught your breath.")
+		current_move_time = BASE_MOVE_TIME
+	
+	# Apply modifiers
+	if is_dragging_entity:
+		current_move_time /= drag_slowdown_modifier
+	
+	current_move_time /= movement_speed_modifier
+	current_move_time /= max(0.5, min(1.5, current_tile_friction))
+	
+	# Extra penalties
+	if controller.grab_pull_component and controller.grab_pull_component.pulling_entity:
+		current_move_time *= 1.2
+	
+	if is_lying:
+		current_move_time *= 1.2
 
-func _on_lying_state_changed(lying: bool):
-	"""Handle lying state change from posture component"""
-	is_lying = lying
-	if lying:
-		set_state(MovementState.CRAWLING)
-	else:
-		set_state(MovementState.IDLE)
-
-func set_movement_modifier(modifier: float):
-	"""Set movement speed modifier"""
-	movement_speed_modifier = modifier
-
-func set_speed_modifier(modifier: float):
-	"""Set speed modifier from status effects"""
-	movement_speed_modifier = modifier
-
-func set_confusion(level: float):
-	"""Set confusion level"""
-	confusion_level = level
-
-func apply_knockback(direction: Vector2, force: float):
-	"""Apply knockback force"""
-	if not is_multiplayer_authority():
-		return
-		
-	if is_floating:
-		velocity += direction * force * 0.5
-		if velocity.length() > ZERO_G_MAX_SPEED * 1.5:
-			velocity = velocity.normalized() * ZERO_G_MAX_SPEED * 1.5
-		sync_zero_g_state.rpc(is_floating, velocity)
-	else:
-		var knockback_tiles = int(force / 20.0)
-		knockback_tiles = min(knockback_tiles, 10)
-		
-		if knockback_tiles > 0:
-			var target = current_tile_position
-			for i in range(knockback_tiles):
-				var next_tile = target + Vector2i(int(direction.x), int(direction.y))
-				if check_collision(next_tile) != CollisionType.NONE:
-					break
-				target = next_tile
-			
-			if target != current_tile_position:
-				perform_instant_move(target)
-#endregion
-
-#region DIRECTION HANDLING
 func update_facing_from_movement(movement_vector: Vector2i):
 	"""Update facing direction from movement"""
 	var new_direction = Direction.NONE
@@ -1069,6 +940,10 @@ func update_facing_from_movement(movement_vector: Vector2i):
 	current_direction = new_direction
 	update_sprite_direction(new_direction)
 	emit_signal("direction_changed", new_direction)
+	
+	# Sync direction change
+	if is_multiplayer_authority():
+		sync_direction_change.rpc(current_direction)
 
 func update_sprite_direction(direction: int):
 	"""Update sprite system direction"""
@@ -1077,48 +952,6 @@ func update_sprite_direction(direction: int):
 		if sprite_system:
 			sprite_system.set_direction(sprite_dir)
 
-func convert_angle_to_grid_direction(angle: float) -> int:
-	"""Convert angle to Direction enum"""
-	while angle < 0:
-		angle += 2 * PI
-	while angle >= 2 * PI:
-		angle -= 2 * PI
-	
-	if angle >= 7 * PI / 4 or angle < PI / 4:
-		return Direction.EAST
-	elif angle >= PI / 4 and angle < 3 * PI / 4:
-		return Direction.SOUTH
-	elif angle >= 3 * PI / 4 and angle < 5 * PI / 4:
-		return Direction.WEST
-	elif angle >= 5 * PI / 4 and angle < 7 * PI / 4:
-		return Direction.NORTH
-	
-	return Direction.NONE
-
-func convert_to_sprite_direction(direction: int) -> int:
-	"""Convert Direction enum to sprite system format"""
-	match direction:
-		Direction.NORTH:
-			return 1
-		Direction.EAST:
-			return 2
-		Direction.SOUTH:
-			return 0
-		Direction.WEST:
-			return 3
-		Direction.NORTHEAST:
-			return 2
-		Direction.SOUTHEAST:
-			return 0
-		Direction.SOUTHWEST:
-			return 0
-		Direction.NORTHWEST:
-			return 3
-		_:
-			return 0
-#endregion
-
-#region HELPER FUNCTIONS
 func world_to_tile(world_pos: Vector2) -> Vector2i:
 	"""Convert world position to tile coordinates"""
 	return Vector2i(int(world_pos.x / TILE_SIZE), int(world_pos.y / TILE_SIZE))
@@ -1205,6 +1038,165 @@ func is_adjacent_to(target: Node, allow_diagonal: bool = true) -> bool:
 	
 	return true
 
+func get_current_tile_position() -> Vector2i:
+	"""Get current tile position"""
+	return current_tile_position
+
+func get_current_direction() -> int:
+	"""Get current facing direction"""
+	return current_direction
+
+func get_normalized_input_direction(raw_input: Vector2) -> Vector2i:
+	"""Convert raw input to cardinal direction"""
+	if raw_input == Vector2.ZERO:
+		raw_input = last_input_direction
+	
+	if raw_input == Vector2.ZERO:
+		return Vector2i.ZERO
+	
+	# Force cardinal movement only
+	var input_dir = Vector2i.ZERO
+	if abs(raw_input.x) > abs(raw_input.y):
+		input_dir.x = 1 if raw_input.x > 0 else -1
+	else:
+		input_dir.y = 1 if raw_input.y > 0 else -1
+	
+	# Apply confusion if active
+	if confusion_level > 0:
+		input_dir = apply_confusion(input_dir)
+	
+	return input_dir
+
+func apply_confusion(input_dir: Vector2i) -> Vector2i:
+	"""Apply confusion effect to movement"""
+	if confusion_level > 40:
+		# Completely random direction
+		var dirs = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
+		return dirs[randi() % 4]
+	elif randf() < confusion_level * 0.015:
+		# 90 degree turn
+		if input_dir.x != 0:
+			return Vector2i(0, [-1, 1][randi() % 2])
+		else:
+			return Vector2i([-1, 1][randi() % 2], 0)
+	
+	return input_dir
+
+func ease_movement_progress(progress: float) -> float:
+	"""Apply easing to movement progress"""
+	return lerp(progress, progress * progress * (3.0 - 2.0 * progress), 0.3)
+
+func toggle_run(is_running: bool):
+	"""Toggle running state - only on authority"""
+	if not is_multiplayer_authority():
+		return
+		
+	if is_running and (!sprint_allowed or current_stamina <= 0):
+		if sensory_system:
+			sensory_system.display_message("You're too exhausted to run!")
+		return
+	
+	is_sprinting = is_running and sprint_allowed
+	
+	if is_sprinting and is_moving:
+		set_state(MovementState.RUNNING)
+	elif is_moving:
+		set_state(MovementState.MOVING)
+
+func process_stun(delta: float):
+	"""Process stun effect"""
+	stun_remaining -= delta
+	if stun_remaining <= 0:
+		is_stunned = false
+		set_state(MovementState.IDLE)
+
+func process_stamina(delta: float):
+	"""Process stamina drain and recovery"""
+	if is_sprinting and is_moving:
+		current_stamina = max(0, current_stamina - stamina_drain_rate * delta)
+		
+		if current_stamina <= 0 and sprint_allowed:
+			sprint_allowed = false
+			is_sprinting = false
+			if sensory_system:
+				sensory_system.display_message("You're too exhausted to keep running!")
+	else:
+		if current_stamina < max_stamina:
+			var recovery_mult = 1.5 if is_lying else 1.0
+			current_stamina = min(max_stamina, current_stamina + stamina_regen_rate * recovery_mult * delta)
+			
+			if not sprint_allowed and current_stamina >= sprint_recovery_threshold:
+				sprint_allowed = true
+				if sensory_system:
+					sensory_system.display_message("You've caught your breath.")
+
+func _on_lying_state_changed(lying: bool):
+	"""Handle lying state change from posture component"""
+	is_lying = lying
+	if lying:
+		set_state(MovementState.CRAWLING)
+	else:
+		set_state(MovementState.IDLE)
+
+func set_movement_modifier(modifier: float):
+	"""Set movement speed modifier"""
+	movement_speed_modifier = modifier
+
+func set_speed_modifier(modifier: float):
+	"""Set speed modifier from status effects"""
+	movement_speed_modifier = modifier
+
+func set_confusion(level: float):
+	"""Set confusion level"""
+	confusion_level = level
+
+func apply_knockback(direction: Vector2, force: float):
+	"""Apply knockback force"""
+	if not is_multiplayer_authority():
+		return
+		
+	if is_floating:
+		velocity += direction * force * 0.5
+		if velocity.length() > ZERO_G_MAX_SPEED * 1.5:
+			velocity = velocity.normalized() * ZERO_G_MAX_SPEED * 1.5
+		sync_zero_g_state.rpc(is_floating, velocity)
+	else:
+		var knockback_tiles = int(force / 20.0)
+		knockback_tiles = min(knockback_tiles, 10)
+		
+		if knockback_tiles > 0:
+			var target = current_tile_position
+			for i in range(knockback_tiles):
+				var next_tile = target + Vector2i(int(direction.x), int(direction.y))
+				if check_collision(next_tile) != CollisionType.NONE:
+					break
+				target = next_tile
+			
+			if target != current_tile_position:
+				perform_instant_move(target)
+
+func convert_to_sprite_direction(direction: int) -> int:
+	"""Convert Direction enum to sprite system format"""
+	match direction:
+		Direction.NORTH:
+			return 1
+		Direction.EAST:
+			return 2
+		Direction.SOUTH:
+			return 0
+		Direction.WEST:
+			return 3
+		Direction.NORTHEAST:
+			return 2
+		Direction.SOUTHEAST:
+			return 0
+		Direction.SOUTHWEST:
+			return 0
+		Direction.NORTHWEST:
+			return 3
+		_:
+			return 0
+
 func check_tile_environment():
 	"""Check environmental effects at current tile"""
 	if not world:
@@ -1256,11 +1248,148 @@ func slip(duration: float):
 	if audio_system:
 		audio_system.play_positioned_sound("slip", controller.position, 0.6)
 
-func get_current_tile_position() -> Vector2i:
-	"""Get current tile position"""
-	return current_tile_position
+# Zero-G movement helper functions (abbreviated for space)
+func get_zero_g_input_direction() -> Vector2:
+	"""Get input direction for zero-G movement"""
+	if not controller or not controller.input_controller:
+		return Vector2.ZERO
+	
+	var raw_input = controller.input_controller.process_movement_input()
+	if raw_input == null or raw_input.length() < 0.1:
+		return Vector2.ZERO
+	
+	return raw_input.normalized()
 
-func get_current_direction() -> int:
-	"""Get current facing direction"""
-	return current_direction
+func check_zero_g_push_possible() -> bool:
+	"""Check if we can push off something in zero-G"""
+	var check_offsets = [
+		Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
+	]
+	
+	var current_pos = world_to_tile(controller.position)
+	var z_level = controller.current_z_level if controller else 0
+	
+	for offset in check_offsets:
+		var check_pos = current_pos + offset
+		
+		if is_wall_at(check_pos, z_level) or is_closed_door_at(check_pos, z_level):
+			return true
+		
+		if tile_occupancy_system and tile_occupancy_system.has_method("has_dense_entity_at"):
+			if tile_occupancy_system.has_dense_entity_at(check_pos, z_level, controller):
+				return true
+	
+	return false
+
+func check_zero_g_collision() -> Dictionary:
+	"""Check for collision in zero-G movement"""
+	var result = {
+		"collided": false,
+		"position": Vector2.ZERO,
+		"normal": Vector2.ZERO,
+		"entity": null
+	}
+	
+	var current_pos = world_to_tile(controller.position)
+	var check_offsets = [
+		Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1),
+		Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1)
+	]
+	
+	var bounds_min = controller.position - Vector2(TILE_SIZE * 0.4, TILE_SIZE * 0.4)
+	var bounds_max = controller.position + Vector2(TILE_SIZE * 0.4, TILE_SIZE * 0.4)
+	
+	for offset in check_offsets:
+		var check_pos = current_pos + offset
+		var tile_center = tile_to_world(check_pos)
+		var tile_bounds_min = tile_center - Vector2(TILE_SIZE * 0.5, TILE_SIZE * 0.5)
+		var tile_bounds_max = tile_center + Vector2(TILE_SIZE * 0.5, TILE_SIZE * 0.5)
+		
+		if bounds_max.x > tile_bounds_min.x and bounds_min.x < tile_bounds_max.x and bounds_max.y > tile_bounds_min.y and bounds_min.y < tile_bounds_max.y:
+			var z_level = controller.current_z_level if controller else 0
+			
+			if is_wall_at(check_pos, z_level) or is_closed_door_at(check_pos, z_level):
+				var to_character = (controller.position - tile_center).normalized()
+				result.collided = true
+				result.position = tile_center
+				result.normal = to_character
+				return result
+	
+	return result
+
+func handle_zero_g_collision(collision: Dictionary, old_position: Vector2):
+	"""Handle collision in zero-G - authority only"""
+	if not collision.collided or not is_multiplayer_authority():
+		return
+	
+	# Calculate new velocity
+	var new_velocity = velocity
+	if collision.normal != Vector2.ZERO:
+		new_velocity = velocity.bounce(collision.normal) * ZERO_G_BOUNCE_FACTOR
+		controller.position = old_position + collision.normal * 1.0
+	else:
+		new_velocity = -velocity * ZERO_G_BOUNCE_FACTOR
+		controller.position = old_position
+	
+	velocity = new_velocity
+	
+	# Sync collision effects to all clients
+	sync_zero_g_state.rpc(is_floating, velocity)
+	
+	if audio_system:
+		var volume = min(0.3 + (new_velocity.length() * 0.1), 0.8)
+		audio_system.play_positioned_sound("space_bump", collision.position, volume)
+
+func handle_zero_g_tile_change(new_tile_pos: Vector2i):
+	"""Handle tile change in zero-G"""
+	var z_level = controller.current_z_level if controller else 0
+	
+	if is_valid_tile(new_tile_pos):
+		var old_tile_pos = current_tile_position
+		previous_tile_position = current_tile_position
+		current_tile_position = new_tile_pos
+		
+		if tile_occupancy_system and tile_occupancy_system.has_method("move_entity"):
+			tile_occupancy_system.move_entity(controller, old_tile_pos, new_tile_pos, z_level)
+		
+		# Sync tile change
+		if is_multiplayer_authority():
+			emit_signal("tile_changed", old_tile_pos, new_tile_pos)
+			emit_signal("entity_moved", old_tile_pos, new_tile_pos, controller)
+			sync_tile_change.rpc(old_tile_pos, new_tile_pos)
+		
+		check_tile_environment()
+	else:
+		velocity = -velocity * 0.5
+
+func convert_angle_to_grid_direction(angle: float) -> int:
+	"""Convert angle to Direction enum"""
+	while angle < 0:
+		angle += 2 * PI
+	while angle >= 2 * PI:
+		angle -= 2 * PI
+	
+	if angle >= 7 * PI / 4 or angle < PI / 4:
+		return Direction.EAST
+	elif angle >= PI / 4 and angle < 3 * PI / 4:
+		return Direction.SOUTH
+	elif angle >= 3 * PI / 4 and angle < 5 * PI / 4:
+		return Direction.WEST
+	elif angle >= 5 * PI / 4 and angle < 7 * PI / 4:
+		return Direction.NORTH
+	
+	return Direction.NONE
+
+func apply_zero_g_impulse(impulse: Vector2):
+	"""Apply impulse in zero-G"""
+	if not is_multiplayer_authority():
+		return
+		
+	if is_floating:
+		velocity += impulse / 70.0  # Assuming mass of 70
+		if velocity.length() > ZERO_G_MAX_SPEED * 1.5:
+			velocity = velocity.normalized() * ZERO_G_MAX_SPEED * 1.5
+		
+		# Sync impulse result
+		sync_zero_g_state.rpc(is_floating, velocity)
 #endregion

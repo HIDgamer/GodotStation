@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=3 uid="uid://7i0cudfe5met"]
+
+[ext_resource type="Script" uid="uid://dgp7v7lxba43" path="res://Code/Items/Uniform/Head.gd" id="1_o5ck5"]
+[ext_resource type="Texture2D" uid="uid://bqdcunii0uugc" path="res://Assets/Icons/misc/E_Beret.png" id="2_oiaed"]
+[ext_resource type="Texture2D" uid="uid://cv88p6a6a8aco" path="res://Assets/Icons/misc/E_Beret_n.png" id="3_6e0vb"]
+[ext_resource type="Texture2D" uid="uid://wxrt5qmjq2xp" path="res://Assets/Icons/misc/E_Beret_s.png" id="4_84e6b"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_7nykr"]
+diffuse_texture = ExtResource("2_oiaed")
+normal_texture = ExtResource("3_6e0vb")
+specular_texture = ExtResource("4_84e6b")
+
+[node name="E_Beret" type="Node2D"]
+script = ExtResource("1_o5ck5")
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = SubResource("CanvasTexture_7nykr")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-3, -15, -3, -14, -4, -14, -4, -13, -5, -13, -5, -12, -6, -12, -6, -9, -3, -9, -3, -10, -1, -10, -1, -11, 4, -11, 4, -13, 3, -13, 3, -14, 2, -14, 2, -15)

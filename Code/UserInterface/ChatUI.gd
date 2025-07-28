@@ -7,6 +7,8 @@ const MAX_HISTORY = 20    # Maximum command history to remember
 const DEFAULT_CHAT_KEY = KEY_T  # Default key to open chat
 const ANIMATION_DURATION = 0.3  # Duration for animations
 const INACTIVE_TRANSPARENCY = 0.7  # Transparency when chat is inactive but visible
+const MAX_MESSAGE_LENGTH = 500  # Maximum characters per message
+const CHAT_RATE_LIMIT = 2.0  # Seconds between messages for rate limiting
 
 # Signal when a message is sent - for multiplayer integration
 signal message_sent(text, channel)
@@ -46,6 +48,12 @@ var input_history = []
 var input_history_index = -1
 var current_input = ""
 
+# Multiplayer state
+var local_peer_id = 1
+var last_message_time = 0.0
+var pending_messages = []
+var is_admin = false
+
 var connected_systems = []
 var sensory_system = null
 
@@ -69,6 +77,9 @@ enum ChatState {HIDDEN, VISIBLE, ACTIVE, INACTIVE}
 var current_state = ChatState.HIDDEN
 
 func _ready():
+	# Initialize multiplayer
+	setup_multiplayer()
+	
 	# Initialize window state
 	chat_window.visible = false
 	chat_window.modulate.a = 0
@@ -107,6 +118,142 @@ func _ready():
 	else:
 		# Start partially visible if needed
 		switch_to_state(current_state)
+
+func setup_multiplayer():
+	"""Initialize multiplayer settings"""
+	if multiplayer.multiplayer_peer != null:
+		local_peer_id = multiplayer.get_unique_id()
+	else:
+		local_peer_id = 1  # Singleplayer fallback
+	
+	# Check if player is admin (host or designated admin)
+	is_admin = is_multiplayer_host() or check_admin_status()
+	
+	add_to_group("chat_systems")
+
+func is_multiplayer_host() -> bool:
+	"""Check if this client is the multiplayer host"""
+	if multiplayer.multiplayer_peer == null:
+		return true  # Singleplayer
+	return multiplayer.is_server()
+
+func check_admin_status() -> bool:
+	"""Check if player has admin privileges"""
+	# This could be expanded to check against a saved admin list
+	return false
+
+# ================== MULTIPLAYER RPCs ==================
+
+@rpc("any_peer", "call_local", "reliable")
+func network_send_message(sender_id: int, sender_name: String, message_text: String, category: String, channel: String, timestamp: float):
+	"""Receive a message from another player"""
+	if not validate_message(message_text, category, channel, sender_id):
+		return
+	
+	# Add message locally
+	var formatted_sender = sender_name if sender_name != "" else "Player" + str(sender_id)
+	add_message_local(message_text, category, formatted_sender, channel, timestamp)
+
+@rpc("any_peer", "call_local", "reliable")
+func network_send_command(sender_id: int, sender_name: String, command: String, args: String, channel: String):
+	"""Receive a command from another player"""
+	if not validate_command(command, args, sender_id):
+		return
+	
+	# Process command locally (most commands should be processed by sender only)
+	match command:
+		"me", "emote":
+			if args:
+				var formatted_sender = sender_name if sender_name != "" else "Player" + str(sender_id)
+				add_message_local(args, "emote", "* " + formatted_sender, channel)
+		"ooc":
+			if args:
+				var formatted_sender = sender_name if sender_name != "" else "Player" + str(sender_id)
+				add_message_local(args, "ooc", formatted_sender, "ooc")
+		"radio", "r":
+			if args:
+				var formatted_sender = sender_name if sender_name != "" else "Player" + str(sender_id)
+				add_message_local(args, "radio", formatted_sender, "radio")
+
+@rpc("authority", "call_local", "reliable")
+func network_admin_message(message_text: String, category: String = "system"):
+	"""Receive an admin message (host only can send)"""
+	add_message_local(message_text, category, "", "")
+
+@rpc("any_peer", "unreliable")
+func network_typing_indicator(sender_id: int, is_typing: bool):
+	"""Show/hide typing indicator for other players"""
+	if sender_id == local_peer_id:
+		return
+	
+	# This could be expanded to show specific player typing indicators
+	if is_typing:
+		show_message_notification()
+
+@rpc("authority", "call_local", "reliable")
+func sync_chat_history(history_data: Array):
+	"""Sync chat history to a newly connected player"""
+	chat_history.clear()
+	for child in chat_log.get_children():
+		chat_log.remove_child(child)
+		child.queue_free()
+	
+	for message_data in history_data:
+		add_message_local(
+			message_data.text,
+			message_data.category,
+			message_data.sender,
+			message_data.channel,
+			message_data.timestamp
+		)
+
+# ================== VALIDATION ==================
+
+func validate_message(message_text: String, category: String, channel: String, sender_id: int) -> bool:
+	"""Validate incoming messages to prevent abuse"""
+	# Check message length
+	if message_text.length() > MAX_MESSAGE_LENGTH:
+		return false
+	
+	# Check for valid category
+	if not message_categories.has(category):
+		return false
+	
+	# Check for valid channel
+	if channel != "" and not chat_channels.has(channel):
+		return false
+	
+	# Check for spam (basic rate limiting)
+	var current_time = Time.get_time_dict_from_system()
+	var message_key = str(sender_id) + ":" + str(current_time.hour) + ":" + str(current_time.minute)
+	
+	# Additional validation could be added here (profanity filter, etc.)
+	
+	return true
+
+func validate_command(command: String, args: String, sender_id: int) -> bool:
+	"""Validate incoming commands"""
+	# Admin-only commands
+	var admin_commands = ["kick", "ban", "admin", "broadcast"]
+	if command in admin_commands:
+		return is_sender_admin(sender_id)
+	
+	# Check command exists
+	var valid_commands = ["help", "me", "emote", "ooc", "radio", "r", "whisper"]
+	if not command in valid_commands:
+		return false
+	
+	return true
+
+func is_sender_admin(sender_id: int) -> bool:
+	"""Check if sender has admin privileges"""
+	if sender_id == 1:  # Host is always admin
+		return true
+	
+	# Could check against admin list here
+	return false
+
+# ================== CORE CHAT FUNCTIONALITY ==================
 
 func _input(event):
 	# Handle chat toggle with configured key
@@ -193,6 +340,10 @@ func close_chat():
 		chat_input.release_focus()
 		chat_input.text = ""
 		input_history_index = -1
+		
+		# Send typing indicator stop
+		if multiplayer.multiplayer_peer != null:
+			network_typing_indicator.rpc(local_peer_id, false)
 	
 	switch_to_state(ChatState.HIDDEN)
 
@@ -208,11 +359,19 @@ func toggle_chat():
 	else:
 		close_chat()
 
-# Add a message to the chat
+# Add a message to the chat (public function)
 func add_message(text, category = "default", sender = "", channel = ""):
+	var timestamp = Time.get_unix_time_from_system()
+	add_message_local(text, category, sender, channel, timestamp)
+
+# Add a message to the chat locally
+func add_message_local(text, category = "default", sender = "", channel = "", timestamp = 0.0):
 	# Skip filtered messages
 	if filter_enabled and is_filtered(text):
 		return
+	
+	if timestamp == 0.0:
+		timestamp = Time.get_unix_time_from_system()
 	
 	# If no specific channel, use the active one
 	if channel == "":
@@ -221,14 +380,15 @@ func add_message(text, category = "default", sender = "", channel = ""):
 	# Create new message container
 	var message_container = HBoxContainer.new()
 	
-# Create timestamp if enabled
+	# Create timestamp if enabled
 	if show_timestamps:
-		var timestamp = Label.new()
-		timestamp.text = Time.get_time_string_from_system().substr(0, 5)  # HH:MM
-		timestamp.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
-		timestamp.add_theme_font_size_override("font_size", 12)
-		timestamp.custom_minimum_size.x = 40
-		message_container.add_child(timestamp)
+		var timestamp_label = Label.new()
+		var time_dict = Time.get_time_dict_from_unix_time(timestamp)
+		timestamp_label.text = "%02d:%02d" % [time_dict.hour, time_dict.minute]
+		timestamp_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		timestamp_label.add_theme_font_size_override("font_size", 12)
+		timestamp_label.custom_minimum_size.x = 40
+		message_container.add_child(timestamp_label)
 	
 	# Create channel indicator if in "all" view
 	if active_channel == "all" and channel in chat_channels:
@@ -280,7 +440,7 @@ func add_message(text, category = "default", sender = "", channel = ""):
 		"category": category,
 		"sender": sender,
 		"channel": channel,
-		"timestamp": Time.get_unix_time_from_system()
+		"timestamp": timestamp
 	})
 	
 	# Limit chat history
@@ -318,6 +478,20 @@ func _on_chat_submitted(text):
 	if text.strip_edges() == "":
 		return
 	
+	# Rate limiting check
+	var current_time = Time.get_time_dict_from_system()
+	var time_since_last = current_time.minute * 60 + current_time.second - last_message_time
+	if time_since_last < CHAT_RATE_LIMIT and not is_admin:
+		add_message("You are sending messages too quickly. Please wait a moment.", "warning")
+		return
+	
+	last_message_time = current_time.minute * 60 + current_time.second
+	
+	# Truncate message if too long
+	if text.length() > MAX_MESSAGE_LENGTH:
+		text = text.substr(0, MAX_MESSAGE_LENGTH)
+		add_message("Message truncated due to length limit.", "warning")
+	
 	# Add to input history
 	if text != "" and (input_history.size() == 0 or input_history[0] != text):
 		input_history.insert(0, text)
@@ -331,21 +505,33 @@ func _on_chat_submitted(text):
 		process_command(text)
 	else:
 		# Send regular message
-		# In a networked game, you would send this to the server
-		var sender = "You"  # This would come from the player's character
-		
-		# Determine channel from active tab
-		var channel = active_channel if active_channel != "all" else "local"
-		
-		# Add to local chat
-		add_message(text, "default", sender, channel)
-		
-		# Emit signal for network handling
-		message_sent.emit(text, channel)
+		send_message_to_network(text)
 	
 	# Clear input
 	chat_input.text = ""
 	chat_input.grab_focus()
+
+func send_message_to_network(message_text: String):
+	"""Send a message to all players"""
+	var sender_name = get_player_name()
+	var channel = active_channel if active_channel != "all" else "local"
+	var timestamp = Time.get_unix_time_from_system()
+	
+	# Send to network
+	if multiplayer.multiplayer_peer != null:
+		network_send_message.rpc(local_peer_id, sender_name, message_text, "default", channel, timestamp)
+	else:
+		# Singleplayer fallback
+		add_message_local(message_text, "default", sender_name, channel, timestamp)
+
+func get_player_name() -> String:
+	"""Get the local player's name"""
+	var game_manager = get_node_or_null("/root/GameManager")
+	if game_manager and game_manager.has_method("get_player_name"):
+		return game_manager.get_player_name()
+	
+	# Fallback
+	return "Player" + str(local_peer_id)
 
 # Send button pressed handler
 func _on_send_button_pressed():
@@ -355,6 +541,10 @@ func _on_send_button_pressed():
 func _on_chat_input_focus_exited():
 	if current_state == ChatState.ACTIVE:
 		switch_to_state(ChatState.VISIBLE)
+		
+		# Send typing indicator stop
+		if multiplayer.multiplayer_peer != null:
+			network_typing_indicator.rpc(local_peer_id, false)
 
 # Process chat commands
 func process_command(text):
@@ -366,46 +556,25 @@ func process_command(text):
 	
 	match command:
 		"help":
-			add_message("Available commands:", "system")
-			add_message("/help - Show this help", "system")
-			add_message("/clear - Clear chat history", "system")
-			add_message("/me <action> - Perform emote", "system")
-			add_message("/ooc <message> - Out-of-character chat", "system")
-			add_message("/whisper <player> <message> - Send private message", "system")
-			add_message("/radio <message> - Send radio message", "system")
-			add_message("/r <message> - Short for radio", "system")
-			add_message("/timestamp - Toggle timestamps", "system")
-			add_message("/filter <word> - Add word to filter", "system")
-			add_message("/unfilter <word> - Remove word from filter", "system")
+			show_help()
 		
 		"clear":
 			clear_chat()
 		
-		"me":
+		"me", "emote":
 			if args:
-				add_message(args, "emote", "* You")
-				message_sent.emit(args, "emote")
+				send_command_to_network(command, args)
 		
 		"whisper":
-			if args:
-				var whisper_parts = args.split(" ", true, 1)
-				if whisper_parts.size() > 1:
-					var target = whisper_parts[0]
-					var message = whisper_parts[1]
-					add_message(message, "whisper", "You → " + target)
-					message_sent.emit(message, "whisper", target)
-				else:
-					add_message("Usage: /whisper <player> <message>", "system")
+			handle_whisper_command(args)
 		
 		"radio", "r":
 			if args:
-				add_message(args, "radio", "You")
-				message_sent.emit(args, "radio")
+				send_command_to_network(command, args)
 		
 		"ooc":
 			if args:
-				add_message(args, "ooc", "You")
-				message_sent.emit(args, "ooc")
+				send_command_to_network(command, args)
 		
 		"timestamp":
 			show_timestamps = !show_timestamps
@@ -421,11 +590,75 @@ func process_command(text):
 				remove_filter(args)
 				add_message("Removed filter: " + args, "system")
 		
+		# Admin commands
+		"kick", "ban", "admin":
+			if is_admin:
+				handle_admin_command(command, args)
+			else:
+				add_message("You don't have permission to use that command.", "warning")
+		
 		_:
 			add_message("Unknown command: " + command, "system")
 	
 	# Emit command execution signal
 	command_executed.emit(command, args)
+
+func send_command_to_network(command: String, args: String):
+	"""Send a command to all players"""
+	var sender_name = get_player_name()
+	var channel = active_channel if active_channel != "all" else "local"
+	
+	if multiplayer.multiplayer_peer != null:
+		network_send_command.rpc(local_peer_id, sender_name, command, args, channel)
+	else:
+		# Singleplayer fallback
+		match command:
+			"me", "emote":
+				add_message_local(args, "emote", "* " + sender_name, channel)
+			"ooc":
+				add_message_local(args, "ooc", sender_name, "ooc")
+			"radio", "r":
+				add_message_local(args, "radio", sender_name, "radio")
+
+func show_help():
+	add_message("Available commands:", "system")
+	add_message("/help - Show this help", "system")
+	add_message("/clear - Clear chat history", "system")
+	add_message("/me <action> - Perform emote", "system")
+	add_message("/ooc <message> - Out-of-character chat", "system")
+	add_message("/whisper <player> <message> - Send private message", "system")
+	add_message("/radio <message> - Send radio message", "system")
+	add_message("/r <message> - Short for radio", "system")
+	add_message("/timestamp - Toggle timestamps", "system")
+	add_message("/filter <word> - Add word to filter", "system")
+	add_message("/unfilter <word> - Remove word from filter", "system")
+	
+	if is_admin:
+		add_message("Admin commands:", "system")
+		add_message("/kick <player> - Kick player", "system")
+		add_message("/ban <player> - Ban player", "system")
+
+func handle_whisper_command(args: String):
+	if args:
+		var whisper_parts = args.split(" ", true, 1)
+		if whisper_parts.size() > 1:
+			var target = whisper_parts[0]
+			var message = whisper_parts[1]
+			# Whispers would need special handling to only send to target
+			add_message(message, "whisper", "You → " + target)
+		else:
+			add_message("Usage: /whisper <player> <message>", "system")
+
+func handle_admin_command(command: String, args: String):
+	match command:
+		"kick":
+			if args:
+				add_message("Kicked player: " + args, "system")
+				# Implement actual kick logic
+		"ban":
+			if args:
+				add_message("Banned player: " + args, "system")
+				# Implement actual ban logic
 
 # Clear chat history
 func clear_chat():
@@ -456,22 +689,24 @@ func filter_messages_by_channel(channel_name):
 	# If "all" channel, show all messages
 	if channel_name == "all":
 		for message in chat_history:
-			add_message(
+			add_message_local(
 				message.text,
 				message.category,
 				message.sender,
-				message.channel
+				message.channel,
+				message.timestamp
 			)
 		return
 	
 	# Otherwise, filter by channel
 	for message in chat_history:
 		if message.channel == channel_name:
-			add_message(
+			add_message_local(
 				message.text,
 				message.category,
 				message.sender,
-				message.channel
+				message.channel,
+				message.timestamp
 			)
 
 # Setup channel tabs
@@ -615,7 +850,7 @@ func is_filtered(message_text):
 
 # Receive a chat message from another player (would be called by network code)
 func receive_message(text, category, sender, channel = "local"):
-	add_message(text, category, sender, channel)
+	add_message_local(text, category, sender, channel)
 
 func is_chat_active() -> bool:
 	return current_state == ChatState.ACTIVE
@@ -661,3 +896,37 @@ func receive_sensory_message(message, category = "default", sender = "System"):
 	
 	# Add the message to chat
 	add_message(message, chat_category, sender)
+
+# ================== MULTIPLAYER UTILITIES ==================
+
+func request_chat_history_sync():
+	"""Request chat history from host (for newly connected clients)"""
+	if multiplayer.multiplayer_peer != null and not multiplayer.is_server():
+		request_history_sync.rpc_id(1)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_history_sync():
+	"""Handle request for chat history sync"""
+	if multiplayer.is_server():
+		var history_data = []
+		for message in chat_history:
+			history_data.append(message)
+		
+		var requester_id = multiplayer.get_remote_sender_id()
+		sync_chat_history.rpc_id(requester_id, history_data)
+
+func on_player_connected(peer_id: int):
+	"""Called when a new player connects"""
+	if multiplayer.is_server():
+		# Send chat history to new player
+		var history_data = []
+		for message in chat_history:
+			history_data.append(message)
+		
+		if history_data.size() > 0:
+			sync_chat_history.rpc_id(peer_id, history_data)
+
+func on_player_disconnected(peer_id: int):
+	"""Called when a player disconnects"""
+	# Could show disconnect message
+	add_message("Player " + str(peer_id) + " disconnected", "system")

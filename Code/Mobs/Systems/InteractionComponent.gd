@@ -1,15 +1,12 @@
 extends Node
 class_name InteractionComponent
 
-## Handles all interaction logic including click handling, intent-based actions, and entity interactions
-
-#region CONSTANTS
+# Interaction range constants
 const INTERACTION_COOLDOWN: float = 0.01
 const EXAMINE_RANGE: float = 5.0
 const DEFAULT_INTERACTION_RANGE: float = 1.5
-#endregion
 
-#region ENUMS
+# Interaction behavior flags
 enum InteractionFlags {
 	NONE = 0,
 	ADJACENT = 1,
@@ -20,151 +17,178 @@ enum InteractionFlags {
 	COMBAT_MODE = 32
 }
 
+# Intent types for interactions
 enum CurrentIntent {
 	HELP = 0,
 	DISARM = 1,
 	GRAB = 2,
 	HARM = 3
 }
-#endregion
 
-#region SIGNALS
+# Signals for interaction events
 signal interaction_started(entity: Node)
 signal interaction_completed(entity: Node, success: bool)
 signal interaction_requested(target: Node)
 signal examine_result(target: Node, text: String)
 signal tile_interaction(tile_coords: Vector2i, interaction_type: String)
-#endregion
 
-#region PROPERTIES
-# Core references
+# Component references
 var controller: Node = null
-var sensory_system = null
-var audio_system = null
-var inventory_system = null
-var world = null
+var sensory_system: Node = null
+var audio_system: Node = null
+var inventory_system: Node = null
+var world: Node = null
 
 # Interaction state
-var is_local_player: bool = false
 var current_interaction_flags: int = InteractionFlags.NONE
 var current_intent: int = CurrentIntent.HELP
 var last_interaction_time: float = 0.0
 var interaction_range: float = DEFAULT_INTERACTION_RANGE
 
-# Safety preferences
+# Safety settings
 var help_intent_safety: bool = false
 var allow_self_harm: bool = false
-#endregion
 
 func initialize(init_data: Dictionary):
-	"""Initialize the interaction component"""
 	controller = init_data.get("controller")
 	sensory_system = init_data.get("sensory_system")
 	audio_system = init_data.get("audio_system")
 	inventory_system = init_data.get("inventory_system")
 	world = init_data.get("world")
-	is_local_player = init_data.get("is_local_player", false)
 
-#region MAIN INTERACTION PROCESSING
+# Processes interaction with target entity
 func process_interaction(target: Node, button_index: int = MOUSE_BUTTON_LEFT, shift_pressed: bool = false, ctrl_pressed: bool = false, alt_pressed: bool = false) -> bool:
-	"""Main interaction handler"""
-	if not target:
+	if not target or not is_multiplayer_authority():
 		return false
 	
-	print("InteractionComponent: Processing interaction with ", target.name)
-	
-	# Handle examine first (no cooldown)
 	if shift_pressed and not ctrl_pressed and not alt_pressed:
 		return handle_examine_interaction(target)
 	
-	# Check cooldown
-	var current_time = Time.get_ticks_msec() / 500.0
-	if current_time < last_interaction_time + INTERACTION_COOLDOWN:
+	if not check_interaction_cooldown():
 		return false
 	
-	# Check range
 	if not can_interact_with(target):
 		show_message("That's too far away.")
 		return false
 	
-	# Face target
 	face_entity(target)
 	
-	# Determine interaction type
-	var result = false
+	var result = await execute_interaction(target, button_index, shift_pressed, ctrl_pressed, alt_pressed)
 	
-	if ctrl_pressed and not shift_pressed and not alt_pressed:
-		result = handle_ctrl_interaction(target)
-	elif alt_pressed and not shift_pressed and not ctrl_pressed:
-		result = handle_alt_interaction(target)
-	elif button_index == MOUSE_BUTTON_MIDDLE:
-		result = handle_middle_interaction(target)
-	else:
-		result = await handle_intent_interaction(target)
-	
-	# Update cooldown if successful
 	if result:
-		last_interaction_time = current_time
+		sync_interaction_to_network(target, button_index, shift_pressed, ctrl_pressed, alt_pressed)
+		last_interaction_time = Time.get_ticks_msec() / 1000.0
 		emit_signal("interaction_completed", target, true)
 	
 	return result
 
+# Executes the appropriate interaction based on input
+func execute_interaction(target: Node, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool) -> bool:
+	if ctrl_pressed and not shift_pressed and not alt_pressed:
+		return handle_ctrl_interaction(target)
+	elif alt_pressed and not shift_pressed and not ctrl_pressed:
+		return handle_alt_interaction(target)
+	elif button_index == MOUSE_BUTTON_MIDDLE:
+		return handle_middle_interaction(target)
+	else:
+		return await handle_intent_interaction(target)
+
+# Handles tile clicks for world interaction
 func handle_tile_click(tile_coords: Vector2i, mouse_button: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
-	"""Handle clicks on tiles"""
-	# Face the clicked tile
+	if not is_multiplayer_authority():
+		return
+	
 	var world_pos = tile_to_world(tile_coords)
 	face_entity(world_pos)
 	
 	match mouse_button:
 		MOUSE_BUTTON_LEFT:
-			if shift_pressed:
-				examine_tile(tile_coords)
-			elif alt_pressed:
-				handle_alt_tile_action(tile_coords)
-			else:
-				# Check for throw mode
-				if controller.item_interaction_component and controller.item_interaction_component.is_throw_mode_active:
-					controller.item_interaction_component.throw_at_tile(tile_coords)
-				else:
-					# Try to interact with tile contents
-					var entity = get_entity_on_tile(tile_coords)
-					if entity and is_adjacent_to_tile(tile_coords):
-						await process_interaction(entity)
-		
+			handle_left_tile_click(tile_coords, shift_pressed, ctrl_pressed, alt_pressed)
 		MOUSE_BUTTON_RIGHT:
 			handle_tile_context_menu(tile_coords)
-		
 		MOUSE_BUTTON_MIDDLE:
-			if shift_pressed:
-				point_to(world_pos)
-#endregion
+			handle_middle_tile_click(tile_coords, shift_pressed)
 
-#region INTERACTION TYPES
+# Handles left clicks on tiles
+func handle_left_tile_click(tile_coords: Vector2i, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	if shift_pressed:
+		examine_tile(tile_coords)
+		sync_tile_action.rpc(tile_coords, "examine", get_entity_name(controller))
+	elif alt_pressed:
+		handle_alt_tile_action(tile_coords)
+		sync_tile_action.rpc(tile_coords, "alt_action", get_entity_name(controller))
+	else:
+		handle_standard_tile_click(tile_coords)
+
+# Handles standard tile interactions
+func handle_standard_tile_click(tile_coords: Vector2i):
+	if controller.has_node("ItemInteractionComponent"):
+		var item_interaction = controller.get_node("ItemInteractionComponent")
+		if item_interaction.is_throw_mode_active:
+			item_interaction.throw_at_tile(tile_coords)
+			return
+	
+	var entity = get_entity_on_tile(tile_coords)
+	if entity and is_adjacent_to_tile(tile_coords):
+		await process_interaction(entity)
+
+# Handles middle clicks on tiles
+func handle_middle_tile_click(tile_coords: Vector2i, shift_pressed: bool):
+	if shift_pressed:
+		var world_pos = tile_to_world(tile_coords)
+		point_to(world_pos)
+		sync_tile_action.rpc(tile_coords, "point", get_entity_name(controller))
+
+# Synchronizes interaction data across network
+@rpc("any_peer", "call_local", "reliable")
+func sync_interaction(action_data: Dictionary):
+	if multiplayer.get_remote_sender_id() == 0:
+		return
+	
+	var target = find_target_by_id(action_data.get("target_id", ""))
+	if not target:
+		return
+	
+	var performer_name = action_data.get("performer", "Someone")
+	show_interaction_visual(target, get_action_type(action_data), performer_name)
+
+# Synchronizes tile actions across network
+@rpc("any_peer", "call_local", "reliable")
+func sync_tile_action(tile_coords: Vector2i, action_type: String, performer_name: String):
+	if multiplayer.get_remote_sender_id() == 0:
+		return
+	
+	match action_type:
+		"examine":
+			show_tile_visual_effect(tile_coords, "examine")
+		"alt_action":
+			show_tile_visual_effect(tile_coords, "alt_action")
+		"point":
+			var world_pos = tile_to_world(tile_coords)
+			show_point_visual(world_pos, performer_name)
+
+# Handles examine interactions with entities
 func handle_examine_interaction(target: Node) -> bool:
-	"""Handle examine (shift+click)"""
 	if not can_interact_with(target, EXAMINE_RANGE):
 		show_message("That's too far to examine.")
 		return false
 	
 	face_entity(target)
 	
-	# Get examine text
 	var examine_text = get_examine_text(target)
 	
-	# Display text
 	if sensory_system:
 		sensory_system.display_message("[color=#AAAAAA]" + examine_text + "[/color]")
 	
 	emit_signal("examine_result", target, examine_text)
 	
-	# Play sound
 	if audio_system:
 		audio_system.play_positioned_sound("examine", controller.position, 0.2)
 	
 	return true
 
+# Handles ctrl+click interactions (pull/grab)
 func handle_ctrl_interaction(target: Node) -> bool:
-	"""Handle ctrl+click (pull/drag)"""
 	if target == controller or target == controller.get_parent():
 		show_message("You can't pull yourself!")
 		return false
@@ -173,14 +197,14 @@ func handle_ctrl_interaction(target: Node) -> bool:
 		show_message("You can't pull that!")
 		return false
 	
-	# Delegate to grab/pull component
-	if controller.grab_pull_component:
-		return controller.grab_pull_component.pull_entity(target)
+	if controller.has_node("GrabPullComponent"):
+		var grab_component = controller.get_node("GrabPullComponent")
+		return grab_component.pull_entity(target)
 	
 	return false
 
+# Handles alt+click interactions (toggle/activate)
 func handle_alt_interaction(target: Node) -> bool:
-	"""Handle alt+click (special actions)"""
 	face_entity(target)
 	
 	if target.has_method("alt_click"):
@@ -191,8 +215,8 @@ func handle_alt_interaction(target: Node) -> bool:
 	
 	return false
 
+# Handles middle click interactions (point)
 func handle_middle_interaction(target: Node) -> bool:
-	"""Handle middle-click (point)"""
 	var target_pos = get_entity_position(target)
 	if target_pos != Vector2.ZERO:
 		point_to(target_pos)
@@ -200,50 +224,37 @@ func handle_middle_interaction(target: Node) -> bool:
 	
 	return false
 
+# Handles intent-based interactions
 func handle_intent_interaction(target: Node) -> bool:
-	"""Handle intent-based interaction"""
-	# Setup flags
 	current_interaction_flags = InteractionFlags.ADJACENT
 	
-	if target == self:
+	if target == controller:
 		current_interaction_flags |= InteractionFlags.SELF
 	
 	var active_item = get_active_item()
 	if active_item:
 		current_interaction_flags |= InteractionFlags.WITH_ITEM
 	
-	var intent = current_intent
+	trigger_interaction_thrust(target, current_intent)
 	
-	# Trigger visual effect
-	trigger_interaction_thrust(target, intent)
-	
-	# Route based on intent
-	var result = false
-	match intent:
-		0: # HELP
-			result = await handle_help_interaction(target, active_item)
-		1: # DISARM
-			result = handle_disarm_interaction(target, active_item)
-		2: # GRAB
-			result = handle_grab_interaction(target, active_item)
-		3: # HARM
-			result = handle_harm_interaction(target, active_item)
+	match current_intent:
+		CurrentIntent.HELP:
+			return await handle_help_interaction(target, active_item)
+		CurrentIntent.DISARM:
+			return handle_disarm_interaction(target, active_item)
+		CurrentIntent.GRAB:
+			return handle_grab_interaction(target, active_item)
+		CurrentIntent.HARM:
+			return handle_harm_interaction(target, active_item)
 		_:
-			result = await handle_help_interaction(target, active_item)
-	
-	return result
-#endregion
+			return await handle_help_interaction(target, active_item)
 
-#region INTENT HANDLERS
-func handle_help_interaction(target: Node, active_item) -> bool:
-	"""Handle help intent interactions"""
-	# Self-interaction
+# Handles help intent interactions
+func handle_help_interaction(target: Node, active_item: Node) -> bool:
 	if current_interaction_flags & InteractionFlags.SELF:
 		return handle_help_self_interaction(active_item)
 	
-	# With item
 	if active_item:
-		# Safety check
 		if help_intent_safety and is_item_harmful(active_item):
 			show_message("You don't want to hurt " + get_target_name(target) + " with that!")
 			play_safety_sound()
@@ -251,16 +262,12 @@ func handle_help_interaction(target: Node, active_item) -> bool:
 		
 		return await use_item_on_target(active_item, target)
 	
-	# No item - friendly interaction or pickup
 	return handle_friendly_interaction(target)
 
-func handle_disarm_interaction(target: Node, active_item) -> bool:
-	"""Handle disarm intent interactions"""
-	# Check if it's an item to pick up
-	if "entity_type" in target and target.entity_type == "item":
-		if "pickupable" in target and target.pickupable:
-			if controller.item_interaction_component:
-				return controller.item_interaction_component.try_pick_up_item(target)
+# Handles disarm intent interactions
+func handle_disarm_interaction(target: Node, active_item: Node) -> bool:
+	if is_item_entity(target):
+		return handle_item_pickup(target)
 	
 	if current_interaction_flags & InteractionFlags.SELF:
 		show_message("You can't disarm yourself!")
@@ -270,7 +277,6 @@ func handle_disarm_interaction(target: Node, active_item) -> bool:
 		show_message("You need empty hands to disarm!")
 		return false
 	
-	# Try to disarm
 	if target.has_method("get_active_item"):
 		var target_item = target.get_active_item()
 		if target_item:
@@ -280,50 +286,39 @@ func handle_disarm_interaction(target: Node, active_item) -> bool:
 	else:
 		return attempt_push_shove(target)
 
-func handle_grab_interaction(target: Node, active_item) -> bool:
-	"""Handle grab intent interactions"""
-	# Check if it's an item to pick up
-	if "entity_type" in target and target.entity_type == "item":
-		if "pickupable" in target and target.pickupable:
-			if controller.item_interaction_component:
-				return controller.item_interaction_component.try_pick_up_item(target)
-	
-	if "entity_type" in target and target.entity_type == "item":
-		return false
+# Handles grab intent interactions
+func handle_grab_interaction(target: Node, active_item: Node) -> bool:
+	if is_item_entity(target):
+		return handle_item_pickup(target)
 	
 	if current_interaction_flags & InteractionFlags.SELF:
 		show_message("You can't grab yourself!")
 		return false
 	
-	# Check if already grabbing
-	if controller.grab_pull_component:
-		if controller.grab_pull_component.grabbing_entity == target:
-			return controller.grab_pull_component.upgrade_grab()
-		elif controller.grab_pull_component.grabbing_entity != null:
-			var grabbed_name = get_target_name(controller.grab_pull_component.grabbing_entity)
+	if controller.has_node("GrabPullComponent"):
+		var grab_component = controller.get_node("GrabPullComponent")
+		if grab_component.grabbing_entity == target:
+			return grab_component.upgrade_grab()
+		elif grab_component.grabbing_entity != null:
+			var grabbed_name = get_target_name(grab_component.grabbing_entity)
 			show_message("You're already grabbing " + grabbed_name + "!")
 			return false
 	
-	# Need free hand
 	if active_item and not is_grab_compatible_item(active_item):
 		show_message("You need a free hand to grab!")
 		return false
 	
-	# Delegate to grab component
-	if controller.grab_pull_component:
-		return controller.grab_pull_component.grab_entity(target, 0) # PASSIVE
+	if controller.has_node("GrabPullComponent"):
+		var grab_component = controller.get_node("GrabPullComponent")
+		return grab_component.grab_entity(target, 0)
 	
 	return false
 
-func handle_harm_interaction(target: Node, active_item) -> bool:
-	"""Handle harm intent interactions"""
-	# Check if it's an item to pick up
-	if "entity_type" in target and target.entity_type == "item":
-		if "pickupable" in target and target.pickupable:
-			if controller.item_interaction_component:
-				return controller.item_interaction_component.try_pick_up_item(target)
+# Handles harm intent interactions
+func handle_harm_interaction(target: Node, active_item: Node) -> bool:
+	if is_item_entity(target):
+		return handle_item_pickup(target)
 	
-	# Self-harm check
 	if current_interaction_flags & InteractionFlags.SELF:
 		if not allow_self_harm:
 			show_message("You have the discipline not to hurt yourself.")
@@ -332,16 +327,27 @@ func handle_harm_interaction(target: Node, active_item) -> bool:
 		
 		return handle_self_harm(active_item)
 	
-	# Attack target
+	var result = false
+	var damage_dealt = 0.0
+	var damage_type = "brute"
+	var weapon_name = ""
+	
 	if active_item:
-		return attack_with_item(active_item, target)
+		result = attack_with_item(active_item, target)
+		weapon_name = get_item_name(active_item)
+		if "force" in active_item:
+			damage_dealt = active_item.force
 	else:
-		return attack_unarmed(target)
-#endregion
+		result = attack_unarmed(target)
+		damage_dealt = 3.0
+	
+	if result:
+		sync_combat_result(target, damage_dealt, damage_type, weapon_name)
+	
+	return result
 
-#region SPECIFIC INTERACTIONS
-func handle_help_self_interaction(active_item) -> bool:
-	"""Handle using item on self with help intent"""
+# Handles self-help interactions
+func handle_help_self_interaction(active_item: Node) -> bool:
 	if active_item:
 		if active_item.has_method("use_on_self"):
 			return active_item.use_on_self(controller)
@@ -351,31 +357,43 @@ func handle_help_self_interaction(active_item) -> bool:
 	show_message("You pat yourself down.")
 	return true
 
+# Handles friendly interactions with entities
 func handle_friendly_interaction(target: Node) -> bool:
-	"""Handle friendly interaction without item"""
-	# Check if it's an item to pick up
-	if "entity_type" in target and target.entity_type == "item":
-		if "pickupable" in target and target.pickupable:
-			if controller.item_interaction_component:
-				return controller.item_interaction_component.try_pick_up_item(target)
-	
-	# Try interaction methods
-	if target.has_method("attack_hand"):
-		target.attack_hand(controller)
-		return true
+	if is_item_entity(target):
+		return handle_item_pickup(target)
 	
 	if target.has_method("interact"):
 		return target.interact(controller)
 	
+	if target.has_method("attack_hand"):
+		target.attack_hand(controller)
+		return true
+	
 	if target.has_method("use"):
 		return target.use(controller)
 	
-	# Default poke
 	show_message("You poke " + get_target_name(target))
 	return true
 
-func handle_self_harm(active_item) -> bool:
-	"""Handle harming self"""
+# Handles item pickup interactions
+func handle_item_pickup(item: Node) -> bool:
+	if "pickupable" in item and item.pickupable:
+		if controller.has_node("ItemInteractionComponent"):
+			var item_interaction = controller.get_node("ItemInteractionComponent")
+			if item_interaction.has_method("try_pick_up_item"):
+				return item_interaction.try_pick_up_item(item)
+		
+		var inventory_system = controller.get_node_or_null("InventorySystem")
+		if inventory_system and inventory_system.has_method("pick_up_item"):
+			return inventory_system.pick_up_item(item)
+		
+		if item.has_method("interact"):
+			return item.interact(controller)
+	
+	return false
+
+# Handles self-harm interactions
+func handle_self_harm(active_item: Node) -> bool:
 	if active_item:
 		var damage = 5.0
 		if "force" in active_item:
@@ -389,95 +407,74 @@ func handle_self_harm(active_item) -> bool:
 	
 	return true
 
+# Uses item on target entity
 func use_item_on_target(item: Node, target: Node) -> bool:
-	"""Use an item on a target"""
-	print("InteractionComponent: Using item ", item.name, " on ", target.name)
+	var result = false
 	
-	# Try target's attackby method first
 	if target.has_method("attackby"):
-		var result = await target.attackby(item, controller)
-		if result:
-			return result
+		result = await target.attackby(item, controller)
 	
-	# Try item methods
-	if item.has_method("use_on"):
-		return await item.use_on(target, controller)
+	if not result and item.has_method("use_on"):
+		result = await item.use_on(target, controller)
 	
-	if item.has_method("attack"):
-		return item.attack(target, controller)
+	if not result and item.has_method("attack"):
+		result = item.attack(target, controller)
 	
-	if item.has_method("afterattack"):
-		return item.afterattack(target, controller, true)
+	if not result and item.has_method("afterattack"):
+		result = item.afterattack(target, controller, true)
 	
-	# Generic use
-	if target.has_method("attack_hand"):
+	if not result and target.has_method("attack_hand"):
 		target.attack_hand(controller)
-		return true
+		result = true
 	
-	# Default message
-	show_message("You use " + get_item_name(item) + " on " + get_target_name(target) + ".")
-	return true
-#endregion
+	if not result:
+		var item_name = get_item_name(item)
+		show_message("You use " + item_name + " on " + get_target_name(target) + ".")
+		result = true
+	
+	return result
 
-#region COMBAT INTERACTIONS
+# Attempts to disarm target entity
 func attempt_disarm(target: Node, target_item: Node) -> bool:
-	"""Attempt to disarm a target"""
 	var base_chance = 25.0
-	var user_skill = 10.0 # Default dexterity
-	var target_resistance = 0.0
-	
-	if "dexterity" in target:
-		target_resistance = target.dexterity * 1.0
-	
-	var item_grip = 0.0
-	if "grip_strength" in target_item:
-		item_grip = target_item.grip_strength
-	elif "w_class" in target_item:
-		item_grip = target_item.w_class * 5.0
+	var user_skill = 10.0
+	var target_resistance = get_target_resistance(target)
+	var item_grip = get_item_grip_strength(target_item)
 	
 	var disarm_chance = base_chance + user_skill - target_resistance - item_grip
 	disarm_chance = clamp(disarm_chance, 5.0, 95.0)
 	
-	# Roll
 	if randf() * 100.0 < disarm_chance:
-		# Success
-		if target.has_method("drop_item"):
-			target.drop_item(target_item)
-		elif target.has_method("drop_active_item"):
-			target.drop_active_item()
-		
-		# Make target lie down
-		if target.has_method("toggle_lying"):
-			target.toggle_lying()
-		
-		# Stun
-		if target.has_method("stun"):
-			target.stun(2.0)
-		
-		show_message("You disarm " + get_target_name(target) + ", knocking them down!")
-		
-		if audio_system:
-			audio_system.play_positioned_sound("disarm", controller.position, 0.5)
-		
+		execute_successful_disarm(target, target_item)
 		return true
 	else:
-		# Failed
 		show_message("You fail to disarm " + get_target_name(target) + ".")
 		return false
 
+# Executes successful disarm effects
+func execute_successful_disarm(target: Node, target_item: Node):
+	if target.has_method("drop_item"):
+		target.drop_item(target_item)
+	elif target.has_method("drop_active_item"):
+		target.drop_active_item()
+	
+	if target.has_method("toggle_lying"):
+		target.toggle_lying()
+	
+	if target.has_method("stun"):
+		target.stun(2.0)
+	
+	show_message("You disarm " + get_target_name(target) + ", knocking them down!")
+	
+	if audio_system:
+		audio_system.play_positioned_sound("disarm", controller.position, 0.5)
+
+# Attempts to push or shove target
 func attempt_push_shove(target: Node) -> bool:
-	"""Attempt to push/shove a target"""
-	if "entity_type" in target and target.entity_type == "item":
-		return false
-	
 	var base_chance = 30.0
-	var user_strength = 20.0 # Default strength
-	var target_resistance = 0.0
+	var user_strength = 20.0
+	var target_resistance = get_target_resistance(target)
 	
-	if "dexterity" in target:
-		target_resistance = target.dexterity * 1.5
-	
-	# Modifiers
 	if "is_lying" in target and target.is_lying:
 		base_chance += 20.0
 	
@@ -488,90 +485,43 @@ func attempt_push_shove(target: Node) -> bool:
 	push_chance = clamp(push_chance, 10.0, 80.0)
 	
 	if randf() * 100.0 < push_chance:
-		# Success
-		show_message("You shove " + get_target_name(target) + "!")
-		
-		if target.has_method("apply_knockback"):
-			var push_dir = (get_entity_position(target) - controller.position).normalized()
-			target.apply_knockback(push_dir, 15.0)
-		
-		if target.has_method("stun"):
-			target.stun(0.5)
-		
-		if target.has_method("toggle_lying"):
-			target.toggle_lying()
-		
-		if audio_system:
-			audio_system.play_positioned_sound("punch", controller.position, 0.3)
-		
+		execute_successful_push(target)
 		return true
 	else:
 		show_message("You try to shove " + get_target_name(target) + " but they resist!")
 		return false
 
+# Executes successful push effects
+func execute_successful_push(target: Node):
+	show_message("You shove " + get_target_name(target) + "!")
+	
+	if target.has_method("apply_knockback"):
+		var push_dir = (get_entity_position(target) - controller.position).normalized()
+		target.apply_knockback(push_dir, 15.0)
+	
+	if target.has_method("stun"):
+		target.stun(0.5)
+	
+	if target.has_method("toggle_lying"):
+		target.toggle_lying()
+
+# Attacks target with equipped item
 func attack_with_item(item: Node, target: Node) -> bool:
-	"""Attack target with item"""
-	var is_weapon = false
-	var weapon_damage = 5.0
-	var damage_type = "brute"
+	var weapon_damage = get_weapon_damage(item)
+	var attack_chance = calculate_attack_chance(target, true)
 	
-	if "tool_behaviour" in item and item.tool_behaviour == "weapon":
-		is_weapon = true
-		weapon_damage = item.get("force")
-		damage_type = item.get("brute")
-	elif "force" in item and item.force > 0:
-		is_weapon = true
-		weapon_damage = item.force
-		damage_type = item.get("brute")
-	else:
-		weapon_damage = max(1.0, item.get("force"))
-	
-	# Calculate hit chance
-	var attack_chance = 75.0
-	attack_chance += 10.0 # Base dexterity bonus
-	
-	if "dexterity" in target:
-		attack_chance -= target.dexterity * 0.5
-	
-	if "is_lying" in target and target.is_lying:
-		attack_chance += 20.0
-	
-	if "is_stunned" in target and target.is_stunned:
-		attack_chance += 40.0
-	
-	attack_chance = clamp(attack_chance, 10.0, 95.0)
-	
-	# Roll to hit
 	if randf() * 100.0 < attack_chance:
-		# Hit!
-		apply_damage_to_target(target, weapon_damage, damage_type)
-		
-		var target_zone = controller.body_targeting_component.get_selected_zone() if controller.body_targeting_component else "chest"
-		if target.has_method("take_damage_to_zone"):
-			target.take_damage_to_zone(weapon_damage, damage_type, target_zone)
-		
-		show_message("You hit " + get_target_name(target) + " with " + get_item_name(item) + "!")
-		
-		if target.has_method("show_interaction_message"):
-			target.show_interaction_message(controller.entity_name + " hits you with " + get_item_name(item) + "!")
-		
-		# Play sound
-		var hit_sound = "hit"
-		if "hitsound" in item:
-			hit_sound = item.hitsound
-		elif is_weapon:
-			hit_sound = "weapon_hit"
+		execute_successful_attack(target, weapon_damage, "brute", get_item_name(item))
 		
 		if audio_system:
+			var hit_sound = get_weapon_hit_sound(item)
 			audio_system.play_positioned_sound(hit_sound, controller.position, 0.6)
 		
-		# Item effects
 		if item.has_method("on_hit"):
 			item.on_hit(target, controller)
 		
 		return true
 	else:
-		# Miss
 		show_message("You swing " + get_item_name(item) + " at " + get_target_name(target) + " but miss!")
 		
 		if audio_system:
@@ -579,255 +529,278 @@ func attack_with_item(item: Node, target: Node) -> bool:
 		
 		return false
 
+# Attacks target with bare hands
 func attack_unarmed(target: Node) -> bool:
-	"""Attack target with bare hands"""
-	var punch_damage = 3.0
-	punch_damage += 3.0 # Base strength bonus
-	
-	var attack_chance = 70.0
-	attack_chance += 12.0 # Base dexterity bonus
-	
-	if "dexterity" in target:
-		attack_chance -= target.dexterity * 0.7
-	
-	if "is_lying" in target and target.is_lying:
-		attack_chance += 25.0
-		punch_damage += 1.0
-	
-	if "is_stunned" in target and target.is_stunned:
-		attack_chance += 35.0
-		punch_damage += 2.0
-	
-	attack_chance = clamp(attack_chance, 15.0, 90.0)
+	var punch_damage = calculate_unarmed_damage(target)
+	var attack_chance = calculate_attack_chance(target, false)
 	
 	if randf() * 100.0 < attack_chance:
-		# Hit
-		apply_damage_to_target(target, punch_damage, "brute")
-		
-		var target_zone = controller.body_targeting_component.get_selected_zone() if controller.body_targeting_component else "chest"
-		if target.has_method("take_damage_to_zone"):
-			target.take_damage_to_zone(punch_damage, "brute", target_zone)
+		var target_zone = get_selected_target_zone()
+		execute_successful_attack(target, punch_damage, "brute", "")
 		
 		var attack_verb = get_unarmed_attack_verb(target_zone)
 		show_message("You " + attack_verb + " " + get_target_name(target) + "!")
 		
-		if target.has_method("show_interaction_message"):
-			target.show_interaction_message(controller.entity_name + " " + attack_verb + "s you!")
-		
 		if audio_system:
 			audio_system.play_positioned_sound("punch", controller.position, 0.5)
 		
-		# Chance to stun on head hits
-		if target_zone == "head" and randf() < 0.1:
-			if target.has_method("stun"):
-				target.stun(1.0)
-				show_message(get_target_name(target) + " staggers from the blow!")
-		
+		handle_unarmed_special_effects(target, target_zone)
 		return true
 	else:
-		# Miss
 		show_message("You throw a punch at " + get_target_name(target) + " but miss!")
 		
 		if audio_system:
 			audio_system.play_positioned_sound("swing", controller.position, 0.3)
 		
 		return false
-#endregion
 
-#region TILE INTERACTIONS
-func examine_tile(tile_position: Vector2i):
-	"""Examine a tile"""
-	if not world:
+# Executes successful attack effects
+func execute_successful_attack(target: Node, damage: float, damage_type: String, weapon_name: String):
+	apply_damage_to_target(target, damage, damage_type)
+	
+	var target_zone = get_selected_target_zone()
+	if target.has_method("take_damage_to_zone"):
+		target.take_damage_to_zone(damage, damage_type, target_zone)
+	
+	var attack_message = "You hit " + get_target_name(target)
+	if weapon_name != "":
+		attack_message += " with " + weapon_name
+	attack_message += "!"
+	show_message(attack_message)
+
+# Handles special effects for unarmed attacks
+func handle_unarmed_special_effects(target: Node, target_zone: String):
+	if target_zone == "head" and randf() < 0.1:
+		if target.has_method("stun"):
+			target.stun(1.0)
+			show_message(get_target_name(target) + " staggers from the blow!")
+
+# Synchronizes combat results across network
+func sync_combat_result(target: Node, damage: float, damage_type: String, weapon_name: String):
+	var result_data = {
+		"damage": damage,
+		"damage_type": damage_type,
+		"weapon": weapon_name,
+		"attacker": get_entity_name(controller),
+		"hit": true
+	}
+	sync_combat_result_rpc.rpc(get_target_network_id(target), result_data)
+
+# RPC for combat result synchronization
+@rpc("any_peer", "call_local", "reliable")
+func sync_combat_result_rpc(target_id: String, result_data: Dictionary):
+	if multiplayer.get_remote_sender_id() == 0:
 		return
 	
-	var z_level = controller.current_z_level if controller else 0
-	var tile_data = world.get_tile_data(tile_position, z_level)
-	if not tile_data:
+	var target = find_target_by_id(target_id)
+	if not target:
 		return
 	
-	var description = "You see nothing special."
-	
-	# Generate description
-	if "door" in tile_data:
-		description = "A door. It appears to be " + ("closed" if tile_data.door.closed else "open") + "."
-		if "locked" in tile_data.door and tile_data.door.locked:
-			description += " It seems to be locked."
-		if "broken" in tile_data.door and tile_data.door.broken:
-			description += " It looks broken."
-	elif "window" in tile_data:
-		description = "A window made of glass."
-		if "reinforced" in tile_data.window and tile_data.window.reinforced:
-			description += " It appears to be reinforced."
-		if "health" in tile_data.window and tile_data.window.health < tile_data.window.max_health:
-			description += " It has some cracks."
-	elif "floor" in tile_data:
-		description = "A " + tile_data.floor.type + " floor."
-	elif "wall" in tile_data:
-		description = "A solid wall made of " + tile_data.wall.material + "."
-	
-	emit_signal("examine_result", {"tile_position": tile_position}, description)
-	
-	if sensory_system:
-		sensory_system.display_message("[color=#AAAAAA]" + description + "[/color]")
+	show_combat_effect(target, result_data)
 
-func handle_alt_tile_action(tile_coords: Vector2i):
-	"""Handle alt+click on tile"""
-	var z_level = controller.current_z_level if controller else 0
-	var tile_data = world.get_tile_data(tile_coords, z_level) if world else null
-	if not tile_data:
-		return
-	
-	# Alt-click on door to toggle
-	if "door" in tile_data:
-		if world and world.has_method("toggle_door"):
-			world.toggle_door(tile_coords, z_level)
-			emit_signal("tile_interaction", tile_coords, "door_toggle")
-		return
-	
-	# Alt-click on window to knock
-	if "window" in tile_data:
-		if world and world.has_method("knock_window"):
-			world.knock_window(tile_coords, z_level)
-			emit_signal("tile_interaction", tile_coords, "window_knock")
-		return
+# Synchronizes interaction data to network
+func sync_interaction_to_network(target: Node, button_index: int, shift_pressed: bool, ctrl_pressed: bool, alt_pressed: bool):
+	var action_data = {
+		"target_id": get_target_network_id(target),
+		"ctrl": ctrl_pressed,
+		"alt": alt_pressed,
+		"middle": (button_index == MOUSE_BUTTON_MIDDLE),
+		"intent": current_intent,
+		"performer": get_entity_name(controller)
+	}
+	sync_interaction.rpc(action_data)
 
-func handle_tile_context_menu(tile_coords: Vector2i):
-	"""Create context menu for tile"""
-	var options = []
-	
-	# Add examine option
-	options.append({
-		"name": "Examine Tile",
-		"icon": "examine",
-		"action": "examine_tile",
-		"params": {"position": tile_coords}
-	})
-	
-	# Check for special tile features
-	var z_level = controller.current_z_level if controller else 0
-	var tile_data = world.get_tile_data(tile_coords, z_level) if world else null
-	
-	if tile_data:
-		if "door" in tile_data:
-			var door = tile_data.door
-			if door.closed:
-				options.append({
-					"name": "Open Door",
-					"icon": "door_open",
-					"action": "toggle_door",
-					"params": {"position": tile_coords}
-				})
-			else:
-				options.append({
-					"name": "Close Door",
-					"icon": "door_close",
-					"action": "toggle_door",
-					"params": {"position": tile_coords}
-				})
-	
-	# Show menu
-	if world and "context_interaction_system" in world:
-		world.context_interaction_system.show_context_menu(options, controller.get_viewport().get_mouse_position())
+# Checks if interaction cooldown allows new interaction
+func check_interaction_cooldown() -> bool:
+	var current_time = Time.get_ticks_msec() / 1000.0
+	return current_time >= last_interaction_time + INTERACTION_COOLDOWN
 
-func point_to(position: Vector2):
-	"""Point to a location"""
-	var direction = (position - controller.position).normalized()
-	var dir_text = get_direction_text(direction)
-	
-	show_message(controller.entity_name + " points to the " + dir_text + ".")
-	
-	# Visual effect
-	if world and world.has_method("spawn_visual_effect"):
-		world.spawn_visual_effect("point", position, 1.0)
-#endregion
-
-#region HELPER FUNCTIONS
+# Checks if entity can interact with target
 func can_interact_with(target: Node, max_range: float = DEFAULT_INTERACTION_RANGE) -> bool:
-	"""Check if can interact with target"""
 	if not target:
 		return false
 	
-	# Self-interaction always allowed
 	if target == controller or target == controller.get_parent():
 		return true
 	
-	# Check adjacency for most interactions
 	if not is_adjacent_to(target):
-		# Check for ranged interactions
 		var distance = get_distance_to(target)
 		
-		# Weapon range
 		var active_item = get_active_item()
 		if active_item and "max_range" in active_item:
 			return distance <= active_item.max_range
 		
-		# Throw range
-		if controller.item_interaction_component and controller.item_interaction_component.is_throw_mode_active:
-			return distance <= 10.0
+		if controller.has_node("ItemInteractionComponent"):
+			var item_interaction = controller.get_node("ItemInteractionComponent")
+			if item_interaction.is_throw_mode_active:
+				return distance <= 10.0
 		
-		# Examine range
-		if controller.intent_component and controller.intent_component.intent == 0:
+		if current_intent == CurrentIntent.HELP:
 			return distance <= EXAMINE_RANGE
 		
 		return false
 	
 	return true
 
+# Checks if entity is adjacent to target
 func is_adjacent_to(target: Node) -> bool:
-	"""Check if adjacent to target"""
-	if not controller.movement_component:
+	if not controller.has_method("is_adjacent_to"):
 		return false
 	
-	return controller.movement_component.is_adjacent_to(target)
+	return controller.is_adjacent_to(target)
 
+# Checks if entity is adjacent to tile
 func is_adjacent_to_tile(tile_coords: Vector2i) -> bool:
-	"""Check if adjacent to tile"""
-	if not controller.movement_component:
+	if not controller.has_method("get_current_tile_position"):
 		return false
 	
-	var my_pos = controller.movement_component.current_tile_position
+	var my_pos = controller.get_current_tile_position()
 	var diff_x = abs(my_pos.x - tile_coords.x)
 	var diff_y = abs(my_pos.y - tile_coords.y)
 	
 	return (diff_x <= 1 and diff_y <= 1) and not (diff_x == 0 and diff_y == 0)
 
+# Calculates distance to target entity
 func get_distance_to(target: Node) -> float:
-	"""Get distance to target in tiles"""
-	if not controller.movement_component:
+	if not controller.has_method("get_current_tile_position"):
 		return 999.0
 	
-	var my_pos = Vector2(controller.movement_component.current_tile_position)
+	var my_pos = Vector2(controller.get_current_tile_position())
 	var target_pos_int = get_entity_tile_position(target)
 	var target_pos = Vector2(target_pos_int.x, target_pos_int.y)
 	
 	return my_pos.distance_to(target_pos)
 
+# Helper functions for entity and item checking
+func is_item_entity(entity: Node) -> bool:
+	return entity.has_method("get_script") and entity.get_script() and "Item" in str(entity.get_script().get_path())
+
+func is_item_harmful(item: Node) -> bool:
+	if "force" in item and item.force > 0:
+		return true
+	if "tool_behaviour" in item and item.tool_behaviour == "weapon":
+		return true
+	if "harmful" in item and item.harmful:
+		return true
+	return false
+
+func is_grab_compatible_item(item: Node) -> bool:
+	if "w_class" in item:
+		return item.w_class <= 2
+	if "allows_grabbing" in item:
+		return item.allows_grabbing
+	return false
+
+# Combat calculation helper functions
+func get_target_resistance(target: Node) -> float:
+	if "dexterity" in target:
+		return target.dexterity * 1.0
+	return 0.0
+
+func get_item_grip_strength(item: Node) -> float:
+	if "grip_strength" in item:
+		return item.grip_strength
+	elif "w_class" in item:
+		return item.w_class * 5.0
+	return 0.0
+
+func get_weapon_damage(item: Node) -> float:
+	if "force" in item and item.force > 0:
+		return item.force
+	return 5.0
+
+func get_weapon_hit_sound(item: Node) -> String:
+	if "hitsound" in item:
+		return item.hitsound
+	return "weapon_hit"
+
+func calculate_attack_chance(target: Node, with_weapon: bool) -> float:
+	var base_chance = 75.0 if with_weapon else 70.0
+	var skill_bonus = 10.0 if with_weapon else 12.0
+	
+	var attack_chance = base_chance + skill_bonus
+	
+	if "dexterity" in target:
+		attack_chance -= target.dexterity * (0.5 if with_weapon else 0.7)
+	
+	if "is_lying" in target and target.is_lying:
+		attack_chance += 20.0 if with_weapon else 25.0
+	
+	if "is_stunned" in target and target.is_stunned:
+		attack_chance += 40.0 if with_weapon else 35.0
+	
+	return clamp(attack_chance, 10.0, 95.0)
+
+func calculate_unarmed_damage(target: Node) -> float:
+	var punch_damage = 3.0 + 3.0
+	
+	if "is_lying" in target and target.is_lying:
+		punch_damage += 1.0
+	
+	if "is_stunned" in target and target.is_stunned:
+		punch_damage += 2.0
+	
+	return punch_damage
+
+func get_selected_target_zone() -> String:
+	if controller.has_node("BodyTargetingComponent"):
+		var body_targeting = controller.get_node("BodyTargetingComponent")
+		return body_targeting.get_selected_zone()
+	return "chest"
+
+func get_unarmed_attack_verb(zone: String) -> String:
+	match zone:
+		"head", "eyes", "mouth":
+			return "punch"
+		"chest":
+			return "punch"
+		"groin":
+			return "knee"
+		"l_leg", "r_leg", "l_foot", "r_foot":
+			return "kick"
+		_:
+			return "hit"
+
+# Utility and helper functions
+func get_active_item() -> Node:
+	if inventory_system and inventory_system.has_method("get_active_item"):
+		return inventory_system.get_active_item()
+	return null
+
+func get_examine_text(target: Node) -> String:
+	if target.has_method("examine"):
+		return target.examine(controller)
+	elif target.has_method("get_examine_text"):
+		return target.get_examine_text(controller)
+	elif "description" in target:
+		return target.description
+	elif "examine_desc" in target:
+		return target.examine_desc
+	else:
+		var name = target.name if "name" in target else "something"
+		return "This is " + name + "."
+
+func get_entity_position(entity: Node) -> Vector2:
+	if "global_position" in entity:
+		return entity.global_position
+	elif "position" in entity:
+		return entity.position
+	return Vector2.ZERO
+
 func get_entity_tile_position(entity: Node) -> Vector2i:
-	"""Get tile position of entity"""
 	if not entity:
 		return Vector2i.ZERO
 	
 	if "current_tile_position" in entity:
 		return entity.current_tile_position
-	elif entity.has_node("GridMovementController"):
-		var grid_controller = entity.get_node("GridMovementController")
-		return grid_controller.get_current_tile_position()
-	elif controller.movement_component:
-		return controller.movement_component.get_entity_tile_position(entity)
+	elif entity.has_method("get_current_tile_position"):
+		return entity.get_current_tile_position()
+	elif controller.has_method("get_entity_tile_position"):
+		return controller.get_entity_tile_position(entity)
 	
 	return Vector2i.ZERO
 
-func get_entity_position(entity: Node) -> Vector2:
-	"""Get world position of entity"""
-	if "global_position" in entity:
-		return entity.global_position
-	elif "position" in entity:
-		return entity.position
-	
-	return Vector2.ZERO
-
 func get_entity_on_tile(tile_coords: Vector2i) -> Node:
-	"""Get entity on a specific tile"""
 	if world and "tile_occupancy_system" in world and world.tile_occupancy_system:
 		var z_level = controller.current_z_level if controller else 0
 		var entities = world.tile_occupancy_system.get_entities_at(tile_coords, z_level)
@@ -835,64 +808,62 @@ func get_entity_on_tile(tile_coords: Vector2i) -> Node:
 			return entities[0]
 	return null
 
-func face_entity(target):
-	"""Make entity face a target"""
-	if not controller.is_multiplayer_authority():
-		return
-	
-	if not controller.movement_component:
-		return
-	
-	var target_position = Vector2.ZERO
-	
-	if typeof(target) == TYPE_VECTOR2:
-		target_position = target
-	elif target.has_method("global_position"):
-		target_position = target.global_position
-	elif "position" in target:
-		target_position = target.position
+func tile_to_world(tile_pos: Vector2i) -> Vector2:
+	return Vector2((tile_pos.x * 32) + 16, (tile_pos.y * 32) + 16)
+
+func get_target_name(target: Node) -> String:
+	if "entity_name" in target and target.entity_name != "":
+		return target.entity_name
+	elif "name" in target:
+		return target.name
 	else:
-		return
-	
-	var direction_vector = target_position - controller.position
-	if direction_vector == Vector2.ZERO:
-		return
-	
-	direction_vector = direction_vector.normalized()
-	
-	var grid_direction = Vector2i(
-		round(direction_vector.x),
-		round(direction_vector.y)
-	)
-	
-	if grid_direction.x != 0 and grid_direction.y != 0:
-		grid_direction.x = sign(grid_direction.x)
-		grid_direction.y = sign(grid_direction.y)
-	elif grid_direction == Vector2i.ZERO:
-		if abs(direction_vector.x) > abs(direction_vector.y):
-			grid_direction.x = sign(direction_vector.x)
-		else:
-			grid_direction.y = sign(direction_vector.y)
-	
-	controller.movement_component.update_facing_from_movement(grid_direction)
+		return "that"
 
-func trigger_interaction_thrust(target: Node, intent: int):
-	"""Trigger visual thrust effect"""
-	if controller.sprite_system:
-		var direction_to_target = get_direction_to_target(target)
-		controller.sprite_system.show_interaction_thrust(direction_to_target, intent)
+func get_entity_name(entity: Node) -> String:
+	if "entity_name" in entity and entity.entity_name != "":
+		return entity.entity_name
+	elif "name" in entity:
+		return entity.name
+	else:
+		return "someone"
 
-func get_direction_to_target(target: Node) -> Vector2:
-	"""Get direction vector to target"""
-	var target_pos = get_entity_position(target)
-	if target_pos == Vector2.ZERO:
-		return Vector2.ZERO
+func get_item_name(item: Node) -> String:
+	if "item_name" in item:
+		return item.item_name
+	elif "name" in item:
+		return item.name
+	else:
+		return "something"
+
+func apply_damage_to_target(target: Node, damage: float, damage_type: String):
+	if target.has_method("take_damage"):
+		target.take_damage(damage, damage_type)
+	elif target.has_method("apply_damage"):
+		target.apply_damage(damage, damage_type)
+
+func show_message(text: String):
+	if sensory_system:
+		sensory_system.display_message(text)
+
+func play_safety_sound():
+	if audio_system:
+		audio_system.play_positioned_sound("buzz", controller.position, 0.3)
+
+func face_entity(target):
+	if not controller.has_method("face_entity"):
+		return
+	controller.face_entity(target)
+
+func point_to(position: Vector2):
+	var direction = (position - controller.position).normalized()
+	var dir_text = get_direction_text(direction)
 	
-	var my_pos = controller.position
-	return (target_pos - my_pos).normalized()
+	show_message(controller.entity_name + " points to the " + dir_text + ".")
+	
+	if world and world.has_method("spawn_visual_effect"):
+		world.spawn_visual_effect("point", position, 1.0)
 
 func get_direction_text(direction: Vector2) -> String:
-	"""Convert direction to text"""
 	var angle = rad_to_deg(atan2(direction.y, direction.x))
 	
 	if angle > -22.5 and angle <= 22.5:
@@ -914,108 +885,223 @@ func get_direction_text(direction: Vector2) -> String:
 	
 	return "somewhere"
 
-func tile_to_world(tile_pos: Vector2i) -> Vector2:
-	"""Convert tile to world position"""
-	return Vector2((tile_pos.x * 32) + 16, (tile_pos.y * 32) + 16)
+# Visual effect and feedback functions
+func trigger_interaction_thrust(target: Node, intent: int):
+	if controller.has_node("SpriteSystem"):
+		var sprite_system = controller.get_node("SpriteSystem")
+		if sprite_system.has_method("show_interaction_thrust"):
+			var direction_to_target = get_direction_to_target(target)
+			sprite_system.show_interaction_thrust(direction_to_target, intent)
 
-func get_active_item():
-	"""Get currently held item"""
-	if inventory_system and inventory_system.has_method("get_active_item"):
-		return inventory_system.get_active_item()
+func get_direction_to_target(target: Node) -> Vector2:
+	var target_pos = get_entity_position(target)
+	if target_pos == Vector2.ZERO:
+		return Vector2.ZERO
+	
+	var my_pos = controller.position
+	return (target_pos - my_pos).normalized()
+
+func show_interaction_visual(target: Node, action_type: String, performer_name: String):
+	match action_type:
+		"pull":
+			trigger_interaction_thrust(target, -1)
+		"alt":
+			trigger_interaction_thrust(target, -2)
+		"point":
+			show_point_visual(get_entity_position(target), performer_name)
+		"help":
+			trigger_interaction_thrust(target, 0)
+		"disarm":
+			trigger_interaction_thrust(target, 1)
+		"grab":
+			trigger_interaction_thrust(target, 2)
+		"harm":
+			trigger_interaction_thrust(target, 3)
+
+func show_tile_visual_effect(tile_coords: Vector2i, effect_type: String):
+	if world and world.has_method("spawn_visual_effect"):
+		var world_pos = tile_to_world(tile_coords)
+		world.spawn_visual_effect(effect_type, world_pos, 0.5)
+
+func show_point_visual(position: Vector2, performer_name: String):
+	var direction = (position - controller.position).normalized()
+	var dir_text = get_direction_text(direction)
+	
+	show_message(performer_name + " points to the " + dir_text + ".")
+	
+	if world and world.has_method("spawn_visual_effect"):
+		world.spawn_visual_effect("point", position, 1.0)
+
+func show_combat_effect(target: Node, result_data: Dictionary):
+	if world and world.has_method("spawn_damage_number"):
+		world.spawn_damage_number(get_entity_position(target), result_data.get("damage", 0), result_data.get("damage_type", "brute"))
+	
+	if audio_system:
+		var hit_sound = "weapon_hit" if result_data.get("weapon", "") != "" else "punch"
+		audio_system.play_positioned_sound(hit_sound, get_entity_position(target), 0.6)
+
+# Network utility functions
+func get_target_network_id(target: Node) -> String:
+	if not target:
+		return ""
+	
+	if target.has_method("get_network_id"):
+		return target.get_network_id()
+	elif "peer_id" in target:
+		return "player_" + str(target.peer_id)
+	elif target.has_meta("network_id"):
+		return str(target.get_meta("network_id"))
+	else:
+		return target.get_path()
+
+func find_target_by_id(target_id: String) -> Node:
+	if target_id == "":
+		return null
+	
+	if target_id.begins_with("player_"):
+		var peer_id = target_id.split("_")[1].to_int()
+		return find_player_by_peer_id(peer_id)
+	
+	if target_id.begins_with("/"):
+		return get_node_or_null(target_id)
+	
+	var entities = get_tree().get_nodes_in_group("networkable")
+	for entity in entities:
+		if entity.has_meta("network_id") and str(entity.get_meta("network_id")) == target_id:
+			return entity
+		if entity.has_method("get_network_id") and entity.get_network_id() == target_id:
+			return entity
 	
 	return null
 
-func get_examine_text(target: Node) -> String:
-	"""Get examine text for target"""
-	if target.has_method("examine"):
-		return target.examine(controller)
-	elif target.has_method("get_examine_text"):
-		return target.get_examine_text(controller)
-	elif "description" in target:
-		return target.description
-	elif "examine_desc" in target:
-		return target.examine_desc
+func find_player_by_peer_id(peer_id: int) -> Node:
+	var players = get_tree().get_nodes_in_group("players")
+	for player in players:
+		if player.has_meta("peer_id") and player.get_meta("peer_id") == peer_id:
+			return player
+		if "peer_id" in player and player.peer_id == peer_id:
+			return player
+	
+	return null
+
+func get_action_type(action_data: Dictionary) -> String:
+	if action_data.get("ctrl", false):
+		return "pull"
+	elif action_data.get("alt", false):
+		return "alt"
+	elif action_data.get("middle", false):
+		return "point"
 	else:
-		var name = target.name if "name" in target else "something"
-		return "This is " + name + "."
+		var intent = action_data.get("intent", 0)
+		match intent:
+			0: return "help"
+			1: return "disarm"
+			2: return "grab"
+			3: return "harm"
+			_: return "help"
 
-func get_target_name(target: Node) -> String:
-	"""Get proper name for target"""
-	if "entity_name" in target and target.entity_name != "":
-		return target.entity_name
-	elif "name" in target:
-		return target.name
-	else:
-		return "that"
-
-func get_item_name(item: Node) -> String:
-	"""Get proper name for item"""
-	if "item_name" in item:
-		return item.item_name
-	elif "name" in item:
-		return item.name
-	else:
-		return "something"
-
-func get_unarmed_attack_verb(zone: String) -> String:
-	"""Get attack verb for unarmed attack on zone"""
-	match zone:
-		"head", "eyes", "mouth":
-			return "punch"
-		"chest":
-			return "punch"
-		"groin":
-			return "knee"
-		"l_leg", "r_leg", "l_foot", "r_foot":
-			return "kick"
-		_:
-			return "hit"
-
-func is_item_harmful(item: Node) -> bool:
-	"""Check if item is harmful"""
-	if "force" in item and item.force > 0:
-		return true
-	if "tool_behaviour" in item and item.tool_behaviour == "weapon":
-		return true
-	if "harmful" in item and item.harmful:
-		return true
-	return false
-
-func is_grab_compatible_item(item: Node) -> bool:
-	"""Check if item allows grabbing"""
-	if "w_class" in item:
-		return item.w_class <= 2
-	if "allows_grabbing" in item:
-		return item.allows_grabbing
-	return false
-
-func apply_damage_to_target(target: Node, damage: float, damage_type: String):
-	"""Apply damage to target"""
-	if target.has_method("take_damage"):
-		target.take_damage(damage, damage_type)
-	elif target.has_method("apply_damage"):
-		target.apply_damage(damage, damage_type)
-
-func show_message(text: String):
-	"""Display message to player"""
+# Tile-specific interaction functions
+func examine_tile(tile_position: Vector2i):
+	if not world:
+		return
+	
+	var z_level = controller.current_z_level if controller else 0
+	var tile_data = world.get_tile_data(tile_position, z_level) if world.has_method("get_tile_data") else null
+	if not tile_data:
+		return
+	
+	var description = generate_tile_description(tile_data)
+	
+	emit_signal("examine_result", {"tile_position": tile_position}, description)
+	
 	if sensory_system:
-		sensory_system.display_message(text)
+		sensory_system.display_message("[color=#AAAAAA]" + description + "[/color]")
+
+func generate_tile_description(tile_data: Dictionary) -> String:
+	if "door" in tile_data:
+		return generate_door_description(tile_data.door)
+	elif "window" in tile_data:
+		return generate_window_description(tile_data.window)
+	elif "floor" in tile_data:
+		return "A " + tile_data.floor.type + " floor."
+	elif "wall" in tile_data:
+		return "A solid wall made of " + tile_data.wall.material + "."
 	else:
-		print("Interaction: " + text)
+		return "You see nothing special."
 
-func play_safety_sound():
-	"""Play safety buzz sound"""
-	if audio_system:
-		audio_system.play_positioned_sound("buzz", controller.position, 0.3)
+func generate_door_description(door_data: Dictionary) -> String:
+	var description = "A door. It appears to be " + ("closed" if door_data.closed else "open") + "."
+	
+	if "locked" in door_data and door_data.locked:
+		description += " It seems to be locked."
+	
+	if "broken" in door_data and door_data.broken:
+		description += " It looks broken."
+	
+	return description
 
+func generate_window_description(window_data: Dictionary) -> String:
+	var description = "A window made of glass."
+	
+	if "reinforced" in window_data and window_data.reinforced:
+		description += " It appears to be reinforced."
+	
+	if "health" in window_data and window_data.health < window_data.max_health:
+		description += " It has some cracks."
+	
+	return description
+
+func handle_alt_tile_action(tile_coords: Vector2i):
+	var z_level = controller.current_z_level if controller else 0
+	var tile_data = world.get_tile_data(tile_coords, z_level) if world and world.has_method("get_tile_data") else null
+	if not tile_data:
+		return
+	
+	if "door" in tile_data:
+		if world and world.has_method("toggle_door"):
+			world.toggle_door(tile_coords, z_level)
+			emit_signal("tile_interaction", tile_coords, "door_toggle")
+		return
+	
+	if "window" in tile_data:
+		if world and world.has_method("knock_window"):
+			world.knock_window(tile_coords, z_level)
+			emit_signal("tile_interaction", tile_coords, "window_knock")
+		return
+
+func handle_tile_context_menu(tile_coords: Vector2i):
+	var options = []
+	
+	options.append({
+		"name": "Examine Tile",
+		"icon": "examine",
+		"action": "examine_tile",
+		"params": {"position": tile_coords}
+	})
+	
+	var z_level = controller.current_z_level if controller else 0
+	var tile_data = world.get_tile_data(tile_coords, z_level) if world and world.has_method("get_tile_data") else null
+	
+	if tile_data and "door" in tile_data:
+		var door = tile_data.door
+		if door.closed:
+			options.append({
+				"name": "Open Door",
+				"icon": "door_open",
+				"action": "toggle_door",
+				"params": {"position": tile_coords}
+			})
+		else:
+			options.append({
+				"name": "Close Door",
+				"icon": "door_close",
+				"action": "toggle_door",
+				"params": {"position": tile_coords}
+			})
+	
+	if world and "context_interaction_system" in world:
+		world.context_interaction_system.show_context_menu(options, controller.get_viewport().get_mouse_position())
+
+# Signal handler for intent changes
 func _on_intent_changed(new_intent: int):
-	"""Handle intent changes"""
-	if new_intent == 0:
-		current_intent = CurrentIntent.HELP
-	elif new_intent == 1:
-		current_intent = CurrentIntent.DISARM
-	elif new_intent == 2:
-		current_intent = CurrentIntent.GRAB
-	elif new_intent == 3:
-		current_intent = CurrentIntent.HARM
-#endregion
+	current_intent = new_intent

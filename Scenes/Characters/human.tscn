@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://c6mxm7u3f5n4g"]
+[gd_scene load_steps=37 format=3 uid="uid://c6mxm7u3f5n4g"]
 
 [ext_resource type="Script" uid="uid://b2bi0dloqd2xs" path="res://Code/Mobs/Controllers/Controller.gd" id="1_uwpdh"]
 [ext_resource type="Script" uid="uid://chnw437ejhnj4" path="res://Code/Mobs/Systems/CameraSystem.gd" id="2_8mbkt"]
@@ -9,6 +9,8 @@
 [ext_resource type="Texture2D" uid="uid://d1wjahb2n7uqs" path="res://Assets/Effects/FX/Gib.tres" id="4_vqrbj"]
 [ext_resource type="Script" uid="uid://dj4qyr2yg1rim" path="res://Code/Mobs/Controllers/HealthConnector.gd" id="5_ntngp"]
 [ext_resource type="Script" uid="uid://dh2tm0dwjxdiw" path="res://Code/Mobs/Systems/HealthSystem.gd" id="6_nypa4"]
+[ext_resource type="Script" uid="uid://ctk7b455p47ul" path="res://Code/OnClick/ClickComponent.gd" id="6_sjx5i"]
+[ext_resource type="Script" uid="uid://co3fb4yan7sep" path="res://Code/Mobs/Systems/WeaponHandlingComponent.gd" id="15_ntngp"]
 [ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Mobs/Systems/MovementComponent.gd" id="16_gwepp"]
 [ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Mobs/Systems/ZLevelMovementComponent.gd" id="17_o264j"]
 [ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Mobs/Systems/InteractionComponent.gd" id="17_sjx5i"]
@@ -138,33 +140,27 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath(".:entity_type")
 properties/2/spawn = true
 properties/2/replication_mode = 1
-properties/3/path = NodePath(".:entity_dense")
+properties/3/path = NodePath(".:no_pull")
 properties/3/spawn = true
 properties/3/replication_mode = 1
-properties/4/path = NodePath(".:no_pull")
+properties/4/path = NodePath(".:is_lying")
 properties/4/spawn = true
 properties/4/replication_mode = 1
-properties/5/path = NodePath(".:is_lying")
+properties/5/path = NodePath(".:is_stunned")
 properties/5/spawn = true
 properties/5/replication_mode = 1
-properties/6/path = NodePath(".:is_stunned")
+properties/6/path = NodePath(".:health")
 properties/6/spawn = true
 properties/6/replication_mode = 1
-properties/7/path = NodePath(".:health")
+properties/7/path = NodePath(".:max_health")
 properties/7/spawn = true
 properties/7/replication_mode = 1
-properties/8/path = NodePath(".:max_health")
+properties/8/path = NodePath("HumanSpriteSystem:position")
 properties/8/spawn = true
 properties/8/replication_mode = 1
-properties/9/path = NodePath("HumanSpriteSystem:position")
+properties/9/path = NodePath("Effect:position")
 properties/9/spawn = true
 properties/9/replication_mode = 1
-properties/10/path = NodePath("Effect:position")
-properties/10/spawn = true
-properties/10/replication_mode = 1
-properties/11/path = NodePath("HumanSpriteSystem:rotation")
-properties/11/spawn = true
-properties/11/replication_mode = 1
 
 [node name="GridMovementController" type="Node2D"]
 script = ExtResource("1_uwpdh")
@@ -192,6 +188,10 @@ default_zoom = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_sq5fq")
 animation = &"Gib"
 
+[node name="ClickComponent" type="Node" parent="."]
+script = ExtResource("6_sjx5i")
+metadata/_custom_type_script = "uid://ctk7b455p47ul"
+
 [node name="HealthConnector" type="Node" parent="."]
 script = ExtResource("5_ntngp")
 metadata/_custom_type_script = "uid://dj4qyr2yg1rim"
@@ -212,17 +212,21 @@ metadata/_custom_type_script = "uid://djrs5msigc2l0"
 script = ExtResource("16_gwepp")
 metadata/_custom_type_script = "uid://cl82bkxuc28j"
 
-[node name="InteractionComponent" type="Node" parent="."]
-script = ExtResource("17_sjx5i")
-metadata/_custom_type_script = "uid://ca4n5hj0ijsn6"
-
 [node name="ZLevelMovementComponent" type="Node" parent="."]
 script = ExtResource("17_o264j")
 metadata/_custom_type_script = "uid://bbv4x26754up"
 
+[node name="InteractionComponent" type="Node" parent="."]
+script = ExtResource("17_sjx5i")
+metadata/_custom_type_script = "uid://ca4n5hj0ijsn6"
+
 [node name="ItemInteractionComponent" type="Node" parent="."]
 script = ExtResource("18_3dn6y")
 metadata/_custom_type_script = "uid://c3u73hjth48ct"
+
+[node name="WeaponHandlingComponent" type="Node" parent="."]
+script = ExtResource("15_ntngp")
+metadata/_custom_type_script = "uid://co3fb4yan7sep"
 
 [node name="StatusEffectComponent" type="Node" parent="."]
 script = ExtResource("19_vb0nj")

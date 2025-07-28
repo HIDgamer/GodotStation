@@ -1,4 +1,4 @@
-extends ReagentItem
+extends MedicalItem
 
 @onready var icon: AnimatedSprite2D = $Icon
 
@@ -42,10 +42,6 @@ func init_contents():
 			"reduce_pain": 25.0,
 			"description": "A pill that relieves pain."
 		})
-
-func use(user):
-	super.use(user)
-	icon.play("Open")
 
 func use_on(user, target, targeted_limb = ""):
 	# Check if we have pills left

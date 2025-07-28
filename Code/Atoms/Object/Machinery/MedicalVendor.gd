@@ -94,7 +94,7 @@ func _process(delta):
 			restock_supplies(80)  # 20% chance to restock per item
 			restock_reagents(5)   # Small amount of reagents
 
-func interact(user) -> bool:
+func interact(user, interaction_type: String = "interact", params: Dictionary = {}) -> bool:
 	# Parent interaction handling
 	super.interact(user)
 	

@@ -1,762 +1,608 @@
-# ThreadManager.gd
 extends Node
-
 class_name ThreadManager
 
-signal task_completed(task_id, result)
-signal all_tasks_completed(task_group_id)
-signal thread_error(thread_id, error)
+# Core thread configuration
+var MAX_WORKER_THREADS = 4
+var TASK_QUEUE_LIMIT = 100  # Prevent queue flooding
+var FRAME_BUDGET_MS = 8.0   # Milliseconds per frame for main thread tasks
 
-# Thread configuration
-var max_threads: int = 0  # Will be set based on CPU count
-var active_threads: Array = []
-var thread_pool: Array = []
-var thread_status: Dictionary = {}  # Maps thread ID to status (idle, working, completed)
-var thread_tasks: Dictionary = {}   # Maps thread ID to current task
-var thread_data: Dictionary = {}    # Maps thread ID to data for mutex operations
+# Task priorities determine execution order
+enum TaskPriority {
+	CRITICAL,    # Execute immediately on main thread
+	HIGH,        # Execute within 1-2 frames
+	MEDIUM,      # Execute within 5 frames
+	LOW,         # Execute when convenient
+	BACKGROUND   # Execute during idle time only
+}
 
-# Task management
-var task_queue: Array = []
-var task_results: Dictionary = {}
-var task_groups: Dictionary = {}    # Groups related tasks
-var task_counter: int = 0
-var task_group_counter: int = 0
+# Only operations that benefit from threading and are thread-safe
+enum TaskType {
+	# Data processing (thread-safe)
+	ATMOSPHERE_CALCULATION,
+	ROOM_DETECTION,
+	PATHFINDING_CALCULATION,
+	INVENTORY_SORTING,
+	ASSET_METADATA_EXTRACTION,
+	
+	# Main thread only operations
+	SCENE_INSTANTIATION,
+	ENTITY_SPAWNING,
+	CLEANUP
+}
 
-# Synchronization
-var task_mutex: Mutex = Mutex.new()
-var result_mutex: Mutex = Mutex.new()
-var wait_semaphore: Semaphore = Semaphore.new()
+# Worker thread management
+var worker_threads = []
+var task_queue = []
+var completed_tasks = []
+var active_tasks = {}
+var thread_mutex = Mutex.new()
+var result_mutex = Mutex.new()
 
-# System references
-var world_ref: WeakRef = null
-var system_priority: Dictionary = {}
+# Scene management (main thread only)
+var scene_pools = {}
+var scene_cache = {}
+var pooled_scene_limits = {
+	"Characters": 20,
+	"Effects": 50,
+	"Items": 100,
+	"UI": 10
+}
 
 # Performance tracking
-var performance_stats: Dictionary = {}
-var thread_timings: Dictionary = {}
+var task_performance = {}
+var queue_warnings_sent = 0
+var last_performance_report = 0
 
-# Configuration
-var enable_threading: bool = true
-var debug_mode: bool = false
-var adaptive_threading: bool = true
-var min_work_size: int = 10  # Minimum work size before threading is used
+# World data access
+var world_ref = null
+var thread_safe_world_data = {}
+var world_data_mutex = Mutex.new()
 
-# Thread workload balancing
-enum BalancingStrategy {
-	EQUAL_DIVISION,
-	WORK_STEALING,
-	ADAPTIVE
-}
-var balancing_strategy: int = BalancingStrategy.ADAPTIVE
-
-# Constants for systems
-enum SystemType {
-	ATMOSPHERE,
-	SPATIAL,
-	ENTITY,
-	PATHFINDING,
-	PHYSICS,
-	ROOM_DETECTION,
-	SENSORY,
-	GENERAL
-}
-
-func _init():
-	# Determine optimal thread count based on CPU cores
-	# Usually good to leave 1-2 cores for the main thread and OS
-	var processor_count = OS.get_processor_count()
-	max_threads = max(1, processor_count - 2)
-	
-	if debug_mode:
-		print("[ThreadManager] System has %d processors, using %d threads" % [processor_count, max_threads])
-	
-	# Set system priorities (higher = more thread allocation)
-	system_priority[SystemType.ATMOSPHERE] = 5
-	system_priority[SystemType.SPATIAL] = 4
-	system_priority[SystemType.ENTITY] = 3
-	system_priority[SystemType.PATHFINDING] = 4
-	system_priority[SystemType.PHYSICS] = 5
-	system_priority[SystemType.ROOM_DETECTION] = 2
-	system_priority[SystemType.SENSORY] = 1
-	system_priority[SystemType.GENERAL] = 1
+# Signals for communication with GameManager
+signal task_completed(task_id, result)
+signal scene_pool_ready(category, pool_size)
+signal entity_batch_processed(batch_id, results)
+signal performance_warning(task_type, execution_time)
 
 func _ready():
-	initialize_thread_pool()
-	
-	# Wait for a frame to ensure all systems are ready
-	await get_tree().process_frame
-	
-	print("[ThreadManager] Ready with %d threads in pool" % thread_pool.size())
+	print("ThreadManager: Starting thread system with ", MAX_WORKER_THREADS, " workers")
+	initialize_worker_threads()
+	initialize_scene_pools()
+	setup_performance_tracking()
 
-func _process(_delta):
-	# Check for completed tasks
+func _process(delta):
 	process_completed_tasks()
+	process_main_thread_tasks()
+	monitor_queue_health()
 	
-	# If adaptive threading is enabled, adjust thread count based on workload
-	if adaptive_threading and Engine.get_frames_drawn() % 300 == 0:  # Every ~5 seconds
-		adjust_thread_count()
+	# Performance reporting every 5 seconds
+	var current_time = Time.get_ticks_msec()
+	if current_time - last_performance_report > 5000:
+		report_performance()
+		last_performance_report = current_time
 
-func initialize_thread_pool():
-	# Create the initial thread pool
-	for i in range(max_threads):
-		var thread = Thread.new()
-		thread_pool.append(thread)
-		thread_status[thread.get_id()] = "idle"
-		thread_data[thread.get_id()] = {}
+func _exit_tree():
+	shutdown_all_threads()
+
+# Worker thread initialization
+func initialize_worker_threads():
+	for i in range(MAX_WORKER_THREADS):
+		var worker = WorkerThread.new()
+		worker.thread_id = i
+		worker.task_queue = task_queue
+		worker.completed_tasks = completed_tasks
+		worker.thread_mutex = thread_mutex
+		worker.result_mutex = result_mutex
+		worker.manager = self
 		
-		if debug_mode:
-			print("[ThreadManager] Created thread %d" % thread.get_id())
+		worker_threads.append(worker)
+		worker.start()
 
-func set_world_reference(world_node: Node):
-	world_ref = weakref(world_node)
-	
-	if debug_mode:
-		print("[ThreadManager] Set world reference: %s" % world_node.name)
+# Scene pool initialization on main thread
+func initialize_scene_pools():
+	for category in pooled_scene_limits.keys():
+		scene_pools[category] = []
 
-# --- Task Submission Methods ---
+# Set up performance monitoring
+func setup_performance_tracking():
+	for task_type in TaskType.values():
+		task_performance[task_type] = {
+			"total_time": 0.0,
+			"count": 0,
+			"avg_time": 0.0,
+			"max_time": 0.0
+		}
 
-func submit_task(callable_obj: Callable, task_data = null, system_type: int = SystemType.GENERAL) -> int:
-	if not enable_threading:
-		# Execute on main thread if threading disabled
-		var result = callable_obj.call(task_data)
-		return -1  # No task ID since it was executed immediately
+# Public API: Queue atmosphere processing for coordinates
+func queue_atmosphere_processing(coordinates: Array, priority: TaskPriority = TaskPriority.MEDIUM) -> String:
+	var task_data = {
+		"coordinates": coordinates,
+		"world_data": get_thread_safe_world_snapshot()
+	}
 	
-	task_mutex.lock()
-	var task_id = task_counter
-	task_counter += 1
+	return submit_task(TaskType.ATMOSPHERE_CALCULATION, priority, task_data)
+
+# Public API: Queue room detection for a Z-level
+func queue_room_detection(z_level: int, priority: TaskPriority = TaskPriority.MEDIUM) -> String:
+	var task_data = {
+		"z_level": z_level,
+		"world_data": get_thread_safe_world_snapshot(z_level)
+	}
 	
-	task_queue.append({
+	return submit_task(TaskType.ROOM_DETECTION, priority, task_data)
+
+# Public API: Queue inventory sorting
+func queue_inventory_operations(inventory_data: Array, priority: TaskPriority = TaskPriority.LOW) -> String:
+	var task_data = {
+		"inventories": inventory_data
+	}
+	
+	return submit_task(TaskType.INVENTORY_SORTING, priority, task_data)
+
+# Public API: Get a pooled scene (main thread only)
+func get_pooled_scene(category: String) -> Node:
+	if not scene_pools.has(category):
+		return null
+	
+	if scene_pools[category].is_empty():
+		# Pool is empty, try to create more
+		create_pooled_scenes(category, 5)
+		return null
+	
+	return scene_pools[category].pop_front()
+
+# Public API: Return scene to pool (main thread only)
+func return_scene_to_pool(scene: Node, category: String):
+	if not scene or not is_instance_valid(scene):
+		return
+	
+	if not scene_pools.has(category):
+		scene_pools[category] = []
+	
+	# Reset the scene state
+	reset_scene_for_pooling(scene)
+	
+	# Check pool limit
+	var limit = pooled_scene_limits.get(category, 20)
+	if scene_pools[category].size() < limit:
+		scene_pools[category].append(scene)
+	else:
+		# Pool is full, cleanup the scene
+		scene.queue_free()
+
+# Core task submission
+func submit_task(task_type: TaskType, priority: TaskPriority, task_data: Dictionary, callback: Callable = Callable()) -> String:
+	# Check queue limits to prevent flooding
+	if task_queue.size() >= TASK_QUEUE_LIMIT:
+		if queue_warnings_sent < 5:  # Limit warning spam
+			print("ThreadManager: Task queue at limit, dropping task")
+			queue_warnings_sent += 1
+		return ""
+	
+	var task_id = generate_task_id()
+	
+	var task = {
 		"id": task_id,
-		"callable": callable_obj,
+		"type": task_type,
+		"priority": priority,
 		"data": task_data,
-		"system_type": system_type,
-		"priority": system_priority.get(system_type, 1),
+		"callback": callback,
 		"submitted_time": Time.get_ticks_msec()
-	})
+	}
 	
-	# Sort queue by priority (higher first)
-	task_queue.sort_custom(Callable(self, "_sort_by_priority"))
-	task_mutex.unlock()
+	# Critical tasks execute immediately on main thread
+	if priority == TaskPriority.CRITICAL:
+		var result = execute_task_on_main_thread(task)
+		if callback.is_valid():
+			callback.call(task_id, result)
+		return task_id
 	
-	# Try to start a thread immediately if available
-	_assign_tasks_to_threads()
+	# Queue task for worker threads
+	thread_mutex.lock()
+	task_queue.append(task)
+	# Sort by priority (lower enum value = higher priority)
+	task_queue.sort_custom(func(a, b): return a.priority < b.priority)
+	thread_mutex.unlock()
 	
+	active_tasks[task_id] = task
 	return task_id
 
-func submit_task_group(callable_obj: Callable, data_array: Array, system_type: int = SystemType.GENERAL) -> int:
-	# For data that can be split across multiple threads
-	if not enable_threading or data_array.size() < min_work_size:
-		# Execute on main thread if threading disabled or task too small
-		var results = []
-		for data in data_array:
-			results.append(callable_obj.call(data))
-		
-		# Signal completion immediately
-		emit_signal("all_tasks_completed", -1)
-		return -1
-	
-	task_mutex.lock()
-	var group_id = task_group_counter
-	task_group_counter += 1
-	
-	# Create a task group entry to track completion
-	task_groups[group_id] = {
-		"total_tasks": data_array.size(),
-		"completed_tasks": 0,
-		"results": [],
-		"system_type": system_type
-	}
-	
-	# Determine how to split the work
-	var chunks = _split_workload(data_array, system_type)
-	
-	for chunk in chunks:
-		var task_id = task_counter
-		task_counter += 1
-		
-		task_queue.append({
-			"id": task_id,
-			"callable": callable_obj,
-			"data": chunk,
-			"system_type": system_type,
-			"priority": system_priority.get(system_type, 1),
-			"group_id": group_id,
-			"submitted_time": Time.get_ticks_msec()
-		})
-	
-	# Sort queue by priority
-	task_queue.sort_custom(Callable(self, "_sort_by_priority"))
-	task_mutex.unlock()
-	
-	# Try to start threads immediately
-	_assign_tasks_to_threads()
-	
-	return group_id
-
-# Special method for atmosphere processing - optimized for tile chunks
-func process_atmosphere_in_chunks(chunk_size: int = 16) -> int:
-	if not is_world_valid():
-		return -1
-	
-	var world = world_ref.get_ref()
-	var atmos_system = world.atmosphere_system
-	
-	if not atmos_system:
-		return -1
-	
-	var all_z_levels = world.world_data.keys()
-	var task_data_array = []
-	
-	# Create workload chunks for each z-level
-	for z_level in all_z_levels:
-		var tiles = world.world_data[z_level].keys()
-		var chunks = []
-		
-		# Split tiles into chunks
-		var current_chunk = []
-		for i in range(tiles.size()):
-			current_chunk.append(tiles[i])
-			
-			if current_chunk.size() >= chunk_size or i == tiles.size() - 1:
-				chunks.append({
-					"z_level": z_level,
-					"tiles": current_chunk.duplicate()
-				})
-				current_chunk.clear()
-		
-		# Add chunks to work array
-		task_data_array.append_array(chunks)
-	
-	# Submit the chunked work
-	return submit_task_group(
-		Callable(atmos_system, "process_atmosphere_chunk"), 
-		task_data_array,
-		SystemType.ATMOSPHERE
-	)
-
-# Process entities in parallel
-func process_entities_parallel(entities: Array, method_name: String) -> int:
-	if entities.size() < min_work_size:
-		# Process on main thread if too few entities
-		for entity in entities:
-			if entity.has_method(method_name):
-				entity.call(method_name)
-		return -1
-	
-	# Create a callable that will call the specified method on each entity
-	var entity_processor = func(entity_chunk):
-		var results = []
-		for entity in entity_chunk:
-			if entity and entity.has_method(method_name):
-				results.append(entity.call(method_name))
-		return results
-	
-	# Split entities into chunks and process
-	return submit_task_group(entity_processor, _chunk_array(entities), SystemType.ENTITY)
-
-# Process room detection in parallel
-func detect_rooms_parallel() -> int:
-	if not is_world_valid():
-		return -1
-	
-	var world = world_ref.get_ref()
-	var all_z_levels = world.world_data.keys()
-	
-	# Create a callable for processing room detection on a z-level
-	var room_detector = func(z_level_data):
-		var z_level = z_level_data
-		var visited = {}
-		var rooms = []
-		
-		# Get all tiles for this z-level
-		var tiles = world.world_data[z_level].keys()
-		
-		# Flood fill to find rooms
-		for coords in tiles:
-			if coords in visited:
-				continue
-			
-			var room_tiles = flood_fill_room(coords, z_level, visited, world)
-			if room_tiles.size() > 0:
-				rooms.append({
-					"tiles": room_tiles,
-					"z_level": z_level,
-					"volume": room_tiles.size(),
-					"connections": detect_room_connections(room_tiles, z_level, world)
-				})
-		
-		return {
-			"z_level": z_level,
-			"rooms": rooms
-		}
-	
-	# Submit a task group with one task per z-level
-	return submit_task_group(room_detector, all_z_levels, SystemType.ROOM_DETECTION)
-
-# --- Helper methods for parallel operations ---
-
-func flood_fill_room(start_coords, z_level, visited, world):
-	var room_tiles = []
-	var to_visit = [start_coords]
-	
-	while to_visit.size() > 0:
-		var current = to_visit.pop_front()
-		
-		if current in visited:
-			continue
-			
-		visited[current] = true
-		room_tiles.append(current)
-		
-		# Check neighbors
-		for neighbor in get_adjacent_tiles(current, world):
-			if neighbor in visited:
-				continue
-				
-			# Skip walls and solid barriers
-			if is_airtight_barrier(current, neighbor, z_level, world):
-				continue
-				
-			to_visit.append(neighbor)
-	
-	return room_tiles
-
-func get_adjacent_tiles(coords, world):
-	# Return coordinates of adjacent tiles (north, south, east, west)
-	var adjacents = [
-		Vector2(coords.x + 1, coords.y),
-		Vector2(coords.x - 1, coords.y),
-		Vector2(coords.x, coords.y + 1),
-		Vector2(coords.x, coords.y - 1)
-	]
-	
-	# Filter out invalid tiles
-	var valid_adjacents = []
-	for adj in adjacents:
-		if world.get_tile_data(adj, world.current_z_level) != null:
-			valid_adjacents.append(adj)
-	
-	return valid_adjacents
-
-func is_airtight_barrier(tile1_coords, tile2_coords, z_level, world):
-	# Check if there's an airtight barrier between tiles
-	var tile1 = world.get_tile_data(tile1_coords, z_level)
-	var tile2 = world.get_tile_data(tile2_coords, z_level)
-	
-	if tile1 == null or tile2 == null:
-		return true  # Consider out of bounds as airtight
-	
-	# Check for walls
-	if world.TileLayer.WALL in tile1:
-		return true  # Wall blocks air
-	
-	if world.TileLayer.WALL in tile2:
-		return true  # Wall blocks air
-	
-	# Check for doors
-	if "door" in tile1 and "closed" in tile1.door and tile1.door.closed:
-		return true  # Closed door blocks air
-	
-	if "door" in tile2 and "closed" in tile2.door and tile2.door.closed:
-		return true  # Closed door blocks air
-	
-	return false
-
-func detect_room_connections(room_tiles, z_level, world):
-	var connections = []
-
-	for tile_coords in room_tiles:
-		var tile = world.get_tile_data(tile_coords, z_level)
-		if tile == null:
-			continue
-
-		# Check for doors
-		if "door" in tile:
-			var door = tile.door
-			if door != null and "closed" in door:
-				connections.append({
-					"type": "door",
-					"tile": tile_coords,
-					"state": "closed" if door.closed else "open"
-				})
-
-		# Check for z-level connections
-		if "z_connection" in tile:
-			var z_conn = tile.z_connection
-			if z_conn != null and "type" in z_conn and "target" in z_conn:
-				connections.append({
-					"type": z_conn.type,
-					"tile": tile_coords,
-					"target": z_conn.target,
-					"direction": z_conn.direction
-				})
-
-	return connections
-
-# --- Thread Management ---
-
-func _thread_function(task_data):
-	var thread_id = OS.get_thread_caller_id()
-	var task = task_data
-	
-	# Record start time for performance tracking
-	var start_time = Time.get_ticks_msec()
-	
-	# Execute the task
-	var result
-	var error = null
-	
-	thread_status[thread_id] = "working"
-	
-	# Try to execute the task
-	result = task.callable.call(task.data)
-	
-	# Update performance stats
-	var end_time = Time.get_ticks_msec()
-	var duration = end_time - start_time
-	
+# Process completed tasks from worker threads
+func process_completed_tasks():
 	result_mutex.lock()
-	thread_timings[task.id] = {
-		"thread_id": thread_id,
-		"system_type": task.system_type,
-		"duration_ms": duration,
-		"submitted_time": task.submitted_time,
-		"start_time": start_time,
-		"end_time": end_time
-	}
-	
-	# Store the result
-	task_results[task.id] = {
-		"result": result,
-		"error": error,
-		"task": task
-	}
-	
-	# Update group completion if part of a group
-	if "group_id" in task and task.group_id in task_groups:
-		task_groups[task.group_id].completed_tasks += 1
-		task_groups[task.group_id].results.append(result)
-	
-	thread_status[thread_id] = "completed"
+	var tasks_to_process = completed_tasks.duplicate()
+	completed_tasks.clear()
 	result_mutex.unlock()
 	
-	# Signal that a task is complete
-	wait_semaphore.post()
+	for task_result in tasks_to_process:
+		var task_id = task_result.id
+		var result = task_result.result
+		var execution_time = task_result.execution_time
+		
+		# Update performance tracking
+		update_task_performance(task_result.type, execution_time)
+		
+		# Emit signal
+		task_completed.emit(task_id, result)
+		
+		# Call callback if provided
+		if task_result.has("callback") and task_result.callback.is_valid():
+			task_result.callback.call(task_id, result)
+		
+		# Remove from active tasks
+		if task_id in active_tasks:
+			active_tasks.erase(task_id)
+
+# Process main thread tasks within frame budget
+func process_main_thread_tasks():
+	var frame_start = Time.get_ticks_msec()
+	var budget_remaining = FRAME_BUDGET_MS
+	
+	# Process scene instantiation requests
+	process_pending_scene_creations(budget_remaining * 0.5)
+	
+	# Process entity spawning requests
+	process_pending_entity_spawns(budget_remaining * 0.3)
+	
+	# Process cleanup tasks
+	process_pending_cleanup(budget_remaining * 0.2)
+
+# Task execution for different types
+func execute_task_on_main_thread(task: Dictionary):
+	var start_time = Time.get_ticks_msec()
+	var result = null
+	
+	match task.type:
+		TaskType.SCENE_INSTANTIATION:
+			result = instantiate_scene(task.data)
+		TaskType.ENTITY_SPAWNING:
+			result = spawn_entity(task.data)
+		TaskType.CLEANUP:
+			result = perform_cleanup(task.data)
+		_:
+			print("ThreadManager: Unknown main thread task type: ", task.type)
+	
+	var execution_time = Time.get_ticks_msec() - start_time
+	update_task_performance(task.type, execution_time)
 	
 	return result
 
-func process_completed_tasks():
-	var completed_task_ids = []
-	var completed_groups = []
-	
-	result_mutex.lock()
-	
-	# Check all task results
-	for task_id in task_results.keys():
-		if not task_id in completed_task_ids:
-			var task_result = task_results[task_id]
-			
-			# Signal task completion
-			emit_signal("task_completed", task_id, task_result.result)
-			
-			# Check if this is an error
-			if task_result.error != null:
-				emit_signal("thread_error", 
-							thread_timings[task_id].thread_id if task_id in thread_timings else -1, 
-							task_result.error)
-			
-			completed_task_ids.append(task_id)
-			
-			# Update performance stats
-			if task_id in thread_timings:
-				var system_type = thread_timings[task_id].system_type
-				if not system_type in performance_stats:
-					performance_stats[system_type] = {
-						"count": 0,
-						"total_duration": 0,
-						"max_duration": 0
-					}
-				
-				performance_stats[system_type].count += 1
-				performance_stats[system_type].total_duration += thread_timings[task_id].duration_ms
-				performance_stats[system_type].max_duration = max(
-					performance_stats[system_type].max_duration,
-					thread_timings[task_id].duration_ms
-				)
-	
-	# Check for completed groups
-	for group_id in task_groups.keys():
-		var group = task_groups[group_id]
-		if group.completed_tasks >= group.total_tasks and not group_id in completed_groups:
-			emit_signal("all_tasks_completed", group_id)
-			completed_groups.append(group_id)
-	
-	# Clean up completed tasks and groups
-	for task_id in completed_task_ids:
-		task_results.erase(task_id)
-		thread_timings.erase(task_id)
-	
-	for group_id in completed_groups:
-		task_groups.erase(group_id)
-	
-	result_mutex.unlock()
-	
-	# Reclaim threads that have completed
-	reclaim_threads()
+# Worker thread task execution (thread-safe operations only)
+func execute_worker_task(task: Dictionary):
+	match task.type:
+		TaskType.ATMOSPHERE_CALCULATION:
+			return calculate_atmosphere_data(task.data)
+		TaskType.ROOM_DETECTION:
+			return detect_rooms(task.data)
+		TaskType.PATHFINDING_CALCULATION:
+			return calculate_pathfinding(task.data)
+		TaskType.INVENTORY_SORTING:
+			return sort_inventory_data(task.data)
+		TaskType.ASSET_METADATA_EXTRACTION:
+			return extract_asset_metadata(task.data)
+		_:
+			print("ThreadManager: Unknown worker task type: ", task.type)
+			return null
 
-func reclaim_threads():
-	var threads_to_reclaim = []
+# Atmosphere calculation (thread-safe)
+func calculate_atmosphere_data(task_data: Dictionary) -> Dictionary:
+	var coordinates = task_data.get("coordinates", [])
+	var world_data = task_data.get("world_data", {})
+	var results = []
 	
-	# Find threads marked as completed
-	for thread in active_threads:
-		var thread_id = thread.get_id()
-		if thread_status[thread_id] == "completed":
-			threads_to_reclaim.append(thread)
+	for coord in coordinates:
+		# Simulate atmosphere calculations
+		var pressure = calculate_pressure_at_coordinate(coord, world_data)
+		var temperature = calculate_temperature_at_coordinate(coord, world_data)
+		var gas_mix = calculate_gas_mixture(coord, world_data)
+		
+		results.append({
+			"coordinate": coord,
+			"pressure": pressure,
+			"temperature": temperature,
+			"gas_mix": gas_mix
+		})
 	
-	# Reclaim threads
-	for thread in threads_to_reclaim:
-		var thread_id = thread.get_id()
-		
-		# Wait for thread to complete (should be instant since it's already marked as completed)
-		if thread.is_alive():
-			var result = thread.wait_to_finish()
-		
-		# Return thread to the pool
-		thread_status[thread_id] = "idle"
-		active_threads.erase(thread)
-		thread_pool.append(thread)
-		
-		if debug_mode:
-			print("[ThreadManager] Reclaimed thread %d" % thread_id)
-	
-	# Try to assign new tasks to reclaimed threads
-	if threads_to_reclaim.size() > 0:
-		_assign_tasks_to_threads()
+	return {"atmosphere_updates": results}
 
-func _assign_tasks_to_threads():
-	task_mutex.lock()
+# Room detection (thread-safe)
+func detect_rooms(task_data: Dictionary) -> Dictionary:
+	var z_level = task_data.get("z_level", 0)
+	var world_data = task_data.get("world_data", {})
 	
-	# Only proceed if we have tasks and available threads
-	if task_queue.size() == 0 or thread_pool.size() == 0:
-		task_mutex.unlock()
+	var rooms = {}
+	var visited = {}
+	var room_id = 0
+	
+	# Find all floor tiles and group them into rooms
+	for coord in world_data.keys():
+		if coord in visited:
+			continue
+		
+		var room_tiles = flood_fill_room(coord, world_data, visited)
+		if room_tiles.size() > 0:
+			rooms[room_id] = {
+				"id": room_id,
+				"tiles": room_tiles,
+				"z_level": z_level,
+				"area": room_tiles.size()
+			}
+			room_id += 1
+	
+	return {"rooms": rooms, "z_level": z_level}
+
+# Inventory sorting (thread-safe)
+func sort_inventory_data(task_data: Dictionary) -> Dictionary:
+	var inventories = task_data.get("inventories", [])
+	var sorted_inventories = []
+	
+	for inventory in inventories:
+		var items = inventory.get("items", [])
+		var sorted_items = sort_items_by_category(items)
+		
+		sorted_inventories.append({
+			"inventory_id": inventory.get("id", "unknown"),
+			"sorted_items": sorted_items,
+			"item_count": sorted_items.size()
+		})
+	
+	return {"sorted_inventories": sorted_inventories}
+
+# Scene management (main thread only)
+func create_pooled_scenes(category: String, count: int):
+	var scenes_created = 0
+	var start_time = Time.get_ticks_msec()
+	
+	# Don't exceed frame budget
+	while scenes_created < count and (Time.get_ticks_msec() - start_time) < FRAME_BUDGET_MS:
+		var scene = create_scene_for_category(category)
+		if scene:
+			scene_pools[category].append(scene)
+			scenes_created += 1
+		else:
+			break
+	
+	if scenes_created > 0:
+		scene_pool_ready.emit(category, scene_pools[category].size())
+
+func create_scene_for_category(category: String) -> Node:
+	# This would integrate with your asset system
+	# For now, just return null to indicate no scene available
+	return null
+
+# Scene state reset for pooling
+func reset_scene_for_pooling(scene: Node):
+	# Reset position
+	if scene.has_method("set_position"):
+		scene.set_position(Vector2.ZERO)
+	
+	# Reset visibility
+	if scene.has_method("set_visible"):
+		scene.set_visible(true)
+	
+	# Call custom reset method if available
+	if scene.has_method("reset_for_pool"):
+		scene.reset_for_pool()
+
+# World data management
+func set_world_reference(world):
+	world_ref = world
+	update_thread_safe_world_data()
+
+func update_thread_safe_world_data():
+	if not world_ref:
 		return
 	
-	# Prioritize tasks based on system_type and submitted time
-	while task_queue.size() > 0 and thread_pool.size() > 0:
-		var task = task_queue[0]
-		task_queue.remove_at(0)
-		
-		var thread = thread_pool[0]
-		thread_pool.remove_at(0)
-		
-		# Store task reference
-		thread_tasks[thread.get_id()] = task
-		
-		# Start thread with task
-		thread_status[thread.get_id()] = "starting"
-		thread.start(Callable(self, "_thread_function").bind(task))
-		
-		# Move to active threads
-		active_threads.append(thread)
-		
-		if debug_mode:
-			print("[ThreadManager] Started thread %d with task %d (system: %d)" % 
-				  [thread.get_id(), task.id, task.system_type])
-	
-	task_mutex.unlock()
+	world_data_mutex.lock()
+	# Create thread-safe copy of world data
+	if world_ref.has_method("get_thread_safe_data"):
+		thread_safe_world_data = world_ref.get_thread_safe_data()
+	world_data_mutex.unlock()
 
-func wait_for_task(task_id: int, timeout_ms: int = 5000) -> Dictionary:
-	var start_time = Time.get_ticks_msec()
-	
-	while Time.get_ticks_msec() - start_time < timeout_ms:
-		result_mutex.lock()
-		if task_id in task_results:
-			var result = task_results[task_id].duplicate()
-			result_mutex.unlock()
-			return result
-		result_mutex.unlock()
+func get_thread_safe_world_snapshot(z_level: int = -1) -> Dictionary:
+	world_data_mutex.lock()
+	var data = {}
+	if z_level >= 0 and z_level in thread_safe_world_data:
+		data = thread_safe_world_data[z_level].duplicate(true)
+	else:
+		data = thread_safe_world_data.duplicate(true)
+	world_data_mutex.unlock()
+	return data
+
+# Performance monitoring
+func update_task_performance(task_type: TaskType, execution_time: float):
+	if task_type in task_performance:
+		var perf = task_performance[task_type]
+		perf.total_time += execution_time
+		perf.count += 1
+		perf.avg_time = perf.total_time / perf.count
+		perf.max_time = max(perf.max_time, execution_time)
 		
-		# Wait for a task to complete
-		if wait_semaphore.try_wait():
-			# A task completed, check if it's the one we want
+		# Warn about slow tasks
+		if execution_time > 50:  # More than 50ms is concerning
+			performance_warning.emit(task_type, execution_time)
+
+func monitor_queue_health():
+	var queue_size = task_queue.size()
+	var active_count = active_tasks.size()
+	
+	# Reset warning counter periodically
+	if Time.get_ticks_msec() % 10000 == 0:  # Every 10 seconds
+		queue_warnings_sent = 0
+	
+	# Warn about queue size
+	if queue_size > 50 and queue_warnings_sent < 3:
+		print("ThreadManager: Task queue size: ", queue_size, ", active: ", active_count)
+		queue_warnings_sent += 1
+
+func report_performance():
+	var total_tasks = 0
+	var total_time = 0.0
+	
+	for task_type in task_performance:
+		var perf = task_performance[task_type]
+		total_tasks += perf.count
+		total_time += perf.total_time
+	
+	if total_tasks > 0:
+		print("ThreadManager: Processed ", total_tasks, " tasks, avg time: ", total_time / total_tasks, "ms")
+
+# Utility functions
+func generate_task_id() -> String:
+	return "task_" + str(Time.get_ticks_msec()) + "_" + str(randi())
+
+func shutdown_all_threads():
+	print("ThreadManager: Shutting down worker threads")
+	
+	for worker in worker_threads:
+		worker.shutdown()
+	
+	worker_threads.clear()
+	task_queue.clear()
+	active_tasks.clear()
+
+# Helper functions for calculations (placeholders - implement as needed)
+func calculate_pressure_at_coordinate(coord: Vector2i, world_data: Dictionary) -> float:
+	# Placeholder atmosphere calculation
+	return 101.3 + randf_range(-5.0, 5.0)
+
+func calculate_temperature_at_coordinate(coord: Vector2i, world_data: Dictionary) -> float:
+	# Placeholder temperature calculation
+	return 293.0 + randf_range(-10.0, 10.0)
+
+func calculate_gas_mixture(coord: Vector2i, world_data: Dictionary) -> Dictionary:
+	# Placeholder gas mixture calculation
+	return {"oxygen": 0.21, "nitrogen": 0.78, "other": 0.01}
+
+func flood_fill_room(start_coord: Vector2i, world_data: Dictionary, visited: Dictionary) -> Array:
+	var room_tiles = []
+	var to_check = [start_coord]
+	
+	while to_check.size() > 0:
+		var coord = to_check.pop_front()
+		
+		if coord in visited or coord not in world_data:
 			continue
 		
-		# Yield to avoid freezing
-		await get_tree().process_frame
-	
-	# Timeout
-	return {"error": "Timeout waiting for task %d" % task_id}
-
-func wait_for_group(group_id: int, timeout_ms: int = 10000) -> Array:
-	var start_time = Time.get_ticks_msec()
-	
-	while Time.get_ticks_msec() - start_time < timeout_ms:
-		result_mutex.lock()
+		visited[coord] = true
+		room_tiles.append(coord)
 		
-		if group_id in task_groups and task_groups[group_id].completed_tasks >= task_groups[group_id].total_tasks:
-			var results = task_groups[group_id].results.duplicate()
-			result_mutex.unlock()
-			return results
+		# Check adjacent tiles
+		var adjacent = [
+			Vector2i(coord.x + 1, coord.y),
+			Vector2i(coord.x - 1, coord.y),
+			Vector2i(coord.x, coord.y + 1),
+			Vector2i(coord.x, coord.y - 1)
+		]
 		
-		result_mutex.unlock()
-		
-		# Wait for a task to complete
-		if wait_semaphore.try_wait():
-			# A task completed, check if group is complete
-			continue
-		
-		# Yield to avoid freezing
-		await get_tree().process_frame
+		for adj_coord in adjacent:
+			if adj_coord not in visited and adj_coord in world_data:
+				# Check if there's a wall between tiles
+				if not is_wall_between(coord, adj_coord, world_data):
+					to_check.append(adj_coord)
 	
-	# Timeout
-	return [{"error": "Timeout waiting for task group %d" % group_id}]
+	return room_tiles
 
-# --- Utility Methods ---
+func is_wall_between(coord1: Vector2i, coord2: Vector2i, world_data: Dictionary) -> bool:
+	# Placeholder wall detection
+	return false
 
-func _sort_by_priority(a, b):
-	# Higher priority first
-	if a.priority != b.priority:
-		return a.priority > b.priority
-	
-	# Then by submission time (older first)
-	return a.submitted_time < b.submitted_time
+func sort_items_by_category(items: Array) -> Array:
+	# Simple category-based sorting
+	items.sort_custom(func(a, b): 
+		var cat_a = a.get("category", "unknown")
+		var cat_b = b.get("category", "unknown")
+		return cat_a < cat_b
+	)
+	return items
 
-func _split_workload(data_array: Array, system_type: int) -> Array:
-	# Get the number of threads to use for this system type
-	var thread_count = _get_thread_allocation(system_type)
+func calculate_pathfinding(task_data: Dictionary) -> Dictionary:
+	# Placeholder pathfinding
+	return {"path": [], "cost": 0}
+
+func extract_asset_metadata(task_data: Dictionary) -> Dictionary:
+	# Placeholder metadata extraction
+	return {"metadata": {}}
+
+func instantiate_scene(task_data: Dictionary) -> Dictionary:
+	# Placeholder scene instantiation
+	return {"scene_created": true}
+
+func spawn_entity(task_data: Dictionary) -> Dictionary:
+	# Placeholder entity spawning
+	return {"entity_spawned": true}
+
+func perform_cleanup(task_data: Dictionary) -> Dictionary:
+	# Placeholder cleanup
+	return {"cleanup_completed": true}
+
+func process_pending_scene_creations(budget_ms: float):
+	# Process scene creation requests within budget
+	pass
+
+func process_pending_entity_spawns(budget_ms: float):
+	# Process entity spawning within budget
+	pass
+
+func process_pending_cleanup(budget_ms: float):
+	# Process cleanup tasks within budget
+	pass
+
+# Worker Thread Class
+class WorkerThread:
+	var thread: Thread
+	var thread_id: int
+	var is_running: bool = false
+	var should_exit: bool = false
 	
-	# Limit to available data size
-	thread_count = min(thread_count, data_array.size())
+	var task_queue: Array
+	var completed_tasks: Array
+	var thread_mutex: Mutex
+	var result_mutex: Mutex
+	var manager: ThreadManager
 	
-	match balancing_strategy:
-		BalancingStrategy.EQUAL_DIVISION:
-			return _chunk_array(data_array, thread_count)
+	func start():
+		thread = Thread.new()
+		is_running = true
+		thread.start(_thread_function)
+	
+	func shutdown():
+		should_exit = true
+		if thread and thread.is_started():
+			thread.wait_to_finish()
+		is_running = false
+	
+	func _thread_function():
+		while not should_exit:
+			var task = get_next_task()
 			
-		BalancingStrategy.WORK_STEALING:
-			# For work stealing, create smaller chunks
-			var chunk_size = max(1, data_array.size() / (thread_count * 2))
-			return _chunk_array_by_size(data_array, chunk_size)
-			
-		BalancingStrategy.ADAPTIVE:
-			# Look at past performance to determine optimal chunk size
-			if system_type in performance_stats and performance_stats[system_type].count > 0:
-				var avg_time = performance_stats[system_type].total_duration / performance_stats[system_type].count
+			if task:
+				var start_time = Time.get_ticks_msec()
+				var result = manager.execute_worker_task(task)
+				var execution_time = Time.get_ticks_msec() - start_time
 				
-				# If tasks are very fast, use fewer but larger chunks
-				if avg_time < 5:  # Less than 5ms per task
-					return _chunk_array(data_array, max(1, thread_count / 2))
-				# If tasks are very slow, use smaller chunks
-				elif avg_time > 50:  # More than 50ms per task
-					var chunk_size = max(1, data_array.size() / (thread_count * 3))
-					return _chunk_array_by_size(data_array, chunk_size)
-			
-			# Default to equal division
-			return _chunk_array(data_array, thread_count)
+				var task_result = {
+					"id": task.id,
+					"type": task.type,
+					"result": result,
+					"execution_time": execution_time,
+					"callback": task.get("callback", Callable())
+				}
+				
+				result_mutex.lock()
+				completed_tasks.append(task_result)
+				result_mutex.unlock()
+			else:
+				# No tasks available, sleep briefly
+				OS.delay_msec(10)
 	
-	# Fallback to simple equal division
-	return _chunk_array(data_array, thread_count)
-
-func _chunk_array(array: Array, chunk_count: int = 4) -> Array:
-	if array.size() == 0:
-		return []
-	
-	var chunks = []
-	var items_per_chunk = max(1, array.size() / chunk_count)
-	
-	var current_chunk = []
-	for i in range(array.size()):
-		current_chunk.append(array[i])
+	func get_next_task():
+		thread_mutex.lock()
+		var task = null
 		
-		if current_chunk.size() >= items_per_chunk or i == array.size() - 1:
-			chunks.append(current_chunk.duplicate())
-			current_chunk.clear()
-	
-	return chunks
-
-func _chunk_array_by_size(array: Array, chunk_size: int) -> Array:
-	if array.size() == 0:
-		return []
-	
-	var chunks = []
-	var current_chunk = []
-	
-	for i in range(array.size()):
-		current_chunk.append(array[i])
+		if task_queue.size() > 0:
+			# Get highest priority task
+			task = task_queue.pop_front()
 		
-		if current_chunk.size() >= chunk_size or i == array.size() - 1:
-			chunks.append(current_chunk.duplicate())
-			current_chunk.clear()
-	
-	return chunks
-
-func _get_thread_allocation(system_type: int) -> int:
-	# Allocate threads based on system priority
-	var priority = system_priority.get(system_type, 1)
-	var total_priority = 0
-	
-	for s_type in system_priority.keys():
-		total_priority += system_priority[s_type]
-	
-	# Calculate thread allocation (at least 1)
-	return max(1, int(ceil((priority / float(total_priority)) * max_threads)))
-
-func adjust_thread_count():
-	# Check CPU usage and adjust thread count if necessary
-	var usage = Performance.get_monitor(Performance.TIME_PROCESS)
-	
-	# If we're using too much CPU time per frame, reduce threads
-	if usage > 1.0/60.0 * 0.8:  # Using more than 80% of frame time
-		max_threads = max(1, max_threads - 1)
-		if debug_mode:
-			print("[ThreadManager] High CPU usage detected, reducing threads to %d" % max_threads)
-	
-	# If we have room to grow and tasks are queuing up
-	elif usage < 1.0/60.0 * 0.5 and task_queue.size() > max_threads:
-		max_threads = min(OS.get_processor_count() - 1, max_threads + 1)
-		if debug_mode:
-			print("[ThreadManager] Low CPU usage with pending tasks, increasing threads to %d" % max_threads)
-
-# --- Cleanup ---
-
-func is_world_valid() -> bool:
-	return world_ref != null and world_ref.get_ref() != null
-
-func cleanup_threads():
-	# Wait for all active threads to complete
-	for thread in active_threads:
-		if thread.is_alive():
-			var result = thread.wait_to_finish()
-	
-	active_threads.clear()
-	
-	# Clear thread pool
-	thread_pool.clear()
-	
-	# Reset counters and status
-	thread_status.clear()
-	thread_tasks.clear()
-	task_results.clear()
-	task_groups.clear()
-	
-	if debug_mode:
-		print("[ThreadManager] All threads cleaned up")
-
-func _exit_tree():
-	# Ensure all threads are properly terminated
-	cleanup_threads()
-
-func get_performance_report() -> Dictionary:
-	var report = {
-		"thread_count": max_threads,
-		"active_threads": active_threads.size(),
-		"idle_threads": thread_pool.size(),
-		"pending_tasks": task_queue.size(),
-		"system_stats": performance_stats.duplicate(true)
-	}
-	print(report)
-	for system_type in report.system_stats.keys():
-		var stats = report.system_stats[system_type]
-		if stats.count > 0:
-			stats["avg_duration"] = stats.total_duration / stats.count
-	
-	return report
+		thread_mutex.unlock()
+		return task

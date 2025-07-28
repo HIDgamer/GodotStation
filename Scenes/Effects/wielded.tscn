@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://cctl4l7x5p6dc"]
+
+[ext_resource type="Script" uid="uid://dq8mj737bpfqo" path="res://Code/Items/ItemComponents/Item.gd" id="1_5l31f"]
+[ext_resource type="Texture2D" uid="uid://ddo685l40bkjc" path="res://Assets/UI/Inventory/Wielded.png" id="2_xejp5"]
+
+[node name="Wielded" type="Node2D"]
+script = ExtResource("1_5l31f")
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_xejp5")

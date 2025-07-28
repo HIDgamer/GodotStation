@@ -45,6 +45,8 @@ animations = [{
 
 [node name="IncendiaryGrenade" type="Node2D" groups=["grenades", "items", "objects"]]
 script = ExtResource("1_j2xxn")
+entity_type = "grenade"
+pickupable = true
 
 [node name="Icon" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_lrfl5")

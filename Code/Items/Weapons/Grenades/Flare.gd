@@ -2,28 +2,32 @@ extends Grenade
 class_name Flare
 
 # Flare properties
-var fuel = 0  # Duration in seconds
-var lower_fuel_limit = 30000  # 300 seconds (5 minutes)
-var upper_fuel_limit = 30000  # 300 seconds (5 minutes)
-var light_range = 3  # Tiles
-var light_color = Color(1.0, 0.5, 0.2)  # Orange-red light
-var light_energy = 0.8  # Light brightness
+var fuel: float = 0.0  # Current fuel in seconds
+var lower_fuel_limit: int = 30000  # 300 seconds (5 minutes)
+var upper_fuel_limit: int = 30000  # 300 seconds (5 minutes)
+var light_range: float = 3.0  # Tiles
+var light_color: Color = Color(1.0, 0.5, 0.2)  # Orange-red light
+var light_energy: float = 0.8  # Light brightness
 
-# Performance settings
-var performance_mode = true  # Set to true to reduce GPU load
-var min_flicker_interval = 0.3  # Less frequent flickering (was 0.1)
-
-# References to created nodes
-var active_light = null
-var active_fire = null
+# Active components
+var active_light: PointLight2D = null
+var active_fire_particles: GPUParticles2D = null
 var user_squad = null  # For squad-based targeting
 
-# Preload the fire particle scene
-var fire_particle_scene = preload("res://Scenes/Effects/Fire.tscn")
-var flare = null
+# Flicker timer
+var flicker_timer: Timer = null
+var flicker_interval: float = 0.5
+
+# State persistence
+var was_active_before_move: bool = false
+var is_depleted: bool = false
+
+# Preloaded resources
+static var fire_particle_scene: PackedScene
 
 # Signal for target designation
 signal targeting_position(pos, squad)
+signal flare_depleted()
 
 func _init():
 	super._init()
@@ -34,698 +38,619 @@ func _init():
 	throwforce = 1
 	dangerous = false
 	
-	# Use the Item class variables for type categorization
-	if "item_type" in self:
-		self.item_type = "grenade"
+	# Load resources
+	if not fire_particle_scene:
+		fire_particle_scene = preload("res://Scenes/Effects/Fire.tscn")
 	
 	# Randomize fuel amount
-	fuel = randi_range(lower_fuel_limit, upper_fuel_limit) / 100.0  # Convert to seconds
+	fuel = randf_range(lower_fuel_limit, upper_fuel_limit) / 100.0
 
 func _ready():
 	super._ready()
 	
-	flare = get_node("Icon")
-	flare.play("Pin")
+	# Set initial animation
+	if icon:
+		set_animation_state("armed")
 	
-	# Create light immediately if item is already active
+	# If already active, create light
 	if active:
-		call_deferred("_create_light")
+		call_deferred("create_light")
 
-func _process(delta):
-	# Only process if active
+# Let inventory system handle basic equipped state, only manage flare-specific logic
+func equipped(user, slot: int):
+	super.equipped(user, slot)
+	
+	# Restore effects if active and lost during move
+	if active and not active_light:
+		call_deferred("create_light")
+	
+	# Sync flare-specific state
+	if multiplayer.has_multiplayer_peer():
+		sync_flare_state.rpc(active, fuel, is_depleted, get_item_network_id())
+
+func unequipped(user, slot: int):
+	super.unequipped(user, slot)
+	
+	# Sync state
+	if multiplayer.has_multiplayer_peer():
+		sync_flare_state.rpc(active, fuel, is_depleted, get_item_network_id())
+
+func picked_up(user):
+	super.picked_up(user)
+	
+	# Restore effects if active
+	if active and not active_light:
+		call_deferred("create_light")
+	
+	# Sync flare state when picked up
+	if multiplayer.has_multiplayer_peer():
+		sync_flare_state.rpc(active, fuel, is_depleted, get_item_network_id())
+
+func handle_drop(user):
+	super.handle_drop(user)
+	
+	# Restore effects if they were lost during drop
+	if active and not active_light:
+		call_deferred("create_light")
+	
+	# Sync drop state
+	if multiplayer.has_multiplayer_peer():
+		sync_flare_state.rpc(active, fuel, is_depleted, get_item_network_id())
+
+func throw_to_position(thrower, target_position: Vector2) -> bool:
+	# Store state before throw
+	var was_active = active
+	var stored_fuel = fuel
+	
+	# Use parent throw logic
+	var result = await super.throw_to_position(thrower, target_position)
+	
+	# Restore state and effects after throw
+	if was_active:
+		active = true
+		fuel = stored_fuel
+		if not active_light:
+			call_deferred("create_light")
+	
+	# Sync throw state
+	if multiplayer.has_multiplayer_peer():
+		sync_flare_state.rpc(active, fuel, is_depleted, get_item_network_id())
+	
+	return result
+
+func use(user):
+	var result = super.use(user)
+	
+	# Check if flare is depleted
+	if is_depleted:
+		if user and user.has_method("show_message"):
+			user.show_message("The flare is depleted and cannot be used.", "red")
+		return false
+	
+	# If not active, try to activate
 	if not active:
+		result = activate(user)
+	else:
+		# If already active, show message that it's already burning
+		if user and user.has_method("show_message"):
+			user.show_message("The flare is already burning.", "yellow")
+		result = false
+	
+	return result
+
+func get_item_network_id() -> String:
+	if has_method("get_network_id"):
+		return get_network_id()
+	elif "network_id" in self and network_id != "":
+		return str(network_id)
+	elif has_meta("network_id"):
+		return str(get_meta("network_id"))
+	else:
+		var new_id = str(get_instance_id()) + "_" + str(Time.get_ticks_msec())
+		set_meta("network_id", new_id)
+		return new_id
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_flare_state(is_active: bool, current_fuel: float, depleted: bool, item_id: String):
+	active = is_active
+	fuel = current_fuel
+	is_depleted = depleted
+	
+	if active and not active_light:
+		call_deferred("create_light")
+	elif not active and active_light:
+		cleanup_effects()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_flare_activation(activator_id: String, squad_info: Dictionary):
+	activate_local(activator_id, squad_info)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_flare_deactivation():
+	turn_off_local()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_fuel_update(new_fuel: float):
+	update_fuel_local(new_fuel)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_targeting_signal(position: Vector2, squad_data: Dictionary):
+	emit_targeting_signal_local(position, squad_data)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_flare_depleted():
+	mark_as_depleted_local()
+
+func _enter_tree():
+	super._enter_tree()
+	
+	# Restore effects if we were active before being moved
+	if was_active_before_move and active and not active_light:
+		call_deferred("create_light")
+		was_active_before_move = false
+
+func _exit_tree():
+	# Store state before being moved
+	if active and active_light:
+		was_active_before_move = true
+	
+	super._exit_tree()
+
+func _process(delta: float):
+	super._process(delta)
+	
+	if not active or is_depleted:
 		return
 	
-	# Update fuel
+	process_fuel_consumption(delta)
+	process_targeting_signals(delta)
+
+func process_fuel_consumption(delta: float):
 	if fuel > 0:
 		fuel -= delta
 		
-		# Start fading when fuel is almost gone (last 30 seconds)
-		if fuel <= 30.0 and active_light and not has_node("FadeTween"):
-			_start_fade_out()
+		# Sync fuel updates every 5 seconds to reduce network traffic
+		if is_multiplayer_authority() and int(fuel) % 5 == 0 and fmod(fuel, 1.0) < delta:
+			if multiplayer.has_multiplayer_peer():
+				sync_fuel_update.rpc(fuel)
 		
-		# Dynamically adjust light based on remaining fuel percentage
-		# Only update every second to reduce GPU load
-		if active_light and fuel > 30.0 and int(fuel) % 5 == 0 and fmod(fuel, 1.0) < delta:
-			var fuel_percentage = min(1.0, fuel / (lower_fuel_limit / 100.0))
-			active_light.texture_scale = (light_range / 2.0) * (0.8 + 0.2 * fuel_percentage)
-			active_light.energy = light_energy * (0.9 + 0.1 * fuel_percentage)
-			
-		# Turn off when out of fuel
+		# Start fade when fuel is low
+		if fuel <= 30.0 and active_light and not has_node("FadeTimer"):
+			start_fade_out()
+		
+		# Update light intensity based on fuel
+		if active_light and int(fuel) % 3 == 0 and fmod(fuel, 1.0) < delta:
+			update_light_intensity()
+		
+		# Turn off when depleted
 		if fuel <= 0:
-			turn_off()
+			if is_multiplayer_authority():
+				deplete_flare()
+			else:
+				mark_as_depleted_local()
+
+func process_targeting_signals(delta: float):
+	if active and "is_targeting_flare" in self and self.is_targeting_flare:
+		if int(fuel) % 1 == 0 and fmod(fuel, 1.0) < delta:
+			var squad_info = get_squad_info_dict()
 			
-	# Emit targeting signal if this is a targeting flare (once per second)
-	if active and "is_targeting_flare" in self and self.is_targeting_flare and int(fuel) % 1 == 0 and fmod(fuel, 1.0) < delta:
-		emit_signal("targeting_position", global_position, user_squad)
+			if is_multiplayer_authority():
+				if multiplayer.has_multiplayer_peer():
+					sync_targeting_signal.rpc(global_position, squad_info)
+				else:
+					emit_targeting_signal_local(global_position, squad_info)
 
-# Implement interact method for ClickSystem
-func interact(user) -> bool:
-	# Call parent method first to handle basic item interaction
-	super.interact(user)
+func get_squad_info_dict() -> Dictionary:
+	var squad_data = {}
 	
-	# If the flare is on the ground and not active, activate it
-	if not active and not has_flag(item_flags, ItemFlags.IN_INVENTORY):
-		activate(user)
-		return true
+	if user_squad:
+		if "name" in user_squad:
+			squad_data["name"] = user_squad.name
+		if "id" in user_squad:
+			squad_data["id"] = user_squad.id
 	
-	# Otherwise, let the standard pickup behavior handle it
-	return false
+	return squad_data
 
-# Override attack_self to allow activation from inventory
-func attack_self(user):
-	if not active:
-		activate(user)
-		return true
-	else:
-		# Turn off if already active
-		turn_off()
-		return true
+func update_fuel_local(new_fuel: float):
+	fuel = new_fuel
 	
-	return false
+	if active_light:
+		update_light_intensity()
 
-# Override use method to activate flare
-func use(user):
-	if not active:
-		activate(user)
-		return true
-	else:
-		# Turn off if already active
-		turn_off()
-		return true
+func update_light_intensity():
+	if not active_light:
+		return
 	
-	return false
+	var fuel_percentage = min(1.0, fuel / (lower_fuel_limit / 100.0))
+	active_light.texture_scale = (light_range / 2.0) * (0.8 + 0.2 * fuel_percentage)
+	active_light.energy = light_energy * (0.9 + 0.1 * fuel_percentage)
 
-# Add afterattack to handle clicking on targets with the flare
-func afterattack(target, user, proximity: bool, params: Dictionary = {}):
-	# If we're not in proximity, we can't use the flare on something
-	if not proximity:
+func activate(user = null) -> bool:
+	# Check if flare is depleted
+	if is_depleted:
 		return false
 	
-	# If the target has a method to be set on fire
-	if target.has_method("add_fire_stacks"):
-		target.add_fire_stacks(5)
-		return true
-	elif target.has_method("ignite"):
-		target.ignite(5)
-		return true
-	
-	# No applicable effect
-	return false
-
-# Add highlighting support for ClickSystem
-func set_highlighted(is_highlighted: bool):
-	if has_node("Sprite2D"):
-		var sprite = get_node("Sprite2D")
-		if is_highlighted:
-			sprite.modulate = Color(1.3, 1.3, 1.3, 1.0)  # Brighter when highlighted
-		else:
-			# Reset to the appropriate state
-			if active:
-				sprite.modulate = Color(1.5, 1.5, 1.0, 1.0)  # Brighter when active
-			else:
-				sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)  # Normal when inactive
-
-# Add tooltip support for ClickSystem
-func get_tooltip_text() -> String:
-	var tooltip = obj_name
-	
 	if active:
-		var minutes = int(fuel) / 60
-		var seconds = int(fuel) % 60
-		tooltip += " (Active: " + str(minutes) + "m " + str(seconds) + "s remaining)"
+		return false
+	
+	var user_id = get_user_id(user)
+	var squad_info = get_squad_info(user)
+	
+	# Sync activation across network
+	if multiplayer.has_multiplayer_peer():
+		sync_flare_activation.rpc(user_id, squad_info)
 	else:
-		tooltip += " (Inactive)"
+		activate_local(user_id, squad_info)
 	
-	return tooltip
+	return true
 
-# Get interaction options for radial menu
-func get_interaction_options(user) -> Array:
-	var options = []
-	
-	# Add examine option
-	options.append({
-		"name": "Examine",
-		"icon": "examine",
-		"callback": func(): 
-			if user.has_method("handle_examine"):
-				user.handle_examine(self)
-			elif "interaction_system" in user and user.interaction_system:
-				user.interaction_system.handle_examine(user, self)
-	})
-	
-	# Add pickup option if the flare is on the ground
-	if not has_flag(item_flags, ItemFlags.IN_INVENTORY):
-		options.append({
-			"name": "Pick Up",
-			"icon": "pickup",
-			"callback": func():
-				if "inventory_system" in user and user.inventory_system:
-					user.inventory_system.pick_up_item(self)
-		})
-	
-	# Add activate/deactivate option
-	var action_name = "Activate" if not active else "Deactivate"
-	options.append({
-		"name": action_name,
-		"icon": "use",
-		"callback": func():
-			if not active:
-				activate(user)
-			else:
-				turn_off()
-	})
-	
-	# Add throw option if in inventory
-	if has_flag(item_flags, ItemFlags.IN_INVENTORY):
-		options.append({
-			"name": "Throw",
-			"icon": "throw",
-			"callback": func():
-				if "grid_controller" in user and user.grid_controller:
-					user.grid_controller.enter_throw_mode(self)
-		})
-	
-	return options
-
-# Override activation to handle instant activation
-func activate(user = null) -> bool:
-	flare.play("Primed")
-	
-	if active:
+func activate_local(user_id: String, squad_info: Dictionary):
+	if active or is_depleted:
 		return false
 	
 	# Set active state
 	active = true
 	
-	# Store squad if user has one
-	if user and "assigned_squad" in user and user.assigned_squad:
-		user_squad = user.assigned_squad
+	# Store squad info
+	if squad_info.size() > 0:
+		user_squad = squad_info
 	
-	# Log bomber if user exists
+	# Log activation
+	var user = find_user_by_id(user_id)
 	if user and "client" in user and user.client:
-		# Log activation
 		print("Flare activated by: ", user.name)
 	
-	# Play arm sound
-	if has_node("ArmSound") and $ArmSound.stream:
-		$ArmSound.play()
-	elif arm_sound:
-		var audio_player = AudioStreamPlayer2D.new()
-		audio_player.stream = arm_sound
-		audio_player.autoplay = true
-		audio_player.position = global_position
-		get_tree().get_root().add_child(audio_player)
-		
-		# Set up timer to free the audio node
-		var timer = Timer.new()
-		audio_player.add_child(timer)
-		timer.wait_time = 2.0  # Adjust based on sound length
-		timer.one_shot = true
-		timer.autostart = true
-		timer.timeout.connect(func(): audio_player.queue_free())
+	# Play activation sound
+	play_activation_sound()
 	
-	# Update appearance
+	# Update visual state
+	set_animation_state("primed")
 	update_appearance()
 	
-	# Create activation effect (simple in performance mode)
-	if not performance_mode:
-		_create_activation_effect()
-	
-	# Create light effect
-	call_deferred("_create_light")
+	# Create lighting and effects
+	create_light()
 	
 	# Emit signal
 	emit_signal("primed", user)
 	
 	return true
 
-# Create a visual effect for activation (simplified)
-func _create_activation_effect():
-	# Create a flash of light
-	var flash = PointLight2D.new()
-	flash.texture = load("res://Assets/Effects/Light/Light_Circle.png")
-	if not flash.texture and has_node("PreloadedTextures/LightTexture"):
-		flash.texture = $PreloadedTextures/LightTexture.texture
-	flash.color = Color(1.0, 0.8, 0.5, 1.0)
-	flash.energy = 0.8
-	flash.texture_scale = light_range / 0.5
-	flash.shadow_enabled = false  # Disable shadows for performance
-	add_child(flash)
+func deplete_flare():
+	if not is_multiplayer_authority():
+		return
 	
-	# Create flash tween
-	var tween = create_tween()
-	tween.tween_property(flash, "energy", 0.0, 0.5)
-	tween.tween_callback(func(): flash.queue_free())
+	# Sync depletion across network
+	if multiplayer.has_multiplayer_peer():
+		sync_flare_depleted.rpc()
+	else:
+		mark_as_depleted_local()
 
-# Create light and fire effects
-func _create_light():
-	# Create light node
+func mark_as_depleted_local():
+	active = false
+	fuel = 0.0
+	is_depleted = true
+	was_active_before_move = false
+	
+	# Update appearance to show depleted state
+	set_animation_state("empty")
+	update_appearance()
+	
+	# Clean up all effects
+	cleanup_effects()
+	
+	# Add to depleted items group for inventory system cleanup
+	add_to_group("depleted_items")
+	
+	# Emit depletion signal
+	emit_signal("flare_depleted")
+
+func turn_off():
+	# Sync deactivation across network
+	if multiplayer.has_multiplayer_peer():
+		sync_flare_deactivation.rpc()
+	else:
+		turn_off_local()
+
+func turn_off_local():
+	active = false
+	was_active_before_move = false
+	
+	# Update appearance
+	set_animation_state("armed")
+	update_appearance()
+	
+	# Clean up all effects
+	cleanup_effects()
+
+func play_activation_sound():
+	var flare_sound = load("res://Sound/handling/flare_activate_2.ogg")
+	if flare_sound:
+		play_cached_sound(flare_sound, -5.0)
+
+func create_light():
+	# Clean up existing light first
+	if active_light:
+		cleanup_effects()
+	
+	# Create primary light
 	active_light = PointLight2D.new()
 	active_light.name = "FlareLight"
+	
+	# Load light texture
 	var light_texture = load("res://Assets/Effects/Light/Light_Circle.png")
 	if light_texture:
 		active_light.texture = light_texture
-	elif has_node("PreloadedTextures/LightTexture"):
-		active_light.texture = $PreloadedTextures/LightTexture.texture
 	else:
-		# Create a simple light texture if not found
-		active_light.texture = create_light_texture()
+		active_light.texture = create_simple_light_texture()
 	
+	# Configure light properties
 	active_light.color = light_color
 	active_light.energy = light_energy
 	active_light.texture_scale = light_range
+	active_light.shadow_enabled = true
 	
-	# Performance settings
-	if performance_mode:
-		active_light.shadow_enabled = false  # Disable shadows for better performance
-	else:
-		active_light.shadow_enabled = true
-		active_light.shadow_filter = 1  # Smooth shadows
-		active_light.shadow_filter_smooth = 2.0
-		
 	add_child(active_light)
 	
-	# In performance mode, don't create the glow sprite
-	if not performance_mode:
-		# Create a glow sprite
-		var active_glow = Sprite2D.new()
-		active_glow.name = "FlareGlow"
-		active_glow.texture = active_light.texture
-		active_glow.modulate = Color(light_color.r, light_color.g, light_color.b, 0.4)
-		active_glow.scale = Vector2(0.5, 0.5)
-		active_glow.z_index = 2  # Ensure glow appears above most items
-		add_child(active_glow)
+	# Create fire effect
+	create_fire_effect()
 	
-	# Create fire effect using the preloaded scene
-	active_fire = fire_particle_scene.instantiate()
-	if active_fire:
-		# Configure fire particles for flare - reduced for performance
-		if active_fire.has_method("set_fire_properties"):
-			if performance_mode:
-				# In performance mode, use fewer particles
-				active_fire.set_fire_properties(32, 0.6)  # Small fire radius, lower intensity
-			else:
-				active_fire.set_fire_properties(32)  # Small fire radius
-		
-		# Update particle properties if needed
-		if "amount" in active_fire:
-			if performance_mode:
-				active_fire.amount = 25  # Fewer particles for performance
-			else:
-				active_fire.amount = 50
-		
-		# Override fire color to match flare color
-		active_fire.modulate = Color(1.0, 0.8, 0.4)
-		
-		add_child(active_fire)
-		active_fire.emitting = true
-		
-		# If fire has a light, adjust its properties
-		if active_fire.has_node("FireLight"):
-			# In performance mode, disable the second light source
-			if performance_mode:
-				active_fire.get_node("FireLight").queue_free()
-			else:
-				active_fire.get_node("FireLight").energy = 1.2
-				active_fire.get_node("FireLight").texture_scale = 1.5
-	
-	# In performance mode, don't create sparks or smoke
-	if not performance_mode:
-		# Create spark particle system
-		_create_sparks()
-		
-		# Create smoke
-		_create_smoke()
-	
-	# Play flare sound
-	var flare_sound = AudioStreamPlayer2D.new()
-	flare_sound.stream = load("res://Sound/handling/flare_activate_2.ogg")
-	flare_sound.volume_db = -5.0  # Slightly quieter than current
-	flare_sound.max_distance = 1000.0
-	flare_sound.attenuation = 2.0  # More realistic falloff
-	flare_sound.autoplay = true
-	flare_sound.position = global_position
-	get_tree().get_root().add_child(flare_sound)
-	
-	# Clean up sound after playing
-	var timer = Timer.new()
-	flare_sound.add_child(timer)
-	timer.wait_time = 4.0  # Longer sound duration
-	timer.one_shot = true
-	timer.autostart = true
-	timer.timeout.connect(func(): flare_sound.queue_free())
-	
-	# Start flickering
-	_start_flickering()
+	# Start subtle flickering
+	start_flickering()
 
-# Create spark particles (simplified)
-func _create_sparks():
-	# Only in full quality mode
-	if performance_mode:
+func create_fire_effect():
+	if not fire_particle_scene:
 		return
+	
+	var fire = fire_particle_scene.instantiate()
+	if fire:
+		add_child(fire)
 		
-	# Create spark particles
-	var active_sparks = GPUParticles2D.new()
-	active_sparks.name = "SparksParticles"
-	
-	# Create particle material
-	var spark_material = ParticleProcessMaterial.new()
-	spark_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	spark_material.emission_sphere_radius = 5.0
-	spark_material.direction = Vector3(0, -1, 0)
-	spark_material.spread = 180.0
-	spark_material.initial_velocity_min = 50.0
-	spark_material.initial_velocity_max = 150.0
-	spark_material.gravity = Vector3(0, 100, 0)  # Sparks fall down
-	spark_material.damping_min = 20.0
-	spark_material.damping_max = 50.0
-	spark_material.scale_min = 0.5
-	spark_material.scale_max = 1.5
-	
-	# Setup color gradient
-	var gradient = Gradient.new()
-	gradient.add_point(0.0, Color(1.0, 0.9, 0.4, 1.0))  # Bright yellow
-	gradient.add_point(0.3, Color(1.0, 0.7, 0.2, 1.0))  # Orange
-	gradient.add_point(0.7, Color(1.0, 0.4, 0.1, 1.0))  # Darker orange
-	gradient.add_point(1.0, Color(0.8, 0.0, 0.0, 0.0))  # Fade to transparent
-	
-	var gradient_texture = GradientTexture1D.new()
-	gradient_texture.gradient = gradient
-	spark_material.color_ramp = gradient_texture
-	
-	# Apply material to particles
-	active_sparks.process_material = spark_material
-	active_sparks.amount = 10  # Reduced amount for performance
-	active_sparks.lifetime = 1.0
-	active_sparks.explosiveness = 0.0
-	active_sparks.randomness = 0.8
-	active_sparks.local_coords = false
-	
-	# Try to load a particle texture
-	var particle_texture = load("res://Assets/Effects/Particles/fire.png")
-	if particle_texture:
-		active_sparks.texture = particle_texture
-	
-	add_child(active_sparks)
-	active_sparks.emitting = true
-
-# Create smoke particles (simplified)
-func _create_smoke():
-	# Only in full quality mode
-	if performance_mode:
-		return
+		# Configure for minimal performance impact
+		configure_fire_particles(fire)
 		
-	# Create smoke particles
-	var smoke = GPUParticles2D.new()
-	smoke.name = "SmokeParticles"
-	
-	# Create particle material
-	var smoke_material = ParticleProcessMaterial.new()
-	smoke_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	smoke_material.emission_sphere_radius = 8.0
-	smoke_material.direction = Vector3(0, -1, 0)
-	smoke_material.spread = 180.0
-	smoke_material.initial_velocity_min = 5.0
-	smoke_material.initial_velocity_max = 15.0
-	smoke_material.gravity = Vector3(0, -5, 0)  # Slight upward drift
-	smoke_material.angular_velocity_min = -50.0
-	smoke_material.angular_velocity_max = 50.0
-	smoke_material.scale_min = 0.3
-	smoke_material.scale_max = 0.8
-	
-	# Setup color gradient
-	var gradient = Gradient.new()
-	gradient.add_point(0.0, Color(0.7, 0.7, 0.7, 0.0))  # Start transparent
-	gradient.add_point(0.1, Color(0.7, 0.7, 0.7, 0.2))  # Fade in
-	gradient.add_point(0.8, Color(0.5, 0.5, 0.5, 0.2))  # Darker gray
-	gradient.add_point(1.0, Color(0.3, 0.3, 0.3, 0.0))  # Fade out
-	
-	var gradient_texture = GradientTexture1D.new()
-	gradient_texture.gradient = gradient
-	smoke_material.color_ramp = gradient_texture
-	
-	# Apply material to particles
-	smoke.process_material = smoke_material
-	smoke.amount = 15  # Reduced for performance
-	smoke.lifetime = 4.0
-	smoke.explosiveness = 0.05
-	smoke.randomness = 0.6
-	smoke.local_coords = false
-	smoke.z_index = -1  # Render behind the flare
-	
-	# Try to load a particle texture
-	var particle_texture = load("res://Assets/Effects/Particles/Smoke.png")
-	if particle_texture:
-		smoke.texture = particle_texture
-	
-	add_child(smoke)
-	smoke.emitting = true
+		# Store reference
+		active_fire_particles = fire
+		
+		# Start emitting
+		if "emitting" in fire:
+			fire.emitting = true
 
-# Start subtle flickering effect for the light
-func _start_flickering():
+func configure_fire_particles(fire: Node):
+	# Reduce particle count
+	if "amount" in fire:
+		fire.amount = 30
+	
+	# Set flare color
+	fire.modulate = Color(1.0, 0.8, 0.4)
+	
+	# Disable additional light sources in fire effect
+	if fire.has_node("FireLight"):
+		fire.get_node("FireLight").queue_free()
+
+func start_flickering():
 	if not active_light:
 		return
 	
-	if has_node("FlickerTimer"):
-		$FlickerTimer.wait_time = min_flicker_interval  # Less frequent updates
-		$FlickerTimer.start()
-	else:
-		var flicker_timer = Timer.new()
-		flicker_timer.name = "FlickerTimer"
-		flicker_timer.wait_time = min_flicker_interval  # Less frequent (was 0.1)
-		flicker_timer.autostart = true
-		flicker_timer.timeout.connect(_flicker_light)
-		add_child(flicker_timer)
+	# Clean up existing flicker timer
+	if flicker_timer:
+		flicker_timer.queue_free()
+	
+	flicker_timer = Timer.new()
+	flicker_timer.name = "FlickerTimer"
+	flicker_timer.wait_time = flicker_interval
+	flicker_timer.autostart = true
+	flicker_timer.timeout.connect(flicker_light)
+	add_child(flicker_timer)
 
-# Random small changes to light energy (simplified)
-func _flicker_light():
+func flicker_light():
 	if not active_light:
 		return
 	
-	# More dynamic flickering based on fuel level
+	# Calculate flicker based on fuel level
 	var fuel_percentage = min(1.0, fuel / (lower_fuel_limit / 100.0))
-	
-	# Less intense flicker in performance mode
-	var flicker_intensity = 0.07 if performance_mode else 0.1 + (0.2 * (1.0 - fuel_percentage))
+	var flicker_intensity = 0.05 + (0.1 * (1.0 - fuel_percentage))
 	var flicker_amount = randf_range(-flicker_intensity, flicker_intensity)
 	
-	# Apply flickering to main light
-	active_light.energy = clamp(light_energy + flicker_amount, light_energy * 0.7, light_energy * 1.3)
-	
-	# Apply flickering to glow sprite if it exists
-	if has_node("FlareGlow"):
-		$FlareGlow.modulate.a = clamp(0.4 + (flicker_amount * 0.3), 0.1, 0.7)
-		
-		# Simplified scale changes
-		if not performance_mode:
-			var scale_change = randf_range(-0.05, 0.05)
-			$FlareGlow.scale = Vector2(0.5, 0.5) * (1.0 + scale_change)
-	
-	# Fire particles can flicker too if they exist
-	if active_fire and active_fire.has_node("FireLight"):
-		active_fire.get_node("FireLight").energy = randf_range(0.8, 1.2)
+	# Apply flicker to main light
+	var base_energy = light_energy * (0.9 + 0.1 * fuel_percentage)
+	active_light.energy = clamp(base_energy + flicker_amount, base_energy * 0.8, base_energy * 1.2)
 
-# Start fading out the light (simplified)
-func _start_fade_out():
-	# Create a marker node to track the fade process
-	var fade_node = Node.new()
-	fade_node.name = "FadeTween"
-	add_child(fade_node)
+func start_fade_out():
+	var fade_timer = Timer.new()
+	fade_timer.name = "FadeTimer"
+	add_child(fade_timer)
 	
-	# Create the tween
+	# Create fade tween
 	var tween = create_tween()
 	
-	# Gradually reduce light energy
+	# Fade out light over 30 seconds
 	if active_light:
 		tween.tween_property(active_light, "energy", 0.0, 30.0)
 	
-	# Fade out glow if it exists
-	if has_node("FlareGlow"):
-		tween.parallel().tween_property($FlareGlow, "modulate:a", 0.0, 30.0)
+	# Fade out fire particles
+	if active_fire_particles:
+		tween.parallel().tween_property(active_fire_particles, "modulate:a", 0.0, 30.0)
 	
-	# If we have fire effect, fade it too
-	if active_fire:
-		tween.parallel().tween_property(active_fire, "modulate:a", 0.0, 30.0)
-		
-	# Fade out sparks if they exist
-	if has_node("SparksParticles"):
-		tween.parallel().tween_property($SparksParticles, "modulate:a", 0.0, 15.0)
-	
-	# Connect to finished signal to clean up the marker node
+	# Clean up fade timer when done
 	tween.finished.connect(func(): 
-		if is_instance_valid(fade_node):
-			fade_node.queue_free()
+		if is_instance_valid(fade_timer):
+			fade_timer.queue_free()
 	)
 
-# Turn off the flare
-func turn_off():
-	active = false
-	fuel = 0
-	
-	# Update appearance
-	update_appearance()
-	
-	# Clean up light and fire
-	if active_light:
+func cleanup_effects():
+	# Clean up light
+	if active_light and is_instance_valid(active_light):
 		active_light.queue_free()
 		active_light = null
 	
-	if active_fire:
-		active_fire.queue_free()
-		active_fire = null
-	
-	# Clean up other nodes
-	for node in ["FlareGlow", "SparksParticles", "SmokeParticles"]:
-		if has_node(node):
-			get_node(node).queue_free()
+	# Clean up fire particles
+	if active_fire_particles and is_instance_valid(active_fire_particles):
+		active_fire_particles.queue_free()
+		active_fire_particles = null
 	
 	# Stop flickering
-	if has_node("FlickerTimer"):
-		$FlickerTimer.stop()
+	if flicker_timer and is_instance_valid(flicker_timer):
+		flicker_timer.queue_free()
+		flicker_timer = null
 	
-	# Remove any tweens
-	if has_node("FadeTween"):
-		get_node("FadeTween").queue_free()
+	# Remove fade timer if it exists
+	if has_node("FadeTimer"):
+		get_node("FadeTimer").queue_free()
 
-# Override explode to prevent destruction
-func explode():
-	# Don't destroy the flare, just activate it
-	if not active:
-		activate()
+func emit_targeting_signal_local(position: Vector2, squad_data: Dictionary):
+	var squad = null
+	if squad_data.size() > 0:
+		squad = squad_data
+	
+	emit_signal("targeting_position", position, squad)
 
-# Create custom throw impact behavior
-func throw_impact(hit_atom, speed: float = 5) -> bool:
-	# In full quality mode, create impact effects
-	if not performance_mode and speed > 3.0:
-		_create_simple_impact_effect(speed)
-	
-	# Handle impact with open turf
-	if hit_atom and "is_open_turf" in hit_atom and hit_atom.is_open_turf:
-		# Check for alien weeds
-		var nodes = get_tree().get_nodes_in_group("alien_weed_nodes")
-		for node in nodes:
-			if node.global_position.distance_to(global_position) < 16:  # Half a tile
-				# Burn alien weeds
-				node.queue_free()
-				
-				# Turn off the flare
-				turn_off()
-				break
-	
-	# Handle impact with living entities
-	if hit_atom and hit_atom.is_in_group("entities") and active:
-		# Set them on fire
-		if hit_atom.has_method("add_fire_stacks"):
-			hit_atom.add_fire_stacks(5)
-		elif hit_atom.has_method("ignite"):
-			hit_atom.ignite(5)
-			
-		# Apply direct damage if flare was launched
-		if launched and hit_atom.has_method("take_damage"):
-			var damage = randf_range(throwforce * 0.75, throwforce * 1.25)
-			
-			# Check if target has a targeted zone
-			var target_zone = "chest"
-			if "zone_selected" in hit_atom and hit_atom.zone_selected:
-				target_zone = hit_atom.zone_selected
-				
-			hit_atom.take_damage(damage, "burn", target_zone)
-	
-	return true
-
-# Simplified impact effect
-func _create_simple_impact_effect(speed: float):
-	# Play impact sound
-	var impact_sound = AudioStreamPlayer2D.new()
-	impact_sound.stream = load("res://Sound/effects/thud.ogg")
-	if not impact_sound.stream:
-		impact_sound.stream = load("res://Sound/handling/flare_activate_2.ogg")
-		
-	impact_sound.volume_db = -10.0
-	impact_sound.pitch_scale = randf_range(0.9, 1.1)
-	impact_sound.autoplay = true
-	impact_sound.position = global_position
-	get_tree().get_root().add_child(impact_sound)
-	
-	# Set up sound cleanup timer
-	var sound_timer = Timer.new()
-	impact_sound.add_child(sound_timer)
-	sound_timer.wait_time = 2.0
-	sound_timer.one_shot = true
-	sound_timer.autostart = true
-	sound_timer.timeout.connect(func(): impact_sound.queue_free())
-
-# Create a light texture if needed
-func create_light_texture() -> Texture2D:
-	var size = 128  # Reduced size for performance (was 256)
+func create_simple_light_texture() -> Texture2D:
+	var size = 64
 	var image = Image.create(size, size, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0, 0, 0, 0))
 	
-	# Create a simpler light texture
 	var center = Vector2(size/2, size/2)
 	for x in range(size):
 		for y in range(size):
 			var dist = Vector2(x, y).distance_to(center)
 			if dist <= size/2:
-				var alpha = 1.0 - dist/(size/2)
-				image.set_pixel(x, y, Color(1, 1, 1, alpha))
+				var alpha = 1.0 - (dist / (size/2))
+				image.set_pixel(x, y, Color(1, 1, 1, alpha * alpha))
 	
 	return ImageTexture.create_from_image(image)
 
-# Helper function for smooth interpolation
-func smoothstep(edge0: float, edge1: float, x: float) -> float:
-	var t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
-	return t * t * (3.0 - 2.0 * t)
-
-# Override prime to handle flare behavior
-func prime() -> void:
-	# Don't explode, just ensure active
-	if not active:
+func explode():
+	if not active and not is_depleted:
 		activate()
 
-# Override update_appearance to show active state
-func update_appearance() -> void:
+func attack_self(user) -> bool:
+	# Check if flare is depleted
+	if is_depleted:
+		if user and user.has_method("show_message"):
+			user.show_message("The flare is depleted and cannot be used.", "red")
+		return false
+	
+	if not active:
+		return activate(user)
+	else:
+		# If already active, show message that it's already burning
+		if user and user.has_method("show_message"):
+			user.show_message("The flare is already burning.", "yellow")
+		return false
+
+func throw_impact(hit_atom, speed: float = 5) -> bool:
+	var result = super.throw_impact(hit_atom, speed)
+	
+	# Impact with open turf - check for alien weeds
+	if hit_atom and "is_open_turf" in hit_atom and hit_atom.is_open_turf:
+		var nodes = get_tree().get_nodes_in_group("alien_weed_nodes")
+		for node in nodes:
+			if node.global_position.distance_to(global_position) < 16:
+				node.queue_free()
+				# Use networked depletion system
+				if multiplayer.has_multiplayer_peer():
+					sync_flare_depleted.rpc()
+				else:
+					mark_as_depleted_local()
+				break
+	
+	# Impact with living entities
+	if hit_atom and hit_atom.is_in_group("entities") and active:
+		apply_fire_to_entity(hit_atom)
+		
+		# Apply damage if launched
+		if launched and hit_atom.has_method("take_damage"):
+			var damage = randf_range(throwforce * 0.75, throwforce * 1.25)
+			hit_atom.take_damage(damage, "burn")
+	
+	return result
+
+func apply_fire_to_entity(entity: Node):
+	if entity.has_method("add_fire_stacks"):
+		entity.add_fire_stacks(5)
+	elif entity.has_method("ignite"):
+		entity.ignite(5)
+
+func update_appearance():
 	super.update_appearance()
 	
-	# Update sprite based on active state
 	if has_node("Sprite2D"):
 		var sprite = get_node("Sprite2D")
-		if active:
-			sprite.modulate = Color(1.5, 1.5, 1.0, 1.0)  # Brighter when active
+		if is_depleted:
+			sprite.modulate = Color(0.5, 0.5, 0.5, 1.0)  # Grayed out when depleted
+		elif active:
+			sprite.modulate = Color(1.3, 1.2, 1.0, 1.0)  # Bright when active
 		else:
 			sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)  # Normal when inactive
 
-# Create a targeting flare variant
-func create_targeting_flare(stronger: bool = false) -> Flare:
-	var targeting_flare = Flare.new()
-	targeting_flare.obj_name = "M50 CFDP signal flare"
-	targeting_flare.obj_desc = "A TGMC signal flare utilized for targeting. When activated, provides a target for CAS pilots."
+func get_tooltip_text() -> String:
+	var tooltip = obj_name
 	
-	# Special properties
-	targeting_flare.is_targeting_flare = true
-	targeting_flare.light_color = Color(0, 1, 0)  # Green light
+	if is_depleted:
+		tooltip += " (Depleted)"
+	elif active:
+		var minutes = int(fuel) / 60
+		var seconds = int(fuel) % 60
+		tooltip += " (Active: " + str(minutes) + "m " + str(seconds) + "s remaining)"
+	else:
+		var minutes = int(fuel) / 60
+		var seconds = int(fuel) % 60
+		tooltip += " (Fuel: " + str(minutes) + "m " + str(seconds) + "s)"
 	
-	# Lower fuel for targeting flares
-	targeting_flare.lower_fuel_limit = 2500  # 25 seconds
-	targeting_flare.upper_fuel_limit = 3000  # 30 seconds
-	
-	# Stronger variant gets extra brightness and range
-	if stronger:
-		targeting_flare.light_range = 12
-		targeting_flare.light_energy = 1.5
-		
-		# Make it harder to move once deployed
-		targeting_flare.pickupable = false
-		
-		# Make the stronger variant cyan colored
-		targeting_flare.light_color = Color(0, 1, 1)  # Cyan light
-	
-	return targeting_flare
+	return tooltip
 
-# Serialize for saving
-func serialize():
+# Helper functions for multiplayer integration
+func get_user_id(user: Node) -> String:
+	if not user:
+		return ""
+	
+	if user.has_method("get_network_id"):
+		return user.get_network_id()
+	elif "peer_id" in user:
+		return "player_" + str(user.peer_id)
+	elif user.has_meta("network_id"):
+		return user.get_meta("network_id")
+	else:
+		return user.get_path()
+
+func get_squad_info(user: Node) -> Dictionary:
+	var squad_info = {}
+	
+	if user and "assigned_squad" in user and user.assigned_squad:
+		squad_info["name"] = user.assigned_squad.get("name", "")
+		squad_info["id"] = user.assigned_squad.get("id", 0)
+	
+	return squad_info
+
+func find_user_by_id(user_id: String) -> Node:
+	if user_id == "":
+		return null
+	
+	# Handle player targets
+	if user_id.begins_with("player_"):
+		var peer_id_str = user_id.split("_")[1]
+		var peer_id_val = peer_id_str.to_int()
+		return find_player_by_peer_id(peer_id_val)
+	
+	# Handle path-based targets
+	if user_id.begins_with("/"):
+		return get_node_or_null(user_id)
+	
+	return null
+
+func find_player_by_peer_id(peer_id_val: int) -> Node:
+	var players = get_tree().get_nodes_in_group("players")
+	for player in players:
+		if player.has_meta("peer_id") and player.get_meta("peer_id") == peer_id_val:
+			return player
+		if "peer_id" in player and player.peer_id == peer_id_val:
+			return player
+	
+	return null
+
+func serialize() -> Dictionary:
 	var data = super.serialize()
+	
 	data["fuel"] = fuel
 	data["lower_fuel_limit"] = lower_fuel_limit
 	data["upper_fuel_limit"] = upper_fuel_limit
@@ -736,25 +661,29 @@ func serialize():
 		"b": light_color.b,
 		"a": light_color.a
 	}
-	data["performance_mode"] = performance_mode
+	data["light_energy"] = light_energy
 	data["active"] = active
+	data["was_active_before_move"] = was_active_before_move
+	data["is_depleted"] = is_depleted
 	
 	return data
 
-# Deserialize for loading
-func deserialize(data):
+func deserialize(data: Dictionary):
 	super.deserialize(data)
 	
 	if "fuel" in data: fuel = data.fuel
 	if "lower_fuel_limit" in data: lower_fuel_limit = data.lower_fuel_limit
 	if "upper_fuel_limit" in data: upper_fuel_limit = data.upper_fuel_limit
 	if "light_range" in data: light_range = data.light_range
-	if "performance_mode" in data: performance_mode = data.performance_mode
+	if "light_energy" in data: light_energy = data.light_energy
+	if "active" in data: active = data.active
+	if "was_active_before_move" in data: was_active_before_move = data.was_active_before_move
+	if "is_depleted" in data: is_depleted = data.is_depleted
 	
 	if "light_color" in data:
 		var color_data = data.light_color
 		light_color = Color(color_data.r, color_data.g, color_data.b, color_data.a)
 	
-	if "active" in data and data.active:
-		# Activate without a user
-		activate(null)
+	# Reactivate if it was active (and not depleted)
+	if active and not is_depleted:
+		call_deferred("create_light")

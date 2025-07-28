@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dm2h5vbxw0n31"]
+[gd_scene load_steps=8 format=3 uid="uid://dm2h5vbxw0n31"]
 
 [ext_resource type="Script" uid="uid://bakoetqgg8rv7" path="res://Code/Items/Weapons/Grenades/HEGrenade.gd" id="1_owvcl"]
 [ext_resource type="Texture2D" uid="uid://hbiga0uga42e" path="res://Assets/Icons/Items/Lethal/HE.png" id="2_5onte"]
@@ -43,41 +43,9 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ud7gf"]
-properties/0/path = NodePath(".:force")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:entity_type")
-properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath(".:entity_dense")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:pickupable")
-properties/3/spawn = true
-properties/3/replication_mode = 1
-properties/4/path = NodePath(".:position")
-properties/4/spawn = true
-properties/4/replication_mode = 1
-properties/5/path = NodePath(".:rotation")
-properties/5/spawn = true
-properties/5/replication_mode = 1
-properties/6/path = NodePath("ArmSound:playing")
-properties/6/spawn = true
-properties/6/replication_mode = 1
-properties/7/path = NodePath("Icon:animation")
-properties/7/spawn = true
-properties/7/replication_mode = 1
-properties/8/path = NodePath("Icon:position")
-properties/8/spawn = true
-properties/8/replication_mode = 1
-properties/9/path = NodePath("Icon:rotation")
-properties/9/spawn = true
-properties/9/replication_mode = 1
-
 [node name="HEGrenade" type="Node2D" groups=["grenades", "items", "objects"]]
 script = ExtResource("1_owvcl")
-entity_type = "item"
+entity_type = "grenade"
 pickupable = true
 
 [node name="Icon" type="AnimatedSprite2D" parent="."]
@@ -93,6 +61,3 @@ polygon = PackedVector2Array(-4.1, -7.1, -4.1, -5.9, -3.1, -5.9, -3.1, -3.1, -4.
 
 [node name="ArmSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("3_8spmw")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_ud7gf")

@@ -1,4 +1,4 @@
-extends ReagentItem
+extends MedicalItem
 
 @onready var icon: AnimatedSprite2D = $Icon
 
@@ -23,10 +23,6 @@ func _ready():
 	is_container = true
 	max_contents = 10
 	init_contents()
-
-func use(user):
-	super.use(user)
-	icon.play("Open")
 
 func should_be_consumed() -> bool:
 	return false

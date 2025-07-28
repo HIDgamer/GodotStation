@@ -9,8 +9,9 @@ var undershirt_options = []
 var background_textures = []
 var races = []
 var occupations = []
+var inhand_sprites = {}  # NEW: In-hand sprite assets
 
-# Directory paths
+# Directory paths (kept for config compatibility)
 const BASE_HUMAN_PATH = "res://Assets/Human/"
 const HAIR_STYLES_PATH = "res://Assets/Human/Hair/"
 const FACIAL_HAIR_PATH = "res://Assets/Human/FacialHair/"
@@ -18,22 +19,33 @@ const CLOTHING_PATH = "res://Assets/Human/Clothing/"
 const UNDERWEAR_PATH = "res://Assets/Human/UnderWear/"
 const UNDERSHIRT_PATH = "res://Assets/Human/UnderShirt/"
 const BACKGROUNDS_PATH = "res://Assets/Backgrounds/"
+const INHAND_PATH = "res://Graphics/inhand/"  # NEW: In-hand sprites path
 const ASSET_CONFIG_PATH = "res://Config/character_assets.json"
 
-# Resource cache
+# Resource cache - now uses AssetRegistry
 var _resource_cache = {}
 
 func _init():
+	# Wait for AssetRegistry to be ready
+	call_deferred("_initialize_after_registry")
+
+func _initialize_after_registry():
+	# Ensure AssetRegistry is available
+	if not has_node("/root/AssetRegistry"):
+		print("Warning: AssetRegistry not found, using fallback mode")
+	
 	_load_defaults()
-	_scan_directories()
+	_scan_assets_from_registry()
 	_load_config_file()
 	_verify_assets()
-	_preload_essential_assets()
+	print("Asset Manager initialized with ", _get_total_asset_count(), " assets")
+	print("In-hand sprites loaded: ", inhand_sprites.size())
 
 # Load default fallback values
 func _load_defaults():
 	races = []
 	occupations = ["Engineer", "Security", "Medical", "Science", "Command", "Cargo"]
+	inhand_sprites = {}  # NEW: Initialize in-hand sprites
 	
 	hair_styles = [{"name": "None", "texture": null, "sex": -1}]
 	facial_hair_styles = [{"name": "None", "texture": null, "sex": 0}]
@@ -52,56 +64,24 @@ func _load_defaults():
 	
 	background_textures = [{"name": "Space", "texture": "res://Assets/Backgrounds/Space.png"}]
 
-# Preload essential assets for performance
-func _preload_essential_assets():
-	var essential_dirs = ["res://Assets/Human/"]
-	
-	for race in races:
-		var race_dir = BASE_HUMAN_PATH + race + "/"
-		if DirAccess.dir_exists_absolute(race_dir):
-			essential_dirs.append(race_dir)
-	
-	for dir_path in essential_dirs:
-		_preload_directory(dir_path)
-	
-	# Preload mandatory items
-	for item in underwear_options:
-		if item.texture and ResourceLoader.exists(item.texture):
-			_resource_cache[item.texture] = load(item.texture)
-	
-	for item in undershirt_options:
-		if item.texture and ResourceLoader.exists(item.texture):
-			_resource_cache[item.texture] = load(item.texture)
-
-func _preload_directory(dir_path):
-	if not DirAccess.dir_exists_absolute(dir_path):
-		return
-		
-	var dir = DirAccess.open(dir_path)
-	if not dir:
-		return
-		
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-	
-	while file_name != "":
-		if not dir.current_is_dir() and file_name.ends_with(".png"):
-			var full_path = dir_path.path_join(file_name)
-			if ResourceLoader.exists(full_path):
-				_resource_cache[full_path] = load(full_path)
-		
-		file_name = dir.get_next()
-	
-	dir.list_dir_end()
-
-# Get cached resource or load it
+# Get cached resource or load from AssetRegistry
 func get_resource(path):
 	if path == null or path.is_empty():
 		return null
-		
+	
+	# Check local cache first
 	if _resource_cache.has(path):
 		return _resource_cache[path]
 	
+	# Try to get from AssetRegistry (preloaded)
+	if has_node("/root/AssetRegistry"):
+		var asset_registry = get_node("/root/AssetRegistry")
+		var resource = asset_registry.get_preloaded_asset(path)
+		if resource != null:
+			_resource_cache[path] = resource
+			return resource
+	
+	# Fallback to manual loading
 	if ResourceLoader.exists(path):
 		var resource = load(path)
 		_resource_cache[path] = resource
@@ -109,8 +89,389 @@ func get_resource(path):
 	
 	return null
 
-# Scan all asset directories
-func _scan_directories():
+# NEW: Get in-hand texture for a specific item and hand
+func get_inhand_texture(item_name: String, hand: String) -> Texture2D:
+	"""Get in-hand texture for an item (hand should be 'left' or 'right')"""
+	var texture_key = item_name + "_" + hand
+	
+	if inhand_sprites.has(texture_key):
+		var texture_path = inhand_sprites[texture_key]
+		return get_resource(texture_path)
+	
+	return null
+
+# NEW: Check if item has in-hand sprites
+func has_inhand_sprites(item_name: String) -> bool:
+	"""Check if an item has in-hand sprites available"""
+	var left_key = item_name + "_left"
+	var right_key = item_name + "_right"
+	
+	return inhand_sprites.has(left_key) or inhand_sprites.has(right_key)
+
+# NEW: Get all available in-hand items
+func get_inhand_item_names() -> Array:
+	"""Get list of all items that have in-hand sprites"""
+	var item_names = []
+	
+	for sprite_key in inhand_sprites.keys():
+		if sprite_key.ends_with("_left") or sprite_key.ends_with("_right"):
+			var item_name = sprite_key.replace("_left", "").replace("_right", "")
+			if item_name not in item_names:
+				item_names.append(item_name)
+	
+	return item_names
+
+# Get total asset count
+func _get_total_asset_count() -> int:
+	var count = 0
+	count += hair_styles.size()
+	count += facial_hair_styles.size()
+	count += clothing_options.size()
+	count += underwear_options.size()
+	count += undershirt_options.size()
+	count += background_textures.size()
+	count += inhand_sprites.size()  # NEW: Include in-hand sprites
+	return count
+
+# Scan assets from AssetRegistry instead of filesystem
+func _scan_assets_from_registry():
+	if not has_node("/root/AssetRegistry"):
+		print("AssetRegistry not available, using fallback scanning")
+		_scan_directories_fallback()
+		return
+	
+	var asset_registry = get_node("/root/AssetRegistry")
+	print("Scanning assets from AssetRegistry...")
+	
+	_scan_races_from_registry(asset_registry)
+	_scan_hair_styles_from_registry(asset_registry)
+	_scan_facial_hair_from_registry(asset_registry)
+	_scan_clothing_from_registry(asset_registry)
+	_scan_underwear_from_registry(asset_registry)
+	_scan_undershirts_from_registry(asset_registry)
+	_scan_backgrounds_from_registry(asset_registry)
+	_scan_inhand_sprites_from_registry(asset_registry)  # NEW: Scan in-hand sprites
+	_scan_occupations()
+
+func _scan_races_from_registry(asset_registry):
+	races = []
+	var all_assets = asset_registry.get_all_assets()
+	var race_dirs = {}
+	
+	# Find all race directories by looking for body/head assets
+	for asset_path in all_assets:
+		if asset_path.contains("/Human/") and (asset_path.contains("Body") or asset_path.contains("Head")):
+			var path_parts = asset_path.split("/")
+			var human_index = -1
+			
+			for i in range(path_parts.size()):
+				if path_parts[i] == "Human":
+					human_index = i
+					break
+			
+			if human_index >= 0:
+				if human_index + 1 < path_parts.size():
+					var potential_race = path_parts[human_index + 1]
+					# If it's a direct file in Human folder, it's "Human" race
+					if potential_race.ends_with(".png"):
+						race_dirs["Human"] = true
+					# If it's a subfolder that's not a standard asset folder
+					elif not potential_race in ["Hair", "FacialHair", "Clothing", "UnderWear", "UnderShirt"]:
+						race_dirs[potential_race] = true
+	
+	# Add found races
+	for race_name in race_dirs.keys():
+		races.append(race_name)
+	
+	if races.size() == 0:
+		races.append("Human")
+	
+	print("Found races: ", races)
+
+func _scan_hair_styles_from_registry(asset_registry):
+	var hair_assets = asset_registry.get_assets_by_type("textures")
+	
+	# Keep existing "None" option
+	if hair_styles.size() > 0 and hair_styles[0].name == "None":
+		var none_option = hair_styles[0]
+		hair_styles.clear()
+		hair_styles.append(none_option)
+	else:
+		hair_styles.clear()
+		hair_styles.append({"name": "None", "texture": null, "sex": -1})
+	
+	for asset_path in hair_assets:
+		if asset_path.contains("/Hair/") and asset_path.ends_with(".png"):
+			var file_name = asset_path.get_file()
+			var style_name = file_name.get_basename()
+			style_name = style_name.replace("_", " ").capitalize()
+			
+			var sex = -1
+			if file_name.to_lower().contains("_male"):
+				sex = 0
+			elif file_name.to_lower().contains("_female"):
+				sex = 1
+			
+			style_name = style_name.replace(" Male", "").replace(" Female", "")
+			
+			hair_styles.append({
+				"name": style_name,
+				"texture": asset_path,
+				"sex": sex
+			})
+	
+	print("Found hair styles: ", hair_styles.size() - 1)  # -1 for "None"
+
+func _scan_facial_hair_from_registry(asset_registry):
+	var texture_assets = asset_registry.get_assets_by_type("textures")
+	
+	# Keep existing "None" option
+	if facial_hair_styles.size() > 0 and facial_hair_styles[0].name == "None":
+		var none_option = facial_hair_styles[0]
+		facial_hair_styles.clear()
+		facial_hair_styles.append(none_option)
+	else:
+		facial_hair_styles.clear()
+		facial_hair_styles.append({"name": "None", "texture": null, "sex": 0})
+	
+	for asset_path in texture_assets:
+		var file_name = asset_path.get_file()
+		if (asset_path.contains("/FacialHair/") or asset_path.contains("/Hair/")) and asset_path.ends_with(".png"):
+			if file_name.contains("Facial_") or file_name.begins_with("Beard") or file_name.begins_with("Mustache") or file_name.contains("facial"):
+				var style_name = file_name.get_basename()
+				style_name = style_name.replace("_", " ").replace("Facial ", "").capitalize()
+				
+				facial_hair_styles.append({
+					"name": style_name,
+					"texture": asset_path,
+					"sex": 0
+				})
+	
+	print("Found facial hair styles: ", facial_hair_styles.size() - 1)
+
+func _scan_clothing_from_registry(asset_registry):
+	var texture_assets = asset_registry.get_assets_by_type("textures")
+	
+	# Keep existing "None" option
+	if clothing_options.size() > 0 and clothing_options[0].name == "None":
+		var none_option = clothing_options[0]
+		clothing_options.clear()
+		clothing_options.append(none_option)
+	else:
+		clothing_options.clear()
+		clothing_options.append({"name": "None", "textures": {}, "sex": -1})
+	
+	var clothing_sets = {}
+	
+	# Group clothing assets by set
+	for asset_path in texture_assets:
+		if asset_path.contains("/Clothing/") and asset_path.ends_with(".png"):
+			var file_name = asset_path.get_file().get_basename()
+			var parts = file_name.split("_")
+			
+			if parts.size() >= 2:
+				var set_name = ""
+				for i in range(parts.size() - 1):
+					if i > 0:
+						set_name += "_"
+					set_name += parts[i]
+				
+				var part_name = parts[parts.size() - 1]
+				
+				if not clothing_sets.has(set_name):
+					clothing_sets[set_name] = {"textures": {}}
+				
+				clothing_sets[set_name]["textures"][part_name] = asset_path
+	
+	# Convert to clothing options
+	for set_name in clothing_sets:
+		var sex = -1
+		
+		if set_name.to_lower().contains("_male"):
+			sex = 0
+		elif set_name.to_lower().contains("_female"):
+			sex = 1
+		
+		var display_name = set_name.replace("_Male", "").replace("_Female", "")
+		display_name = display_name.replace("_", " ").capitalize()
+		
+		clothing_options.append({
+			"name": display_name,
+			"textures": clothing_sets[set_name]["textures"],
+			"sex": sex
+		})
+	
+	print("Found clothing sets: ", clothing_options.size() - 1)
+
+func _scan_underwear_from_registry(asset_registry):
+	var texture_assets = asset_registry.get_assets_by_type("textures")
+	
+	var has_male = false
+	var has_female = false
+	var defaults = []
+	
+	for item in underwear_options:
+		if item.sex == 0:
+			has_male = true
+		elif item.sex == 1:
+			has_female = true
+		defaults.append(item)
+	
+	underwear_options.clear()
+	
+	for asset_path in texture_assets:
+		if asset_path.contains("/UnderWear/") and asset_path.ends_with(".png"):
+			var file_name = asset_path.get_file()
+			var item_name = file_name.get_basename()
+			item_name = item_name.replace("_", " ").capitalize()
+			
+			var sex = -1
+			if file_name.to_lower().contains("_male") or file_name.to_lower().contains("boxers") or file_name.to_lower().contains("briefs"):
+				sex = 0
+				has_male = true
+			elif file_name.to_lower().contains("_female") or file_name.to_lower().contains("panties"):
+				sex = 1
+				has_female = true
+			
+			item_name = item_name.replace(" Male", "").replace(" Female", "")
+			
+			underwear_options.append({
+				"name": item_name,
+				"texture": asset_path,
+				"sex": sex
+			})
+	
+	# Add defaults if needed
+	if not has_male or not has_female:
+		for item in defaults:
+			if (item.sex == 0 and not has_male) or (item.sex == 1 and not has_female):
+				underwear_options.append(item)
+				if item.sex == 0:
+					has_male = true
+				elif item.sex == 1:
+					has_female = true
+	
+	print("Found underwear options: ", underwear_options.size())
+
+func _scan_undershirts_from_registry(asset_registry):
+	var texture_assets = asset_registry.get_assets_by_type("textures")
+	
+	var has_female_top = false
+	var defaults = []
+	
+	for item in undershirt_options:
+		if item.sex == 1 and item.texture != null:
+			has_female_top = true
+		defaults.append(item)
+	
+	undershirt_options.clear()
+	undershirt_options.append({"name": "None", "texture": null, "sex": 0})
+	
+	for asset_path in texture_assets:
+		if asset_path.contains("/UnderShirt/") and asset_path.ends_with(".png"):
+			var file_name = asset_path.get_file()
+			var item_name = file_name.get_basename()
+			item_name = item_name.replace("_", " ").capitalize()
+			
+			var sex = -1
+			if file_name.to_lower().contains("_male"):
+				sex = 0
+			elif file_name.to_lower().contains("_female") or file_name.to_lower().contains("bra"):
+				sex = 1
+				has_female_top = true
+			
+			item_name = item_name.replace(" Male", "").replace(" Female", "")
+			
+			undershirt_options.append({
+				"name": item_name,
+				"texture": asset_path,
+				"sex": sex
+			})
+	
+	# Add defaults if needed
+	if not has_female_top:
+		for item in defaults:
+			if item.sex == 1 and item.texture != null:
+				undershirt_options.append(item)
+				has_female_top = true
+				break
+	
+	print("Found undershirt options: ", undershirt_options.size())
+
+func _scan_backgrounds_from_registry(asset_registry):
+	var texture_assets = asset_registry.get_assets_by_type("textures")
+	
+	background_textures.clear()
+	
+	for asset_path in texture_assets:
+		if asset_path.contains("/Backgrounds/") and (asset_path.ends_with(".png") or asset_path.ends_with(".jpg")):
+			var file_name = asset_path.get_file()
+			var bg_name = file_name.get_basename()
+			bg_name = bg_name.replace("_", " ").capitalize()
+			
+			var already_added = false
+			for bg in background_textures:
+				if bg.texture == asset_path:
+					already_added = true
+					break
+			
+			if not already_added:
+				background_textures.append({
+					"name": bg_name,
+					"texture": asset_path
+				})
+	
+	# Ensure default space background
+	if background_textures.size() == 0:
+		background_textures.append({
+			"name": "Space", 
+			"texture": "res://Assets/Backgrounds/Space.png"
+		})
+	
+	print("Found backgrounds: ", background_textures.size())
+
+# NEW: Scan in-hand sprites from AssetRegistry
+func _scan_inhand_sprites_from_registry(asset_registry):
+	var texture_assets = asset_registry.get_assets_by_type("textures")
+	
+	inhand_sprites.clear()
+	
+	# Look for in-hand sprites in various possible paths
+	var inhand_paths = ["/inhand/", "/items/inhand/", "/sprites/inhand/", "/Graphics/inhand/"]
+	
+	for asset_path in texture_assets:
+		# Check if path contains any of the in-hand directories
+		var is_inhand = false
+		for inhand_path in inhand_paths:
+			if asset_path.contains(inhand_path):
+				is_inhand = true
+				break
+		
+		if is_inhand and asset_path.ends_with(".png"):
+			var file_name = asset_path.get_file().get_basename()
+			
+			# Check if it follows the expected naming pattern: ItemName_left or ItemName_right
+			if file_name.ends_with("_left") or file_name.ends_with("_right"):
+				inhand_sprites[file_name] = asset_path
+				print("Found in-hand sprite: ", file_name, " -> ", asset_path)
+	
+	print("Total in-hand sprites found: ", inhand_sprites.size())
+
+func _scan_occupations():
+	var occupation_list = ["Engineer", "Security", "Medical", "Science", "Command", "Cargo"]
+	
+	for clothing in clothing_options:
+		if clothing.name != "None":
+			var occupation = clothing.name.replace("Uniform", "").strip_edges()
+			
+			if not occupation in occupation_list:
+				occupation_list.append(occupation)
+	
+	occupations = occupation_list
+
+# Fallback directory scanning if AssetRegistry is not available
+func _scan_directories_fallback():
+	print("Using fallback directory scanning...")
 	_scan_races()
 	_scan_hair_styles()
 	_scan_facial_hair()
@@ -118,8 +479,47 @@ func _scan_directories():
 	_scan_underwear()
 	_scan_undershirts()
 	_scan_backgrounds()
+	_scan_inhand_sprites_fallback()  # NEW: Fallback in-hand scanning
 	_scan_occupations()
 
+# NEW: Fallback in-hand sprite scanning
+func _scan_inhand_sprites_fallback():
+	inhand_sprites.clear()
+	
+	# Try common in-hand directories
+	var inhand_directories = [
+		"res://Graphics/inhand/",
+		"res://Graphics/items/inhand/",
+		"res://Graphics/sprites/inhand/",
+		"res://Assets/inhand/"
+	]
+	
+	for dir_path in inhand_directories:
+		var dir = DirAccess.open(dir_path)
+		if dir:
+			print("Scanning in-hand directory: ", dir_path)
+			
+			dir.list_dir_begin()
+			var file_name = dir.get_next()
+			
+			while file_name != "":
+				if not dir.current_is_dir() and file_name.ends_with(".png") and not file_name.begins_with("."):
+					var base_name = file_name.get_basename()
+					
+					# Check for left/right hand pattern
+					if base_name.ends_with("_left") or base_name.ends_with("_right"):
+						var texture_path = dir_path + file_name
+						if ResourceLoader.exists(texture_path):
+							inhand_sprites[base_name] = texture_path
+							print("Found in-hand sprite: ", base_name, " -> ", texture_path)
+				
+				file_name = dir.get_next()
+			
+			dir.list_dir_end()
+	
+	print("Total in-hand sprites found (fallback): ", inhand_sprites.size())
+
+# Keep original directory scanning methods for fallback
 func _scan_races():
 	races = []
 	
@@ -483,18 +883,6 @@ func _scan_backgrounds():
 			
 			file_name = dir.get_next()
 
-func _scan_occupations():
-	var occupation_list = ["Engineer", "Security", "Medical", "Science", "Command", "Cargo"]
-	
-	for clothing in clothing_options:
-		if clothing.name != "None":
-			var occupation = clothing.name.replace("Uniform", "").strip_edges()
-			
-			if not occupation in occupation_list:
-				occupation_list.append(occupation)
-	
-	occupations = occupation_list
-
 func _load_config_file():
 	if ResourceLoader.exists(ASSET_CONFIG_PATH):
 		var file = FileAccess.open(ASSET_CONFIG_PATH, FileAccess.READ)
@@ -519,6 +907,9 @@ func _load_config_file():
 					undershirt_options = json_result.undershirt_options
 				if json_result.has("background_textures"):
 					background_textures = json_result.background_textures
+				# NEW: Load in-hand sprites from config
+				if json_result.has("inhand_sprites"):
+					inhand_sprites = json_result.inhand_sprites
 
 func _verify_assets():
 	# Verify hair styles
@@ -569,6 +960,14 @@ func _verify_assets():
 		if bg.texture == null or ResourceLoader.exists(bg.texture):
 			valid_backgrounds.append(bg)
 	background_textures = valid_backgrounds
+	
+	# NEW: Verify in-hand sprites
+	var valid_inhand_sprites = {}
+	for sprite_key in inhand_sprites:
+		var sprite_path = inhand_sprites[sprite_key]
+		if ResourceLoader.exists(sprite_path):
+			valid_inhand_sprites[sprite_key] = sprite_path
+	inhand_sprites = valid_inhand_sprites
 	
 	_ensure_minimal_options()
 
@@ -672,7 +1071,7 @@ func get_race_sprites(race_index: int, sex: int = 0) -> Dictionary:
 	
 	return sprite_paths
 
-# Asset getters for specific sex
+# Asset getters for specific sex (unchanged - maintaining compatibility)
 func get_hair_styles_for_sex(sex: int = 0) -> Array:
 	var result = [{"name": "None", "texture": null, "sex": -1}]
 	
@@ -759,13 +1158,13 @@ func get_undershirts_for_sex(sex: int = 0) -> Array:
 	
 	return result
 
-# Config management
+# Config management (updated to include in-hand sprites)
 func save_config():
 	var config = {
 		"races": races, "occupations": occupations, "hair_styles": hair_styles,
 		"facial_hair_styles": facial_hair_styles, "clothing_options": clothing_options,
 		"underwear_options": underwear_options, "undershirt_options": undershirt_options,
-		"background_textures": background_textures
+		"background_textures": background_textures, "inhand_sprites": inhand_sprites  # NEW
 	}
 	
 	var directory = DirAccess.open("res://")
@@ -776,7 +1175,7 @@ func save_config():
 	if file:
 		file.store_line(JSON.stringify(config, "  "))
 
-# Asset management functions
+# Asset management functions (unchanged)
 func add_hair_style(name: String, texture_path: String, sex: int = -1) -> void:
 	hair_styles.append({"name": name, "texture": texture_path, "sex": sex})
 	save_config()
@@ -809,7 +1208,38 @@ func add_background(name: String, texture_path: String) -> void:
 	background_textures.append({"name": name, "texture": texture_path})
 	save_config()
 
+# NEW: In-hand sprite management functions
+func add_inhand_sprite(item_name: String, hand: String, texture_path: String) -> void:
+	"""Add an in-hand sprite for an item"""
+	var sprite_key = item_name + "_" + hand
+	inhand_sprites[sprite_key] = texture_path
+	save_config()
+
+func remove_inhand_sprite(item_name: String, hand: String) -> void:
+	"""Remove an in-hand sprite for an item"""
+	var sprite_key = item_name + "_" + hand
+	if inhand_sprites.has(sprite_key):
+		inhand_sprites.erase(sprite_key)
+		save_config()
+
+func get_inhand_sprite_path(item_name: String, hand: String) -> String:
+	"""Get the file path for an in-hand sprite"""
+	var sprite_key = item_name + "_" + hand
+	if inhand_sprites.has(sprite_key):
+		return inhand_sprites[sprite_key]
+	return ""
+
 func refresh_assets() -> void:
-	_scan_directories()
+	_scan_assets_from_registry()
 	_verify_assets()
 	save_config()
+
+# New utility function to check AssetRegistry availability
+func is_asset_registry_available() -> bool:
+	return has_node("/root/AssetRegistry")
+
+# Get asset registry node
+func get_asset_registry():
+	if has_node("/root/AssetRegistry"):
+		return get_node("/root/AssetRegistry")
+	return null

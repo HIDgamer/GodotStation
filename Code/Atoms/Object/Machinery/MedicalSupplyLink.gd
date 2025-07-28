@@ -99,7 +99,7 @@ func do_unclamp_animation():
 	# Emit signal
 	emit_signal("structure_unwrenched")
 
-func interact(user) -> bool:
+func interact(user, interaction_type: String = "interact", params: Dictionary = {}) -> bool:
 	# Base interaction
 	super.interact(user)
 	

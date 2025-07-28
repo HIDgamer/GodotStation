@@ -171,15 +171,3 @@ func handle_patient_visual(target, entering_stasis):
 		
 		# Offset position slightly to avoid overlap
 		target.global_position = global_position + Vector2(32, 0)
-
-func interact(user):
-	# If active, check if the user wants to deactivate
-	if is_active and occupied:
-		if user.has_method("display_message"):
-			user.display_message("You deactivate the stasis bag and carefully remove the patient.")
-		
-		deactivate()
-		return true
-	
-	# Otherwise, handle normally
-	return super.interact(user)

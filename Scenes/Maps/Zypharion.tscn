@@ -1,7 +1,8 @@
-[gd_scene load_steps=90 format=3 uid="uid://dwx26j3f05xb1"]
+[gd_scene load_steps=100 format=3 uid="uid://dwx26j3f05xb1"]
 
 [ext_resource type="Script" uid="uid://dhdolra15rmy3" path="res://Code/Atoms/World_Systems/World.gd" id="1_n0dfv"]
 [ext_resource type="Script" uid="uid://ddf3tjqudd13u" path="res://Code/Helpers/visual_tile_map.gd" id="2_4w5a4"]
+[ext_resource type="PackedScene" uid="uid://conwqm0x8frrv" path="res://Scenes/UI/Player/pause_menu.tscn" id="2_cgiob"]
 [ext_resource type="PackedScene" uid="uid://b8j7h5lam2n4p" path="res://Scenes/UI/Ingame/AdminSpawner.tscn" id="2_vlxk0"]
 [ext_resource type="Script" uid="uid://bo00c7it76j3q" path="res://Code/Atoms/World_Systems/ChunkCullingSystem.gd" id="3_4i6l0"]
 [ext_resource type="Script" uid="uid://hrh2ly2ivbaq" path="res://Code/Atoms/World_Systems/ZoneTileMap.gd" id="3_63btk"]
@@ -17,11 +18,20 @@
 [ext_resource type="PackedScene" uid="uid://dm2h5vbxw0n31" path="res://Scenes/Items/Grenades/HEgrenade.tscn" id="11_82gmr"]
 [ext_resource type="PackedScene" uid="uid://bxnpctlybofkh" path="res://Scenes/Objects/Machinery/MedicalVendor.tscn" id="11_mlwxp"]
 [ext_resource type="PackedScene" uid="uid://cuj34ntgy48j2" path="res://Scenes/Lighting/wall_light.tscn" id="11_ry2mu"]
-[ext_resource type="PackedScene" uid="uid://csayyiueq2vo8" path="res://Scenes/Items/Melee/telebaton.tscn" id="13_cgiob"]
-[ext_resource type="Script" uid="uid://ctk7b455p47ul" path="res://Code/OnClick/ClickSystem.gd" id="17_ry2mu"]
+[ext_resource type="PackedScene" uid="uid://djvnxoepnmjsa" path="res://Scenes/Items/Clothing/paramdic_u_1.tscn" id="12_382x6"]
+[ext_resource type="PackedScene" uid="uid://cotvtxqxfrlxe" path="res://Scenes/Items/Grenades/Flashbang.tscn" id="16_5s2u1"]
+[ext_resource type="PackedScene" uid="uid://d0xfkv8o80qsi" path="res://Scenes/Items/Grenades/EMPgrenade.tscn" id="16_382x6"]
+[ext_resource type="PackedScene" uid="uid://bh3i0yrcpgbgu" path="res://Scenes/Items/Grenades/Phosphorusgrenade.tscn" id="17_2k0ho"]
+[ext_resource type="PackedScene" uid="uid://bd8rfjfpfbpfg" path="res://Scenes/Items/Grenades/Flare.tscn" id="17_382x6"]
+[ext_resource type="PackedScene" uid="uid://bcdh3n2gbsb5l" path="res://Scenes/Items/Grenades/Smokegrenade.tscn" id="19_oyx32"]
 [ext_resource type="PackedScene" uid="uid://ctk4o3xyuqeq1" path="res://Scenes/UI/Ingame/ChatUI.tscn" id="22_k6jxd"]
 [ext_resource type="Script" uid="uid://dilpklot1quje" path="res://Code/Helpers/SensorySystem.gd" id="25_5s2u1"]
 [ext_resource type="Script" uid="uid://c8jf8v6g6lyi5" path="res://Code/Managers/AudioManager.gd" id="26_382x6"]
+[ext_resource type="PackedScene" uid="uid://cipxsy3w58mhm" path="res://Scenes/Items/Clothing/j_beret.tscn" id="31_3isho"]
+[ext_resource type="PackedScene" uid="uid://7i0cudfe5met" path="res://Scenes/Items/Clothing/e_beret.tscn" id="32_1vlnd"]
+[ext_resource type="PackedScene" uid="uid://b3xqv1h8j2k5n" path="res://Scenes/Items/Guns/Pistol.tscn" id="32_wkrl5"]
+[ext_resource type="PackedScene" uid="uid://d38s16gde836l" path="res://Scenes/Items/Guns/Magazines/PistolMagazine.tscn" id="33_3isho"]
+[ext_resource type="PackedScene" uid="uid://dc85ow0v4jacl" path="res://Scenes/Items/Clothing/j_uniform.tscn" id="33_a2uqf"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3n6t6"]
 texture = ExtResource("5_ry2mu")
@@ -1155,13 +1165,16 @@ dof_blur_near_enabled = true
 [node name="Main" type="Node2D"]
 
 [node name="UILayer" type="CanvasLayer" parent="."]
+layer = 100
+follow_viewport_enabled = true
 
 [node name="EnhancedChatUI" parent="UILayer" instance=ExtResource("22_k6jxd")]
+visible = false
 
 [node name="AdminSpawner" parent="UILayer" instance=ExtResource("2_vlxk0")]
-z_index = 5
-size_flags_horizontal = 4
-size_flags_vertical = 4
+visible = false
+
+[node name="PauseMenu" parent="UILayer" instance=ExtResource("2_cgiob")]
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 color = Color(0.0478506, 0.0455295, 0.0937934, 1)
@@ -1208,41 +1221,6 @@ script = ExtResource("3_63btk")
 [node name="MedicalVendor" parent="World/Objects/Medical_Equipment" instance=ExtResource("11_mlwxp")]
 position = Vector2(112, 8)
 
-[node name="Items" type="Node2D" parent="World/Objects"]
-
-[node name="HEGrenade" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade2" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade3" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade4" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade5" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade6" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade7" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade8" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade9" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="HEGrenade10" parent="World/Objects/Items" instance=ExtResource("11_82gmr")]
-position = Vector2(112, 112)
-
-[node name="Telebaton" parent="World/Objects/Items" instance=ExtResource("13_cgiob")]
-position = Vector2(112, 80)
-
 [node name="Lights" type="Node2D" parent="World"]
 
 [node name="Wall_Light5" parent="World/Lights" instance=ExtResource("11_ry2mu")]
@@ -1281,12 +1259,10 @@ script = ExtResource("3_k2pgl")
 script = ExtResource("9_vlxk0")
 metadata/_custom_type_script = "uid://dheeug2eok4df"
 
-[node name="ClickSystem" type="Node2D" parent="World" groups=["click_system"]]
-script = ExtResource("17_ry2mu")
-
 [node name="TileOccupancySystem" type="Node2D" parent="World"]
 script = ExtResource("7_cgiob")
-debug_collisions = true
+sync_mode = 0
+sync_push_attempts = true
 
 [node name="SensorySystem" type="Node2D" parent="World"]
 script = ExtResource("25_5s2u1")
@@ -1295,6 +1271,214 @@ metadata/_custom_type_script = "uid://dilpklot1quje"
 [node name="AudioManager" type="Node2D" parent="World"]
 script = ExtResource("26_382x6")
 metadata/_custom_type_script = "uid://c8jf8v6g6lyi5"
+
+[node name="SmokeGrenade" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="SmokeGrenade2" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="SmokeGrenade3" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="SmokeGrenade4" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="SmokeGrenade5" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="SmokeGrenade6" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="SmokeGrenade7" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="SmokeGrenade8" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="SmokeGrenade9" parent="World" instance=ExtResource("19_oyx32")]
+position = Vector2(48, 144)
+
+[node name="PhosphorusGrenade" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="PhosphorusGrenade2" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="PhosphorusGrenade3" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="PhosphorusGrenade4" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="PhosphorusGrenade5" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="PhosphorusGrenade6" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="PhosphorusGrenade7" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="PhosphorusGrenade8" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="PhosphorusGrenade9" parent="World" instance=ExtResource("17_2k0ho")]
+position = Vector2(48, 176)
+
+[node name="E_Beret" parent="World" instance=ExtResource("32_1vlnd")]
+position = Vector2(80, 80)
+
+[node name="J_Beret" parent="World" instance=ExtResource("31_3isho")]
+position = Vector2(112, 80)
+
+[node name="J_Uniform" parent="World" instance=ExtResource("33_a2uqf")]
+position = Vector2(112, 112)
+
+[node name="Paramdic_U1" parent="World" instance=ExtResource("12_382x6")]
+position = Vector2(80, 112)
+
+[node name="HEGrenade" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="HEGrenade2" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="HEGrenade3" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="HEGrenade4" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="HEGrenade5" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="HEGrenade6" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="HEGrenade7" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="HEGrenade8" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="HEGrenade9" parent="World" instance=ExtResource("11_82gmr")]
+position = Vector2(80, 144)
+
+[node name="Flare" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flare2" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flare3" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flare4" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flare5" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flare6" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flare7" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flare8" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flare9" parent="World" instance=ExtResource("17_382x6")]
+position = Vector2(80, 176)
+
+[node name="Flashbang" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="Flashbang2" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="Flashbang3" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="Flashbang4" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="Flashbang5" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="Flashbang6" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="Flashbang7" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="Flashbang8" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="Flashbang9" parent="World" instance=ExtResource("16_5s2u1")]
+position = Vector2(112, 144)
+
+[node name="EMPGrenade" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="EMPGrenade2" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="EMPGrenade3" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="EMPGrenade4" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="EMPGrenade5" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="EMPGrenade6" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="EMPGrenade7" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="EMPGrenade8" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="EMPGrenade9" parent="World" instance=ExtResource("16_382x6")]
+position = Vector2(112, 176)
+
+[node name="Pistol" parent="World" instance=ExtResource("32_wkrl5")]
+position = Vector2(144, 112)
+current_safety_state = 0
+
+[node name="PistolMagazine" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine2" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine3" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine4" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine5" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine6" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine7" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine8" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine9" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
+
+[node name="PistolMagazine10" parent="World" instance=ExtResource("33_3isho")]
+position = Vector2(176, 96)
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://c6mxm7u3f5n4g")

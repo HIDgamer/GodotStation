@@ -48,7 +48,7 @@ func clear_internal_item():
 	deployed_item = null
 
 # Interact with the deployable object
-func interact(user):
+func interact(user, interaction_type: String = "interact", params: Dictionary = {}) -> bool:
 	super.interact(user)
 	
 	# If the deployer interacts with it, show additional options

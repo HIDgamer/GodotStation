@@ -225,6 +225,7 @@ animations = [{
 }]
 
 [node name="ExplosionParticles" type="GPUParticles2D"]
+z_index = 4
 emitting = false
 amount = 20
 texture = ExtResource("2_sukcf")
