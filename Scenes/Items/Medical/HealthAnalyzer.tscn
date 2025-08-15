@@ -18,9 +18,8 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="MedicalItem" type="Node2D"]
+[node name="HealthAnalyzer" type="Node2D"]
 script = ExtResource("1_ex5w8")
-medical_type = 12
 
 [node name="Icon" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_hutpd")

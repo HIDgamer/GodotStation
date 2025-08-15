@@ -27,7 +27,7 @@ func _ready():
 	setup_magazine_visuals()
 	
 	# Set valid equipment slots (can go in belt, pockets, hands)
-	equip_slot_flags = Slots.LEFT_HAND | Slots.RIGHT_HAND | Slots.BELT | Slots.POCKET | Slots.POCKET
+	equip_slot_flags = Slots.LEFT_HAND | Slots.RIGHT_HAND | Slots.BELT | Slots.IN_L_POUCH | Slots.IN_R_POUCH | Slots.S_STORE
 
 func setup_magazine_visuals():
 	"""Set up magazine appearance using AnimatedSprite2D"""

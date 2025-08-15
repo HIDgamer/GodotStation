@@ -1,0 +1,10 @@
+[gd_resource type="CanvasTexture" load_steps=4 format=3 uid="uid://cj6mgmwd8ln2a"]
+
+[ext_resource type="Texture2D" uid="uid://do3w5qksuoyxe" path="res://Assets/Icons/Items/Objects/Flood_Light.png" id="1_0teir"]
+[ext_resource type="Texture2D" uid="uid://xgajj8w8306e" path="res://Assets/Icons/Items/Objects/Flood_Light_n.png" id="2_sppe3"]
+[ext_resource type="Texture2D" uid="uid://i5c5nggk8umq" path="res://Assets/Icons/Items/Objects/Flood_Light_s.png" id="3_x6e1p"]
+
+[resource]
+diffuse_texture = ExtResource("1_0teir")
+normal_texture = ExtResource("2_sppe3")
+specular_texture = ExtResource("3_x6e1p")

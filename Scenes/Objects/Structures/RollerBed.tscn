@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3 uid="uid://co26vgu50m16f"]
+
+[ext_resource type="Script" uid="uid://qgtdbhdyhsup" path="res://Code/Atoms/Object/Structures/Furniture.gd" id="1_kee8o"]
+[ext_resource type="PackedScene" uid="uid://d0wggabcysnq8" path="res://Scenes/Items/Furniture/RollerBed.tscn" id="2_jnuyx"]
+[ext_resource type="Texture2D" uid="uid://b2bolkw1q7wba" path="res://Assets/Structure/rollerbed.png" id="3_jnuyx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l12gc"]
+atlas = ExtResource("3_jnuyx")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ouqfo"]
+atlas = ExtResource("3_jnuyx")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_61lo4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l12gc")
+}],
+"loop": true,
+"name": &"Buckled",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ouqfo")
+}],
+"loop": true,
+"name": &"Empty",
+"speed": 5.0
+}]
+
+[node name="RollerBed" type="Node2D"]
+script = ExtResource("1_kee8o")
+can_buckle = true
+foldable = true
+folded_item_scene = ExtResource("2_jnuyx")
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_61lo4")
+animation = &"Empty"
+autoplay = "Empty"

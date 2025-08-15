@@ -1,111 +1,18 @@
-[gd_scene load_steps=22 format=3 uid="uid://b3xqv1h8j2k5n"]
+[gd_scene load_steps=9 format=3 uid="uid://b3xqv1h8j2k5n"]
 
 [ext_resource type="Script" uid="uid://6wprq1tm3ej3" path="res://Code/Items/Weapons/Guns/Pistol.gd" id="1_0hdcq"]
-[ext_resource type="PackedScene" uid="uid://c7xqv2iak3l6o" path="res://Scenes/Effects/PistolProjectile.tscn" id="2_gewp1"]
-[ext_resource type="Texture2D" uid="uid://bqrswj3nw5alu" path="res://Assets/Weapons/Pistol/Pistol_sheet.png" id="2_k2bl1"]
+[ext_resource type="PackedScene" uid="uid://c7xqv2iak3l6o" path="res://Scenes/Effects/Projectile.tscn" id="2_gewp1"]
 [ext_resource type="AudioStream" uid="uid://bfnvacxvc6kh5" path="res://Sound/weapons/Shot.wav" id="3_g5jlo"]
 [ext_resource type="AudioStream" uid="uid://e1vrm0k4iawq" path="res://Sound/weapons/handling/gun_jam_click.ogg" id="3_uj6x4"]
 [ext_resource type="AudioStream" uid="uid://ci1vl4llpcjpr" path="res://Sound/weapons/gun_vp78_reload.ogg" id="4_gewp1"]
 [ext_resource type="AudioStream" uid="uid://ytreg77yt8oq" path="res://Sound/weapons/gun_pistol_cocked.ogg" id="4_k2bl1"]
 [ext_resource type="AudioStream" uid="uid://dlsmqvnr6tmvt" path="res://Sound/weapons/Reload.wav" id="4_scr0w"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_scr0w"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(0, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_uj6x4"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(64, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_gewp1"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(128, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_hvkhn"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(192, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_wqla4"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(256, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_q8dyk"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(320, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_m882l"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(384, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_r73yx"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(448, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6igrl"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(512, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_lh6yj"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(576, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_stkh0"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(640, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ut0jg"]
-atlas = ExtResource("2_k2bl1")
-region = Rect2(704, 0, 64, 32)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_nacfe"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_scr0w")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_uj6x4")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_gewp1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_hvkhn")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_wqla4")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_q8dyk")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_m882l")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_r73yx")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6igrl")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_lh6yj")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_stkh0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ut0jg")
-}],
-"loop": true,
-"name": &"Fire",
-"speed": 30.0
-}]
+[ext_resource type="Texture2D" uid="uid://dqxt3tdexip3j" path="res://Assets/Weapons/Pistol/Pistol.png" id="7_gewp1"]
 
 [node name="Pistol" type="Node2D"]
 script = ExtResource("1_0hdcq")
 scatter_amount = 1.0
 effective_range = 0.0
-muzzle_flash_enabled = false
 auto_eject_magazine = true
 projectile_scene = ExtResource("2_gewp1")
 fire_sound = ExtResource("3_g5jlo")
@@ -113,12 +20,10 @@ empty_sound = ExtResource("3_uj6x4")
 reload_sound = ExtResource("4_gewp1")
 cock_sound = ExtResource("4_k2bl1")
 weapon_type = 1
-safety_enabled = false
+current_safety_state = 0
 
-[node name="Icon" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
-sprite_frames = SubResource("SpriteFrames_nacfe")
-animation = &"Fire"
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("7_gewp1")
 
 [node name="MuzzlePoint" type="Marker2D" parent="."]
 
@@ -142,6 +47,4 @@ collision_layer = 8
 collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
-position = Vector2(-7, 0)
-scale = Vector2(0.5, 0.5)
 polygon = PackedVector2Array(-6, -6, -6, -5, -9, -5, -9, -4, -11, -4, -11, -3, -10, -3, -10, -2, -11, -2, -11, -1, -13, -1, -13, 0, -12, 0, -12, 1, -10, 1, -10, 3, -11, 3, -11, 5, -12, 5, -12, 6, -13, 6, -13, 8, -14, 8, -14, 10, -13, 10, -13, 11, -9, 11, -9, 12, -6, 12, -6, 9, -5, 9, -5, 7, -4, 7, -4, 5, 2, 5, 2, 4, 3, 4, 3, 3, 4, 3, 4, 1, 8, 1, 8, 0, 13, 0, 13, -1, 14, -1, 14, -5, 13, -5, 13, -6, 11, -6, 11, -5, -4, -5, -4, -6)

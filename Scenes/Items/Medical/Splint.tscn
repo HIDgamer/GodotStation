@@ -1,10 +1,16 @@
 [gd_scene load_steps=3 format=3 uid="uid://msehra1m50i"]
 
-[ext_resource type="Script" uid="uid://camokrw5tfkgm" path="res://Code/Items/Medical/Splint.gd" id="1_r6tsn"]
+[ext_resource type="Script" uid="uid://gqwq11v2jk4k" path="res://Code/Items/Medical/MedicalItem.gd" id="1_r6tsn"]
 [ext_resource type="Texture2D" uid="uid://bd3tl8pvyf564" path="res://Assets/Icons/Items/Medical/Splint.png" id="2_r5prd"]
 
 [node name="MedicalItem" type="Node2D"]
 script = ExtResource("1_r6tsn")
+medical_type = 4
+target_limb_required = true
+use_time = 4.0
+is_stackable = true
+max_stack = 5
+current_stack = 5
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("2_r5prd")

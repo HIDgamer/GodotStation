@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://csayyiueq2vo8"]
+[gd_scene load_steps=8 format=3 uid="uid://csayyiueq2vo8"]
 
-[ext_resource type="Script" uid="uid://bdcvqj104fn4c" path="res://Code/Items/Melee/telebaton.gd" id="1_g4rvn"]
-[ext_resource type="Texture2D" uid="uid://dig2lyi31focd" path="res://Assets/Icons/Items/Lethal/TeleBaton.png" id="2_amq1v"]
+[ext_resource type="Script" uid="uid://b82wvrmcwhln" path="res://Code/Items/ItemComponents/Weapon.gd" id="1_g4rvn"]
+[ext_resource type="AudioStream" uid="uid://d2g50qs85r37p" path="res://Sound/weapons/baton.ogg" id="2_5sk76"]
+[ext_resource type="Texture2D" uid="uid://bang2oricqlt3" path="res://Assets/Icons/Items/Lethal/TeleBaton.png" id="2_amq1v"]
 [ext_resource type="AudioStream" uid="uid://471grdq2lxme" path="res://Sound/handling/combistick_close.ogg" id="3_5sk76"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g4rvn"]
@@ -33,21 +34,17 @@ animations = [{
 
 [node name="Telebaton" type="Node2D"]
 script = ExtResource("1_g4rvn")
-force = 20
-attack_speed = 1.0
-tool_behaviour = "weapon"
-entity_type = "item"
-entity_name = "Telebaton"
-pickupable = true
+weapon_damage = 25.0
+weapon_accuracy = 100.0
+weapon_sound = ExtResource("2_5sk76")
+safety_enabled = false
+current_safety_state = 0
+item_name = "Telebaton"
+w_class = 2
 
 [node name="Icon" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_idjvk")
 animation = &"Closed"
-
-[node name="Icon2" type="Sprite2D" parent="."]
-texture = ExtResource("2_amq1v")
-hframes = 2
-frame = 1
 
 [node name="InteractionArea" type="Area2D" parent="."]
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bvn8m7x2kj4gh"]
+[gd_scene load_steps=8 format=3 uid="uid://bvn8m7x2kj4gh"]
 
 [ext_resource type="Script" uid="uid://bllqbbb2vhgnb" path="res://Code/UserInterface/character_creation.gd" id="1_enhanced"]
 
@@ -9,10 +9,10 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.2, 0.5, 0.9, 0.8)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
 bg_color = Color(0.1, 0.25, 0.45, 0.8)
@@ -21,24 +21,22 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.3, 0.6, 1, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_main_panel"]
+bg_color = Color(0.03, 0.08, 0.15, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.1, 0.4, 0.8, 0.6)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_main_panel"]
-bg_color = Color(0.03, 0.08, 0.15, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.1, 0.4, 0.8, 0.6)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_section"]
 bg_color = Color(0.05, 0.1, 0.2, 0.9)
@@ -47,10 +45,10 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.15, 0.35, 0.7, 0.5)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_input"]
 bg_color = Color(0.06, 0.12, 0.24, 0.95)
@@ -59,46 +57,22 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.2, 0.4, 0.7, 0.8)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_preview"]
+bg_color = Color(0.02, 0.05, 0.12, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.15, 0.35, 0.7, 0.6)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_danger_button"]
-bg_color = Color(0.6, 0.15, 0.15, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 0.3, 0.3, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_primary_button"]
-bg_color = Color(0.15, 0.4, 0.7, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.7, 1, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_preview"]
-bg_color = Color(0.02, 0.05, 0.12, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.15, 0.35, 0.7, 0.6)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
 
 [node name="PersonnelFileCreation" type="Control"]
 layout_mode = 3
@@ -130,24 +104,24 @@ grow_vertical = 2
 layout_mode = 0
 offset_left = 200.0
 offset_top = 120.0
-offset_right = 203.0
-offset_bottom = 123.0
+offset_right = 202.0
+offset_bottom = 122.0
 color = Color(0.8, 0.9, 1, 0.4)
 
 [node name="Star2" type="ColorRect" parent="Background/StarField"]
 layout_mode = 0
 offset_left = 500.0
 offset_top = 250.0
-offset_right = 502.0
-offset_bottom = 252.0
+offset_right = 501.0
+offset_bottom = 251.0
 color = Color(0.6, 0.8, 1, 0.3)
 
 [node name="Star3" type="ColorRect" parent="Background/StarField"]
 layout_mode = 0
 offset_left = 900.0
 offset_top = 180.0
-offset_right = 904.0
-offset_bottom = 184.0
+offset_right = 902.0
+offset_bottom = 182.0
 color = Color(0.9, 0.9, 1, 0.5)
 
 [node name="HeaderBar" type="PanelContainer" parent="."]
@@ -155,275 +129,227 @@ z_index = 1
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 42.0
+offset_bottom = 40.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_header")
 
 [node name="HeaderContainer" type="HBoxContainer" parent="HeaderBar"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 15
 
 [node name="LeftHeader" type="HBoxContainer" parent="HeaderBar/HeaderContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 15
+theme_override_constants/separation = 10
 
 [node name="BackButton" type="Button" parent="HeaderBar/HeaderContainer/LeftHeader"]
-custom_minimum_size = Vector2(120, 40)
+custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "← ABORT"
 
 [node name="SystemLabel" type="Label" parent="HeaderBar/HeaderContainer/LeftHeader"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 18
-text = "PERSONNEL FILE CREATION SYSTEM"
+theme_override_font_sizes/font_size = 14
+text = "PERSONNEL CREATION"
 vertical_alignment = 1
 
 [node name="CenterHeader" type="Label" parent="HeaderBar/HeaderContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 24
-text = "NEW CREW MEMBER REGISTRATION"
+theme_override_font_sizes/font_size = 18
+text = "NEW CREW MEMBER"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RightHeader" type="VBoxContainer" parent="HeaderBar/HeaderContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 2
 alignment = 2
 
-[node name="StatusLabel" type="Label" parent="HeaderBar/HeaderContainer/RightHeader"]
+[node name="NotificationLabel" type="Label" parent="HeaderBar/HeaderContainer/RightHeader"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
-theme_override_font_sizes/font_size = 12
-text = "Status: Draft"
-horizontal_alignment = 2
-
-[node name="SystemTime" type="Label" parent="HeaderBar/HeaderContainer/RightHeader"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.7, 0.8, 0.8)
-theme_override_font_sizes/font_size = 10
-text = "Stardate: 2387.045"
+theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 11
+text = "System Message"
 horizontal_alignment = 2
 
 [node name="MainInterface" type="HBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.068
-anchor_right = 0.999
+anchor_top = 0.055
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 1.0
-offset_top = -2.064
-offset_right = 1.15186
+offset_left = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 20
-
-[node name="LeftTerminal" type="PanelContainer" parent="MainInterface"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.2
-theme_override_styles/panel = SubResource("StyleBoxFlat_main_panel")
-
-[node name="LeftMargin" type="MarginContainer" parent="MainInterface/LeftTerminal"]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
-
-[node name="LeftContent" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin"]
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="TerminalHeader" type="PanelContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_section")
-
-[node name="HeaderMargin" type="MarginContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/TerminalHeader"]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 12
-
-[node name="HeaderContainer" type="HBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/TerminalHeader/HeaderMargin"]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="HeaderLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/TerminalHeader/HeaderMargin/HeaderContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "📋 PERSONNEL DATA ENTRY"
-
-[node name="NotificationLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/TerminalHeader/HeaderMargin/HeaderContainer"]
-unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
-theme_override_font_sizes/font_size = 12
-text = "System Message"
-horizontal_alignment = 2
-
-[node name="PresetManagement" type="PanelContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_section")
-
-[node name="PresetMargin" type="MarginContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement"]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
-
-[node name="PresetContent" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="PresetHeader" type="HBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent"]
-layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="PresetIcon" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent/PresetHeader"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "🗄️"
-
-[node name="PresetTitle" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent/PresetHeader"]
+[node name="LeftPanel" type="PanelContainer" parent="MainInterface"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "TEMPLATE MANAGEMENT"
+size_flags_stretch_ratio = 1.3
+theme_override_styles/panel = SubResource("StyleBoxFlat_main_panel")
 
-[node name="ActivePresetLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent"]
+[node name="LeftMargin" type="MarginContainer" parent="MainInterface/LeftPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="LeftContent" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PresetSection" type="PanelContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_section")
+
+[node name="PresetMargin" type="MarginContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="PresetContent" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection/PresetMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PresetHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection/PresetMargin/PresetContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "🗄️ TEMPLATES"
+
+[node name="ActivePresetLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection/PresetMargin/PresetContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 0.8)
-theme_override_font_sizes/font_size = 11
-text = "Active Template: None"
+theme_override_font_sizes/font_size = 9
+text = "Active: None"
 
-[node name="PresetDropdown" type="OptionButton" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent"]
+[node name="PresetDropdown" type="OptionButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection/PresetMargin/PresetContent"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 
-[node name="PresetActions" type="GridContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent"]
+[node name="PresetControls" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection/PresetMargin/PresetContent"]
 layout_mode = 2
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 8
-columns = 2
+theme_override_constants/separation = 4
 
-[node name="SavePresetButton" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent/PresetActions"]
+[node name="PresetNameInput" type="LineEdit" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection/PresetMargin/PresetContent/PresetControls"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "💾 SAVE"
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+placeholder_text = "Template name..."
 
-[node name="LoadPresetButton" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent/PresetActions"]
+[node name="SavePresetButton" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection/PresetMargin/PresetContent/PresetControls"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 20)
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.8, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-disabled = true
-text = "📂 LOAD"
+text = "💾"
 
-[node name="SetActiveButton" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent/PresetActions"]
+[node name="DeletePresetButton" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/PresetSection/PresetMargin/PresetContent/PresetControls"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 20)
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-disabled = true
-text = "⭐ ACTIVE"
+text = "🗑️"
 
-[node name="DeletePresetButton" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/PresetManagement/PresetMargin/PresetContent/PresetActions"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxFlat_danger_button")
-disabled = true
-text = "🗑️ DELETE"
-
-[node name="DataEntryScroll" type="ScrollContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent"]
+[node name="TabSection" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent"]
 layout_mode = 2
 size_flags_vertical = 3
-horizontal_scroll_mode = 0
+theme_override_constants/separation = 6
 
-[node name="DataSections" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll"]
+[node name="TabButtons" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection"]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 18
+theme_override_constants/separation = 3
 
-[node name="BasicDataSection" type="PanelContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections"]
+[node name="TabContainer" type="Control" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection"]
+unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BasicInfoTab" type="PanelContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_section")
 
-[node name="BasicMargin" type="MarginContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection"]
+[node name="BasicMargin" type="MarginContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab"]
 layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
 
-[node name="BasicContent" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin"]
+[node name="BasicContent" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="BasicHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent"]
+[node name="BasicHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "👤 BASIC IDENTIFICATION"
+theme_override_font_sizes/font_size = 12
+text = "👤 BASIC INFO"
 
-[node name="IdentityGrid" type="GridContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent"]
+[node name="IdentityGrid" type="GridContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent"]
 layout_mode = 2
-theme_override_constants/h_separation = 15
-theme_override_constants/v_separation = 12
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
 columns = 2
 
-[node name="NameLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="NameLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/IdentityGrid"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Full Name:"
+theme_override_font_sizes/font_size = 10
+text = "Name:"
 
-[node name="NameInput" type="LineEdit" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="NameInput" type="LineEdit" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/IdentityGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("StyleBoxFlat_input")
-placeholder_text = "Enter personnel name"
+placeholder_text = "Enter name"
 
-[node name="AgeLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="AgeLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/IdentityGrid"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "Age:"
 
-[node name="AgeSpinBox" type="SpinBox" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="AgeSpinBox" type="SpinBox" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/IdentityGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 18.0
@@ -431,608 +357,632 @@ max_value = 80.0
 value = 30.0
 rounded = true
 
-[node name="RaceLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="RaceLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/IdentityGrid"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "Species:"
 
-[node name="RaceOption" type="OptionButton" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="RaceOption" type="OptionButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/IdentityGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 
-[node name="SexLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="SexLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/IdentityGrid"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "Gender:"
 
-[node name="SexOption" type="OptionButton" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="SexOption" type="OptionButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/IdentityGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("StyleBoxFlat_input")
 
-[node name="OccupationLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
+[node name="RecordsSection" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Assignment:"
+theme_override_constants/separation = 4
 
-[node name="OccupationOption" type="OptionButton" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
-theme_override_styles/normal = SubResource("StyleBoxFlat_input")
-
-[node name="PhysicalSection" type="PanelContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_section")
-
-[node name="PhysicalMargin" type="MarginContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection"]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
-
-[node name="PhysicalContent" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin"]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="PhysicalHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent"]
+[node name="RecordsHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/RecordsSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "🧬 PHYSICAL CHARACTERISTICS"
+theme_override_font_sizes/font_size = 11
+text = "📋 RECORDS"
 
-[node name="HairSection" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="HairHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Hair Configuration:"
-
-[node name="HairControls" type="HBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PrevHair" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection/HairControls"]
+[node name="BackgroundText" type="TextEdit" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/RecordsSection"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+placeholder_text = "Service history..."
+
+[node name="MedicalText" type="TextEdit" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/BasicInfoTab/BasicMargin/BasicContent/RecordsSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+placeholder_text = "Medical records..."
+
+[node name="AppearanceTab" type="PanelContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_section")
+
+[node name="AppearanceMargin" type="MarginContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="AppearanceContent" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AppearanceHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "🧬 APPEARANCE"
+
+[node name="HairSection" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HairHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/HairSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "Hair Configuration:"
+
+[node name="HairControls" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/HairSection"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PrevHair" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/HairSection/HairControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "◀"
 
-[node name="HairLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection/HairControls"]
+[node name="HairLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/HairSection/HairControls"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 text = "Standard Cut"
 horizontal_alignment = 1
 
-[node name="NextHair" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection/HairControls"]
+[node name="NextHair" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/HairSection/HairControls"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
+custom_minimum_size = Vector2(24, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "▶"
 
-[node name="HairColorPicker" type="ColorPickerButton" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection/HairControls"]
+[node name="HairColorPicker" type="ColorPickerButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/HairSection/HairControls"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(60, 30)
+custom_minimum_size = Vector2(50, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 8
 text = "COLOR"
 color = Color(0.337255, 0.211765, 0.117647, 1)
 
-[node name="FacialHairSection" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent"]
+[node name="FacialHairSection" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
-[node name="FacialHairHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection"]
+[node name="FacialHairHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/FacialHairSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "Facial Hair:"
 
-[node name="FacialHairControls" type="HBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection"]
+[node name="FacialHairControls" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/FacialHairSection"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
-[node name="PrevFacialHair" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection/FacialHairControls"]
+[node name="PrevFacialHair" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/FacialHairSection/FacialHairControls"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
+custom_minimum_size = Vector2(24, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "◀"
 
-[node name="FacialHairLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection/FacialHairControls"]
+[node name="FacialHairLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/FacialHairSection/FacialHairControls"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 text = "None"
 horizontal_alignment = 1
 
-[node name="NextFacialHair" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection/FacialHairControls"]
+[node name="NextFacialHair" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/FacialHairSection/FacialHairControls"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
+custom_minimum_size = Vector2(24, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "▶"
 
-[node name="FacialHairColorPicker" type="ColorPickerButton" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection/FacialHairControls"]
+[node name="FacialHairColorPicker" type="ColorPickerButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AppearanceTab/AppearanceMargin/AppearanceContent/FacialHairSection/FacialHairControls"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(60, 30)
+custom_minimum_size = Vector2(50, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 8
 text = "COLOR"
 color = Color(0.337255, 0.211765, 0.117647, 1)
 
-[node name="UniformSection" type="PanelContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections"]
-layout_mode = 2
+[node name="AssignmentTab" type="PanelContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_section")
 
-[node name="UniformMargin" type="MarginContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection"]
+[node name="AssignmentMargin" type="MarginContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AssignmentTab"]
 layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
 
-[node name="UniformContent" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin"]
+[node name="AssignmentContent" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AssignmentTab/AssignmentMargin"]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 6
 
-[node name="UniformHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "🎖️ UNIFORM CONFIGURATION"
-
-[node name="UndergarmentSection" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="UnderwearHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndergarmentSection"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Base Layer:"
-
-[node name="UnderwearControls" type="HBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndergarmentSection"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PrevUnderwear" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndergarmentSection/UnderwearControls"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "◀"
-
-[node name="UnderwearLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndergarmentSection/UnderwearControls"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Standard Issue"
-horizontal_alignment = 1
-
-[node name="NextUnderwear" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndergarmentSection/UnderwearControls"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "▶"
-
-[node name="UndershirtSection" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="UndershirtHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndershirtSection"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Under Layer:"
-
-[node name="UndershirtControls" type="HBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndershirtSection"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PrevUndershirt" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndershirtSection/UndershirtControls"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "◀"
-
-[node name="UndershirtLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndershirtSection/UndershirtControls"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "None"
-horizontal_alignment = 1
-
-[node name="NextUndershirt" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndershirtSection/UndershirtControls"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "▶"
-
-[node name="UniformMain" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="ClothingHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UniformMain"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Primary Uniform:"
-
-[node name="ClothingControls" type="HBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UniformMain"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PrevClothing" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UniformMain/ClothingControls"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "◀"
-
-[node name="ClothingLabel" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UniformMain/ClothingControls"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Standard Duty Uniform"
-horizontal_alignment = 1
-
-[node name="NextClothing" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UniformMain/ClothingControls"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "▶"
-
-[node name="RecordsSection" type="PanelContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_section")
-
-[node name="RecordsMargin" type="MarginContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection"]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
-
-[node name="RecordsContent" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin"]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="RecordsHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent"]
+[node name="AssignmentHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AssignmentTab/AssignmentMargin/AssignmentContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "📋 PERSONNEL RECORDS"
-
-[node name="BackgroundSection" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="BackgroundHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent/BackgroundSection"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "Service History:"
+text = "🎖️ ASSIGNMENT & LOADOUT"
 
-[node name="BackgroundText" type="TextEdit" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent/BackgroundSection"]
+[node name="OccupationOption" type="OptionButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AssignmentTab/AssignmentMargin/AssignmentContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+
+[node name="OccupationSearch" type="LineEdit" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AssignmentTab/AssignmentMargin/AssignmentContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+placeholder_text = "Search assignments..."
+
+[node name="OccupationList" type="ItemList" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AssignmentTab/AssignmentMargin/AssignmentContent"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxFlat_input")
-placeholder_text = "Enter personnel background and service history..."
+theme_override_font_sizes/font_size = 9
+theme_override_styles/panel = SubResource("StyleBoxFlat_input")
 
-[node name="MedicalSection" type="VBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent"]
+[node name="LoadoutEnabledCheck" type="CheckBox" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AssignmentTab/AssignmentMargin/AssignmentContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+button_pressed = true
+text = "Enable Standard Loadout"
+
+[node name="OccupationDescription" type="TextEdit" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/AssignmentTab/AssignmentMargin/AssignmentContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 8
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+placeholder_text = "Assignment details..."
+editable = false
+
+[node name="EquipmentTab" type="PanelContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_section")
+
+[node name="EquipmentMargin" type="MarginContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="EquipmentContent" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="MedicalHeader" type="Label" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent/MedicalSection"]
+[node name="EquipmentHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "🎖️ UNIFORM CONFIGURATION"
+
+[node name="UnderwearSection" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="UnderwearHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UnderwearSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Medical Records:"
+theme_override_font_sizes/font_size = 10
+text = "Base Layer:"
 
-[node name="MedicalText" type="TextEdit" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent/MedicalSection"]
+[node name="UnderwearControls" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UnderwearSection"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PrevUnderwear" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UnderwearSection/UnderwearControls"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(24, 22)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 11
-theme_override_styles/normal = SubResource("StyleBoxFlat_input")
-placeholder_text = "Enter medical history and notes..."
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "◀"
 
-[node name="ActionBar" type="HBoxContainer" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="RandomizeButton" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar"]
+[node name="UnderwearLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UnderwearSection/UnderwearControls"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "🎲 GENERATE RANDOM"
+theme_override_font_sizes/font_size = 9
+text = "Standard Issue"
+horizontal_alignment = 1
 
-[node name="CancelButton" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar"]
+[node name="NextUnderwear" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UnderwearSection/UnderwearControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "▶"
+
+[node name="UndershirtSection" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="UndershirtHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UndershirtSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "Under Layer:"
+
+[node name="UndershirtControls" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UndershirtSection"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PrevUndershirt" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UndershirtSection/UndershirtControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "◀"
+
+[node name="UndershirtLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UndershirtSection/UndershirtControls"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+text = "None"
+horizontal_alignment = 1
+
+[node name="NextUndershirt" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/UndershirtSection/UndershirtControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "▶"
+
+[node name="ClothingSection" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ClothingHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/ClothingSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "Primary Uniform:"
+
+[node name="ClothingControls" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/ClothingSection"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PrevClothing" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/ClothingSection/ClothingControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "◀"
+
+[node name="ClothingLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/ClothingSection/ClothingControls"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+text = "Standard Duty Uniform"
+horizontal_alignment = 1
+
+[node name="NextClothing" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/TabContainer/EquipmentTab/EquipmentMargin/EquipmentContent/ClothingSection/ClothingControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "▶"
+
+[node name="ActionBar" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RandomizeButton" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "🎲 RANDOM"
+
+[node name="CancelButton" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.8, 0.8, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_danger_button")
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "❌ CANCEL"
 
-[node name="ConfirmButton" type="Button" parent="MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar"]
+[node name="ConfirmButton" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 1, 0.9, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_primary_button")
-text = "✅ REGISTER PERSONNEL"
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "✅ REGISTER"
 
-[node name="RightTerminal" type="PanelContainer" parent="MainInterface"]
+[node name="RightPanel" type="PanelContainer" parent="MainInterface"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_main_panel")
 
-[node name="RightMargin" type="MarginContainer" parent="MainInterface/RightTerminal"]
+[node name="RightMargin" type="MarginContainer" parent="MainInterface/RightPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
 
-[node name="RightContent" type="VBoxContainer" parent="MainInterface/RightTerminal/RightMargin"]
+[node name="RightContent" type="VBoxContainer" parent="MainInterface/RightPanel/RightMargin"]
 layout_mode = 2
-theme_override_constants/separation = 18
+theme_override_constants/separation = 8
 
-[node name="PreviewHeader" type="PanelContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_section")
-
-[node name="PreviewHeaderMargin" type="MarginContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewHeader"]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 12
-
-[node name="PreviewHeaderLabel" type="Label" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewHeader/PreviewHeaderMargin"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "🖼️ HOLOGRAPHIC PREVIEW"
-horizontal_alignment = 1
-
-[node name="PreviewTerminal" type="PanelContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent"]
+[node name="PreviewSection" type="PanelContainer" parent="MainInterface/RightPanel/RightMargin/RightContent"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
 
-[node name="PreviewBackground" type="TextureRect" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewTerminal"]
-unique_name_in_owner = true
+[node name="PreviewMargin" type="MarginContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection"]
 layout_mode = 2
-expand_mode = 1
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
 
-[node name="CharacterPreview" type="Node2D" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewTerminal/PreviewBackground"]
-unique_name_in_owner = true
-position = Vector2(238, 65)
-scale = Vector2(4, 4)
-
-[node name="PreviewControls" type="PanelContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent"]
+[node name="PreviewContent" type="VBoxContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_section")
+theme_override_constants/separation = 6
 
-[node name="ControlsMargin" type="MarginContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls"]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
-
-[node name="ControlsContent" type="VBoxContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ControlsHeader" type="Label" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent"]
+[node name="PreviewHeader" type="Label" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "🕹️ HOLOGRAM CONTROLS"
+theme_override_font_sizes/font_size = 11
+text = "🖼️ HOLOGRAPHIC PREVIEW"
 horizontal_alignment = 1
 
-[node name="RotationSection" type="VBoxContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent"]
+[node name="PreviewContainer" type="Control" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent"]
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
-theme_override_constants/separation = 8
+size_flags_vertical = 3
 
-[node name="RotationLabel" type="Label" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/RotationSection"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Viewing Angle:"
+[node name="PreviewBackground" type="TextureRect" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent/PreviewContainer"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
 
-[node name="RotationControls" type="HBoxContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/RotationSection"]
+[node name="CharacterPreview" type="Node2D" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent/PreviewContainer/PreviewBackground"]
+unique_name_in_owner = true
+position = Vector2(226, 127.36)
+scale = Vector2(7, 7)
+
+[node name="PreviewControls" type="HBoxContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 4
 alignment = 1
 
-[node name="RotateLeftButton" type="Button" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/RotationSection/RotationControls"]
+[node name="RotateLeftButton" type="Button" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent/PreviewControls"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 24)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "⟲ ROTATE"
+text = "⟲ LEFT"
 
-[node name="DirectionLabel" type="Label" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/RotationSection/RotationControls"]
+[node name="DirectionLabel" type="Label" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent/PreviewControls"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 9
 text = "FRONT VIEW"
 horizontal_alignment = 1
 
-[node name="RotateRightButton" type="Button" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/RotationSection/RotationControls"]
+[node name="RotateRightButton" type="Button" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent/PreviewControls"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 24)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "ROTATE ⟳"
+text = "RIGHT ⟳"
 
-[node name="BackgroundSection" type="VBoxContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent"]
+[node name="BackgroundControls" type="HBoxContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
-[node name="BackgroundLabel" type="Label" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/BackgroundSection"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Hologram Environment:"
-
-[node name="BackgroundControls" type="HBoxContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/BackgroundSection"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PrevBackground" type="Button" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/BackgroundSection/BackgroundControls"]
+[node name="PrevBackground" type="Button" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent/BackgroundControls"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
+custom_minimum_size = Vector2(24, 20)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "◀"
 
-[node name="BackgroundLabel" type="Label" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/BackgroundSection/BackgroundControls"]
+[node name="BackgroundLabel" type="Label" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent/BackgroundControls"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 8
 text = "Standard Chamber"
 horizontal_alignment = 1
 
-[node name="NextBackground" type="Button" parent="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/BackgroundSection/BackgroundControls"]
+[node name="NextBackground" type="Button" parent="MainInterface/RightPanel/RightMargin/RightContent/PreviewSection/PreviewMargin/PreviewContent/BackgroundControls"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
+custom_minimum_size = Vector2(24, 20)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "▶"
 
-[node name="PersonnelSummary" type="PanelContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent"]
+[node name="InfoSection" type="PanelContainer" parent="MainInterface/RightPanel/RightMargin/RightContent"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_section")
 
-[node name="SummaryMargin" type="MarginContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PersonnelSummary"]
+[node name="InfoMargin" type="MarginContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/InfoSection"]
 layout_mode = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
 
-[node name="SummaryContent" type="VBoxContainer" parent="MainInterface/RightTerminal/RightMargin/RightContent/PersonnelSummary/SummaryMargin"]
+[node name="InfoContent" type="VBoxContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/InfoSection/InfoMargin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 4
 
-[node name="SummaryHeader" type="Label" parent="MainInterface/RightTerminal/RightMargin/RightContent/PersonnelSummary/SummaryMargin/SummaryContent"]
+[node name="InfoHeader" type="Label" parent="MainInterface/RightPanel/RightMargin/RightContent/InfoSection/InfoMargin/InfoContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 10
 text = "📊 PERSONNEL SUMMARY"
 horizontal_alignment = 1
 
-[node name="CharacterInfo" type="Label" parent="MainInterface/RightTerminal/RightMargin/RightContent/PersonnelSummary/SummaryMargin/SummaryContent"]
+[node name="CharacterInfo" type="Label" parent="MainInterface/RightPanel/RightMargin/RightContent/InfoSection/InfoMargin/InfoContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 text = "Name: [UNASSIGNED]
 Age: 30 Standard Years
 Species: Human
 Assignment: Engineer"
 
-[connection signal="pressed" from="HeaderBar/HeaderContainer/LeftHeader/BackButton" to="." method="_on_cancel_button_pressed"]
-[connection signal="text_changed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid/NameInput" to="." method="_on_name_input_text_changed"]
-[connection signal="value_changed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid/AgeSpinBox" to="." method="_on_age_spin_box_value_changed"]
-[connection signal="item_selected" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid/RaceOption" to="." method="_on_race_option_item_selected"]
-[connection signal="item_selected" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid/SexOption" to="." method="_on_sex_option_item_selected"]
-[connection signal="item_selected" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/BasicDataSection/BasicMargin/BasicContent/IdentityGrid/OccupationOption" to="." method="_on_occupation_option_item_selected"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection/HairControls/PrevHair" to="." method="_on_prev_hair_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection/HairControls/NextHair" to="." method="_on_next_hair_pressed"]
-[connection signal="color_changed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/HairSection/HairControls/HairColorPicker" to="." method="_on_hair_color_picker_color_changed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection/FacialHairControls/PrevFacialHair" to="." method="_on_prev_facial_hair_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection/FacialHairControls/NextFacialHair" to="." method="_on_next_facial_hair_pressed"]
-[connection signal="color_changed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/PhysicalSection/PhysicalMargin/PhysicalContent/FacialHairSection/FacialHairControls/FacialHairColorPicker" to="." method="_on_facial_hair_color_picker_color_changed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndergarmentSection/UnderwearControls/PrevUnderwear" to="." method="_on_prev_underwear_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndergarmentSection/UnderwearControls/NextUnderwear" to="." method="_on_next_underwear_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndershirtSection/UndershirtControls/PrevUndershirt" to="." method="_on_prev_undershirt_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UndershirtSection/UndershirtControls/NextUndershirt" to="." method="_on_next_undershirt_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UniformMain/ClothingControls/PrevClothing" to="." method="_on_prev_clothing_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/UniformSection/UniformMargin/UniformContent/UniformMain/ClothingControls/NextClothing" to="." method="_on_next_clothing_pressed"]
-[connection signal="text_changed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent/BackgroundSection/BackgroundText" to="." method="_on_background_text_text_changed"]
-[connection signal="text_changed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/DataEntryScroll/DataSections/RecordsSection/RecordsMargin/RecordsContent/MedicalSection/MedicalText" to="." method="_on_medical_text_text_changed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar/RandomizeButton" to="." method="_on_randomize_button_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar/CancelButton" to="." method="_on_cancel_button_pressed"]
-[connection signal="pressed" from="MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar/ConfirmButton" to="." method="_on_confirm_button_pressed"]
-[connection signal="pressed" from="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/RotationSection/RotationControls/RotateLeftButton" to="." method="_on_rotate_left_button_pressed"]
-[connection signal="pressed" from="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/RotationSection/RotationControls/RotateRightButton" to="." method="_on_rotate_right_button_pressed"]
-[connection signal="pressed" from="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/BackgroundSection/BackgroundControls/PrevBackground" to="." method="_on_prev_background_pressed"]
-[connection signal="pressed" from="MainInterface/RightTerminal/RightMargin/RightContent/PreviewControls/ControlsMargin/ControlsContent/BackgroundSection/BackgroundControls/NextBackground" to="." method="_on_next_background_pressed"]
+[node name="EquipmentSection" type="PanelContainer" parent="MainInterface/RightPanel/RightMargin/RightContent"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_section")
+
+[node name="EquipmentMargin" type="MarginContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/EquipmentSection"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="EquipmentContent" type="VBoxContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/EquipmentSection/EquipmentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="EquipmentHeader" type="Label" parent="MainInterface/RightPanel/RightMargin/RightContent/EquipmentSection/EquipmentMargin/EquipmentContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "⚡ LOADOUT PREVIEW"
+horizontal_alignment = 1
+
+[node name="EquipmentPreview" type="ScrollContainer" parent="MainInterface/RightPanel/RightMargin/RightContent/EquipmentSection/EquipmentMargin/EquipmentContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="LoadoutPreviewList" type="ItemList" parent="MainInterface/RightPanel/RightMargin/RightContent/EquipmentSection/EquipmentMargin/EquipmentContent/EquipmentPreview"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 8
+theme_override_styles/panel = SubResource("StyleBoxFlat_input")

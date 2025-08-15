@@ -9,8 +9,8 @@ class_name Mask
 
 func _init():
 	super._init()
-	equipped_slot = EquipSlot.MASK
-	equip_slot_flags = Slots.WEAR_MASK
+	primary_slot = Slots.WEAR_MASK
+	valid_slots = [Slots.WEAR_MASK]
 	blood_overlay_type = "mask"
 
 func update_clothing_icon():

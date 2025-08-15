@@ -1,6 +1,7 @@
-[gd_scene load_steps=28 format=3 uid="uid://dnrsljtlvb77j"]
+[gd_scene load_steps=54 format=3 uid="uid://dnrsljtlvb77j"]
 
 [ext_resource type="Script" uid="uid://vpbvoc34kmbp" path="res://Code/UserInterface/PlayerUI.gd" id="1_tmc17"]
+[ext_resource type="Texture2D" uid="uid://r5pgo7pmehec" path="res://Assets/UI/General/close.png" id="2_ioewn"]
 [ext_resource type="Texture2D" uid="uid://dpebp2qm0v7ce" path="res://Assets/UI/Inventory/Pouch.png" id="2_pb4ad"]
 [ext_resource type="Texture2D" uid="uid://cfau505r4hd38" path="res://Assets/UI/Inventory/MainHand_main.png" id="3_2i2l7"]
 [ext_resource type="Texture2D" uid="uid://tytyoeia5ylb" path="res://Assets/UI/Inventory/OffHand_main.png" id="4_3for7"]
@@ -17,11 +18,18 @@
 [ext_resource type="Texture2D" uid="uid://cnb5cnkhmu7jc" path="res://Assets/UI/Inventory/Armor.png" id="15_w7l74"]
 [ext_resource type="Texture2D" uid="uid://df7qj0jjfwnpc" path="res://Assets/UI/Inventory/Armor_slot.png" id="16_7cohv"]
 [ext_resource type="Texture2D" uid="uid://dlkoh6hx8cup3" path="res://Assets/UI/Inventory/Gloves.png" id="17_ga0nh"]
+[ext_resource type="Texture2D" uid="uid://cbagh2s71ttj" path="res://Assets/UI/Inventory/Highlight.png" id="18_i7513"]
 [ext_resource type="Texture2D" uid="uid://b24jasydxdjqt" path="res://Assets/UI/Inventory/Boots.png" id="18_jjevt"]
 [ext_resource type="Texture2D" uid="uid://ca6t6jyg74up1" path="res://Assets/UI/Inventory/help.png" id="19_moxo4"]
 [ext_resource type="Texture2D" uid="uid://chqf6cfi2fsf6" path="res://Assets/UI/Inventory/disarm.png" id="20_6vebg"]
 [ext_resource type="Texture2D" uid="uid://b7bie87r1xm21" path="res://Assets/UI/Inventory/grab.png" id="21_dx2ri"]
 [ext_resource type="Texture2D" uid="uid://cjsy8mh2ghs2q" path="res://Assets/UI/Inventory/harm.png" id="22_x4adt"]
+[ext_resource type="Texture2D" uid="uid://q03wkamu3cwm" path="res://Assets/UI/Inventory/Run.png" id="24_i7513"]
+[ext_resource type="Texture2D" uid="uid://bc8y62mr2gkb2" path="res://Assets/UI/Inventory/Walk.png" id="25_guqse"]
+[ext_resource type="Texture2D" uid="uid://bgy2agtkhgend" path="res://Assets/UI/Inventory/Drop.png" id="27_bwqv5"]
+[ext_resource type="Texture2D" uid="uid://dym3ukbe2a4o6" path="res://Assets/UI/Inventory/Throw.png" id="28_eep1i"]
+[ext_resource type="Texture2D" uid="uid://c8wi806aed82m" path="res://Assets/UI/Inventory/Status.png" id="29_alu6v"]
+[ext_resource type="Texture2D" uid="uid://sayyre3p7p30" path="res://Assets/UI/Inventory/Temp.png" id="29_eep1i"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cvjkx"]
 bg_color = Color(0.156863, 0.156863, 0.156863, 0.784314)
@@ -67,58 +75,238 @@ corner_radius_bottom_left = 3
 shadow_color = Color(0, 0, 0, 0.3)
 shadow_size = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m0pey"]
-bg_color = Color(0.156863, 0.156863, 0.156863, 0.784314)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.294118, 0.294118, 0.294118, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-shadow_color = Color(0, 0, 0, 0.1)
-shadow_size = 1
+[sub_resource type="AtlasTexture" id="AtlasTexture_uwvi0"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(224, 0, 32, 32)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7ocg"]
-bg_color = Color(0.156863, 0.156863, 0.156863, 0.784314)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.294118, 0.294118, 0.294118, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-shadow_color = Color(0, 0, 0, 0.1)
-shadow_size = 1
+[sub_resource type="AtlasTexture" id="AtlasTexture_l5aof"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(256, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_303ct"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(288, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ye2d1"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5y4ym"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w5mog"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_knpnw"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n12wx"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vbt36"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wy8by"]
+atlas = ExtResource("29_alu6v")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_alu6v"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uwvi0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l5aof")
+}],
+"loop": true,
+"name": &"critical",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_303ct")
+}],
+"loop": true,
+"name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ye2d1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5y4ym")
+}],
+"loop": true,
+"name": &"health_20",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w5mog")
+}],
+"loop": true,
+"name": &"health_30",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_knpnw")
+}],
+"loop": true,
+"name": &"health_50",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n12wx")
+}],
+"loop": true,
+"name": &"health_70",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vbt36")
+}],
+"loop": true,
+"name": &"health_90",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wy8by")
+}],
+"loop": true,
+"name": &"healthy",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_alu6v"]
+atlas = ExtResource("29_eep1i")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_urrj1"]
+atlas = ExtResource("29_eep1i")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u0ep5"]
+atlas = ExtResource("29_eep1i")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_obveh"]
+atlas = ExtResource("29_eep1i")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rqi70"]
+atlas = ExtResource("29_eep1i")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8oxt8"]
+atlas = ExtResource("29_eep1i")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p1n4x"]
+atlas = ExtResource("29_eep1i")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_756gj"]
+atlas = ExtResource("29_eep1i")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_urrj1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_alu6v")
+}],
+"loop": true,
+"name": &"cold",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_urrj1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u0ep5")
+}],
+"loop": true,
+"name": &"critically_cold",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_obveh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rqi70")
+}],
+"loop": true,
+"name": &"critically_hot",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8oxt8")
+}],
+"loop": true,
+"name": &"hot",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": null
+}],
+"loop": true,
+"name": &"none",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p1n4x")
+}],
+"loop": true,
+"name": &"very_cold",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_756gj")
+}],
+"loop": true,
+"name": &"very_hot",
+"speed": 5.0
+}]
 
 [node name="PlayerUI" type="CanvasLayer" groups=["ui_elements"]]
 script = ExtResource("1_tmc17")
 
 [node name="Control" type="HBoxContainer" parent="."]
 anchors_preset = -1
-anchor_left = 0.125
-anchor_top = 0.839506
-anchor_right = 0.895833
-anchor_bottom = 0.999228
-offset_right = -296.0
-offset_bottom = -34.5
-grow_horizontal = 2
-grow_vertical = 2
+anchor_left = 0.136285
+anchor_top = 0.830247
+anchor_right = 0.694878
+anchor_bottom = 0.987654
+offset_right = -214.5
+offset_bottom = -34.0
 scale = Vector2(1.5, 1.5)
-size_flags_horizontal = 3
-size_flags_vertical = 3
+size_flags_horizontal = 4
+size_flags_vertical = 4
 mouse_filter = 2
-alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="DragPreview" type="TextureRect" parent="Control"]
 visible = false
 layout_mode = 2
 mouse_filter = 2
+texture = ExtResource("2_ioewn")
 expand_mode = 1
 stretch_mode = 5
 
@@ -151,13 +339,13 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_notif")
 
 [node name="NotificationLabel" type="Label" parent="Control/NotificationPanel"]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 5.0
-offset_right = -10.0
-offset_bottom = -5.0
+anchors_preset = -1
+anchor_top = 0.078
+anchor_bottom = 0.941
+offset_left = -73.0
+offset_top = -0.304
+offset_right = 1.0
+offset_bottom = 0.0119972
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.901961, 0.901961, 0.901961, 1)
@@ -169,8 +357,11 @@ autowrap_mode = 3
 
 [node name="EquipmentItems" type="HBoxContainer" parent="Control"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/separation = 4
+alignment = 1
 
 [node name="EquipmentButton" type="TextureButton" parent="Control/EquipmentItems"]
 custom_minimum_size = Vector2(32, 32)
@@ -184,13 +375,14 @@ texture_normal = ExtResource("8_c6re1")
 [node name="EquipmentSlots" type="Control" parent="Control/EquipmentItems/EquipmentButton"]
 visible = false
 layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = -112.0
-offset_top = -183.333
-offset_right = -5.00031
-offset_bottom = -18.3336
+anchor_left = -3.167
+anchor_top = -4.229
+anchor_right = -0.167
+anchor_bottom = 0.438
+offset_left = 0.0106659
+offset_top = -0.00532532
+offset_right = 0.0106645
+offset_bottom = -0.349329
 grow_vertical = 0
 mouse_filter = 2
 
@@ -211,15 +403,15 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_r3mp4")
 
 [node name="GridContainer" type="GridContainer" parent="Control/EquipmentItems/EquipmentButton/EquipmentSlots"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -48.0
-offset_top = -80.0
-offset_right = 48.0
-offset_bottom = 80.0
+anchors_preset = -1
+anchor_left = -0.042
+anchor_top = -0.036
+anchor_right = 1.042
+anchor_bottom = 0.906
+offset_left = 0.0320005
+offset_top = 0.364
+offset_right = -0.0320053
+offset_bottom = 0.0059967
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -479,9 +671,11 @@ scale = Vector2(0.9, 0.9)
 
 [node name="MainSlots" type="HBoxContainer" parent="Control"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/separation = 4
-alignment = 2
+alignment = 1
 
 [node name="IDSlot" type="TextureRect" parent="Control/MainSlots"]
 custom_minimum_size = Vector2(32, 32)
@@ -557,6 +751,7 @@ scale = Vector2(0.9, 0.9)
 
 [node name="HandSlots" type="HBoxContainer" parent="Control"]
 layout_mode = 2
+size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/separation = 5
@@ -575,14 +770,12 @@ offset_left = 37.0
 offset_right = 5.0
 mouse_filter = 2
 
-[node name="ActiveRightIndicator" type="ColorRect" parent="Control/HandSlots/RightHand"]
+[node name="ActiveRightIndicator" type="TextureRect" parent="Control/HandSlots/RightHand"]
 layout_mode = 2
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 79.0
-offset_right = 47.0
 mouse_filter = 2
-color = Color(0.666667, 0, 0.227451, 0.670588)
+texture = ExtResource("18_i7513")
 
 [node name="LeftHand" type="TextureButton" parent="Control/HandSlots"]
 layout_mode = 2
@@ -597,20 +790,22 @@ offset_left = 37.0
 offset_right = 5.0
 mouse_filter = 2
 
-[node name="ActiveLeftIndicator" type="ColorRect" parent="Control/HandSlots/LeftHand"]
+[node name="ActiveLeftIndicator" type="TextureRect" parent="Control/HandSlots/LeftHand"]
 layout_mode = 2
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 37.0
-offset_right = 5.0
+offset_left = 0.333332
+offset_right = 0.333332
 mouse_filter = 2
-color = Color(0.301961, 0, 0.956863, 0.717647)
+texture = ExtResource("18_i7513")
 
 [node name="PouchSlots" type="HBoxContainer" parent="Control"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/separation = 4
-alignment = 2
+alignment = 1
 
 [node name="Pouch1" type="TextureRect" parent="Control/PouchSlots"]
 custom_minimum_size = Vector2(32, 32)
@@ -662,51 +857,69 @@ scale = Vector2(0.9, 0.9)
 
 [node name="IntentSelector" type="GridContainer" parent="Control"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 mouse_filter = 2
 columns = 2
 
 [node name="HelpIntent" type="TextureButton" parent="Control/IntentSelector"]
 layout_mode = 2
 focus_mode = 0
-toggle_mode = true
-button_pressed = true
 texture_normal = ExtResource("19_moxo4")
 
 [node name="DisarmIntent" type="TextureButton" parent="Control/IntentSelector"]
 layout_mode = 2
 focus_mode = 0
-toggle_mode = true
 texture_normal = ExtResource("20_6vebg")
 
 [node name="GrabIntent" type="TextureButton" parent="Control/IntentSelector"]
 layout_mode = 2
 focus_mode = 0
-toggle_mode = true
 texture_normal = ExtResource("21_dx2ri")
 
 [node name="HarmIntent" type="TextureButton" parent="Control/IntentSelector"]
 layout_mode = 2
 focus_mode = 0
-toggle_mode = true
 texture_normal = ExtResource("22_x4adt")
 
-[node name="MovementButtons" type="VBoxContainer" parent="Control"]
+[node name="MovementButtons" type="GridContainer" parent="Control"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 mouse_filter = 2
-theme_override_constants/separation = 5
-alignment = 1
+columns = 4
 
-[node name="RunButton" type="Button" parent="Control/MovementButtons"]
-custom_minimum_size = Vector2(80, 32)
+[node name="RunButton" type="TextureButton" parent="Control/MovementButtons"]
 layout_mode = 2
 focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_m0pey")
-text = "Run"
+texture_normal = ExtResource("24_i7513")
 
-[node name="WalkButton" type="Button" parent="Control/MovementButtons"]
-custom_minimum_size = Vector2(80, 32)
+[node name="WalkButton" type="TextureButton" parent="Control/MovementButtons"]
 layout_mode = 2
 focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_a7ocg")
 disabled = true
-text = "Walk"
+texture_normal = ExtResource("25_guqse")
+
+[node name="DropButton" type="TextureButton" parent="Control/MovementButtons"]
+layout_mode = 2
+focus_mode = 0
+texture_normal = ExtResource("27_bwqv5")
+ignore_texture_size = true
+
+[node name="ThrowModeIndicator" type="TextureRect" parent="Control/MovementButtons"]
+layout_mode = 2
+texture = ExtResource("28_eep1i")
+stretch_mode = 2
+
+[node name="StatusIndicator" type="AnimatedSprite2D" parent="Control"]
+position = Vector2(394.667, -310.667)
+scale = Vector2(2, 2)
+sprite_frames = SubResource("SpriteFrames_alu6v")
+animation = &"critical"
+
+[node name="TemperatureIndicator" type="AnimatedSprite2D" parent="Control"]
+position = Vector2(394.667, -246.667)
+scale = Vector2(2, 2)
+sprite_frames = SubResource("SpriteFrames_urrj1")
+animation = &"cold"
+autoplay = "none"

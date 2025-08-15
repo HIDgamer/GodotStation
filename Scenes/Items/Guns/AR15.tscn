@@ -1,0 +1,71 @@
+[gd_scene load_steps=10 format=3 uid="uid://b4xuexoyi1w0v"]
+
+[ext_resource type="Script" uid="uid://dlduqaa74shfl" path="res://Code/Items/Weapons/Guns/AssaultRifle.gd" id="1_fnh47"]
+[ext_resource type="AudioStream" uid="uid://bfnvacxvc6kh5" path="res://Sound/weapons/Shot.wav" id="3_366vx"]
+[ext_resource type="AudioStream" uid="uid://ytreg77yt8oq" path="res://Sound/weapons/gun_pistol_cocked.ogg" id="6_a3jll"]
+[ext_resource type="Texture2D" uid="uid://qiyvbugcxq04" path="res://Assets/Icons/Items/Lethal/Assault_rifle_Magless.png" id="7_v0215"]
+[ext_resource type="Texture2D" uid="uid://bf51ctntg2ejh" path="res://Assets/Icons/Items/Lethal/Assault_rifle.png" id="8_o7yen"]
+[ext_resource type="AudioStream" uid="uid://dlsmqvnr6tmvt" path="res://Sound/weapons/Reload.wav" id="9_wanx2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y56lh"]
+atlas = ExtResource("7_v0215")
+region = Rect2(0, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n3u2n"]
+atlas = ExtResource("8_o7yen")
+region = Rect2(0, 0, 96, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0ybqo"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y56lh")
+}],
+"loop": true,
+"name": &"Empty",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n3u2n")
+}],
+"loop": true,
+"name": &"Full",
+"speed": 5.0
+}]
+
+[node name="AR_15" type="Node2D"]
+script = ExtResource("1_fnh47")
+accepted_ammo_types = Array[int]([1])
+burst_amount = 5
+available_fire_modes = Array[int]([0, 1, 2])
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_0ybqo")
+animation = &"Full"
+
+[node name="MuzzlePoint" type="Marker2D" parent="."]
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_366vx")
+volume_db = -5.0
+max_distance = 1000.0
+
+[node name="ReloadAudioPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("9_wanx2")
+volume_db = -10.0
+max_distance = 500.0
+
+[node name="EmptyAudioPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_a3jll")
+volume_db = -8.0
+max_distance = 300.0
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 2
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+scale = Vector2(0.5, 0.5)
+polygon = PackedVector2Array(-20, -13, -20, -11, -21, -11, -21, -10, -24, -10, -24, -9, -26, -9, -26, -8, -44, -8, -44, -7, -45, -7, -45, 6, -44, 6, -44, 7, -41, 7, -41, 6, -40, 6, -40, 3, -39, 3, -39, 0, -37, 0, -37, -1, -35, -1, -35, -2, -32, -2, -32, -3, -29, -3, -29, -4, -28, -4, -28, -5, -27, -5, -27, -3, -26, -3, -26, -2, -24, -2, -24, -1, -22, -1, -22, 0, -21, 0, -21, 1, -20, 1, -20, 3, -21, 3, -21, 5, -22, 5, -22, 6, -23, 6, -23, 7, -24, 7, -24, 9, -23, 9, -23, 10, -21, 10, -21, 11, -18, 11, -18, 9, -17, 9, -17, 7, -16, 7, -16, 4, -15, 4, -15, 5, -8, 5, -8, 4, -7, 4, -7, 7, -6, 7, -6, 10, -5, 10, -5, 12, -4, 12, -4, 14, -3, 14, -3, 15, 0, 15, 0, 14, 2, 14, 2, 13, 3, 13, 3, 11, 2, 11, 2, 8, 1, 8, 1, 5, 0, 5, 0, 3, 1, 3, 1, 2, 0, 2, 0, 0, 1, 0, 1, -1, 19, -1, 19, -2, 20, -2, 20, -4, 21, -4, 21, -5, 38, -5, 38, -6, 37, -6, 37, -7, 38, -7, 38, -8, 35, -8, 35, -7, 32, -7, 32, -8, 30, -8, 30, -7, 21, -7, 21, -9, 19, -9, 19, -10, 15, -10, 15, -11, 14, -11, 14, -13, 13, -13, 13, -10, -18, -10, -18, -11, -19, -11, -19, -13)

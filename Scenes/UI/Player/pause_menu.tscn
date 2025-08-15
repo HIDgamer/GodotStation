@@ -18,22 +18,29 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="PauseMenu" type="CanvasLayer" groups=["pause_menu"]]
-process_mode = 3
-layer = 100
-visible = false
+[node name="PauseMenu" type="Control" groups=["pause_menu"]]
+process_mode = 2
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("1_emv3i")
-handle_esc_internally = true
 
 [node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.501961)
+mouse_filter = 2
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

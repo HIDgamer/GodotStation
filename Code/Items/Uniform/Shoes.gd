@@ -9,9 +9,9 @@ var stored_item = null
 
 func _init():
 	super._init()
-	primary_slot = EquipSlot.SHOES
+	primary_slot = Slots.SHOES
 	
-	valid_slots = [EquipSlot.SHOES]
+	valid_slots = [Slots.SHOES]
 	siemens_coefficient = 0.9
 	blood_overlay_type = "feet"
 

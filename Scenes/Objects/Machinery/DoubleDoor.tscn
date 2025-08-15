@@ -1,0 +1,234 @@
+[gd_scene load_steps=32 format=3 uid="uid://dm7f3umldiso6"]
+
+[ext_resource type="Script" uid="uid://cb0y5omwt76a5" path="res://Code/Atoms/Object/Machinery/Door.gd" id="1_ayxk4"]
+[ext_resource type="AudioStream" uid="uid://013cyt47kwdn" path="res://Sound/machines/airlock.ogg" id="2_icpjb"]
+[ext_resource type="Script" uid="uid://b380egf2u285h" path="res://Code/Atoms/Object/Machinery/DoorCollisionComponent.gd" id="2_nvx27"]
+[ext_resource type="AudioStream" uid="uid://ckww1477n0b5c" path="res://Sound/effects/metalhit.ogg" id="3_cyvgf"]
+[ext_resource type="Texture2D" uid="uid://b624lf4u6wc4f" path="res://Assets/Tilesets/Doors/Opening.tres" id="3_l7yj3"]
+[ext_resource type="Texture2D" uid="uid://ct0l4lcrat1l8" path="res://Assets/Tilesets/Doors/1x2_idle.tres" id="4_h7wjb"]
+[ext_resource type="Texture2D" uid="uid://dubwoodaemnko" path="res://Assets/Tilesets/Doors/Opening_south.tres" id="4_wespa"]
+[ext_resource type="AudioStream" uid="uid://cqv5p5ou734qm" path="res://Sound/effects/metal_crash.ogg" id="4_xsdw4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bp5oj"]
+atlas = ExtResource("4_wespa")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h7wjb"]
+atlas = ExtResource("4_wespa")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nvx27"]
+atlas = ExtResource("4_wespa")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wespa"]
+atlas = ExtResource("4_wespa")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ofs61"]
+atlas = ExtResource("4_wespa")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_icpjb"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cyvgf"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xsdw4"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_df7hc"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y6bme"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r0o5p"]
+atlas = ExtResource("4_h7wjb")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gewmj"]
+atlas = ExtResource("4_h7wjb")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4mm27"]
+atlas = ExtResource("4_wespa")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1571v"]
+atlas = ExtResource("4_wespa")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nyjpy"]
+atlas = ExtResource("4_wespa")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ljfkn"]
+atlas = ExtResource("4_wespa")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sch1q"]
+atlas = ExtResource("4_wespa")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nul2p"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h4hof"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vxqjr"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bx546"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3yd1k"]
+atlas = ExtResource("3_l7yj3")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_xvnkj"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bp5oj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h7wjb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nvx27")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wespa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ofs61")
+}],
+"loop": false,
+"name": &"civ_close_h",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_icpjb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cyvgf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xsdw4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_df7hc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y6bme")
+}],
+"loop": false,
+"name": &"civ_close_v",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r0o5p")
+}],
+"loop": true,
+"name": &"civ_idle_h",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gewmj")
+}],
+"loop": true,
+"name": &"civ_idle_v",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4mm27")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1571v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nyjpy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ljfkn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sch1q")
+}],
+"loop": false,
+"name": &"civ_open_h",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nul2p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h4hof")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vxqjr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bx546")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yd1k")
+}],
+"loop": false,
+"name": &"civ_open_v",
+"speed": 10.0
+}]
+
+[node name="DoubleDoor" type="Node2D" groups=["doors"]]
+modulate = Color(1.2, 1.2, 1, 1)
+script = ExtResource("1_ayxk4")
+door_orientation = 1
+door_width = 2
+is_airlock = true
+require_access = false
+glass_door = true
+open_sound = ExtResource("2_icpjb")
+close_sound = ExtResource("2_icpjb")
+machinery_type = "door"
+machinery_id = "door_civ_2736330465849"
+use_cooldown = 0.4
+requires_power = false
+power_usage = 0.0
+obj_name = "civilian airlock"
+obj_desc = "A civilian airlock door."
+entity_type = "door"
+entity_name = "object"
+anchored = true
+blocks_vision = true
+hit_sound = ExtResource("3_cyvgf")
+destroy_sound = ExtResource("4_xsdw4")
+
+[node name="DoorCollisionComponent" type="Node2D" parent="."]
+script = ExtResource("2_nvx27")
+metadata/_custom_type_script = "uid://b380egf2u285h"
+
+[node name="Door" type="AnimatedSprite2D" parent="."]
+position = Vector2(32, 32)
+sprite_frames = SubResource("SpriteFrames_xvnkj")
+animation = &"civ_close_v"
+frame = 4
+frame_progress = 1.0
+
+[node name="AutoCloseTimer" type="Timer" parent="."]

@@ -38,12 +38,11 @@ signal ui_closed
 @onready var toxin_bar = $MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/ToxinContainer/ToxinBar
 @onready var oxygen_bar = $MainPanel/VBoxContainer/ScrollContainer/ContentContainer/DamageContainer/OxygenContainer/OxygenBar
 
-var scan_data: HealthScanData
+var scan_data: Dictionary
 var target_entity = null
 var is_dragging: bool = false
 var drag_offset: Vector2
 
-# Resize functionality
 var is_resizing: bool = false
 var resize_edge: String = ""
 var resize_threshold: float = 10.0
@@ -54,19 +53,13 @@ var original_panel_size: Vector2
 
 func _ready():
 	close_button.pressed.connect(_on_close_pressed)
-	
-	# Make draggable and resizable
 	main_panel.gui_input.connect(_on_panel_gui_input)
-	
-	# Setup UI theme
 	setup_ui_theme()
 	
-	# IMPORTANT: Set anchors and size flags for proper UI behavior
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE  # Allow clicks to pass through empty areas
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func setup_ui_theme():
-	# Apply custom styling to match SS13 aesthetic
 	var panel_style = StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.1, 0.1, 0.1, 0.95)
 	panel_style.border_color = Color(0.3, 0.6, 0.8, 1.0)
@@ -81,18 +74,12 @@ func setup_ui_theme():
 	
 	main_panel.add_theme_stylebox_override("panel", panel_style)
 
-func show_scan_results(entity, detail_level = HealthScanData.DetailLevel.FULL):
-	target_entity = entity
-	scan_data = HealthScanData.new(entity)
-	scan_data.detail_level = detail_level
-	
-	var data = scan_data.get_scan_data()
+func show_scan_results(data: Dictionary):
+	scan_data = data
 	populate_ui(data)
-	
 	show()
 
 func populate_ui(data: Dictionary):
-	# Header
 	patient_name_label.text = data.patient_name
 	
 	if data.dead:
@@ -102,29 +89,18 @@ func populate_ui(data: Dictionary):
 		patient_name_label.modulate = Color.WHITE
 		title_label.text = "Health Analyzer"
 	
-	# Vital Signs
 	populate_vital_signs(data.vital_signs, data.health, data.max_health)
-	
-	# Damage
 	populate_damage_data(data.damage)
-	
-	# Blood
 	populate_blood_data(data.blood)
-	
-	# Limbs
-	populate_limb_data(data.limbs)
-	
-	# Chemicals
-	populate_chemical_data(data.chemicals)
-	
-	# Medical Advice
+	populate_pain_data(data.get("pain", {}))
+	populate_limb_data(data.limbs, data.detail_level)
+	populate_chemical_data(data.chemicals, data.detail_level)
 	populate_advice_data(data.advice)
 
 func populate_vital_signs(vitals: Dictionary, health: float, max_health: float):
 	var health_percent = (health / max_health) * 100.0
 	health_bar.value = health_percent
 	
-	# Color code health bar
 	if health_percent > 75:
 		health_bar.modulate = Color.GREEN
 	elif health_percent > 50:
@@ -134,25 +110,42 @@ func populate_vital_signs(vitals: Dictionary, health: float, max_health: float):
 	else:
 		health_bar.modulate = Color.RED
 	
-	# Update vital sign labels
+	health_label.text = "Health: %.1f/%.1f (%.1f%%)" % [health, max_health, health_percent]
 	pulse_label.text = "Pulse: %d BPM" % vitals.pulse
 	temp_label.text = "Temperature: %.1f°C (%.1f°F)" % [vitals.temperature, vitals.temperature * 1.8 + 32]
 	bp_label.text = "Blood Pressure: %s" % vitals.blood_pressure
 	
-	# Color code pulse
-	if vitals.pulse < 60 or vitals.pulse > 100:
+	if vitals.pulse == 0:
 		pulse_label.modulate = Color.RED
+		pulse_label.text += " - NO PULSE"
+	elif vitals.pulse < 60 or vitals.pulse > 100:
+		pulse_label.modulate = Color.ORANGE
 	else:
 		pulse_label.modulate = Color.WHITE
+	
+	if vitals.has("consciousness"):
+		add_consciousness_label(vitals.consciousness)
+
+func add_consciousness_label(consciousness: float):
+	var consciousness_label = Label.new()
+	consciousness_label.name = "ConsciousnessLabel"
+	consciousness_label.text = "Consciousness: %.1f%%" % consciousness
+	
+	if consciousness < 30:
+		consciousness_label.modulate = Color.RED
+	elif consciousness < 70:
+		consciousness_label.modulate = Color.ORANGE
+	else:
+		consciousness_label.modulate = Color.WHITE
+	
+	vital_signs_container.add_child(consciousness_label)
 
 func populate_damage_data(damage: Dictionary):
-	# Update damage bars
 	brute_bar.value = min(damage.brute, 100)
 	burn_bar.value = min(damage.burn, 100)
 	toxin_bar.value = min(damage.toxin, 100)
 	oxygen_bar.value = min(damage.oxygen, 100)
 	
-	# Color coding
 	brute_bar.modulate = Color.RED if damage.brute > 50 else Color.WHITE
 	burn_bar.modulate = Color.ORANGE if damage.burn > 50 else Color.WHITE
 	toxin_bar.modulate = Color.GREEN if damage.toxin > 50 else Color.WHITE
@@ -162,13 +155,63 @@ func populate_damage_data(damage: Dictionary):
 	burn_label.text = "Burn: %.1f" % damage.burn
 	toxin_label.text = "Toxin: %.1f" % damage.toxin
 	oxygen_label.text = "Oxygen: %.1f" % damage.oxygen
+	
+	if damage.has("brain") and damage.brain > 0:
+		add_damage_label("Brain", damage.brain, Color.PURPLE)
+	if damage.has("clone") and damage.clone > 0:
+		add_damage_label("Cellular", damage.clone, Color.CYAN)
+	if damage.has("stamina") and damage.stamina > 0:
+		add_damage_label("Stamina", damage.stamina, Color.YELLOW)
+
+func add_damage_label(damage_type: String, amount: float, color: Color):
+	var damage_label = Label.new()
+	damage_label.text = "%s: %.1f" % [damage_type, amount]
+	damage_label.modulate = color if amount > 20 else Color.WHITE
+	damage_container.add_child(damage_label)
+
+func populate_pain_data(pain_data: Dictionary):
+	if pain_data.is_empty():
+		return
+	
+	var pain_container = VBoxContainer.new()
+	pain_container.name = "PainContainer"
+	
+	var pain_header = Label.new()
+	pain_header.text = "PAIN ANALYSIS"
+	pain_header.add_theme_font_size_override("font_size", 14)
+	pain_container.add_child(pain_header)
+	
+	var pain_level_label = Label.new()
+	pain_level_label.text = "Pain Level: %.1f (%s)" % [pain_data.level, pain_data.status]
+	
+	if pain_data.level > 60:
+		pain_level_label.modulate = Color.RED
+	elif pain_data.level > 25:
+		pain_level_label.modulate = Color.ORANGE
+	else:
+		pain_level_label.modulate = Color.WHITE
+	
+	pain_container.add_child(pain_level_label)
+	
+	if pain_data.has("shock"):
+		var shock_label = Label.new()
+		shock_label.text = "Shock Level: %.1f" % pain_data.shock
+		shock_label.modulate = Color.RED if pain_data.shock > 50 else Color.WHITE
+		pain_container.add_child(shock_label)
+	
+	if pain_data.has("pain_effects") and pain_data.pain_effects.size() > 0:
+		var effects_label = Label.new()
+		effects_label.text = "Effects: " + ", ".join(pain_data.pain_effects)
+		effects_label.modulate = Color.ORANGE
+		pain_container.add_child(effects_label)
+	
+	damage_container.add_child(pain_container)
 
 func populate_blood_data(blood: Dictionary):
 	var blood_percent = (blood.volume / blood.max_volume) * 100.0
 	blood_volume_label.text = "Blood Volume: %d/%d mL (%.1f%%)" % [blood.volume, blood.max_volume, blood_percent]
 	blood_type_label.text = "Blood Type: %s" % blood.type
 	
-	# Color code blood volume
 	if blood_percent < 60:
 		blood_volume_label.modulate = Color.RED
 	elif blood_percent < 80:
@@ -176,7 +219,6 @@ func populate_blood_data(blood: Dictionary):
 	else:
 		blood_volume_label.modulate = Color.WHITE
 	
-	# Bleeding status
 	if blood.bleeding:
 		bleeding_label.text = "⚠ BLEEDING (Rate: %.1f mL/min)" % blood.bleeding_rate
 		bleeding_label.modulate = Color.RED
@@ -184,59 +226,77 @@ func populate_blood_data(blood: Dictionary):
 	else:
 		bleeding_label.visible = false
 
-func populate_limb_data(limbs: Array):
-	# Clear existing limb entries
+func populate_limb_data(limbs: Array, detail_level: String):
 	for child in limbs_container.get_children():
 		if child.name.begins_with("LimbEntry"):
 			child.queue_free()
 	
-	# Add limb entries
 	for i in range(limbs.size()):
 		var limb = limbs[i]
-		var limb_entry = create_limb_entry(limb)
+		var limb_entry = create_limb_entry(limb, detail_level)
 		limb_entry.name = "LimbEntry%d" % i
 		limbs_container.add_child(limb_entry)
 
-func create_limb_entry(limb: Dictionary) -> Control:
-	var entry = HBoxContainer.new()
+func create_limb_entry(limb: Dictionary, detail_level: String) -> Control:
+	var entry = VBoxContainer.new()
+	entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
+	var main_info = HBoxContainer.new()
 	
 	var name_label = Label.new()
 	name_label.text = limb.name
 	name_label.custom_minimum_size.x = 100
-	entry.add_child(name_label)
+	main_info.add_child(name_label)
 	
 	var status_label = Label.new()
 	var status_text = ""
+	var status_color = Color.WHITE
 	
-	if limb.missing:
+	if not limb.attached:
 		status_text = "MISSING"
-		status_label.modulate = Color.RED
-	elif limb.broken:
-		status_text = "FRACTURED"
-		status_label.modulate = Color.ORANGE
+		status_color = Color.RED
+	elif limb.fractured:
+		if limb.splinted:
+			status_text = "FRACTURED (Splinted)"
+			status_color = Color.ORANGE
+		else:
+			status_text = "FRACTURED (Severity: %d)" % limb.fracture_severity
+			status_color = Color.RED
 	elif limb.brute > 20 or limb.burn > 20:
 		status_text = "Damaged (B:%.0f/Bu:%.0f)" % [limb.brute, limb.burn]
-		status_label.modulate = Color.YELLOW
+		status_color = Color.YELLOW
 	else:
 		status_text = "Healthy"
-		status_label.modulate = Color.GREEN
+		status_color = Color.GREEN
 	
 	if limb.bleeding:
 		status_text += " BLEEDING"
-		status_label.modulate = Color.RED
+		status_color = Color.RED
 	
 	if limb.bandaged:
 		status_text += " [Bandaged]"
 	
+	if limb.infected:
+		status_text += " [Infected]"
+		status_color = Color.PURPLE
+	
 	status_label.text = status_text
-	entry.add_child(status_label)
+	status_label.modulate = status_color
+	main_info.add_child(status_label)
+	
+	entry.add_child(main_info)
+	
+	if detail_level == "medical" and limb.has("wounds") and limb.wounds > 0:
+		var wounds_label = Label.new()
+		wounds_label.text = "    Wounds: %d detected" % limb.wounds
+		wounds_label.modulate = Color.ORANGE
+		entry.add_child(wounds_label)
 	
 	return entry
 
-func populate_chemical_data(chemicals: Dictionary):
-	# Clear existing chemical entries
+func populate_chemical_data(chemicals: Dictionary, detail_level: String):
 	for child in chemicals_container.get_children():
-		if child.name.begins_with("ChemEntry"):
+		if child.name.begins_with("ChemEntry") or child.name == "NoChemicals":
 			child.queue_free()
 	
 	if not chemicals.has_chemicals:
@@ -246,40 +306,75 @@ func populate_chemical_data(chemicals: Dictionary):
 		chemicals_container.add_child(no_chems_label)
 		return
 	
-	# Add chemical entries
+	var volume_label = Label.new()
+	volume_label.text = "Total Volume: %.1f units" % chemicals.total_volume
+	volume_label.modulate = Color.CYAN
+	chemicals_container.add_child(volume_label)
+	
+	if chemicals.dangerous_detected:
+		var warning_label = Label.new()
+		warning_label.text = "⚠ DANGEROUS CHEMICALS DETECTED"
+		warning_label.modulate = Color.RED
+		chemicals_container.add_child(warning_label)
+	
 	for i in range(chemicals.reagents.size()):
 		var reagent = chemicals.reagents[i]
-		var chem_entry = create_chemical_entry(reagent)
+		var chem_entry = create_chemical_entry(reagent, detail_level)
 		chem_entry.name = "ChemEntry%d" % i
 		chemicals_container.add_child(chem_entry)
 
-func create_chemical_entry(reagent: Dictionary) -> Control:
-	var entry = HBoxContainer.new()
+func create_chemical_entry(reagent: Dictionary, detail_level: String) -> Control:
+	var entry = VBoxContainer.new()
+	entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
+	var main_info = HBoxContainer.new()
 	
 	var name_label = Label.new()
 	name_label.text = reagent.name
 	name_label.custom_minimum_size.x = 120
-	entry.add_child(name_label)
+	main_info.add_child(name_label)
 	
 	var amount_label = Label.new()
 	amount_label.text = "%.1f units" % reagent.amount
-	entry.add_child(amount_label)
+	main_info.add_child(amount_label)
+	
+	var status_indicators = []
 	
 	if reagent.overdose:
-		var od_label = Label.new()
-		od_label.text = "OVERDOSE"
-		od_label.modulate = Color.RED
-		entry.add_child(od_label)
+		status_indicators.append("OVERDOSE")
+		main_info.modulate = Color.RED
+	elif reagent.dangerous:
+		status_indicators.append("TOXIC")
+		main_info.modulate = Color.ORANGE
+	elif reagent.beneficial:
+		status_indicators.append("BENEFICIAL")
+		main_info.modulate = Color.GREEN
 	
-	if reagent.dangerous:
-		entry.modulate = Color.RED
+	if status_indicators.size() > 0:
+		var status_label = Label.new()
+		status_label.text = " [" + ", ".join(status_indicators) + "]"
+		main_info.add_child(status_label)
+	
+	entry.add_child(main_info)
+	
+	if detail_level == "medical":
+		if reagent.has("overdose_threshold") and reagent.overdose_threshold > 0:
+			var od_label = Label.new()
+			od_label.text = "    OD Threshold: %.1f units" % reagent.overdose_threshold
+			od_label.modulate = Color.ORANGE
+			entry.add_child(od_label)
+		
+		if reagent.has("effects") and reagent.effects.size() > 0:
+			var effects_label = Label.new()
+			effects_label.text = "    Effects: " + ", ".join(reagent.effects)
+			effects_label.modulate = Color.CYAN
+			entry.add_child(effects_label)
 	
 	return entry
 
 func populate_advice_data(advice: Array):
-	# Clear existing advice entries
 	for child in advice_container.get_children():
-		if child.name.begins_with("AdviceEntry"):
+		if child.name.begins_with("AdviceEntry") or child.name == "NoAdvice":
 			child.queue_free()
 	
 	if advice.is_empty():
@@ -289,7 +384,6 @@ func populate_advice_data(advice: Array):
 		advice_container.add_child(no_advice_label)
 		return
 	
-	# Add advice entries
 	for i in range(advice.size()):
 		var advice_item = advice[i]
 		var advice_entry = create_advice_entry(advice_item)
@@ -298,7 +392,6 @@ func populate_advice_data(advice: Array):
 
 func create_advice_entry(advice_item: Dictionary) -> Control:
 	var entry = HBoxContainer.new()
-	# FIXED: Ensure proper sizing to prevent vertical text wrapping
 	entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	
 	var icon_label = Label.new()
@@ -309,19 +402,17 @@ func create_advice_entry(advice_item: Dictionary) -> Control:
 	
 	var text_label = Label.new()
 	text_label.text = advice_item.text
-	# FIXED: Remove autowrap to prevent vertical letter display
-	text_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	# FIXED: Ensure horizontal expansion
+	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text_label.clip_contents = false
 	
-	# Color coding
 	match advice_item.color:
 		"red": text_label.modulate = Color.RED
 		"orange": text_label.modulate = Color.ORANGE
 		"yellow": text_label.modulate = Color.YELLOW
 		"green": text_label.modulate = Color.GREEN
 		"blue": text_label.modulate = Color.CYAN
+		"purple": text_label.modulate = Color.PURPLE
 		_: text_label.modulate = Color.WHITE
 	
 	entry.add_child(text_label)
@@ -337,6 +428,8 @@ func get_icon_text(icon_name: String) -> String:
 		"oxygen": return "💨"
 		"blood": return "🩸"
 		"bleeding": return "🔴"
+		"fracture": return "🦴"
+		"pain": return "😣"
 		_: return "•"
 
 func _on_close_pressed():
@@ -344,7 +437,6 @@ func _on_close_pressed():
 	ui_closed.emit()
 
 func get_resize_edge(mouse_pos: Vector2) -> String:
-	"""Determine which edge/corner is being hovered for resizing"""
 	var panel_rect = main_panel.get_rect()
 	var panel_pos = main_panel.position
 	var panel_size = main_panel.size
@@ -354,13 +446,11 @@ func get_resize_edge(mouse_pos: Vector2) -> String:
 	var top = abs(mouse_pos.y - panel_pos.y) < resize_threshold
 	var bottom = abs(mouse_pos.y - (panel_pos.y + panel_size.y)) < resize_threshold
 	
-	# Check corners first
 	if top and left: return "top_left"
 	if top and right: return "top_right"
 	if bottom and left: return "bottom_left"
 	if bottom and right: return "bottom_right"
 	
-	# Check edges
 	if left: return "left"
 	if right: return "right"
 	if top: return "top"
@@ -369,7 +459,6 @@ func get_resize_edge(mouse_pos: Vector2) -> String:
 	return ""
 
 func update_cursor(edge: String):
-	"""Update cursor based on resize edge"""
 	match edge:
 		"left", "right":
 			mouse_default_cursor_shape = Control.CURSOR_HSIZE
@@ -383,15 +472,12 @@ func update_cursor(edge: String):
 			mouse_default_cursor_shape = Control.CURSOR_ARROW
 
 func _on_panel_gui_input(event):
-	"""Enhanced dragging and resizing system"""
 	if event is InputEventMouseMotion:
 		if not is_dragging and not is_resizing:
-			# Update cursor based on hover position
 			var edge = get_resize_edge(event.global_position)
 			update_cursor(edge)
 		
 		if is_resizing:
-			# Handle resizing
 			var delta = event.global_position - original_mouse_pos
 			var new_pos = original_panel_pos
 			var new_size = original_panel_size
@@ -424,16 +510,13 @@ func _on_panel_gui_input(event):
 					new_size.x += delta.x
 					new_size.y += delta.y
 			
-			# Apply minimum size constraints
 			if new_size.x >= min_size.x and new_size.y >= min_size.y:
 				main_panel.position = new_pos
 				main_panel.size = new_size
 				
 		elif is_dragging:
-			# Handle dragging
 			var new_position = event.global_position + drag_offset
 			
-			# Keep panel within viewport bounds
 			var viewport = get_viewport()
 			if viewport:
 				var viewport_size = viewport.get_visible_rect().size
@@ -450,18 +533,15 @@ func _on_panel_gui_input(event):
 				var edge = get_resize_edge(event.global_position)
 				
 				if edge != "":
-					# Start resizing
 					is_resizing = true
 					resize_edge = edge
 					original_mouse_pos = event.global_position
 					original_panel_pos = main_panel.position
 					original_panel_size = main_panel.size
 				else:
-					# Start dragging
 					is_dragging = true
 					drag_offset = main_panel.global_position - event.global_position
 			else:
-				# Stop dragging/resizing
 				is_dragging = false
 				is_resizing = false
 				resize_edge = ""

@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://pdml8sl1ux4v"]
+
+[ext_resource type="Script" uid="uid://dmokli82jlauy" path="res://Code/Items/Uniform/Glove.gd" id="1_nd6ca"]
+[ext_resource type="Texture2D" uid="uid://bnijuj3mot3ni" path="res://Assets/Icons/Items/Clothing/Gloves/Insulated_Gloves.png" id="2_gpdh8"]
+[ext_resource type="Texture2D" uid="uid://wxwukhy35khv" path="res://Assets/Icons/Clothing/Gloves/Insulated_Gloves.png" id="3_7it57"]
+
+[node name="InsulatedGloves" type="Node2D"]
+script = ExtResource("1_nd6ca")
+item_name = "InsulatedGloves"
+w_class = 2
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_gpdh8")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_7it57")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(1, -7, 1, -6, 0, -6, 0, -5, -1, -5, -1, -4, -2, -4, -2, -5, -6, -5, -6, -4, -8, -4, -8, -3, -10, -3, -10, -2, -11, -2, -11, -1, -12, -1, -12, 0, -13, 0, -13, 1, -14, 1, -14, 2, -15, 2, -15, 4, -14, 4, -14, 6, -13, 6, -13, 7, -12, 7, -12, 8, -11, 8, -11, 9, -9, 9, -9, 10, -7, 10, -7, 9, -6, 9, -6, 10, -5, 10, -5, 11, -3, 11, -3, 10, -2, 10, -2, 9, -1, 9, -1, 7, 1, 7, 1, 8, 2, 8, 2, 9, 4, 9, 4, 8, 5, 8, 5, 7, 6, 7, 6, 8, 8, 8, 8, 7, 10, 7, 10, 6, 11, 6, 11, 5, 12, 5, 12, 4, 13, 4, 13, 2, 14, 2, 14, 0, 13, 0, 13, -1, 12, -1, 12, -2, 11, -2, 11, -3, 10, -3, 10, -4, 9, -4, 9, -5, 7, -5, 7, -6, 5, -6, 5, -7)

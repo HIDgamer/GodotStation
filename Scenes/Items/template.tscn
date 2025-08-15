@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://b5aq60ifunbk5"]
+
+[node name="Template" type="Node2D"]
+
+[node name="Icon" type="Sprite2D" parent="."]
+
+[node name="Sprite" type="Sprite2D" parent="."]
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]

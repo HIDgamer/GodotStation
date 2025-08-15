@@ -3,7 +3,7 @@ class_name Ears
 
 func _init():
 	super._init()
-	equipped_slot = EquipSlot.EARS
+	equipped_slot = Slots.EARS
 	w_class = 1  # SIZE_TINY
 	throwforce = 2
 	equip_slot_flags = Slots.EARS

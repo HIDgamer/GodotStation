@@ -1,47 +1,43 @@
-[gd_scene load_steps=14 format=3 uid="uid://dv64yka5v6pjj"]
+[gd_scene load_steps=13 format=3 uid="uid://dv64yka5v6pjj"]
 
 [ext_resource type="Script" uid="uid://boemaluqfkdgb" path="res://Code/Effects/BulletCasings.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://drgp3sq8of3xi" path="res://Assets/Weapons/Assault_rifle/FX/[CASING_SINGLE_SHOT] Assault_rifle_V1.00.png" id="2_1baut"]
+[ext_resource type="Texture2D" uid="uid://nynxhyhlo7hq" path="res://Assets/Weapons/Particals/BulletCasing.png" id="2_1baut"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qxptw"]
 atlas = ExtResource("2_1baut")
-region = Rect2(768, 0, 128, 48)
+region = Rect2(64, 0, 64, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4m1ea"]
 atlas = ExtResource("2_1baut")
-region = Rect2(896, 0, 128, 48)
+region = Rect2(128, 0, 64, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dyb6e"]
 atlas = ExtResource("2_1baut")
-region = Rect2(1024, 0, 128, 48)
+region = Rect2(192, 0, 64, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_laan1"]
 atlas = ExtResource("2_1baut")
-region = Rect2(1152, 0, 128, 48)
+region = Rect2(256, 0, 64, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2soen"]
 atlas = ExtResource("2_1baut")
-region = Rect2(1280, 0, 128, 48)
+region = Rect2(320, 0, 64, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gt2g3"]
 atlas = ExtResource("2_1baut")
-region = Rect2(1408, 0, 128, 48)
+region = Rect2(384, 0, 64, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8qeey"]
 atlas = ExtResource("2_1baut")
-region = Rect2(1536, 0, 128, 48)
+region = Rect2(448, 0, 64, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1fbe2"]
 atlas = ExtResource("2_1baut")
-region = Rect2(1664, 0, 128, 48)
+region = Rect2(512, 0, 64, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_sl4yy"]
 atlas = ExtResource("2_1baut")
-region = Rect2(1792, 0, 128, 48)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_5psm7"]
-atlas = ExtResource("2_1baut")
-region = Rect2(1920, 0, 128, 48)
+region = Rect2(576, 0, 64, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_wqdqm"]
 animations = [{
@@ -72,13 +68,10 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_sl4yy")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5psm7")
 }],
 "loop": false,
 "name": &"Casing",
-"speed": 30.0
+"speed": 20.0
 }]
 
 [node name="BulletCasing" type="Node2D"]
@@ -87,7 +80,8 @@ script = ExtResource("1")
 [node name="Icon" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_wqdqm")
 animation = &"Casing"
-frame_progress = 0.339226
+frame = 8
+frame_progress = 1.0
 
 [node name="DespawnTimer" type="Timer" parent="."]
 wait_time = 30.0

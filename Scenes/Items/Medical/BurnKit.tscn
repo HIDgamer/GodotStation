@@ -1,10 +1,15 @@
 [gd_scene load_steps=3 format=3 uid="uid://d0682hu1kgwo5"]
 
-[ext_resource type="Script" uid="uid://bynyo7tnucjkp" path="res://Code/Items/Medical/BurnKit.gd" id="1_wfanv"]
+[ext_resource type="Script" uid="uid://gqwq11v2jk4k" path="res://Code/Items/Medical/MedicalItem.gd" id="1_wfanv"]
 [ext_resource type="Texture2D" uid="uid://cly2kdpv4cc5d" path="res://Assets/Icons/Items/Medical/BurnKit.png" id="2_kbnmq"]
 
 [node name="MedicalItem" type="Node2D"]
 script = ExtResource("1_wfanv")
+medical_type = 1
+target_limb_required = true
+instant_burn_heal = 15.0
+max_stack = 10
+current_stack = 10
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("2_kbnmq")

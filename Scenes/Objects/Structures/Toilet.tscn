@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3 uid="uid://brdftusp1jjqg"]
+
+[ext_resource type="Script" uid="uid://bdm1nh08lbjds" path="res://Code/Atoms/Object/Structures/PlumbingFixture.gd" id="1_c3gci"]
+[ext_resource type="AudioStream" uid="uid://ctqvny2yefi71" path="res://Sound/effects/sinkrunning.ogg" id="2_k5mjr"]
+[ext_resource type="AudioStream" uid="uid://c4p8remkb1kwd" path="res://Sound/effects/toilet_flush_new.ogg" id="3_1m0xw"]
+[ext_resource type="Texture2D" uid="uid://cmrhdoskayppe" path="res://Assets/Tilesets/Enviroment/Plumping.tres" id="4_3gmq5"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_equy3"]
+texture = ExtResource("4_3gmq5")
+texture_region_size = Vector2i(32, 32)
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+10:0/0 = 0
+11:0/0 = 0
+12:0/0 = 0
+13:0/0 = 0
+14:0/0 = 0
+15:0/0 = 0
+16:0/0 = 0
+0:1/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_e12kt"]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_equy3")
+
+[node name="Toilet" type="Node2D"]
+script = ExtResource("1_c3gci")
+water_sound = ExtResource("2_k5mjr")
+usage_sound = ExtResource("3_1m0xw")
+
+[node name="TileMap" type="TileMap" parent="."]
+position = Vector2(-16, -16)
+tile_set = SubResource("TileSet_e12kt")
+rendering_quadrant_size = 1
+format = 2
+layer_0/tile_data = PackedInt32Array(0, 393216, 0)

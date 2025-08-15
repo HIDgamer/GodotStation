@@ -1,4 +1,4 @@
-extends CanvasLayer
+extends Control
 class_name AdminSpawner
 
 signal item_spawned(item_path: String, position: Vector2)
@@ -44,10 +44,6 @@ var configured_directories = [
 ]
 
 func _ready():
-	layer = 100
-	follow_viewport_enabled = true
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	
 	main_panel.gui_input.connect(_on_panel_gui_input)
 	
 	find_world_systems()

@@ -1,0 +1,60 @@
+[gd_scene load_steps=9 format=3 uid="uid://yhcd7rn5ryc5"]
+
+[ext_resource type="Script" uid="uid://dlduqaa74shfl" path="res://Code/Items/Weapons/Guns/AssaultRifle.gd" id="1_sylkm"]
+[ext_resource type="AudioStream" uid="uid://dq77vlx1vlj2p" path="res://Sound/weapons/gun_m41a_1.ogg" id="2_445ug"]
+[ext_resource type="AudioStream" uid="uid://b8hvobejuvysi" path="res://Sound/weapons/handling/m41_reload.ogg" id="3_rpfob"]
+[ext_resource type="AudioStream" uid="uid://ckubo2xlkvq1q" path="res://Sound/weapons/Cocking.wav" id="4_raprv"]
+[ext_resource type="Texture2D" uid="uid://de5thxjyksknm" path="res://Assets/Icons/Items/Guns/Rifles/M42C.png" id="5_xjrpe"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_71823"]
+atlas = ExtResource("5_xjrpe")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_748by"]
+atlas = ExtResource("5_xjrpe")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_u3dy0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_71823")
+}],
+"loop": true,
+"name": &"Empty",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_748by")
+}],
+"loop": true,
+"name": &"Full",
+"speed": 5.0
+}]
+
+[node name="M42C" type="Node2D"]
+script = ExtResource("1_sylkm")
+burst_amount = 5
+burst_delay = 0.2
+muzzle_flash_enabled = true
+auto_eject_magazine = true
+accurate_range_tiles = 8
+fire_sound = ExtResource("2_445ug")
+empty_sound = ExtResource("3_rpfob")
+reload_sound = ExtResource("3_rpfob")
+cock_sound = ExtResource("4_raprv")
+weapon_type = 1
+current_safety_state = 0
+item_name = "M42C"
+w_class = 4
+obj_name = "M42C"
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_u3dy0")
+animation = &"Full"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-8, -5, -8, -4, -12, -4, -12, -3, -13, -3, -13, -2, -14, -2, -14, 2, -9, 2, -9, 3, -8, 3, -8, 4, -9, 4, -9, 5, -10, 5, -10, 7, -9, 7, -9, 8, -7, 8, -7, 9, 3, 9, 3, 8, 4, 8, 4, 7, 5, 7, 5, 6, 6, 6, 6, 5, 7, 5, 7, 4, 15, 4, 15, 0, 16, 0, 16, -3, 15, -3, 15, -5, 12, -5, 12, -4, 11, -4, 11, -3, -5, -3, -5, -4, -6, -4, -6, -5)

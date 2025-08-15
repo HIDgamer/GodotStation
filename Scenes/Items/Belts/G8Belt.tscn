@@ -1,0 +1,55 @@
+[gd_scene load_steps=7 format=3 uid="uid://e5jqg2jf1snn"]
+
+[ext_resource type="Script" uid="uid://27snrlviqtp3" path="res://Code/Items/Uniform/Belt.gd" id="1_alj5p"]
+[ext_resource type="Texture2D" uid="uid://bdjc5imijidm6" path="res://Assets/Icons/Items/Storage/Belts/G8_Belt.png" id="2_u3hqc"]
+[ext_resource type="Texture2D" uid="uid://dwwn8ch0al2if" path="res://Assets/Icons/Clothing/Belts/G8_Belt.png" id="3_o7gp1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fx3ga"]
+atlas = ExtResource("2_u3hqc")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1mkjh"]
+atlas = ExtResource("2_u3hqc")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pnckw"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fx3ga")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1mkjh")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="G8Belt" type="Node2D"]
+script = ExtResource("1_alj5p")
+storage_type = 1
+storage_max_size = 8
+storage_slots = 8
+max_storage_space = 8
+has_open_close_animation = true
+item_name = "G8Belt"
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_pnckw")
+animation = &"open"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_o7gp1")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-10, 9, -9, 9, -9, 10, 9, 10, 9, 9, 10, 9, 10, -2, -10, -2)

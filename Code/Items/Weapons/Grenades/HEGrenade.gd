@@ -1,6 +1,20 @@
 extends Grenade
 class_name HEGrenade
 
+# Import HealthSystem damage types
+enum DamageType {
+	BRUTE = 0,
+	BURN = 1,
+	TOXIN = 2,
+	OXYGEN = 3,
+	CLONE = 4,
+	STAMINA = 5,
+	BRAIN = 6,
+	CELLULAR = 7,
+	GENETIC = 8,
+	RADIATION = 9
+}
+
 # Exported explosion damage ranges in tiles for easy tuning
 @export_group("Explosion Ranges")
 @export var light_impact_range: float = 2.5
@@ -9,18 +23,25 @@ class_name HEGrenade
 @export var explosion_damage: int = 60
 
 @export_group("Shrapnel Properties")
-@export var shrapnel_count: int = 6  # Increased from 4 for better spread
+@export var shrapnel_count: int = 6
 @export var shrapnel_damage: int = 15
 @export var shrapnel_speed: float = 500.0
-@export var shrapnel_spread_angle: float = 360.0  # Full circle
+@export var shrapnel_spread_angle: float = 360.0
+@export var shrapnel_penetration: float = 20.0  # Armor penetration for shrapnel
+
+@export_group("Explosive Properties")
+@export var blast_penetration: float = 35.0  # High penetration for explosive damage
+@export var concussion_range: float = 1.0   # Range for brain/stamina damage
+@export var flash_duration: float = 8.0     # Duration of flash/stun effects
+@export var deafness_duration: float = 15.0 # Duration of hearing damage
 
 @export_group("Performance Settings")
-@export var max_explosion_particles: int = 80  # Reduced from 100
+@export var max_explosion_particles: int = 80
 @export var explosion_scale: float = 1.0
 @export var camera_shake_intensity: float = 1.0
 
 @export_group("Effect Configuration")
-@export var explosion_variant: int = 0  # 0 = default, 1 = large, 2 = small
+@export var explosion_variant: int = 0
 @export var knockback_multiplier: float = 1.0
 @export var stun_duration_multiplier: float = 1.0
 
@@ -31,6 +52,10 @@ var explosion_pending: bool = false
 # Preloaded resources
 static var explosion_scene: PackedScene
 static var shrapnel_scene: PackedScene
+
+# Body zones for targeted damage
+const BODY_ZONES = ["head", "chest", "groin", "l_arm", "r_arm", "l_leg", "r_leg"]
+const VITAL_ZONES = ["head", "chest"]
 
 func _init():
 	super._init()
@@ -57,97 +82,78 @@ func _ready():
 func equipped(user, slot: int):
 	super.equipped(user, slot)
 	
-	# Make item follow the user and become invisible
 	if get_parent() != user:
 		if get_parent():
 			get_parent().remove_child(self)
 		user.add_child(self)
 	
-	# Set position relative to user
 	position = Vector2.ZERO
 	visible = false
 	
-	# Sync grenade state when equipped
 	if inventory_sync_enabled and multiplayer.has_multiplayer_peer():
 		sync_grenade_equipped_state.rpc(active, explosion_pending, get_item_network_id(self))
 
 func unequipped(user, slot: int):
 	super.unequipped(user, slot)
-	
-	# Make item visible again but keep following user until dropped
 	visible = true
 	
-	# Sync grenade state when unequipped
 	if inventory_sync_enabled and multiplayer.has_multiplayer_peer():
 		sync_grenade_unequipped_state.rpc(active, explosion_pending, get_item_network_id(self))
 
 func picked_up(user):
 	super.picked_up(user)
 	
-	# Ensure item follows the user
 	if get_parent() != user:
 		if get_parent():
 			get_parent().remove_child(self)
 		user.add_child(self)
 	
-	# Set position relative to user and make invisible
 	position = Vector2.ZERO
 	visible = false
 	
-	# Sync grenade state when picked up
 	if inventory_sync_enabled and multiplayer.has_multiplayer_peer():
 		sync_grenade_pickup_state.rpc(active, explosion_pending, det_time, get_item_network_id(self))
 
 func handle_drop(user):
 	super.handle_drop(user)
 	
-	# Move to world and make visible
 	var world = user.get_parent()
 	if get_parent() != world:
 		if get_parent():
 			get_parent().remove_child(self)
 		world.add_child(self)
 	
-	# Set world position and make visible
 	global_position = user.global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16))
 	visible = true
 	
-	# Sync drop state through inventory system
 	if inventory_sync_enabled and multiplayer.has_multiplayer_peer():
 		sync_grenade_drop_state.rpc(active, explosion_pending, global_position, get_item_network_id(self))
 
 func throw_to_position(thrower, target_position: Vector2) -> bool:
-	# Move to world first
 	var world = thrower.get_parent()
 	if get_parent() != world:
 		if get_parent():
 			get_parent().remove_child(self)
 		world.add_child(self)
 	
-	# Set initial position and make visible
 	global_position = thrower.global_position
 	visible = true
 	
-	# Use parent throw logic
 	var result = await super.throw_to_position(thrower, target_position)
 	
-	# Sync throw state through inventory system
 	if inventory_sync_enabled and multiplayer.has_multiplayer_peer():
 		sync_grenade_throw_state.rpc(active, explosion_pending, global_position, get_item_network_id(self))
 	
 	return result
 
-# Integration with InventorySystem's use functionality
 func use(user):
 	var result = super.use(user)
 	
-	# Activate grenade when used (allow any client to use)
 	if not active:
 		result = activate()
 	
 	return result
 
-# Get network ID for syncing
 func get_item_network_id(item) -> String:
 	if item.has_method("get_network_id"):
 		return item.get_network_id()
@@ -166,7 +172,6 @@ func sync_grenade_equipped_state(is_active: bool, pending_explosion: bool, item_
 	active = is_active
 	explosion_pending = pending_explosion
 	
-	# Find the user who equipped this item
 	var user = find_item_owner(item_id)
 	if user and get_parent() != user:
 		if get_parent():
@@ -187,7 +192,6 @@ func sync_grenade_pickup_state(is_active: bool, pending_explosion: bool, current
 	explosion_pending = pending_explosion
 	det_time = current_det_time
 	
-	# Find the user who picked up this item
 	var user = find_item_owner(item_id)
 	if user and get_parent() != user:
 		if get_parent():
@@ -203,7 +207,6 @@ func sync_grenade_drop_state(is_active: bool, pending_explosion: bool, drop_pos:
 	global_position = drop_pos
 	visible = true
 	
-	# Move to world
 	var world = get_tree().current_scene
 	if get_parent() != world:
 		if get_parent():
@@ -217,7 +220,6 @@ func sync_grenade_throw_state(is_active: bool, pending_explosion: bool, throw_po
 	global_position = throw_pos
 	visible = true
 	
-	# Move to world
 	var world = get_tree().current_scene
 	if get_parent() != world:
 		if get_parent():
@@ -229,8 +231,8 @@ func sync_explosion(explosion_pos: Vector2, explosion_data: Dictionary):
 	execute_explosion_local(explosion_pos, explosion_data)
 
 @rpc("any_peer", "call_local", "reliable")
-func sync_damage_result(target_id: String, damage: float, damage_type: String, knockback_data: Dictionary):
-	apply_damage_result_local(target_id, damage, damage_type, knockback_data)
+func sync_damage_result(target_id: String, damage_data: Dictionary):
+	apply_damage_result_local(target_id, damage_data)
 
 @rpc("any_peer", "call_local", "reliable")
 func sync_shrapnel_creation(pos: Vector2, shrapnel_data: Array):
@@ -249,9 +251,7 @@ func sync_impact_detonation(impact_pos: Vector2, impact_data: Dictionary):
 	handle_impact_detonation_local(impact_pos, impact_data)
 #endregion
 
-# Find the owner of an item by network ID
 func find_item_owner(item_id: String) -> Node:
-	# Look through all players' inventory systems
 	var players = get_tree().get_nodes_in_group("players")
 	for player in players:
 		var inventory = player.get_node_or_null("InventorySystem")
@@ -263,12 +263,10 @@ func find_item_owner(item_id: String) -> Node:
 	return null
 
 func explode() -> void:
-	"""Handle HE grenade explosion with blast and shrapnel"""
+	"""Handle HE grenade explosion with proper HealthSystem integration"""
 	if not active:
 		return
 	
-	# Allow any client to trigger explosion, but sync the result
-	# Store explosion position before calling super
 	var explosion_pos = global_position
 	explosion_pending = true
 	
@@ -283,7 +281,11 @@ func explode() -> void:
 		"explosion_damage": explosion_damage,
 		"explosion_variant": explosion_variant,
 		"knockback_multiplier": knockback_multiplier,
-		"stun_duration_multiplier": stun_duration_multiplier
+		"stun_duration_multiplier": stun_duration_multiplier,
+		"blast_penetration": blast_penetration,
+		"concussion_range": concussion_range,
+		"flash_duration": flash_duration,
+		"deafness_duration": deafness_duration
 	}
 	
 	# Sync explosion across network
@@ -293,15 +295,16 @@ func explode() -> void:
 		execute_explosion_local(explosion_pos, explosion_data)
 
 func execute_explosion_local(explosion_pos: Vector2, explosion_data: Dictionary):
-	"""Execute explosion effects locally"""
+	"""Execute explosion effects locally with proper HealthSystem integration"""
 	# Apply explosion data
 	light_impact_range = explosion_data.get("light_impact_range", light_impact_range)
 	medium_impact_range = explosion_data.get("medium_impact_range", medium_impact_range)
 	heavy_impact_range = explosion_data.get("heavy_impact_range", heavy_impact_range)
 	explosion_damage = explosion_data.get("explosion_damage", explosion_damage)
-	explosion_variant = explosion_data.get("explosion_variant", explosion_variant)
-	knockback_multiplier = explosion_data.get("knockback_multiplier", knockback_multiplier)
-	stun_duration_multiplier = explosion_data.get("stun_duration_multiplier", stun_duration_multiplier)
+	blast_penetration = explosion_data.get("blast_penetration", blast_penetration)
+	concussion_range = explosion_data.get("concussion_range", concussion_range)
+	flash_duration = explosion_data.get("flash_duration", flash_duration)
+	deafness_duration = explosion_data.get("deafness_duration", deafness_duration)
 	
 	# Create visual effects
 	var effect_data = {
@@ -311,8 +314,8 @@ func execute_explosion_local(explosion_pos: Vector2, explosion_data: Dictionary)
 	}
 	create_explosion_effect_local(explosion_pos, effect_data)
 	
-	# Apply damage (authority clients can apply damage too for responsiveness)
-	apply_explosion_damage(explosion_pos)
+	# Apply damage using proper HealthSystem integration
+	apply_explosion_damage_advanced(explosion_pos)
 	
 	# Create shrapnel
 	create_shrapnel_with_sync(explosion_pos)
@@ -322,8 +325,299 @@ func execute_explosion_local(explosion_pos: Vector2, explosion_data: Dictionary)
 	
 	explosion_pending = false
 	
-	# Destroy the grenade after explosion - sync across all clients
+	# Destroy the grenade after explosion
 	_destroy_item_local()
+
+func apply_explosion_damage_advanced(pos: Vector2) -> void:
+	"""Apply damage using HealthSystem's advanced damage system"""
+	var tile_size = 32
+	var max_range = light_impact_range * tile_size
+	
+	var entities = get_entities_in_radius(pos, max_range)
+	
+	for entity in entities:
+		var health_system = get_entity_health_system(entity)
+		if not health_system:
+			continue
+		
+		var distance_tiles = entity.global_position.distance_to(pos) / tile_size
+		var damage_data = calculate_explosion_damage_data(distance_tiles, entity, pos)
+		
+		# Apply damage through HealthSystem
+		apply_health_system_damage(health_system, damage_data, entity)
+		
+		# Sync damage result across network
+		if multiplayer.has_multiplayer_peer():
+			sync_damage_result.rpc(get_entity_id(entity), damage_data)
+		else:
+			apply_damage_result_local(get_entity_id(entity), damage_data)
+
+func get_entity_health_system(entity: Node) -> Node:
+	"""Get the HealthSystem component for an entity"""
+	if "health_system" in entity and entity.health_system:
+		return entity.health_system
+	elif entity.has_node("HealthSystem"):
+		return entity.get_node("HealthSystem")
+	elif entity.get_parent() and entity.get_parent().has_node("HealthSystem"):
+		return entity.get_parent().get_node("HealthSystem")
+	return null
+
+func calculate_explosion_damage_data(distance_tiles: float, entity: Node, explosion_pos: Vector2) -> Dictionary:
+	"""Calculate comprehensive damage data for HealthSystem"""
+	var damage_data = {}
+	
+	# Calculate base damage with falloff
+	var base_damage_multiplier = calculate_damage_falloff(distance_tiles)
+	var primary_damage = explosion_damage * base_damage_multiplier
+	
+	# Determine primary damage zone (closest body part to explosion)
+	var primary_zone = determine_damage_zone(entity, explosion_pos)
+	
+	# Primary explosive damage (BRUTE with high penetration)
+	damage_data["primary"] = {
+		"amount": primary_damage,
+		"type": DamageType.BRUTE,
+		"penetration": blast_penetration,
+		"zone": primary_zone,
+		"source": self
+	}
+	
+	# Secondary burn damage from heat
+	if distance_tiles <= medium_impact_range:
+		var burn_damage = primary_damage * 0.4
+		damage_data["burn"] = {
+			"amount": burn_damage,
+			"type": DamageType.BURN,
+			"penetration": blast_penetration * 0.6,
+			"zone": primary_zone,
+			"source": self
+		}
+	
+	# Concussion effects for close range
+	if distance_tiles <= concussion_range:
+		var brain_damage = primary_damage * 0.3
+		var stamina_damage = primary_damage * 0.8
+		
+		damage_data["concussion"] = {
+			"amount": brain_damage,
+			"type": DamageType.BRAIN,
+			"penetration": 0,  # Concussion bypasses most armor
+			"zone": "head",
+			"source": self
+		}
+		
+		damage_data["stamina"] = {
+			"amount": stamina_damage,
+			"type": DamageType.STAMINA,
+			"penetration": 0,
+			"zone": "chest",
+			"source": self
+		}
+	
+	# Calculate knockback
+	damage_data["knockback"] = {
+		"direction": (entity.global_position - explosion_pos).normalized(),
+		"strength": calculate_knockback_strength(distance_tiles),
+		"distance_tiles": distance_tiles
+	}
+	
+	# Calculate status effects
+	damage_data["status_effects"] = calculate_status_effects(distance_tiles, base_damage_multiplier)
+	
+	return damage_data
+
+func determine_damage_zone(entity: Node, explosion_pos: Vector2) -> String:
+	"""Determine which body zone is closest to the explosion"""
+	var entity_pos = entity.global_position
+	var direction = (explosion_pos - entity_pos).normalized()
+	
+	# Simple zone determination based on explosion direction
+	var angle = direction.angle()
+	var abs_angle = abs(angle)
+	
+	# Convert angle to determine hit zone
+	if abs_angle < PI/6 or abs_angle > 5*PI/6:  # Front/back
+		if direction.y < -0.3:  # Above entity
+			return "head"
+		elif direction.y > 0.3:   # Below entity
+			return "l_leg" if randf() < 0.5 else "r_leg"
+		else:  # Center mass
+			return "chest"
+	elif angle > 0:  # Right side
+		return "r_arm"
+	else:  # Left side
+		return "l_arm"
+
+func apply_health_system_damage(health_system: Node, damage_data: Dictionary, entity: Node):
+	"""Apply damage through the HealthSystem with proper integration"""
+	
+	# Apply primary damage
+	if damage_data.has("primary"):
+		var primary = damage_data["primary"]
+		health_system.apply_damage(
+			primary.amount,
+			primary.type,
+			primary.penetration,
+			primary.zone,
+			primary.source
+		)
+	
+	# Apply burn damage
+	if damage_data.has("burn"):
+		var burn = damage_data["burn"]
+		health_system.apply_damage(
+			burn.amount,
+			burn.type,
+			burn.penetration,
+			burn.zone,
+			burn.source
+		)
+	
+	# Apply concussion damage
+	if damage_data.has("concussion"):
+		var concussion = damage_data["concussion"]
+		health_system.apply_damage(
+			concussion.amount,
+			concussion.type,
+			concussion.penetration,
+			concussion.zone,
+			concussion.source
+		)
+	
+	# Apply stamina damage
+	if damage_data.has("stamina"):
+		var stamina = damage_data["stamina"]
+		health_system.apply_damage(
+			stamina.amount,
+			stamina.type,
+			stamina.penetration,
+			stamina.zone,
+			stamina.source
+		)
+	
+	# Apply status effects
+	if damage_data.has("status_effects"):
+		for effect in damage_data["status_effects"]:
+			health_system.add_status_effect(effect.name, effect.duration, effect.intensity)
+	
+	# Apply knockback
+	if damage_data.has("knockback") and entity.has_method("apply_knockback"):
+		var knockback = damage_data["knockback"]
+		entity.apply_knockback(knockback.direction, knockback.strength)
+
+func calculate_status_effects(distance_tiles: float, damage_multiplier: float) -> Array:
+	"""Calculate status effects based on explosion proximity"""
+	var effects = []
+	
+	# Stunning from concussion
+	if distance_tiles <= heavy_impact_range:
+		effects.append({
+			"name": "stunned",
+			"duration": 4.0 * stun_duration_multiplier * damage_multiplier,
+			"intensity": 3.0
+		})
+	elif distance_tiles <= medium_impact_range:
+		effects.append({
+			"name": "stunned",
+			"duration": 2.0 * stun_duration_multiplier * damage_multiplier,
+			"intensity": 2.0
+		})
+	
+	# Temporary deafness from blast
+	if distance_tiles <= light_impact_range:
+		effects.append({
+			"name": "deaf",
+			"duration": deafness_duration * damage_multiplier,
+			"intensity": 1.0
+		})
+	
+	# Confusion from head trauma
+	if distance_tiles <= medium_impact_range:
+		effects.append({
+			"name": "confused",
+			"duration": 8.0 * damage_multiplier,
+			"intensity": 2.0
+		})
+	
+	# Potential bleeding from shrapnel wounds
+	if distance_tiles <= light_impact_range and randf() < 0.7:
+		effects.append({
+			"name": "bleeding",
+			"duration": 30.0,
+			"intensity": damage_multiplier * 2.0
+		})
+	
+	return effects
+
+func calculate_damage_falloff(distance_tiles: float) -> float:
+	"""Calculate damage reduction based on distance with realistic falloff"""
+	if distance_tiles <= heavy_impact_range:
+		# Close range: maximum damage with slight falloff
+		return 1.2 * (1.0 - (distance_tiles / heavy_impact_range) * 0.15)
+	elif distance_tiles <= medium_impact_range:
+		# Medium range: linear falloff
+		var falloff = (distance_tiles - heavy_impact_range) / (medium_impact_range - heavy_impact_range)
+		return 1.0 * (1.0 - falloff * 0.4)
+	else:
+		# Light range: exponential falloff
+		var falloff = (distance_tiles - medium_impact_range) / (light_impact_range - medium_impact_range)
+		return 0.6 * (1.0 - falloff * falloff)
+
+func calculate_knockback_strength(distance_tiles: float) -> float:
+	"""Calculate knockback strength based on distance"""
+	var max_knockback = 400.0 * knockback_multiplier
+	return max_knockback * (1.0 - pow(distance_tiles / light_impact_range, 0.6))
+
+func apply_damage_result_local(target_id: String, damage_data: Dictionary):
+	"""Apply damage result locally (visual effects, feedback)"""
+	var entity = find_entity_by_id(target_id)
+	if not entity:
+		return
+	
+	# Apply knockback effect if entity supports it
+	if entity.has_method("apply_knockback") and damage_data.has("knockback"):
+		var knockback = damage_data["knockback"]
+		var direction = Vector2(knockback.direction.x, knockback.direction.y)
+		entity.apply_knockback(direction, knockback.strength)
+	
+	# Send feedback to players
+	var distance_tiles = damage_data.get("knockback", {}).get("distance_tiles", 999.0)
+	if distance_tiles <= light_impact_range:
+		send_explosion_feedback(entity, distance_tiles)
+
+func send_explosion_feedback(entity: Node, distance_tiles: float):
+	"""Send appropriate feedback message to players"""
+	if not entity.is_in_group("players"):
+		return
+	
+	var sensory_system = get_entity_sensory_system(entity)
+	if not sensory_system or not sensory_system.has_method("display_message"):
+		return
+	
+	var message = ""
+	var color = "orange"
+	
+	if distance_tiles <= heavy_impact_range:
+		message = "You're caught in a devastating explosion!"
+		color = "red"
+	elif distance_tiles <= medium_impact_range:
+		message = "You're hit by a powerful explosion!"
+		color = "orange"
+	else:
+		message = "You're caught in the blast wave!"
+		color = "yellow"
+	
+	sensory_system.display_message(message, color)
+
+func get_entity_sensory_system(entity: Node) -> Node:
+	"""Get the sensory system for an entity"""
+	if "sensory_system" in entity and entity.sensory_system:
+		return entity.sensory_system
+	elif entity.has_node("SensorySystem"):
+		return entity.get_node("SensorySystem")
+	elif entity.get_parent() and entity.get_parent().has_node("SensorySystem"):
+		return entity.get_parent().get_node("SensorySystem")
+	return null
 
 func create_explosion_effect_local(pos: Vector2, effect_data: Dictionary):
 	"""Create visual explosion effect locally"""
@@ -335,15 +629,11 @@ func create_explosion_effect_local(pos: Vector2, effect_data: Dictionary):
 		get_tree().current_scene.add_child(explosion)
 		explosion.global_position = pos
 		
-		# Apply effect data
 		var variant = effect_data.get("explosion_variant", 0)
 		var scale = effect_data.get("explosion_scale", 1.0)
 		var particles = effect_data.get("max_explosion_particles", 80)
 		
-		# Configure explosion intensity based on variant
 		configure_explosion_intensity(explosion, variant, scale, particles)
-		
-		# Auto cleanup after effect duration
 		create_cleanup_timer(explosion, 3.0)
 
 func configure_explosion_intensity(explosion: Node, variant: int, scale_mult: float, particle_count: int) -> void:
@@ -361,137 +651,25 @@ func configure_explosion_intensity(explosion: Node, variant: int, scale_mult: fl
 			intensity_multiplier = 0.7
 			scale_multiplier *= 0.8
 	
-	# Apply configuration if explosion supports it
 	if explosion.has_method("configure"):
 		explosion.configure(scale_multiplier, intensity_multiplier)
 	elif explosion.has_method("set_intensity"):
 		explosion.set_intensity(intensity_multiplier)
 	
-	# Optimize particle count
 	if "amount" in explosion:
 		explosion.amount = particle_count
 	
-	# Adjust scale manually if no configuration methods available
 	explosion.scale = Vector2(scale_multiplier, scale_multiplier)
 
-func apply_explosion_damage(pos: Vector2) -> void:
-	"""Apply damage to entities based on distance from explosion"""
-	var tile_size = 32
-	var max_range = light_impact_range * tile_size
-	
-	var entities = get_entities_in_radius(pos, max_range)
-	
-	for entity in entities:
-		var distance_tiles = entity.global_position.distance_to(pos) / tile_size
-		
-		# Calculate damage based on distance
-		var damage_multiplier = calculate_damage_falloff(distance_tiles)
-		var final_damage = explosion_damage * damage_multiplier
-		
-		# Apply damage locally
-		apply_damage_to_entity(entity, final_damage, "explosive")
-		
-		# Prepare knockback data
-		var knockback_data = {
-			"direction": (entity.global_position - pos).normalized(),
-			"strength": calculate_knockback_strength(distance_tiles),
-			"distance_tiles": distance_tiles
-		}
-		
-		# Sync damage result across network (but don't double-apply)
-		if multiplayer.has_multiplayer_peer():
-			sync_damage_result.rpc(get_entity_id(entity), final_damage, "explosive", knockback_data)
-		else:
-			apply_damage_result_local(get_entity_id(entity), final_damage, "explosive", knockback_data)
-
-func calculate_knockback_strength(distance_tiles: float) -> float:
-	"""Calculate knockback strength based on distance"""
-	var max_knockback = 350.0 * knockback_multiplier
-	return max_knockback * (1.0 - pow(distance_tiles / light_impact_range, 0.7))
-
-func apply_damage_result_local(target_id: String, damage: float, damage_type: String, knockback_data: Dictionary):
-	"""Apply damage result locally (visual effects, etc.)"""
-	var entity = find_entity_by_id(target_id)
-	if not entity:
-		return
-	
-	# Apply knockback effect
-	if entity.has_method("apply_knockback") and knockback_data.size() > 0:
-		var direction = Vector2(knockback_data.direction.x, knockback_data.direction.y)
-		var strength = knockback_data.get("strength", 0.0)
-		entity.apply_knockback(direction, strength)
-	
-	# Apply status effects for close range
-	var distance_tiles = knockback_data.get("distance_tiles", 999.0)
-	if distance_tiles <= heavy_impact_range:
-		apply_status_effects(entity, distance_tiles)
-	
-	# Send feedback message to players
-	send_explosion_feedback(entity, damage / explosion_damage)
-
-func calculate_damage_falloff(distance_tiles: float) -> float:
-	"""Calculate damage reduction based on distance"""
-	if distance_tiles <= heavy_impact_range:
-		# Exponential falloff for heavy impact
-		return 1.5 * (1.0 - (distance_tiles / heavy_impact_range) * 0.2)
-	elif distance_tiles <= medium_impact_range:
-		# Linear falloff in medium range
-		var falloff = (distance_tiles - heavy_impact_range) / (medium_impact_range - heavy_impact_range)
-		return 1.0 * (1.0 - falloff * 0.3)
-	else:
-		# Quadratic falloff in light range
-		var falloff = (distance_tiles - medium_impact_range) / (light_impact_range - medium_impact_range)
-		return 0.7 * (1.0 - falloff * falloff)
-
-func apply_status_effects(entity: Node, distance_tiles: float) -> void:
-	"""Apply stun and other status effects for close explosions"""
-	if not entity.has_method("apply_effects"):
-		return
-	
-	var stun_duration = (1.0 - pow(distance_tiles / light_impact_range, 0.6)) * 5.0 * stun_duration_multiplier
-	entity.apply_effects("stun", stun_duration)
-
-func send_explosion_feedback(entity: Node, damage_multiplier: float) -> void:
-	"""Send appropriate feedback message to players"""
-	if not entity.is_in_group("players") and not "is_local_player" in entity:
-		return
-	
-	var sensory_system = get_entity_sensory_system(entity)
-	if not sensory_system or not sensory_system.has_method("display_message"):
-		return
-	
-	var message = "You're hit by an explosion!"
-	var color = "orange"
-	
-	if damage_multiplier > 1.0:
-		message = "You're hit by a powerful explosion!"
-		color = "red"
-	elif damage_multiplier < 0.5:
-		message = "You're hit by the edge of an explosion!"
-		color = "yellow"
-	
-	sensory_system.display_message(message, color)
-
-func get_entity_sensory_system(entity: Node) -> Node:
-	"""Get the sensory system for an entity"""
-	if "sensory_system" in entity and entity.sensory_system:
-		return entity.sensory_system
-	elif entity.has_node("SensorySystem"):
-		return entity.get_node("SensorySystem")
-	elif entity.get_parent() and entity.get_parent().has_node("SensorySystem"):
-		return entity.get_parent().get_node("SensorySystem")
-	return null
-
 func create_shrapnel_with_sync(pos: Vector2) -> void:
-	"""Create shrapnel and sync across network"""
+	"""Create shrapnel with HealthSystem integration"""
 	if not shrapnel_scene:
 		print_debug("Shrapnel scene not loaded!")
 		return
 	
-	# Prepare shrapnel data
 	var shrapnel_data = []
 	var angle_step = shrapnel_spread_angle / shrapnel_count
-	var base_angle = randf() * TAU  # Random starting angle
+	var base_angle = randf() * TAU
 	
 	for i in range(shrapnel_count):
 		var angle = base_angle + (angle_step * i) + randf_range(-0.2, 0.2)
@@ -501,32 +679,34 @@ func create_shrapnel_with_sync(pos: Vector2) -> void:
 		shrapnel_data.append({
 			"direction": {"x": direction.x, "y": direction.y},
 			"velocity_modifier": velocity_modifier,
-			"damage": shrapnel_damage * velocity_modifier
+			"damage": shrapnel_damage * velocity_modifier,
+			"penetration": shrapnel_penetration,
+			"damage_type": DamageType.BRUTE
 		})
 	
-	# Sync shrapnel creation
 	if multiplayer.has_multiplayer_peer():
 		sync_shrapnel_creation.rpc(pos, shrapnel_data)
 	else:
 		create_shrapnel_local(pos, shrapnel_data)
 
 func create_shrapnel_local(pos: Vector2, shrapnel_data: Array) -> void:
-	"""Create shrapnel projectiles locally"""
+	"""Create shrapnel projectiles with HealthSystem damage integration"""
 	if not shrapnel_scene:
 		return
 	
 	print_debug("Creating ", shrapnel_data.size(), " shrapnel pieces")
 	
-	# Create shrapnel projectiles
 	for data in shrapnel_data:
 		var direction = Vector2(data.direction.x, data.direction.y)
 		var velocity_modifier = data.get("velocity_modifier", 1.0)
 		var damage = data.get("damage", shrapnel_damage)
+		var penetration = data.get("penetration", shrapnel_penetration)
+		var damage_type = data.get("damage_type", DamageType.BRUTE)
 		
-		create_shrapnel_projectile(pos, direction, velocity_modifier, damage)
+		create_shrapnel_projectile(pos, direction, velocity_modifier, damage, penetration, damage_type)
 
-func create_shrapnel_projectile(pos: Vector2, direction: Vector2, velocity_modifier: float, damage: float) -> void:
-	"""Create a single shrapnel projectile"""
+func create_shrapnel_projectile(pos: Vector2, direction: Vector2, velocity_modifier: float, damage: float, penetration: float, damage_type: int) -> void:
+	"""Create a single shrapnel projectile with proper damage integration"""
 	var shrapnel = shrapnel_scene.instantiate()
 	if not shrapnel:
 		print_debug("Failed to instantiate shrapnel")
@@ -535,12 +715,9 @@ func create_shrapnel_projectile(pos: Vector2, direction: Vector2, velocity_modif
 	get_tree().current_scene.add_child(shrapnel)
 	shrapnel.global_position = pos
 	
-	print_debug("Created shrapnel at ", pos, " with direction ", direction)
-	
-	# Configure shrapnel properties
 	var velocity = direction * shrapnel_speed * velocity_modifier
 	
-	# Set velocity using different possible methods
+	# Set velocity
 	if "velocity" in shrapnel:
 		shrapnel.velocity = velocity
 	elif "linear_velocity" in shrapnel:
@@ -550,15 +727,23 @@ func create_shrapnel_projectile(pos: Vector2, direction: Vector2, velocity_modif
 	elif shrapnel.has_method("launch"):
 		shrapnel.launch(direction, shrapnel_speed * velocity_modifier)
 	
-	# Set damage properties
+	# Set damage properties for HealthSystem integration
 	if "damage" in shrapnel:
 		shrapnel.damage = damage
 	elif shrapnel.has_method("set_damage"):
 		shrapnel.set_damage(damage)
 	
-	# Set penetration if available
+	# Set penetration for armor calculations
 	if "penetration" in shrapnel:
-		shrapnel.penetration = 20
+		shrapnel.penetration = penetration
+	elif shrapnel.has_method("set_penetration"):
+		shrapnel.set_penetration(penetration)
+	
+	# Set damage type for HealthSystem
+	if "damage_type" in shrapnel:
+		shrapnel.damage_type = damage_type
+	elif shrapnel.has_method("set_damage_type"):
+		shrapnel.set_damage_type(damage_type)
 	
 	# Set range
 	if "max_range" in shrapnel:
@@ -566,24 +751,23 @@ func create_shrapnel_projectile(pos: Vector2, direction: Vector2, velocity_modif
 	elif "range" in shrapnel:
 		shrapnel.range = shrapnel_range * 32
 	
-	# Set projectile properties
+	# Set projectile identification
 	if "projectile_name" in shrapnel:
 		shrapnel.projectile_name = "shrapnel"
 	if "projectile_type" in shrapnel:
-		shrapnel.projectile_type = "shrapnel"
+		shrapnel.projectile_type = "explosive_shrapnel"
 	
-	# Enable physics if it's a RigidBody2D
+	# Configure physics
 	if shrapnel is RigidBody2D:
 		shrapnel.linear_velocity = velocity
-		shrapnel.gravity_scale = 0.3  # Some gravity for realistic arc
+		shrapnel.gravity_scale = 0.3
 	
-	# Enable visual trail if supported
+	# Enable visual effects
 	if "has_trail" in shrapnel:
 		shrapnel.has_trail = true
 	elif shrapnel.has_method("enable_trail"):
 		shrapnel.enable_trail()
 	
-	# Set up auto cleanup timer
 	create_cleanup_timer(shrapnel, 5.0)
 
 func create_camera_shake_local(intensity: float, epicenter: Vector2):
@@ -591,14 +775,12 @@ func create_camera_shake_local(intensity: float, epicenter: Vector2):
 	create_camera_shake(intensity)
 
 func throw_impact(hit_atom, speed: float = 5) -> bool:
-	"""Handle impact when thrown - chance to detonate on hard surfaces"""
-	# Call parent impact handling
+	"""Handle impact when thrown with HealthSystem integration"""
 	var result = super.throw_impact(hit_atom, speed)
 	
-	# Allow any client to trigger impact detonation
 	# Check for impact detonation if launched
 	if launched and hit_atom and hit_atom.get("density") == true:
-		var detonation_chance = 0.25 + (speed / 20.0) * 0.25  # Up to 50% at high speeds
+		var detonation_chance = 0.25 + (speed / 20.0) * 0.25
 		if not active and randf() < detonation_chance:
 			print_debug("Impact detonation triggered")
 			
@@ -608,7 +790,6 @@ func throw_impact(hit_atom, speed: float = 5) -> bool:
 				"detonation_chance": detonation_chance
 			}
 			
-			# Sync impact detonation
 			if multiplayer.has_multiplayer_peer():
 				sync_impact_detonation.rpc(global_position, impact_data)
 			else:
@@ -620,13 +801,11 @@ func throw_impact(hit_atom, speed: float = 5) -> bool:
 
 func handle_impact_detonation_local(impact_pos: Vector2, impact_data: Dictionary):
 	"""Handle impact detonation visual effects locally"""
-	# Show impact spark effect
 	if impact_pos != Vector2.ZERO:
 		create_impact_spark_effect(impact_pos)
 
 func create_impact_spark_effect(pos: Vector2):
 	"""Create spark effect at impact location"""
-	# Simple spark effect - you can replace with actual spark particle scene
 	var spark = Sprite2D.new()
 	spark.modulate = Color(1.0, 0.8, 0.2, 1.0)
 	spark.scale = Vector2(0.5, 0.5)
@@ -634,7 +813,6 @@ func create_impact_spark_effect(pos: Vector2):
 	get_tree().current_scene.add_child(spark)
 	spark.global_position = pos
 	
-	# Fade out quickly
 	var tween = create_tween()
 	tween.tween_property(spark, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(spark.queue_free)
@@ -655,23 +833,20 @@ func create_cleanup_timer(node: Node, duration: float):
 
 func create_camera_shake(intensity: float = 1.0):
 	"""Create camera shake effect"""
-	# Find camera or viewport
 	var camera = get_viewport().get_camera_2d()
 	if not camera:
 		return
 	
-	# Simple camera shake implementation
 	var shake_tween = create_tween()
 	var original_pos = camera.global_position
 	
-	for i in range(8):  # 8 shake iterations
+	for i in range(8):
 		var shake_offset = Vector2(
 			randf_range(-intensity * 10, intensity * 10),
 			randf_range(-intensity * 10, intensity * 10)
 		)
 		shake_tween.tween_property(camera, "global_position", original_pos + shake_offset, 0.05)
 	
-	# Return to original position
 	shake_tween.tween_property(camera, "global_position", original_pos, 0.1)
 
 # Helper functions for multiplayer integration
@@ -692,17 +867,14 @@ func find_entity_by_id(entity_id: String) -> Node:
 	if entity_id == "":
 		return null
 	
-	# Handle player targets
 	if entity_id.begins_with("player_"):
 		var peer_id_str = entity_id.split("_")[1]
 		var peer_id_val = peer_id_str.to_int()
 		return find_player_by_peer_id(peer_id_val)
 	
-	# Handle path-based targets
 	if entity_id.begins_with("/"):
 		return get_node_or_null(entity_id)
 	
-	# Try to find by network_id meta
 	var entities = get_tree().get_nodes_in_group("networkable")
 	for entity in entities:
 		if entity.has_meta("network_id") and entity.get_meta("network_id") == entity_id:
@@ -725,27 +897,20 @@ func find_player_by_peer_id(peer_id_val: int) -> Node:
 func get_entities_in_radius(center: Vector2, radius: float) -> Array:
 	"""Get all entities within explosion radius"""
 	var entities = []
-	
-	# Check different entity groups
 	var groups_to_check = ["players", "entities", "mobs", "characters"]
 	
 	for group_name in groups_to_check:
 		var group_entities = get_tree().get_nodes_in_group(group_name)
 		for entity in group_entities:
 			if entity.global_position.distance_to(center) <= radius:
-				if not entities.has(entity):  # Avoid duplicates
+				if not entities.has(entity):
 					entities.append(entity)
 	
 	return entities
 
-func apply_damage_to_entity(entity: Node, damage: float, damage_type: String = "explosive"):
-	"""Apply damage to an entity"""
-	if entity.has_method("take_damage"):
-		entity.take_damage(damage, damage_type, "explosive", true)
-	elif entity.has_method("damage"):
-		entity.damage(damage, damage_type)
-	elif "health" in entity:
-		entity.health -= damage
+func _destroy_item_local():
+	"""Destroy the grenade locally"""
+	queue_free()
 
 func create_large_variant() -> HEGrenade:
 	"""Create a large variant with increased properties"""
@@ -753,14 +918,15 @@ func create_large_variant() -> HEGrenade:
 	large_he.obj_name = "M40 HEDP-L grenade"
 	large_he.obj_desc = "A large variant of the M40 HEDP with increased explosive yield."
 	
-	# Increase properties
 	large_he.explosion_variant = 1
-	large_he.explosion_damage = 80
-	large_he.light_impact_range = 3.0
-	large_he.medium_impact_range = 2.0
-	large_he.heavy_impact_range = 1.0
-	large_he.shrapnel_count = 8
-	large_he.camera_shake_intensity = 1.5
+	large_he.explosion_damage = 90
+	large_he.light_impact_range = 3.5
+	large_he.medium_impact_range = 2.2
+	large_he.heavy_impact_range = 1.2
+	large_he.shrapnel_count = 10
+	large_he.shrapnel_damage = 20
+	large_he.blast_penetration = 50.0
+	large_he.camera_shake_intensity = 1.8
 	
 	return large_he
 
@@ -770,14 +936,15 @@ func create_small_variant() -> HEGrenade:
 	small_he.obj_name = "M40 HEDP-S grenade"
 	small_he.obj_desc = "A compact variant of the M40 HEDP with reduced explosive yield."
 	
-	# Decrease properties
 	small_he.explosion_variant = 2
 	small_he.explosion_damage = 40
-	small_he.light_impact_range = 2.0
+	small_he.light_impact_range = 1.8
 	small_he.medium_impact_range = 1.0
-	small_he.heavy_impact_range = 0.5
+	small_he.heavy_impact_range = 0.4
 	small_he.shrapnel_count = 4
-	small_he.camera_shake_intensity = 0.7
+	small_he.shrapnel_damage = 10
+	small_he.blast_penetration = 20.0
+	small_he.camera_shake_intensity = 0.6
 	
 	return small_he
 
@@ -793,6 +960,11 @@ func serialize() -> Dictionary:
 	data["shrapnel_damage"] = shrapnel_damage
 	data["shrapnel_speed"] = shrapnel_speed
 	data["shrapnel_range"] = shrapnel_range
+	data["shrapnel_penetration"] = shrapnel_penetration
+	data["blast_penetration"] = blast_penetration
+	data["concussion_range"] = concussion_range
+	data["flash_duration"] = flash_duration
+	data["deafness_duration"] = deafness_duration
 	data["explosion_variant"] = explosion_variant
 	data["camera_shake_intensity"] = camera_shake_intensity
 	data["max_explosion_particles"] = max_explosion_particles
@@ -812,6 +984,11 @@ func deserialize(data: Dictionary):
 	if "shrapnel_damage" in data: shrapnel_damage = data.shrapnel_damage
 	if "shrapnel_speed" in data: shrapnel_speed = data.shrapnel_speed
 	if "shrapnel_range" in data: shrapnel_range = data.shrapnel_range
+	if "shrapnel_penetration" in data: shrapnel_penetration = data.shrapnel_penetration
+	if "blast_penetration" in data: blast_penetration = data.blast_penetration
+	if "concussion_range" in data: concussion_range = data.concussion_range
+	if "flash_duration" in data: flash_duration = data.flash_duration
+	if "deafness_duration" in data: deafness_duration = data.deafness_duration
 	if "explosion_variant" in data: explosion_variant = data.explosion_variant
 	if "camera_shake_intensity" in data: camera_shake_intensity = data.camera_shake_intensity
 	if "max_explosion_particles" in data: max_explosion_particles = data.max_explosion_particles

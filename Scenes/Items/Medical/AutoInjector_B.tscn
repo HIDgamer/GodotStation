@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://prc0hc8w1ii2"]
 
-[ext_resource type="Script" uid="uid://ddj3t1agp0ej2" path="res://Code/Items/Medical/AutoInjector_B.gd" id="1_a3hj3"]
+[ext_resource type="Script" uid="uid://gqwq11v2jk4k" path="res://Code/Items/Medical/MedicalItem.gd" id="1_28alw"]
 [ext_resource type="Texture2D" uid="uid://hmjotqmjehu4" path="res://Assets/Icons/Items/Medical/AutoInjector_Single.png" id="2_28alw"]
 [ext_resource type="Texture2D" uid="uid://dis4336gdtmad" path="res://Assets/Effects/Chemicals/injector.png" id="3_25166"]
 
@@ -20,8 +20,13 @@ animations = [{
 }]
 
 [node name="MedicalItem" type="Node2D"]
-script = ExtResource("1_a3hj3")
-can_refill = true
+script = ExtResource("1_28alw")
+medical_type = 5
+slow_brute_heal = 15.0
+injector_capacity = 45.0
+injection_dose = 45.0
+max_injections = 1
+current_injections = 1
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("2_28alw")

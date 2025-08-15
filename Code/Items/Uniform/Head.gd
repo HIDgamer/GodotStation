@@ -3,8 +3,8 @@ class_name Head
 
 func _init():
 	super._init()
-	primary_slot = EquipSlot.HEAD
-	valid_slots = [EquipSlot.HEAD]
+	primary_slot = Slots.HEAD
+	valid_slots = [Slots.HEAD]
 	blood_overlay_type = "head"
 	
 	# Head items often provide accessories

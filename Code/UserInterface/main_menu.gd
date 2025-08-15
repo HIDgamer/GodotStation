@@ -1,6 +1,6 @@
 extends Control
 
-@export var game_scene_path: String = "res://Scenes/Maps/Zypharion.tscn"
+@export var game_scene_path: String = "res://Scenes/Maps/Hub.tscn"
 @export var multiplayer_scene_path: String = "res://Scenes/UI/Menus/network_ui.tscn" 
 @export var settings_scene_path: String = "res://Scenes/UI/Menus/Settings.tscn"
 @export var character_creation_path: String = "res://Scenes/UI/Menus/character_creation.tscn"

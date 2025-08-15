@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://d0wggabcysnq8"]
+
+[ext_resource type="Script" uid="uid://dq8mj737bpfqo" path="res://Code/Items/ItemComponents/Item.gd" id="1_ihueh"]
+[ext_resource type="Texture2D" uid="uid://b2bolkw1q7wba" path="res://Assets/Structure/rollerbed.png" id="2_wvjt2"]
+
+[node name="RollerBed" type="Node2D"]
+script = ExtResource("1_ihueh")
+entity_dense = false
+pickupable = true
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_wvjt2")
+region_enabled = true
+region_rect = Rect2(96, 0, 32, 32)
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(3, -3, -8, -3, -8, -2, -9, -2, -9, -1, -10, -1, -10, 0, -11, 0, -11, 8, -10, 8, -10, 9, -9, 9, -9, 10, -8, 10, -8, 11, 3, 11, 3, 12, 6, 12, 6, 11, 7, 11, 7, 10, 8, 10, 8, -2, 7, -2, 7, -3, 6, -3, 6, -5, 3, -5)

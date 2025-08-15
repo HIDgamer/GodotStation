@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=3 uid="uid://b7770sgqh2k1h"]
+
+[ext_resource type="Script" uid="uid://cogtt8qcqymsc" path="res://Code/Items/Magazines/PistolMagazine.gd" id="1_pqnhe"]
+[ext_resource type="Texture2D" uid="uid://sxyljy0ktg33" path="res://Assets/Icons/Items/Guns/Magazines/M42C_Magazine.png" id="2_yilvp"]
+[ext_resource type="AudioStream" uid="uid://bx4yrtl3s0lc" path="res://Sound/weapons/singlebullet.wav" id="3_g3x6u"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_txhwh"]
+atlas = ExtResource("2_yilvp")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lp6gy"]
+atlas = ExtResource("2_yilvp")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_y4qay"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_txhwh")
+}],
+"loop": true,
+"name": &"Empty",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lp6gy")
+}],
+"loop": true,
+"name": &"Full",
+"speed": 5.0
+}]
+
+[node name="ARMagazine" type="Node2D"]
+script = ExtResource("1_pqnhe")
+max_rounds = 50
+current_rounds = 50
+compatible_ammo_type = 1
+bullet_type = "RifleBullet"
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_y4qay")
+animation = &"Full"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4, -5, -4, 3, -5, 3, -5, 6, -4, 6, -4, 7, -3, 7, -3, 8, -2, 8, -2, 9, 2, 9, 2, 8, 4, 8, 4, 6, 5, 6, 5, 3, 4, 3, 4, -3, 3, -3, 3, -4, -1, -4, -1, -5)
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_g3x6u")

@@ -1,0 +1,55 @@
+[gd_scene load_steps=7 format=3 uid="uid://ckq1rqo4od3g4"]
+
+[ext_resource type="Script" uid="uid://27snrlviqtp3" path="res://Code/Items/Uniform/Belt.gd" id="1_883my"]
+[ext_resource type="Texture2D" uid="uid://b7t3akcptg646" path="res://Assets/Icons/Items/Storage/Belts/Medicalrig_Belt.png" id="2_hvliy"]
+[ext_resource type="Texture2D" uid="uid://d0w4stnuohp8" path="res://Assets/Icons/Clothing/Belts/Medical_Rig_Belt.png" id="3_3kfre"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_37epb"]
+atlas = ExtResource("2_hvliy")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l5l6u"]
+atlas = ExtResource("2_hvliy")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_uj1bk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_37epb")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l5l6u")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="MedicalRigBelt" type="Node2D"]
+script = ExtResource("1_883my")
+storage_type = 2
+storage_max_size = 8
+storage_slots = 8
+max_storage_space = 8
+has_open_close_animation = true
+item_name = "MedicalRigBelt"
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_uj1bk")
+animation = &"open"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_3kfre")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-14, 0, -16, 0, -16, 5, -14, 5, -14, 10, -2, 10, -2, 5, 3, 5, 3, 10, 14, 10, 14, 5, 16, 5, 16, 0, 14, 0, 14, -2, 3, -2, 3, -1, 1, -1, 1, 0, -1, 0, -1, -1, -2, -1, -2, -2, -14, -2)

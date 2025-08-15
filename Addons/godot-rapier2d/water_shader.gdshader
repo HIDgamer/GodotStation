@@ -1,22 +1,18 @@
 shader_type canvas_item;
 
-uniform float threshold = 0.8;
-uniform vec4 water_color: source_color = vec4(0.12,0.24,0.45,0.65);
-uniform vec4 test_color: source_color = vec4(1,0,1,1);
+uniform sampler2D screen_texture: hint_screen_texture;
+uniform sampler2D noise_texture: filter_nearest, repeat_enable;
+uniform float distortion = 0.01;
+uniform vec2 speed = vec2(0.5, 0.2);
+uniform float wave_strength = 0.1;
 
-uniform float speed = 0.1; // Speed of movement
-uniform float amplitude = 0.1; // Amplitude of movement
-
-uniform sampler2D water_texture;
+void vertex(){
+	VERTEX.y += sin(TIME);
+}
 
 void fragment(){
-	float displacement = sin(TIME * speed) * amplitude;
-	vec4 screen_tex = texture(TEXTURE, SCREEN_UV).rgba;
-
-	float color_distance = screen_tex.r;
-	if (color_distance > threshold) {
-		COLOR = texture(water_texture, SCREEN_UV + displacement).rgba * water_color;
-	} else {
-		COLOR = vec4(0.0);
-	}
+	vec2 uv = UV + speed * TIME;
+	vec2 noise = 2.0 * texture(noise_texture, uv).rg - vec2(1.0);
+	COLOR = texture(TEXTURE, UV + noise * wave_strength);
+	COLOR *= texture(screen_texture, SCREEN_UV + noise * distortion);
 }

@@ -1,35 +1,10 @@
-[gd_scene load_steps=20 format=3 uid="uid://cuj34ntgy48j2"]
+[gd_scene load_steps=16 format=3 uid="uid://cuj34ntgy48j2"]
 
-[ext_resource type="Texture2D" uid="uid://kjtp8v53c0jv" path="res://Assets/Icons/Items/Objects/Lights.png" id="2_e58ag"]
-[ext_resource type="Script" uid="uid://sopiu7n53fvo" path="res://Code/Atoms/Object/Wall_Light.gd" id="3_jnrlv"]
-[ext_resource type="Texture2D" uid="uid://drb28gcqq1wj4" path="res://Assets/Effects/Light/Cone_2.png" id="4_30dfr"]
-[ext_resource type="Texture2D" uid="uid://vsy674kvylv1" path="res://Assets/Icons/Items/Objects/Lights_off.png" id="4_yv45d"]
-[ext_resource type="Texture2D" uid="uid://c7oq8bfywn48o" path="res://Assets/Effects/Light/Cone_1.png" id="5_3r6uo"]
-
-[sub_resource type="Gradient" id="Gradient_46ku0"]
-colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
-metadata/_snap_enabled = true
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_yv45d"]
-gradient = SubResource("Gradient_46ku0")
-width = 800
-height = 800
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(0.8, 1)
-metadata/_snap_enabled = true
-
-[sub_resource type="Gradient" id="Gradient_yv45d"]
-offsets = PackedFloat32Array(0.4, 1)
-colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
-metadata/_snap_enabled = true
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_30dfr"]
-gradient = SubResource("Gradient_yv45d")
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(0.7, 1)
-metadata/_snap_enabled = true
+[ext_resource type="Texture2D" uid="uid://dl2ucdnbaoebl" path="res://Assets/Effects/Light/Light_normalized.png" id="1_3r6uo"]
+[ext_resource type="Texture2D" uid="uid://tfnqhlc1fwgr" path="res://Assets/Icons/Items/Objects/Lights.png" id="2_e58ag"]
+[ext_resource type="Texture2D" uid="uid://duo2i0kjlm80i" path="res://Assets/Effects/Light/Rotating_Cone.png" id="3_30dfr"]
+[ext_resource type="Script" uid="uid://sopiu7n53fvo" path="res://Code/Lighting/Wall_Light.gd" id="3_jnrlv"]
+[ext_resource type="Texture2D" uid="uid://ce6xablcc0qbv" path="res://Assets/Icons/Items/Objects/Lights_off.png" id="4_yv45d"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_30dfr"]
 atlas = ExtResource("2_e58ag")
@@ -137,39 +112,23 @@ animations = [{
 shadow_enabled = true
 shadow_color = Color(0, 0, 0, 1)
 shadow_filter = 1
-shadow_filter_smooth = 5.0
-texture = SubResource("GradientTexture2D_yv45d")
-height = 1024.0
+shadow_filter_smooth = 2.0
+texture = ExtResource("1_3r6uo")
 script = ExtResource("3_jnrlv")
-entity_detection_radius = 600.0
+light_range = 100.0
+rotation_speed = 1.5
+max_energy = 1.0
+flicker_intensity = 0.2
 is_static = true
 metadata/use_color_temperature = true
 metadata/color_temperature = 4500
 metadata/color_filter = Color(1, 1, 1, 0)
 
-[node name="ambient_light" type="PointLight2D" parent="."]
-color = Color(1, 0.853067, 0.735035, 1)
-energy = 0.01
+[node name="cone_light" type="PointLight2D" parent="."]
 shadow_enabled = true
-shadow_filter = 2
+shadow_filter = 1
 shadow_filter_smooth = 5.0
-texture = SubResource("GradientTexture2D_30dfr")
-texture_scale = 2.0
-metadata/use_color_temperature = true
-metadata/color_temperature = 4500
-metadata/color_filter = Color(1, 1, 1, 0)
-
-[node name="cone_light1" type="PointLight2D" parent="."]
-texture = ExtResource("4_30dfr")
-metadata/use_color_temperature = true
-metadata/color_temperature = 6500
-metadata/color_filter = Color(1, 1, 1, 0)
-
-[node name="cone_light2" type="PointLight2D" parent="."]
-texture = ExtResource("5_3r6uo")
-metadata/use_color_temperature = true
-metadata/color_temperature = 6500
-metadata/color_filter = Color(1, 1, 1, 0)
+texture = ExtResource("3_30dfr")
 
 [node name="On" type="AnimatedSprite2D" parent="."]
 z_index = 5

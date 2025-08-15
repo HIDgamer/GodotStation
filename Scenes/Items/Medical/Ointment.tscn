@@ -1,10 +1,16 @@
 [gd_scene load_steps=3 format=3 uid="uid://rtdpuw72otob"]
 
-[ext_resource type="Script" uid="uid://wpqfu1v6kfcn" path="res://Code/Items/Medical/Ointment.gd" id="1_yrwtx"]
+[ext_resource type="Script" uid="uid://gqwq11v2jk4k" path="res://Code/Items/Medical/MedicalItem.gd" id="1_yrwtx"]
 [ext_resource type="Texture2D" uid="uid://dyy0ovreka3du" path="res://Assets/Icons/Items/Medical/Ointment.png" id="2_e5ynv"]
 
 [node name="MedicalItem" type="Node2D"]
 script = ExtResource("1_yrwtx")
+medical_type = 1
+target_limb_required = true
+instant_burn_heal = 10.0
+is_stackable = true
+max_stack = 10
+current_stack = 10
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("2_e5ynv")

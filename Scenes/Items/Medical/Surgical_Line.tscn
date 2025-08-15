@@ -1,10 +1,13 @@
 [gd_scene load_steps=3 format=3 uid="uid://du2tjwab22dsf"]
 
-[ext_resource type="Script" uid="uid://d3cro6dm5w7xo" path="res://Code/Items/Medical/Surgical_Line.gd" id="1_hpiaj"]
+[ext_resource type="Script" uid="uid://gqwq11v2jk4k" path="res://Code/Items/Medical/MedicalItem.gd" id="1_hpiaj"]
 [ext_resource type="Texture2D" uid="uid://tvdxinoh20eo" path="res://Assets/Icons/Items/Medical/Surgical_Lining.png" id="2_adq8x"]
 
 [node name="MedicalItem" type="Node2D"]
 script = ExtResource("1_hpiaj")
+medical_type = 3
+target_limb_required = true
+stop_bleeding = true
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("2_adq8x")

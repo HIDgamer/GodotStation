@@ -6,11 +6,11 @@ class_name Armor
 
 func _init():
 	super._init()
-	primary_slot = EquipSlot.WEAR_SUIT
+	primary_slot = Slots.WEAR_SUIT
 	
 	blood_overlay_type = "uniform"
 	
-	valid_slots = [EquipSlot.WEAR_SUIT]
+	valid_slots = [Slots.WEAR_SUIT]
 	w_class = 3  # SIZE_MEDIUM
 	siemens_coefficient = 0.9
 	fire_resist = 373.15  # T0C+100

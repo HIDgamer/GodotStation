@@ -1,0 +1,82 @@
+[gd_scene load_steps=16 format=3 uid="uid://buuusq0mxebc1"]
+
+[ext_resource type="Script" uid="uid://ch1jwonqft1ah" path="res://Code/Aliens/AlienController.gd" id="1_cpwxp"]
+[ext_resource type="PackedScene" uid="uid://cd5564cr2suu0" path="res://Scenes/Sprites/alien_sprite_system.tscn" id="2_exf7r"]
+[ext_resource type="Script" uid="uid://dilpklot1quje" path="res://Code/Helpers/SensorySystem.gd" id="3_aqftw"]
+[ext_resource type="Script" uid="uid://ctk7b455p47ul" path="res://Code/OnClick/ClickComponent.gd" id="3_s81oj"]
+[ext_resource type="Script" uid="uid://mt0rh1vdlm7n" path="res://Code/Aliens/AlienHealthSystem.gd" id="4_aqftw"]
+[ext_resource type="Script" uid="uid://w2tld6m0n26q" path="res://Code/Aliens/AlienGrabPullComponent.gd" id="5_k8ohx"]
+[ext_resource type="Script" uid="uid://djrs5msigc2l0" path="res://Code/Humanoids/Systems/InventorySystem.gd" id="5_s81oj"]
+[ext_resource type="Script" uid="uid://dkur85cr3skgb" path="res://Code/Aliens/AlienInputController.gd" id="6_857qp"]
+[ext_resource type="Script" uid="uid://hn6hdyerw2dv" path="res://Code/Aliens/AlienPostureComponent.gd" id="7_b0yg3"]
+[ext_resource type="Script" uid="uid://bfd8pa8r6iu6a" path="res://Code/Aliens/AlienVisionComponent.gd" id="8_5qcjo"]
+[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Humanoids/Systems/MovementComponent.gd" id="9_lwi4q"]
+[ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Humanoids/Systems/ZLevelMovementComponent.gd" id="10_np0x0"]
+[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Humanoids/Systems/StatusEffectComponent.gd" id="11_imbpr"]
+[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Humanoids/Systems/InteractionComponent.gd" id="12_on0hc"]
+[ext_resource type="Script" uid="uid://bha58yd6dhqr6" path="res://Code/Aliens/AlienAI.gd" id="13_2tj6m"]
+
+[node name="AlienController" type="Node2D"]
+script = ExtResource("1_cpwxp")
+is_npc = true
+entity_type = "mob"
+no_pull = true
+health = 200.0
+max_health = 200.0
+metadata/_custom_type_script = "uid://ch1jwonqft1ah"
+
+[node name="AlienSpriteSystem" parent="." instance=ExtResource("2_exf7r")]
+position = Vector2(0, -8)
+
+[node name="SensorySystem" type="Node2D" parent="."]
+script = ExtResource("3_aqftw")
+metadata/_custom_type_script = "uid://dilpklot1quje"
+
+[node name="AlienAI" type="Node" parent="."]
+script = ExtResource("13_2tj6m")
+metadata/_custom_type_script = "uid://bha58yd6dhqr6"
+
+[node name="ClickComponent" type="Node" parent="."]
+script = ExtResource("3_s81oj")
+metadata/_custom_type_script = "uid://ctk7b455p47ul"
+
+[node name="InventorySystem" type="Node" parent="."]
+script = ExtResource("5_s81oj")
+metadata/_custom_type_script = "uid://djrs5msigc2l0"
+
+[node name="HealthSystem" type="Node" parent="."]
+script = ExtResource("4_aqftw")
+metadata/_custom_type_script = "uid://mt0rh1vdlm7n"
+
+[node name="AlienGrabPullComponent" type="Node" parent="."]
+script = ExtResource("5_k8ohx")
+metadata/_custom_type_script = "uid://w2tld6m0n26q"
+
+[node name="AlienInputController" type="Node" parent="."]
+script = ExtResource("6_857qp")
+metadata/_custom_type_script = "uid://dkur85cr3skgb"
+
+[node name="AlienPostureComponent" type="Node" parent="."]
+script = ExtResource("7_b0yg3")
+can_crawl = false
+metadata/_custom_type_script = "uid://hn6hdyerw2dv"
+
+[node name="AlienVisionComponent" type="Node" parent="."]
+script = ExtResource("8_5qcjo")
+metadata/_custom_type_script = "uid://bfd8pa8r6iu6a"
+
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("9_lwi4q")
+metadata/_custom_type_script = "uid://cl82bkxuc28j"
+
+[node name="ZLevelMovementComponent" type="Node" parent="."]
+script = ExtResource("10_np0x0")
+metadata/_custom_type_script = "uid://bbv4x26754up"
+
+[node name="StatusEffectComponent" type="Node" parent="."]
+script = ExtResource("11_imbpr")
+metadata/_custom_type_script = "uid://ceqlv6f14jwgs"
+
+[node name="InteractionComponent" type="Node" parent="."]
+script = ExtResource("12_on0hc")
+metadata/_custom_type_script = "uid://ca4n5hj0ijsn6"

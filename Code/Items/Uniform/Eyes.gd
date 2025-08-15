@@ -7,8 +7,8 @@ class_name Eyes
 
 func _init():
 	super._init()
-	primary_slot = EquipSlot.GLASSES
-	valid_slots = [EquipSlot.GLASSES]
+	primary_slot = Slots.GLASSES
+	valid_slots = [Slots.GLASSES]
 	w_class = 1  # SIZE_TINY
 
 func update_clothing_icon():

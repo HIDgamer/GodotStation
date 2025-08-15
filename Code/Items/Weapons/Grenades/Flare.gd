@@ -182,8 +182,6 @@ func sync_flare_depleted():
 	mark_as_depleted_local()
 
 func _enter_tree():
-	super._enter_tree()
-	
 	# Restore effects if we were active before being moved
 	if was_active_before_move and active and not active_light:
 		call_deferred("create_light")

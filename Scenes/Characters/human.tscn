@@ -1,25 +1,32 @@
-[gd_scene load_steps=37 format=3 uid="uid://c6mxm7u3f5n4g"]
+[gd_scene load_steps=44 format=3 uid="uid://c6mxm7u3f5n4g"]
 
-[ext_resource type="Script" uid="uid://b2bi0dloqd2xs" path="res://Code/Mobs/Controllers/Controller.gd" id="1_uwpdh"]
-[ext_resource type="Script" uid="uid://chnw437ejhnj4" path="res://Code/Mobs/Systems/CameraSystem.gd" id="2_8mbkt"]
+[ext_resource type="Script" uid="uid://b2bi0dloqd2xs" path="res://Code/Humanoids/Controllers/Controller.gd" id="1_uwpdh"]
+[ext_resource type="AudioStream" uid="uid://xljtqhwduorn" path="res://Sound/weapons/punch1.ogg" id="2_6kg4y"]
+[ext_resource type="Script" uid="uid://chnw437ejhnj4" path="res://Code/Humanoids/Systems/CameraSystem.gd" id="2_8mbkt"]
 [ext_resource type="PackedScene" uid="uid://dnrsljtlvb77j" path="res://Scenes/UI/Player/PlayerUI.tscn" id="2_s6v5g"]
 [ext_resource type="PackedScene" uid="uid://duso7e10esk50" path="res://Scenes/Sprites/human_sprite_system.tscn" id="3_lq0mj"]
-[ext_resource type="Script" uid="uid://by1xcc5dbrila" path="res://Code/Mobs/Controllers/InputController.gd" id="3_lyye4"]
-[ext_resource type="Script" uid="uid://djrs5msigc2l0" path="res://Code/Mobs/Systems/InventorySystem.gd" id="4_8gj18"]
+[ext_resource type="Script" uid="uid://by1xcc5dbrila" path="res://Code/Humanoids/Controllers/InputController.gd" id="3_lyye4"]
+[ext_resource type="AudioStream" uid="uid://d2lkry7prnx7s" path="res://Sound/effects/gibbed.ogg" id="3_yoeyc"]
+[ext_resource type="Script" uid="uid://djrs5msigc2l0" path="res://Code/Humanoids/Systems/InventorySystem.gd" id="4_8gj18"]
 [ext_resource type="Texture2D" uid="uid://d1wjahb2n7uqs" path="res://Assets/Effects/FX/Gib.tres" id="4_vqrbj"]
-[ext_resource type="Script" uid="uid://dj4qyr2yg1rim" path="res://Code/Mobs/Controllers/HealthConnector.gd" id="5_ntngp"]
-[ext_resource type="Script" uid="uid://dh2tm0dwjxdiw" path="res://Code/Mobs/Systems/HealthSystem.gd" id="6_nypa4"]
+[ext_resource type="Script" uid="uid://dj4qyr2yg1rim" path="res://Code/Humanoids/Controllers/HealthConnector.gd" id="5_ntngp"]
+[ext_resource type="Script" uid="uid://dh2tm0dwjxdiw" path="res://Code/Humanoids/Systems/HealthSystem.gd" id="6_nypa4"]
 [ext_resource type="Script" uid="uid://ctk7b455p47ul" path="res://Code/OnClick/ClickComponent.gd" id="6_sjx5i"]
-[ext_resource type="Script" uid="uid://co3fb4yan7sep" path="res://Code/Mobs/Systems/WeaponHandlingComponent.gd" id="15_ntngp"]
-[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Mobs/Systems/MovementComponent.gd" id="16_gwepp"]
-[ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Mobs/Systems/ZLevelMovementComponent.gd" id="17_o264j"]
-[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Mobs/Systems/InteractionComponent.gd" id="17_sjx5i"]
-[ext_resource type="Script" uid="uid://c3u73hjth48ct" path="res://Code/Mobs/Systems/ItemInteractionComponent.gd" id="18_3dn6y"]
-[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Mobs/Systems/StatusEffectComponent.gd" id="19_vb0nj"]
-[ext_resource type="Script" uid="uid://dahxqtbwo8bw7" path="res://Code/Mobs/Systems/BodyTargetingComponent.gd" id="20_38qpi"]
-[ext_resource type="Script" uid="uid://57gv3jq6b82j" path="res://Code/Mobs/Systems/GrabPullComponent.gd" id="21_3u27n"]
-[ext_resource type="Script" uid="uid://crcieeppmdsku" path="res://Code/Mobs/Systems/PostureComponent.gd" id="22_3dn6y"]
-[ext_resource type="Script" uid="uid://bu4qlco8mbb3m" path="res://Code/Mobs/Systems/IntentComponent.gd" id="23_vb0nj"]
+[ext_resource type="Script" uid="uid://dbg635erwfw8b" path="res://Code/Humanoids/Systems/VisionComponent.gd" id="7_nypa4"]
+[ext_resource type="Script" uid="uid://byp73f8op172y" path="res://Code/Humanoids/Systems/ReagentSystem.gd" id="10_o264j"]
+[ext_resource type="Script" uid="uid://co3fb4yan7sep" path="res://Code/Humanoids/Systems/WeaponHandlingComponent.gd" id="15_ntngp"]
+[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Humanoids/Systems/MovementComponent.gd" id="16_gwepp"]
+[ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Humanoids/Systems/ZLevelMovementComponent.gd" id="17_o264j"]
+[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Humanoids/Systems/InteractionComponent.gd" id="17_sjx5i"]
+[ext_resource type="Script" uid="uid://c3u73hjth48ct" path="res://Code/Humanoids/Systems/ItemInteractionComponent.gd" id="18_3dn6y"]
+[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Humanoids/Systems/StatusEffectComponent.gd" id="19_vb0nj"]
+[ext_resource type="Script" uid="uid://dahxqtbwo8bw7" path="res://Code/Humanoids/Systems/BodyTargetingComponent.gd" id="20_38qpi"]
+[ext_resource type="Script" uid="uid://57gv3jq6b82j" path="res://Code/Humanoids/Systems/GrabPullComponent.gd" id="21_3u27n"]
+[ext_resource type="Script" uid="uid://crcieeppmdsku" path="res://Code/Humanoids/Systems/PostureComponent.gd" id="22_3dn6y"]
+[ext_resource type="Script" uid="uid://c0gd3pjre5rg0" path="res://Code/Humanoids/Systems/SkillComponent.gd" id="23_3dn6y"]
+[ext_resource type="Script" uid="uid://bu4qlco8mbb3m" path="res://Code/Humanoids/Systems/IntentComponent.gd" id="23_vb0nj"]
+[ext_resource type="Script" uid="uid://dilpklot1quje" path="res://Code/Helpers/SensorySystem.gd" id="24_38qpi"]
+[ext_resource type="Texture2D" uid="uid://b0tfvqv883853" path="res://Assets/Effects/Light/light_224.png" id="24_vb0nj"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kqdsm"]
 atlas = ExtResource("4_vqrbj")
@@ -162,9 +169,11 @@ properties/9/path = NodePath("Effect:position")
 properties/9/spawn = true
 properties/9/replication_mode = 1
 
-[node name="GridMovementController" type="Node2D"]
+[node name="GridMovementController" type="Node2D" groups=["player_controller"]]
 script = ExtResource("1_uwpdh")
 entity_type = "mob"
+hit_sound = ExtResource("2_6kg4y")
+destroy_sound = ExtResource("3_yoeyc")
 
 [node name="PlayerUI" parent="." instance=ExtResource("2_s6v5g")]
 layer = 128
@@ -187,10 +196,20 @@ default_zoom = Vector2(3, 3)
 [node name="Effect" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_sq5fq")
 animation = &"Gib"
+frame = 14
+frame_progress = 1.0
 
 [node name="ClickComponent" type="Node" parent="."]
 script = ExtResource("6_sjx5i")
+double_click_time = 0.5
+click_cooldown = 0.5
 metadata/_custom_type_script = "uid://ctk7b455p47ul"
+
+[node name="VisionComponent" type="Node" parent="."]
+script = ExtResource("7_nypa4")
+vision_radius = 10
+vision_blocked_by_doors = true
+metadata/_custom_type_script = "uid://dbg635erwfw8b"
 
 [node name="HealthConnector" type="Node" parent="."]
 script = ExtResource("5_ntngp")
@@ -199,6 +218,10 @@ metadata/_custom_type_script = "uid://dj4qyr2yg1rim"
 [node name="HealthSystem" type="Node" parent="." groups=["health_system"]]
 script = ExtResource("6_nypa4")
 metadata/_custom_type_script = "uid://dh2tm0dwjxdiw"
+
+[node name="ReagentSystem" type="Node" parent="."]
+script = ExtResource("10_o264j")
+metadata/_custom_type_script = "uid://byp73f8op172y"
 
 [node name="InputController" type="Node" parent="."]
 script = ExtResource("3_lyye4")
@@ -214,18 +237,28 @@ metadata/_custom_type_script = "uid://cl82bkxuc28j"
 
 [node name="ZLevelMovementComponent" type="Node" parent="."]
 script = ExtResource("17_o264j")
+ladder_climb_sound = "catwalk1"
+movement_sound = "catwalk1"
 metadata/_custom_type_script = "uid://bbv4x26754up"
 
 [node name="InteractionComponent" type="Node" parent="."]
 script = ExtResource("17_sjx5i")
+interaction_cooldown = 0.5
+examine_sound = "paper_pickup"
+disarm_sound = "punchmiss"
 metadata/_custom_type_script = "uid://ca4n5hj0ijsn6"
 
 [node name="ItemInteractionComponent" type="Node" parent="."]
 script = ExtResource("18_3dn6y")
+arc_height_multiplier = 0.0
+max_arc_height = 0.0
 metadata/_custom_type_script = "uid://c3u73hjth48ct"
 
 [node name="WeaponHandlingComponent" type="Node" parent="."]
 script = ExtResource("15_ntngp")
+wield_sound = "gunrustle1"
+empty_sound = "gunrustle2"
+chamber_sound = "Cocking"
 metadata/_custom_type_script = "uid://co3fb4yan7sep"
 
 [node name="StatusEffectComponent" type="Node" parent="."]
@@ -234,20 +267,46 @@ metadata/_custom_type_script = "uid://ceqlv6f14jwgs"
 
 [node name="BodyTargetingComponent" type="Node" parent="."]
 script = ExtResource("20_38qpi")
+highlight_targeted_zones = false
 metadata/_custom_type_script = "uid://dahxqtbwo8bw7"
 
 [node name="GrabPullComponent" type="Node" parent="."]
 script = ExtResource("21_3u27n")
+grab_sound = "thudswoosh"
+tighten_sound = "thudswoosh"
+choke_sound = "thudswoosh"
+release_sound = "thudswoosh"
 metadata/_custom_type_script = "uid://57gv3jq6b82j"
 
 [node name="PostureComponent" type="Node" parent="."]
 script = ExtResource("22_3dn6y")
+body_fall_sound = "bump"
+rustle_sound = "clothingrustle2"
 metadata/_custom_type_script = "uid://crcieeppmdsku"
 
 [node name="IntentComponent" type="Node" parent="."]
 script = ExtResource("23_vb0nj")
 metadata/_custom_type_script = "uid://bu4qlco8mbb3m"
 
+[node name="SkillComponent" type="Node" parent="."]
+script = ExtResource("23_3dn6y")
+skillset_name = "marine"
+metadata/_custom_type_script = "uid://c0gd3pjre5rg0"
+
+[node name="SensorySystem" type="Node2D" parent="."]
+script = ExtResource("24_38qpi")
+metadata/_custom_type_script = "uid://dilpklot1quje"
+
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_bgoxp")
 visibility_update_mode = 1
+
+[node name="AmbientLight" type="PointLight2D" parent="."]
+energy = 0.3
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 5.0
+texture = ExtResource("24_vb0nj")
+metadata/use_color_temperature = true
+metadata/color_temperature = 6500
+metadata/color_filter = Color(1, 1, 1, 0)

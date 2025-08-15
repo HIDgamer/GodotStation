@@ -99,8 +99,8 @@ colors = PackedColorArray(1, 0.9, 0.7, 1, 1, 0.7, 0.2, 0.8, 1, 0.5, 0, 0.3, 0, 0
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_72xkh"]
 gradient = SubResource("Gradient_4uf13")
-width = 1000
-height = 1000
+width = 500
+height = 500
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
@@ -244,9 +244,10 @@ scale_amount_max = 8.0
 color = Color(0.8, 0.8, 0.9, 0.3)
 
 [node name="Sun" type="Node2D" parent="."]
-visible = false
-position = Vector2(-4832, -936)
+position = Vector2(-63392, 87488)
+scale = Vector2(5, 5)
 script = ExtResource("6_ejcwl")
+light_energy = 2.0
 corona_texture = SubResource("GradientTexture2D_72xkh")
 flare_texture = ExtResource("10_1j7gh")
 
@@ -274,12 +275,14 @@ color = Color(1, 0.7, 0.2, 0.2)
 
 [node name="Light2D" type="PointLight2D" parent="Sun"]
 z_as_relative = false
+energy = 2.0
 shadow_enabled = true
-shadow_filter = 2
-shadow_filter_smooth = 1.5
+shadow_filter = 1
+shadow_filter_smooth = 5.0
 texture = SubResource("GradientTexture2D_72xkh")
+offset = Vector2(10000, -10000)
 texture_scale = 50.0
-height = 20.0
+height = 1275.0
 metadata/use_color_temperature = false
 metadata/color_temperature = 1000
 metadata/color_filter = Color(1, 1, 1, 0)

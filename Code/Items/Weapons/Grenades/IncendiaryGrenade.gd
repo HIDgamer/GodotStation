@@ -226,10 +226,6 @@ func apply_immediate_fire_damage(pos: Vector2) -> void:
 			# Apply fire stacks
 			apply_fire_stacks(entity, fire_stacks)
 			
-			# Apply initial burn damage
-			var damage = burn_damage * (1.0 - (distance_tiles / fire_radius))
-			apply_damage_to_entity(entity, damage, "fire")
-			
 			# Send feedback to players
 			send_fire_feedback(entity)
 
@@ -270,10 +266,6 @@ func _on_fire_body_entered(body: Node, fire_effect: Node) -> void:
 		# Apply fire stacks
 		var stacks = fire_effect.burn_stacks if "burn_stacks" in fire_effect else fire_stacks
 		apply_fire_stacks(body, stacks)
-		
-		# Apply initial damage
-		var damage = fire_effect.burn_damage if "burn_damage" in fire_effect else burn_damage
-		apply_damage_to_entity(body, damage, "fire")
 
 func _on_fire_body_exited(body: Node, fire_effect: Node) -> void:
 	"""Handle entity leaving fire area"""
@@ -287,10 +279,6 @@ func throw_impact(hit_atom, speed: float = 5) -> bool:
 	# Direct impact ignition
 	if hit_atom and (hit_atom.is_in_group("entities") or hit_atom.is_in_group("players")):
 		apply_fire_stacks(hit_atom, fire_stacks)
-		
-		# Apply impact damage if launched
-		if launched:
-			apply_damage_to_entity(hit_atom, burn_damage * 0.5, "fire")
 	
 	return result
 

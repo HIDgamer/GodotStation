@@ -1,0 +1,10 @@
+[gd_resource type="CanvasTexture" load_steps=4 format=3 uid="uid://o7vy6dt0xkic"]
+
+[ext_resource type="Texture2D" uid="uid://chhvaw7xqxqgx" path="res://Assets/Aliens/Drone/Drone Sheet.png" id="1_yljfy"]
+[ext_resource type="Texture2D" uid="uid://c8n7mnlceqwq6" path="res://Assets/Aliens/Drone/Drone Sheet_n.png" id="2_wwctm"]
+[ext_resource type="Texture2D" uid="uid://pci0mwclae5u" path="res://Assets/Aliens/Drone/Drone Sheet_s.png" id="3_0k0ef"]
+
+[resource]
+diffuse_texture = ExtResource("1_yljfy")
+normal_texture = ExtResource("2_wwctm")
+specular_texture = ExtResource("3_0k0ef")

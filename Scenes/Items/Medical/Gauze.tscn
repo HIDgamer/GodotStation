@@ -1,10 +1,15 @@
 [gd_scene load_steps=3 format=3 uid="uid://djmjxyfjsmvl2"]
 
-[ext_resource type="Script" uid="uid://c4gsj86m0gp25" path="res://Code/Items/Medical/Gauze.gd" id="1_4q1x4"]
+[ext_resource type="Script" uid="uid://gqwq11v2jk4k" path="res://Code/Items/Medical/MedicalItem.gd" id="1_4q1x4"]
 [ext_resource type="Texture2D" uid="uid://ca1vgmkh6rqmb" path="res://Assets/Icons/Items/Medical/Gauze.png" id="2_m0ipf"]
 
 [node name="MedicalItem" type="Node2D"]
 script = ExtResource("1_4q1x4")
+medical_type = 0
+target_limb_required = true
+stop_bleeding = true
+max_stack = 10
+current_stack = 10
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("2_m0ipf")

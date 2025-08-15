@@ -9,11 +9,11 @@ var cell_item = null
 
 func _init():
 	super._init()
-	primary_slot = EquipSlot.GLOVES
+	primary_slot = Slots.GLOVES
 	
 	blood_overlay_type = "uniform"
 	
-	valid_slots = [EquipSlot.GLOVES]
+	valid_slots = [Slots.GLOVES]
 	w_class = 2  # SIZE_SMALL
 	siemens_coefficient = 0.5
 	attack_verb = ["challenged"]

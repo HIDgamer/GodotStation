@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://diq0uktorh2x3"]
 
-[ext_resource type="Script" uid="uid://bo78qngjdnh0b" path="res://Code/Items/Medical/Bottle_Peridaxon.gd" id="1_fafdq"]
+[ext_resource type="Script" uid="uid://gqwq11v2jk4k" path="res://Code/Items/Medical/MedicalItem.gd" id="1_fafdq"]
 [ext_resource type="Texture2D" uid="uid://daphef4atoor5" path="res://Assets/Icons/Items/Medical/Bottles.png" id="1_fbilr"]
 [ext_resource type="Texture2D" uid="uid://cc7gio61vhrud" path="res://Assets/Effects/Chemicals/Regant.png" id="2_fafdq"]
 
@@ -69,9 +69,6 @@ animations = [{
 
 [node name="MedicalItem" type="Node2D"]
 script = ExtResource("1_fafdq")
-is_medicine_container = true
-can_refill = true
-can_mix = true
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("1_fbilr")

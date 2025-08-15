@@ -14,10 +14,17 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="AdminSpawner" type="CanvasLayer"]
+[node name="AdminSpawner" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -16.0
+offset_top = 288.0
+offset_right = -16.0
+offset_bottom = 288.0
 script = ExtResource("1_admin_spawner")
 
 [node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -27,6 +34,7 @@ mouse_filter = 2
 color = Color(0, 0, 0, 0.5)
 
 [node name="MainPanel" type="Panel" parent="."]
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5

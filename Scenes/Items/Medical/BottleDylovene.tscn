@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://beq2jxnrjew86"]
 
-[ext_resource type="Script" uid="uid://dhs6w82upedv0" path="res://Code/Items/Medical/Bottle_Dylovene.gd" id="1_bo378"]
+[ext_resource type="Script" uid="uid://gqwq11v2jk4k" path="res://Code/Items/Medical/MedicalItem.gd" id="1_bo378"]
 [ext_resource type="Texture2D" uid="uid://daphef4atoor5" path="res://Assets/Icons/Items/Medical/Bottles.png" id="2_j6o3u"]
 [ext_resource type="Texture2D" uid="uid://cc7gio61vhrud" path="res://Assets/Effects/Chemicals/Regant.png" id="3_unjtl"]
 
@@ -69,9 +69,6 @@ animations = [{
 
 [node name="MedicalItem" type="Node2D"]
 script = ExtResource("1_bo378")
-is_medicine_container = true
-can_refill = true
-can_mix = true
 
 [node name="Icon" type="Sprite2D" parent="."]
 texture = ExtResource("2_j6o3u")

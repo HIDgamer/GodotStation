@@ -20,17 +20,19 @@ var sprite_system_scene_paths = ["res://Scenes/Sprites/human_sprite_system.tscn"
 	"undershirt": 0,
 	"background_text": "",
 	"medical_text": "",
-	"preview_background": 0
+	"preview_background": 0,
+	"loadout_enabled": true,
+	"custom_loadout": {}
 }
 
 var default_character_data = {}
-
 var preview_sprites = {}
 var available_hair_styles = []
 var available_facial_hair = []
 var available_clothing = []
 var available_underwear = []
 var available_undershirts = []
+var preview_loadout_items = {}
 
 enum Direction {SOUTH, NORTH, EAST, WEST}
 var preview_direction = Direction.SOUTH
@@ -39,6 +41,9 @@ var direction_names = ["FRONT VIEW", "REAR VIEW", "RIGHT PROFILE", "LEFT PROFILE
 var is_updating_preview = false
 var presets_data = {}
 var active_preset_name = ""
+
+var current_tab = 0
+var tab_names = ["Basic Info", "Appearance", "Assignment", "Equipment"]
 
 const PRESETS_FILE_PATH = "user://character_presets.json"
 const SETTINGS_FILE_PATH = "user://character_creation_settings.json"
@@ -52,16 +57,17 @@ var is_host: bool = false
 @onready var notification_label = %NotificationLabel
 @onready var active_preset_label = %ActivePresetLabel
 @onready var preset_dropdown = %PresetDropdown
+@onready var preset_name_input = %PresetNameInput
 @onready var save_preset_button = %SavePresetButton
-@onready var load_preset_button = %LoadPresetButton
-@onready var set_active_button = %SetActiveButton
 @onready var delete_preset_button = %DeletePresetButton
+
+@onready var tab_container = %TabContainer
+@onready var tab_buttons = %TabButtons
 
 @onready var name_input = %NameInput
 @onready var age_spinbox = %AgeSpinBox
 @onready var race_option = %RaceOption
 @onready var sex_option = %SexOption
-@onready var occupation_option = %OccupationOption
 
 @onready var prev_hair = %PrevHair
 @onready var hair_label = %HairLabel
@@ -71,6 +77,12 @@ var is_host: bool = false
 @onready var facial_hair_label = %FacialHairLabel
 @onready var next_facial_hair = %NextFacialHair
 @onready var facial_hair_color_picker = %FacialHairColorPicker
+
+@onready var occupation_option = %OccupationOption
+@onready var occupation_search = %OccupationSearch
+@onready var occupation_list = %OccupationList
+@onready var occupation_description = %OccupationDescription
+@onready var loadout_enabled_check = %LoadoutEnabledCheck
 
 @onready var prev_underwear = %PrevUnderwear
 @onready var underwear_label = %UnderwearLabel
@@ -82,9 +94,6 @@ var is_host: bool = false
 @onready var clothing_label = %ClothingLabel
 @onready var next_clothing = %NextClothing
 
-@onready var background_text = %BackgroundText
-@onready var medical_text = %MedicalText
-
 @onready var preview_background = %PreviewBackground
 @onready var character_preview = %CharacterPreview
 @onready var rotate_left_button = %RotateLeftButton
@@ -95,18 +104,27 @@ var is_host: bool = false
 @onready var next_background = %NextBackground
 @onready var character_info = %CharacterInfo
 
-@onready var randomize_button = $MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar/RandomizeButton
-@onready var cancel_button = $MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar/CancelButton
-@onready var confirm_button = $MainInterface/LeftTerminal/LeftMargin/LeftContent/ActionBar/ConfirmButton
+@onready var equipment_preview = %EquipmentPreview
+@onready var loadout_preview_list = %LoadoutPreviewList
+
+@onready var randomize_button = %RandomizeButton
+@onready var cancel_button = %CancelButton
+@onready var confirm_button = %ConfirmButton
+
+@onready var background_text = %BackgroundText
+@onready var medical_text = %MedicalText
+
+var occupation_filter_text = ""
+var filtered_occupations = []
 
 func _ready():
 	initialize_character_creator()
 	setup_ui_connections()
 	setup_initial_state()
+	setup_tab_system()
 	animate_interface_entrance()
 
 func initialize_character_creator():
-	"""Initialize the character creation system with all required components"""
 	default_character_data = character_data.duplicate(true)
 	
 	_check_multiplayer_mode()
@@ -122,6 +140,7 @@ func initialize_character_creator():
 	_load_assets()
 	_setup_ui()
 	_setup_preset_ui()
+	_setup_occupation_ui()
 	_initialize_character_preview()
 	
 	if active_preset_name != "" and presets_data.has(active_preset_name):
@@ -130,40 +149,261 @@ func initialize_character_creator():
 	
 	_update_character_preview()
 	_update_direction_label()
+	_update_equipment_preview()
+
+func setup_tab_system():
+	for i in range(tab_names.size()):
+		var tab_button = Button.new()
+		tab_button.text = tab_names[i]
+		tab_button.toggle_mode = true
+		tab_button.button_group = ButtonGroup.new() if i == 0 else tab_buttons.get_child(0).button_group
+		tab_button.pressed.connect(_on_tab_selected.bind(i))
+		
+		tab_button.custom_minimum_size = Vector2(60, 24)
+		
+		tab_buttons.add_child(tab_button)
+		
+		if i == 0:
+			tab_button.button_pressed = true
+	
+	_show_tab(0)
+
+func _on_tab_selected(tab_index: int):
+	if current_tab != tab_index:
+		current_tab = tab_index
+		_show_tab(tab_index)
+
+func _show_tab(tab_index: int):
+	for child in tab_container.get_children():
+		child.visible = false
+	
+	if tab_index < tab_container.get_child_count():
+		tab_container.get_child(tab_index).visible = true
+
+func _update_equipment_preview():
+	if not loadout_preview_list:
+		return
+	
+	loadout_preview_list.clear()
+	
+	if not character_data.loadout_enabled:
+		loadout_preview_list.add_item("⚠️ Loadout Disabled")
+		return
+	
+	if character_data.occupation >= asset_manager.occupations.size():
+		loadout_preview_list.add_item("❌ No Valid Occupation")
+		return
+	
+	var occupation_name = asset_manager.occupations[character_data.occupation]
+	var loadout = asset_manager.get_occupation_loadout(occupation_name)
+	
+	if loadout.is_empty():
+		loadout_preview_list.add_item("📦 No Loadout Data")
+		return
+	
+	var clothing = loadout.get("clothing", {})
+	if not clothing.is_empty():
+		loadout_preview_list.add_item("=== 👕 CLOTHING ===")
+		for slot in clothing:
+			var item_name = clothing[slot]
+			if item_name and item_name != "":
+				var slot_name = _get_readable_slot_name(slot)
+				loadout_preview_list.add_item("  " + slot_name + ": " + item_name)
+	
+	var inventory = loadout.get("inventory", {})
+	if not inventory.is_empty():
+		loadout_preview_list.add_item("=== ⚡ EQUIPMENT ===")
+		for slot in inventory:
+			var item_name = inventory[slot]
+			if item_name and item_name != "":
+				var slot_name = _get_readable_slot_name(slot)
+				loadout_preview_list.add_item("  " + slot_name + ": " + item_name)
+	
+	var storage_contents = loadout.get("storage_contents", {})
+	if not storage_contents.is_empty():
+		loadout_preview_list.add_item("=== 🎒 STORAGE ===")
+		for storage_item in storage_contents:
+			loadout_preview_list.add_item("  " + storage_item + ":")
+			var items = storage_contents[storage_item]
+			if items is Array:
+				for item in items:
+					if item and item != "":
+						loadout_preview_list.add_item("    - " + item)
+
+func _apply_loadout_to_preview():
+	if not character_data.loadout_enabled:
+		_clear_loadout_preview()
+		return
+	
+	if character_data.occupation >= asset_manager.occupations.size():
+		return
+	
+	var occupation_name = asset_manager.occupations[character_data.occupation]
+	var loadout = asset_manager.get_occupation_loadout(occupation_name)
+	
+	if loadout.is_empty():
+		return
+	
+	var sprite_system = preview_sprites.get("sprite_system")
+	if not sprite_system:
+		return
+	
+	if sprite_system.has_method("clear_all_equipment"):
+		sprite_system.clear_all_equipment()
+	
+	var clothing = loadout.get("clothing", {})
+	for slot_name in clothing:
+		var item_name = clothing[slot_name]
+		if item_name and item_name != "":
+			_apply_loadout_item_to_preview(sprite_system, item_name, slot_name)
+	
+	var inventory = loadout.get("inventory", {})
+	for slot_name in inventory:
+		var item_name = inventory[slot_name]
+		if item_name and item_name != "":
+			_apply_loadout_item_to_preview(sprite_system, item_name, slot_name)
+
+func _apply_loadout_item_to_preview(sprite_system, item_name: String, slot_name: String):
+	var temp_item = asset_manager.create_item_from_name(item_name)
+	if not temp_item:
+		print("Failed to create item: ", item_name)
+		return
+	
+	var slot_id = _get_slot_id_from_loadout_name(slot_name)
+	if slot_id != -1:
+		if sprite_system.has_method("equip_item"):
+			sprite_system.equip_item(temp_item, slot_id)
+		elif sprite_system.has_method("_equip_item_internal"):
+			sprite_system._equip_item_internal(temp_item, slot_id)
+
+func _get_slot_id_from_loadout_name(slot_name: String) -> int:
+	match slot_name:
+		"HEAD": return 1
+		"GLASSES", "EYES": return 2
+		"BACK": return 3
+		"WEAR_MASK", "MASK": return 4
+		"W_UNIFORM", "UNIFORM": return 6
+		"WEAR_SUIT", "SUIT": return 7
+		"EARS": return 8
+		"GLOVES": return 9
+		"SHOES": return 10
+		"WEAR_ID", "ID": return 12
+		"LEFT_HAND": return 13
+		"RIGHT_HAND": return 14
+		"BELT": return 15
+		"L_STORE": return 16
+		"R_STORE": return 17
+		"S_STORE": return 18
+		_: return -1
+
+func _clear_loadout_preview():
+	preview_loadout_items.clear()
+	var sprite_system = preview_sprites.get("sprite_system")
+	if sprite_system and sprite_system.has_method("clear_all_equipment"):
+		sprite_system.clear_all_equipment()
+
+func _get_readable_slot_name(slot: String) -> String:
+	match slot:
+		"W_UNIFORM": return "Uniform"
+		"WEAR_SUIT": return "Suit"
+		"HEAD": return "Head"
+		"GLASSES": return "Eyes"
+		"WEAR_MASK": return "Mask"
+		"EARS": return "Ears"
+		"GLOVES": return "Gloves"
+		"SHOES": return "Shoes"
+		"BELT": return "Belt"
+		"BACK": return "Backpack"
+		"WEAR_ID": return "ID Card"
+		"LEFT_HAND": return "Left Hand"
+		"RIGHT_HAND": return "Right Hand"
+		"L_STORE": return "Left Pocket"
+		"R_STORE": return "Right Pocket"
+		"S_STORE": return "Suit Storage"
+		_: return slot.replace("_", " ").capitalize()
+
+func _setup_occupation_ui():
+	occupation_search.text_changed.connect(_on_occupation_search_changed)
+	occupation_list.item_selected.connect(_on_occupation_list_selected)
+	loadout_enabled_check.toggled.connect(_on_loadout_enabled_toggled)
+	
+	_update_occupation_list()
+	
+	if character_data.occupation < asset_manager.occupations.size():
+		var occupation_name = asset_manager.occupations[character_data.occupation]
+		_select_occupation_in_list(occupation_name)
+		_update_occupation_details(occupation_name)
+
+func _update_occupation_list():
+	occupation_list.clear()
+	filtered_occupations.clear()
+	
+	var filter = occupation_filter_text.to_lower()
+	
+	for occupation_name in asset_manager.occupations:
+		if filter.is_empty() or occupation_name.to_lower().contains(filter):
+			var display_name = asset_manager.get_occupation_display_name(occupation_name)
+			occupation_list.add_item(display_name)
+			filtered_occupations.append(occupation_name)
+
+func _select_occupation_in_list(occupation_name: String):
+	for i in range(filtered_occupations.size()):
+		if filtered_occupations[i] == occupation_name:
+			occupation_list.select(i)
+			break
+
+func _update_occupation_details(occupation_name: String):
+	var description = asset_manager.get_occupation_description(occupation_name)
+	occupation_description.text = description
+	
+	_update_equipment_preview()
+
+func _on_occupation_search_changed(new_text: String):
+	occupation_filter_text = new_text
+	_update_occupation_list()
+
+func _on_occupation_list_selected(index: int):
+	if index >= 0 and index < filtered_occupations.size():
+		var occupation_name = filtered_occupations[index]
+		var occupation_index = asset_manager.occupations.find(occupation_name)
+		
+		if occupation_index >= 0:
+			character_data.occupation = occupation_index
+			_update_occupation_details(occupation_name)
+			_update_info_label()
+			
+			auto_select_matching_uniform(occupation_index)
+			_apply_loadout_to_preview()
+			broadcast_character_change("occupation", character_data.occupation)
+
+func _on_loadout_enabled_toggled(enabled: bool):
+	character_data.loadout_enabled = enabled
+	
+	if enabled:
+		_apply_loadout_to_preview()
+	else:
+		_clear_loadout_preview()
+	
+	_update_equipment_preview()
+	broadcast_character_change("loadout_enabled", enabled)
 
 func _reset_to_defaults():
-	"""Reset character data to default values"""
 	character_data = default_character_data.duplicate(true)
 
 func _color_to_dict(color: Color) -> Dictionary:
-	"""Convert Color object to dictionary for JSON serialization"""
-	return {
-		"r": color.r,
-		"g": color.g,
-		"b": color.b,
-		"a": color.a
-	}
+	return {"r": color.r, "g": color.g, "b": color.b, "a": color.a}
 
 func _dict_to_color(dict: Dictionary) -> Color:
-	"""Convert dictionary back to Color object"""
 	if dict.has("r") and dict.has("g") and dict.has("b") and dict.has("a"):
 		return Color(dict.r, dict.g, dict.b, dict.a)
 	else:
 		return Color(0.337255, 0.211765, 0.117647)
 
 func setup_ui_connections():
-	"""Connect all UI element signals to their respective handler methods"""
-	save_preset_button.pressed.connect(_on_save_preset_pressed)
-	load_preset_button.pressed.connect(_on_load_preset_pressed)
-	delete_preset_button.pressed.connect(_on_delete_preset_pressed)
-	set_active_button.pressed.connect(_on_set_active_preset_pressed)
-	preset_dropdown.item_selected.connect(_on_preset_dropdown_selected)
-	
 	name_input.text_changed.connect(_on_name_input_text_changed)
 	age_spinbox.value_changed.connect(_on_age_spin_box_value_changed)
 	race_option.item_selected.connect(_on_race_option_item_selected)
 	sex_option.item_selected.connect(_on_sex_option_item_selected)
-	occupation_option.item_selected.connect(_on_occupation_option_item_selected)
 	
 	prev_hair.pressed.connect(_on_prev_hair_pressed)
 	next_hair.pressed.connect(_on_next_hair_pressed)
@@ -192,7 +432,6 @@ func setup_ui_connections():
 	confirm_button.pressed.connect(_on_confirm_button_pressed)
 
 func setup_initial_state():
-	"""Setup the initial visual state of the interface"""
 	animate_star_field()
 	update_system_time()
 	
@@ -203,13 +442,11 @@ func setup_initial_state():
 	add_child(timer)
 
 func animate_interface_entrance():
-	"""Perform fade-in animation when interface becomes visible"""
 	modulate.a = 0
 	var entrance_tween = create_tween()
 	entrance_tween.tween_property(self, "modulate:a", 1.0, 0.8)
 
 func animate_star_field():
-	"""Create twinkling animations for background stars"""
 	var star_field = $Background/StarField
 	for star in star_field.get_children():
 		var star_tween = create_tween()
@@ -219,13 +456,12 @@ func animate_star_field():
 		star_tween.tween_property(star, "modulate:a", 0.8, duration)
 
 func update_system_time():
-	"""Update the system time display in the header"""
 	var time_label = $HeaderBar/HeaderContainer/RightHeader/SystemTime
-	var stardate = "Stardate: " + str(Time.get_ticks_msec() / 100000.0).substr(0, 8)
-	time_label.text = stardate
+	if time_label:
+		var stardate = "Stardate: " + str(Time.get_ticks_msec() / 100000.0).substr(0, 8)
+		time_label.text = stardate
 
 func _check_multiplayer_mode():
-	"""Check if the game is in multiplayer mode and configure accordingly"""
 	var game_manager = get_node_or_null("/root/GameManager")
 	
 	if game_manager:
@@ -236,7 +472,6 @@ func _check_multiplayer_mode():
 			local_peer_id = multiplayer.get_unique_id()
 
 func _load_existing_character_data():
-	"""Load existing character data from GameManager or local storage"""
 	var game_manager = get_node_or_null("/root/GameManager")
 	
 	if game_manager and game_manager.has_method("get_character_data"):
@@ -249,7 +484,6 @@ func _load_existing_character_data():
 		load_character_data_from_file()
 
 func apply_character_data(data: Dictionary):
-	"""Apply character data dictionary to current character configuration"""
 	for key in data:
 		if key in character_data:
 			if key == "hair_color" or key == "facial_hair_color":
@@ -261,7 +495,6 @@ func apply_character_data(data: Dictionary):
 				character_data[key] = data[key]
 
 func load_character_data_from_file():
-	"""Load character data from local JSON file"""
 	var file = FileAccess.open("user://character_data.json", FileAccess.READ)
 	if file:
 		var json_text = file.get_as_text()
@@ -272,7 +505,6 @@ func load_character_data_from_file():
 			apply_character_data(json_result)
 
 func _load_assets():
-	"""Load character customization assets from the asset manager"""
 	if not asset_manager:
 		return
 	
@@ -283,7 +515,6 @@ func _load_assets():
 	available_undershirts = asset_manager.get_undershirts_for_sex(character_data.sex)
 
 func _setup_ui():
-	"""Setup UI dropdown options and initial values"""
 	if not asset_manager:
 		return
 	
@@ -298,57 +529,57 @@ func _setup_ui():
 	_update_preview_background()
 
 func setup_species_dropdown():
-	"""Configure the species selection dropdown"""
 	race_option.clear()
 	for race in asset_manager.races:
 		race_option.add_item(race)
 	race_option.select(character_data.race)
 
 func setup_gender_dropdown():
-	"""Configure the gender selection dropdown"""
 	sex_option.clear()
 	sex_option.add_item("Male")
 	sex_option.add_item("Female")
 	sex_option.select(character_data.sex)
 
 func setup_assignment_dropdown():
-	"""Configure the assignment selection dropdown"""
 	occupation_option.clear()
 	for occupation in asset_manager.occupations:
-		occupation_option.add_item(occupation)
-	occupation_option.select(character_data.occupation)
+		var display_name = asset_manager.get_occupation_display_name(occupation)
+		occupation_option.add_item(display_name)
+	
+	if character_data.occupation < asset_manager.occupations.size():
+		occupation_option.select(character_data.occupation)
+	else:
+		occupation_option.select(0)
+		character_data.occupation = 0
 
 func setup_initial_values():
-	"""Set initial values for basic character information"""
 	name_input.text = character_data.name
 	age_spinbox.value = character_data.age
+	
+	if loadout_enabled_check:
+		loadout_enabled_check.button_pressed = character_data.get("loadout_enabled", true)
 
 func update_color_pickers():
-	"""Update color picker widgets with current character colors"""
 	hair_color_picker.color = character_data.hair_color
 	facial_hair_color_picker.color = character_data.facial_hair_color
 
 func update_text_areas():
-	"""Update text input areas with current character text data"""
 	background_text.text = character_data.background_text
 	medical_text.text = character_data.medical_text
 
 func _update_ui_labels():
-	"""Update all UI labels with current character configuration names"""
 	update_hair_label()
 	update_facial_hair_label()
 	update_clothing_labels()
 	update_background_label()
 
 func update_hair_label():
-	"""Update the hair style label with current selection"""
 	if character_data.hair_style >= available_hair_styles.size():
 		character_data.hair_style = 0
 	if available_hair_styles.size() > 0:
 		hair_label.text = available_hair_styles[character_data.hair_style].name
 
 func update_facial_hair_label():
-	"""Update the facial hair label based on gender and selection"""
 	if character_data.sex == 0:
 		if character_data.facial_hair >= available_facial_hair.size():
 			character_data.facial_hair = 0
@@ -359,7 +590,6 @@ func update_facial_hair_label():
 		facial_hair_label.text = "None"
 
 func update_clothing_labels():
-	"""Update all clothing-related labels with current selections"""
 	if character_data.clothing >= available_clothing.size():
 		character_data.clothing = 0
 	if available_clothing.size() > 0:
@@ -376,17 +606,21 @@ func update_clothing_labels():
 		undershirt_label.text = available_undershirts[character_data.undershirt].name
 
 func update_background_label():
-	"""Update the background environment label"""
 	if asset_manager.background_textures.size() > 0:
 		background_label.text = asset_manager.background_textures[character_data.preview_background].name
 
 func _update_info_label():
-	"""Update the character information summary display"""
 	if not asset_manager:
 		return
 	
 	var species_name = asset_manager.races[character_data.race] if character_data.race < asset_manager.races.size() else "Unknown"
-	var assignment_name = asset_manager.occupations[character_data.occupation] if character_data.occupation < asset_manager.occupations.size() else "Unassigned"
+	var assignment_name = ""
+	
+	if character_data.occupation < asset_manager.occupations.size():
+		var occupation_name = asset_manager.occupations[character_data.occupation]
+		assignment_name = asset_manager.get_occupation_display_name(occupation_name)
+	else:
+		assignment_name = "Unassigned"
 	
 	var info_text = "Name: %s\nAge: %d Standard Years\nSpecies: %s\nAssignment: %s" % [
 		character_data.name if character_data.name != "" else "[UNASSIGNED]",
@@ -398,11 +632,9 @@ func _update_info_label():
 	character_info.text = info_text
 
 func _update_direction_label():
-	"""Update the character preview direction label"""
 	direction_label.text = direction_names[preview_direction]
 
 func _initialize_character_preview():
-	"""Initialize the character preview system"""
 	var preview_node = character_preview
 	
 	for child in preview_node.get_children():
@@ -422,7 +654,6 @@ func _initialize_character_preview():
 		_initialize_legacy_character_preview()
 
 func _create_sprite_system():
-	"""Create the character sprite system for preview rendering"""
 	var scene_path = find_sprite_system_scene()
 	if scene_path:
 		var scene = load(scene_path)
@@ -441,14 +672,13 @@ func _create_sprite_system():
 	return null
 
 func _initialize_legacy_character_preview():
-	"""Initialize fallback character preview system"""
 	var preview_node = character_preview
 	
 	var sprite_data = {
 		"body": {"path": "res://Assets/Human/Body.png", "z_index": 0},
-		"head": {"path": "res://Assets/Human/Head.png", "z_index": 1},
-		"hair": {"path": null, "z_index": 3},
-		"facial_hair": {"path": null, "z_index": 3}
+		"head": {"path": "res://Assets/Human/Head.png", "z_index": 0},
+		"hair": {"path": null, "z_index": 2},
+		"facial_hair": {"path": null, "z_index": 2}
 	}
 	
 	if asset_manager:
@@ -476,7 +706,6 @@ func _initialize_legacy_character_preview():
 	_update_sprite_frames()
 
 func _update_character_preview():
-	"""Update the character preview with current configuration settings"""
 	if is_updating_preview:
 		return
 		
@@ -491,10 +720,12 @@ func _update_character_preview():
 	
 	apply_character_settings_to_sprite_system(sprite_system)
 	
+	if character_data.loadout_enabled:
+		_apply_loadout_to_preview()
+	
 	is_updating_preview = false
 
 func apply_character_settings_to_sprite_system(sprite_system):
-	"""Apply current character settings to the sprite system"""
 	if sprite_system.has_method("set_sex"):
 		sprite_system.set_sex(character_data.sex)
 	
@@ -509,7 +740,6 @@ func apply_character_settings_to_sprite_system(sprite_system):
 		sprite_system.set_direction(preview_direction)
 
 func apply_clothing_to_sprite_system(sprite_system):
-	"""Apply clothing configuration to sprite system"""
 	if sprite_system.has_method("set_underwear") and character_data.underwear < available_underwear.size():
 		var underwear_data = available_underwear[character_data.underwear]
 		if underwear_data.texture:
@@ -525,21 +755,18 @@ func apply_clothing_to_sprite_system(sprite_system):
 		sprite_system.set_clothing(clothing.textures)
 
 func apply_hair_to_sprite_system(sprite_system):
-	"""Apply hair configuration to sprite system"""
 	if sprite_system.has_method("set_hair") and character_data.hair_style < available_hair_styles.size():
 		var hair_data = available_hair_styles[character_data.hair_style]
 		if hair_data.texture:
 			sprite_system.set_hair(load(hair_data.texture), character_data.hair_color)
 
 func apply_facial_hair_to_sprite_system(sprite_system):
-	"""Apply facial hair configuration to sprite system"""
 	if sprite_system.has_method("set_facial_hair") and character_data.sex == 0 and character_data.facial_hair < available_facial_hair.size():
 		var facial_hair_data = available_facial_hair[character_data.facial_hair]
 		if facial_hair_data.texture:
 			sprite_system.set_facial_hair(load(facial_hair_data.texture), character_data.facial_hair_color)
 
 func _update_legacy_preview():
-	"""Update fallback preview when sprite system is unavailable"""
 	if preview_sprites.has("hair") and character_data.hair_style < available_hair_styles.size():
 		var hair_sprite = preview_sprites["hair"]
 		var hair_data = available_hair_styles[character_data.hair_style]
@@ -553,7 +780,6 @@ func _update_legacy_preview():
 	_update_sprite_frames()
 
 func _update_sprite_frames():
-	"""Update sprite frame regions for directional display"""
 	if preview_sprites.has("sprite_system"):
 		return
 		
@@ -564,7 +790,6 @@ func _update_sprite_frames():
 			sprite.region_rect = Rect2(frame_x, 0, 32, 32)
 
 func _update_preview_background():
-	"""Update the background environment for character preview"""
 	if character_data.preview_background < asset_manager.background_textures.size():
 		var bg_data = asset_manager.background_textures[character_data.preview_background]
 		preview_background.modulate = Color(1, 1, 1, 1)
@@ -579,16 +804,61 @@ func _update_preview_background():
 		preview_background.modulate = Color(0.1, 0.2, 0.3, 1)
 
 func _setup_preset_ui():
-	"""Setup the character preset management interface"""
-	save_preset_button.pressed.connect(_on_save_preset_pressed)
-	load_preset_button.pressed.connect(_on_load_preset_pressed)
-	delete_preset_button.pressed.connect(_on_delete_preset_pressed)
-	set_active_button.pressed.connect(_on_set_active_preset_pressed)
-	preset_dropdown.item_selected.connect(_on_preset_dropdown_selected)
 	_update_preset_dropdown()
+	
+	if preset_dropdown:
+		preset_dropdown.item_selected.connect(_on_preset_dropdown_item_selected)
+	
+	if save_preset_button:
+		save_preset_button.pressed.connect(_on_save_preset_pressed)
+	if delete_preset_button:
+		delete_preset_button.pressed.connect(_on_delete_preset_pressed)
+
+func _on_preset_dropdown_item_selected(index: int):
+	if index == 0:
+		return
+	
+	var selected_text = preset_dropdown.get_item_text(index)
+	if presets_data.has(selected_text):
+		_load_preset_data(presets_data[selected_text])
+		active_preset_name = selected_text
+		_save_settings()
+		_show_notification("Loaded preset: " + selected_text, Color(0.4, 1, 0.4))
+
+func _on_save_preset_pressed():
+	var preset_name = preset_name_input.text.strip_edges()
+	save_current_as_preset(preset_name)
+
+func _on_delete_preset_pressed():
+	delete_active_preset()
+
+func save_current_as_preset(preset_name: String):
+	if preset_name.strip_edges() == "":
+		_show_notification("Please enter a preset name", Color(1, 0.4, 0.4))
+		return
+	
+	var preset_data = _save_preset_data()
+	presets_data[preset_name] = preset_data
+	active_preset_name = preset_name
+	_save_presets()
+	_save_settings()
+	_update_preset_dropdown()
+	_show_notification("Preset saved: " + preset_name, Color(0.4, 1, 0.4))
+
+func delete_active_preset():
+	if active_preset_name == "":
+		_show_notification("No active preset to delete", Color(1, 0.4, 0.4))
+		return
+	
+	if presets_data.has(active_preset_name):
+		presets_data.erase(active_preset_name)
+		active_preset_name = ""
+		_save_presets()
+		_save_settings()
+		_update_preset_dropdown()
+		_show_notification("Preset deleted", Color(0.4, 1, 0.4))
 
 func _update_preset_dropdown():
-	"""Update the preset dropdown menu with available presets"""
 	preset_dropdown.clear()
 	preset_dropdown.add_item("Select Template...")
 	
@@ -598,14 +868,13 @@ func _update_preset_dropdown():
 			preset_dropdown.select(preset_dropdown.get_item_count() - 1)
 	
 	if active_preset_name != "":
-		active_preset_label.text = "Active Template: " + active_preset_name
+		active_preset_label.text = "Active: " + active_preset_name
 		active_preset_label.modulate = Color(0.4, 1, 0.4)
 	else:
-		active_preset_label.text = "Active Template: None"
+		active_preset_label.text = "Active: None"
 		active_preset_label.modulate = Color(0.6, 0.8, 0.9, 0.8)
 
 func _save_preset_data() -> Dictionary:
-	"""Save current character configuration as preset data"""
 	var preset = character_data.duplicate(true)
 	
 	preset["hair_color"] = _color_to_dict(character_data.hair_color)
@@ -615,7 +884,6 @@ func _save_preset_data() -> Dictionary:
 	return preset
 
 func _load_preset_data(preset: Dictionary):
-	"""Load character configuration from preset data"""
 	for key in character_data.keys():
 		if preset.has(key):
 			if key == "hair_color" or key == "facial_hair_color":
@@ -631,9 +899,15 @@ func _load_preset_data(preset: Dictionary):
 	_update_ui_labels()
 	_update_character_preview()
 	_update_info_label()
+	
+	if character_data.occupation < asset_manager.occupations.size():
+		var occupation_name = asset_manager.occupations[character_data.occupation]
+		_select_occupation_in_list(occupation_name)
+		_update_occupation_details(occupation_name)
+		if character_data.loadout_enabled:
+			_apply_loadout_to_preview()
 
 func _load_presets():
-	"""Load saved character presets from file"""
 	if FileAccess.file_exists(PRESETS_FILE_PATH):
 		var file = FileAccess.open(PRESETS_FILE_PATH, FileAccess.READ)
 		if file:
@@ -646,14 +920,12 @@ func _load_presets():
 				presets_data = json.data
 
 func _save_presets():
-	"""Save character presets to file"""
 	var file = FileAccess.open(PRESETS_FILE_PATH, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(presets_data))
 		file.close()
 
 func _load_settings():
-	"""Load character creation settings from file"""
 	if FileAccess.file_exists(SETTINGS_FILE_PATH):
 		var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.READ)
 		if file:
@@ -666,7 +938,6 @@ func _load_settings():
 				active_preset_name = json.data["active_preset"]
 
 func _save_settings():
-	"""Save character creation settings to file"""
 	var settings = {"active_preset": active_preset_name}
 	var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.WRITE)
 	if file:
@@ -674,7 +945,6 @@ func _save_settings():
 		file.close()
 
 func _show_notification(text: String, color: Color):
-	"""Display a temporary notification message to the user"""
 	notification_label.text = text
 	notification_label.modulate = color
 	notification_label.modulate.a = 1.0
@@ -686,19 +956,21 @@ func _show_notification(text: String, color: Color):
 	tween.tween_interval(3.0)
 	tween.tween_property(notification_label, "modulate:a", 0.0, 0.5)
 
-func _preset_name_exists(name: String) -> bool:
-	"""Check if a preset name already exists"""
-	return presets_data.has(name)
+func broadcast_character_change(data_key: String, value):
+	if is_multiplayer_mode and multiplayer and multiplayer.has_multiplayer_peer():
+		sync_character_update.rpc(local_peer_id, data_key, value)
+
+func broadcast_final_character_data(complete_data: Dictionary):
+	if is_multiplayer_mode and multiplayer and multiplayer.has_multiplayer_peer():
+		sync_character_data.rpc(local_peer_id, complete_data)
 
 @rpc("any_peer", "reliable", "call_local")
 func sync_character_update(peer_id: int, data_key: String, value):
-	"""Synchronize character updates in multiplayer mode"""
 	if not is_multiplayer_mode or peer_id == local_peer_id:
 		return
 
 @rpc("any_peer", "reliable", "call_local") 
 func sync_character_data(peer_id: int, complete_data: Dictionary):
-	"""Synchronize complete character data in multiplayer mode"""
 	if not is_multiplayer_mode:
 		return
 		
@@ -709,32 +981,19 @@ func sync_character_data(peer_id: int, complete_data: Dictionary):
 		elif game_manager.has_method("update_player_customization"):
 			game_manager.update_player_customization(peer_id, complete_data)
 
-func broadcast_character_change(data_key: String, value):
-	"""Broadcast character changes to other players in multiplayer"""
-	if is_multiplayer_mode and multiplayer and multiplayer.has_multiplayer_peer():
-		sync_character_update.rpc(local_peer_id, data_key, value)
-
-func broadcast_final_character_data(complete_data: Dictionary):
-	"""Broadcast final character data to all players in multiplayer"""
-	if is_multiplayer_mode and multiplayer and multiplayer.has_multiplayer_peer():
-		sync_character_data.rpc(local_peer_id, complete_data)
-
 func find_sprite_system_script():
-	"""Find the character sprite system script file"""
 	for path in sprite_system_script_paths:
 		if ResourceLoader.exists(path):
 			return path
 	return ""
 
 func find_sprite_system_scene():
-	"""Find the character sprite system scene file"""
 	for path in sprite_system_scene_paths:
 		if ResourceLoader.exists(path):
 			return path
 	return ""
 
 func get_character_data():
-	"""Generate complete character data for export to game systems"""
 	if not asset_manager:
 		return {}
 		
@@ -746,17 +1005,32 @@ func get_character_data():
 	add_readable_names_to_data(data)
 	add_texture_paths_to_data(data)
 	add_metadata_to_data(data)
+	add_loadout_data(data)
 	
 	return data
 
+func add_loadout_data(data: Dictionary):
+	if data.get("loadout_enabled", true) and data.occupation < asset_manager.occupations.size():
+		var occupation_name = asset_manager.occupations[data.occupation]
+		var loadout = asset_manager.get_occupation_loadout(occupation_name)
+		
+		if not loadout.is_empty():
+			data["occupation_loadout"] = loadout
+			data["occupation_display_name"] = asset_manager.get_occupation_display_name(occupation_name)
+
 func add_readable_names_to_data(data: Dictionary):
-	"""Add human-readable names to character data"""
 	data.race_name = asset_manager.races[data.race] if data.race < asset_manager.races.size() else "Human"
-	data.occupation_name = asset_manager.occupations[data.occupation] if data.occupation < asset_manager.occupations.size() else "Engineer"
 	data.sex_name = "Male" if data.sex == 0 else "Female"
+	
+	if data.occupation < asset_manager.occupations.size():
+		var occupation_name = asset_manager.occupations[data.occupation]
+		data.occupation_name = occupation_name
+		data.occupation_display_name = asset_manager.get_occupation_display_name(occupation_name)
+	else:
+		data.occupation_name = "Engineer"
+		data.occupation_display_name = "Engineer"
 
 func add_texture_paths_to_data(data: Dictionary):
-	"""Add texture paths and style names to character data"""
 	if data.hair_style < available_hair_styles.size():
 		var hair_data = available_hair_styles[data.hair_style]
 		data.hair_texture = hair_data.texture
@@ -774,7 +1048,6 @@ func add_texture_paths_to_data(data: Dictionary):
 	add_clothing_data(data)
 
 func add_facial_hair_data(data: Dictionary):
-	"""Add facial hair data to character export data"""
 	if data.sex == 0 and data.facial_hair < available_facial_hair.size():
 		var facial_hair_data = available_facial_hair[data.facial_hair]
 		data.facial_hair_texture = facial_hair_data.texture
@@ -789,7 +1062,6 @@ func add_facial_hair_data(data: Dictionary):
 		data.facial_hair_name = "None"
 
 func add_clothing_data(data: Dictionary):
-	"""Add clothing data to character export data"""
 	if data.clothing < available_clothing.size():
 		var clothing_data = available_clothing[data.clothing]
 		data.clothing_textures = clothing_data.textures.duplicate()
@@ -802,7 +1074,6 @@ func add_clothing_data(data: Dictionary):
 	add_undershirt_data(data)
 
 func add_underwear_data(data: Dictionary):
-	"""Add underwear data to character export data"""
 	if data.underwear < available_underwear.size():
 		var underwear_data = available_underwear[data.underwear]
 		data.underwear_texture = underwear_data.texture
@@ -814,7 +1085,6 @@ func add_underwear_data(data: Dictionary):
 			data.underwear_name = default_underwear[0].name
 
 func add_undershirt_data(data: Dictionary):
-	"""Add undershirt data to character export data"""
 	if data.undershirt < available_undershirts.size():
 		var undershirt_data = available_undershirts[data.undershirt]
 		data.undershirt_texture = undershirt_data.texture
@@ -830,13 +1100,23 @@ func add_undershirt_data(data: Dictionary):
 			data.undershirt_name = "None"
 
 func add_metadata_to_data(data: Dictionary):
-	"""Add metadata to character export data"""
 	data.character_created_version = "3.0"
 	data.creation_timestamp = Time.get_ticks_msec()
 	data.direction = preview_direction
 
+func auto_select_matching_uniform(index: int):
+	if asset_manager and index < asset_manager.occupations.size():
+		var occupation_name = asset_manager.occupations[index]
+		
+		for i in range(available_clothing.size()):
+			if available_clothing[i].name.to_lower() == occupation_name.to_lower():
+				character_data.clothing = i
+				clothing_label.text = available_clothing[i].name
+				_update_character_preview()
+				broadcast_character_change("clothing", character_data.clothing)
+				break
+
 func _generate_random_name() -> String:
-	"""Generate a random character name based on gender"""
 	var first_names_male = ["Commander", "Captain", "Lieutenant", "Admiral", "Colonel", "Major", "Sergeant", "Pilot", "Chief", "Specialist"]
 	var first_names_female = ["Commander", "Captain", "Lieutenant", "Admiral", "Colonel", "Major", "Sergeant", "Pilot", "Chief", "Specialist"]
 	var last_names = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Theta", "Omega", "Nova", "Stellar", "Cosmic", "Vector", "Matrix", "Phoenix"]
@@ -847,128 +1127,43 @@ func _generate_random_name() -> String:
 	
 	return first_name + " " + last_name
 
-func _on_save_preset_pressed():
-	"""Handle save preset button press"""
-	var dialog = AcceptDialog.new()
-	var vbox = VBoxContainer.new()
-	var label = Label.new()
-	var line_edit = LineEdit.new()
-	
-	label.text = "Enter template name:"
-	line_edit.placeholder_text = "Personnel Template"
-	line_edit.text = character_data.name if character_data.name != "" else "New Template"
-	
-	vbox.add_child(label)
-	vbox.add_child(line_edit)
-	dialog.add_child(vbox)
-	dialog.title = "Save Personnel Template"
-	
-	get_tree().current_scene.add_child(dialog)
-	dialog.popup_centered()
-	
-	var result = await dialog.confirmed
-	var preset_name = line_edit.text.strip_edges()
-	
-	dialog.queue_free()
-	
-	if preset_name != "":
-		if _preset_name_exists(preset_name):
-			var confirm_dialog = ConfirmationDialog.new()
-			confirm_dialog.dialog_text = "A template named '" + preset_name + "' already exists. Do you want to overwrite it?"
-			get_tree().current_scene.add_child(confirm_dialog)
-			confirm_dialog.popup_centered()
-			
-			var overwrite_result = await confirm_dialog.confirmed
-			confirm_dialog.queue_free()
-			
-			if not overwrite_result:
-				_show_notification("Save cancelled", Color(1, 0.8, 0.4))
-				return
-		
-		presets_data[preset_name] = _save_preset_data()
-		_save_presets()
-		_update_preset_dropdown()
-		_show_notification("Template '" + preset_name + "' saved successfully", Color(0.4, 1, 0.4))
+func save_character_data_locally(complete_data: Dictionary):
+	var save_path = "user://character_data.json"
+	var file = FileAccess.open(save_path, FileAccess.WRITE)
+	if file:
+		file.store_line(JSON.stringify(complete_data))
+		file.close()
 
-func _on_load_preset_pressed():
-	"""Handle load preset button press"""
-	var selected_index = preset_dropdown.selected
-	if selected_index <= 0:
-		_show_notification("Please select a template to load", Color(1, 0.8, 0.4))
-		return
+func handle_character_creation_fallback():
+	var next_scene = "res://Scenes/Maps/Hub.tscn"
 	
-	var preset_name = preset_dropdown.get_item_text(selected_index)
-	if presets_data.has(preset_name):
-		_load_preset_data(presets_data[preset_name])
-		_show_notification("Loaded template '" + preset_name + "'", Color(0.4, 1, 0.4))
+	if ResourceLoader.exists(next_scene):
+		_transition_to_scene(func(): get_tree().change_scene_to_file(next_scene))
+	else:
+		_transition_to_scene(func(): get_tree().change_scene_to_file("res://Scenes/UI/Menus/Main_menu.tscn"))
 
-func _on_delete_preset_pressed():
-	"""Handle delete preset button press"""
-	var selected_index = preset_dropdown.selected
-	if selected_index <= 0:
-		_show_notification("Please select a template to delete", Color(1, 0.8, 0.4))
-		return
-	
-	var preset_name = preset_dropdown.get_item_text(selected_index)
-	
-	var dialog = ConfirmationDialog.new()
-	dialog.dialog_text = "Delete template '" + preset_name + "'? This action cannot be undone."
-	get_tree().current_scene.add_child(dialog)
-	dialog.popup_centered()
-	
-	var result = await dialog.confirmed
-	dialog.queue_free()
-	
-	if result and presets_data.has(preset_name):
-		presets_data.erase(preset_name)
-		if active_preset_name == preset_name:
-			active_preset_name = ""
-			_save_settings()
-		_save_presets()
-		_update_preset_dropdown()
-		_show_notification("Template '" + preset_name + "' deleted", Color(1, 0.6, 0.6))
-
-func _on_set_active_preset_pressed():
-	"""Handle set active preset button press"""
-	var selected_index = preset_dropdown.selected
-	if selected_index <= 0:
-		_show_notification("Please select a template to set as active", Color(1, 0.8, 0.4))
-		return
-	
-	var preset_name = preset_dropdown.get_item_text(selected_index)
-	active_preset_name = preset_name
-	_save_settings()
-	_update_preset_dropdown()
-	_show_notification("Set '" + preset_name + "' as active template", Color(0.4, 0.8, 1))
-
-func _on_preset_dropdown_selected(index: int):
-	"""Handle preset dropdown selection change"""
-	var is_valid = index > 0
-	load_preset_button.disabled = not is_valid
-	delete_preset_button.disabled = not is_valid
-	set_active_button.disabled = not is_valid
+func _transition_to_scene(callback: Callable):
+	var exit_tween = create_tween()
+	exit_tween.tween_property(self, "modulate:a", 0.0, 0.4)
+	exit_tween.tween_callback(callback)
 
 func _on_name_input_text_changed(new_text):
-	"""Handle character name input changes"""
 	character_data.name = new_text
 	_update_info_label()
 	broadcast_character_change("name", new_text)
 
 func _on_age_spin_box_value_changed(value):
-	"""Handle character age input changes"""
 	character_data.age = value
 	_update_info_label()
 	broadcast_character_change("age", value)
 
 func _on_race_option_item_selected(index):
-	"""Handle species selection changes"""
 	character_data.race = index
 	_update_character_preview()
 	_update_info_label()
 	broadcast_character_change("race", index)
 
 func _on_sex_option_item_selected(index):
-	"""Handle gender selection changes"""
 	character_data.sex = index
 	_load_assets()
 	
@@ -980,7 +1175,6 @@ func _on_sex_option_item_selected(index):
 	broadcast_character_change("sex", index)
 
 func reset_customization_for_gender():
-	"""Reset customization options when gender changes"""
 	character_data.hair_style = 0
 	character_data.facial_hair = 0
 	character_data.clothing = 0
@@ -994,7 +1188,6 @@ func reset_customization_for_gender():
 				break
 
 func update_default_name_for_gender(index: int):
-	"""Update default character name based on gender selection"""
 	if character_data.name == "Commander Alpha" and index == 1:
 		character_data.name = "Commander Beta"
 		name_input.text = character_data.name
@@ -1004,29 +1197,7 @@ func update_default_name_for_gender(index: int):
 		name_input.text = character_data.name
 		_update_info_label()
 
-func _on_occupation_option_item_selected(index):
-	"""Handle assignment selection changes"""
-	character_data.occupation = index
-	_update_info_label()
-	broadcast_character_change("occupation", index)
-	
-	auto_select_matching_uniform(index)
-
-func auto_select_matching_uniform(index: int):
-	"""Automatically select uniform that matches the selected assignment"""
-	if asset_manager and index < asset_manager.occupations.size():
-		var occupation_name = asset_manager.occupations[index]
-		
-		for i in range(available_clothing.size()):
-			if available_clothing[i].name.to_lower() == occupation_name.to_lower():
-				character_data.clothing = i
-				clothing_label.text = available_clothing[i].name
-				_update_character_preview()
-				broadcast_character_change("clothing", character_data.clothing)
-				break
-
 func _on_prev_hair_pressed():
-	"""Handle previous hair style button press"""
 	if available_hair_styles.size() == 0:
 		return
 		
@@ -1039,7 +1210,6 @@ func _on_prev_hair_pressed():
 	broadcast_character_change("hair_style", character_data.hair_style)
 
 func _on_next_hair_pressed():
-	"""Handle next hair style button press"""
 	if available_hair_styles.size() == 0:
 		return
 
@@ -1052,13 +1222,11 @@ func _on_next_hair_pressed():
 	broadcast_character_change("hair_style", character_data.hair_style)
 
 func _on_hair_color_picker_color_changed(color):
-	"""Handle hair color selection changes"""
 	character_data.hair_color = color
 	_update_character_preview()
 	broadcast_character_change("hair_color", color)
 
 func _on_prev_facial_hair_pressed():
-	"""Handle previous facial hair style button press"""
 	if character_data.sex == 0 and available_facial_hair.size() > 0:
 		character_data.facial_hair = (character_data.facial_hair - 1) % available_facial_hair.size()
 		if character_data.facial_hair < 0:
@@ -1069,7 +1237,6 @@ func _on_prev_facial_hair_pressed():
 		broadcast_character_change("facial_hair", character_data.facial_hair)
 
 func _on_next_facial_hair_pressed():
-	"""Handle next facial hair style button press"""
 	if character_data.sex == 0 and available_facial_hair.size() > 0:
 		character_data.facial_hair = (character_data.facial_hair + 1) % available_facial_hair.size()
 		facial_hair_label.text = available_facial_hair[character_data.facial_hair].name
@@ -1077,13 +1244,11 @@ func _on_next_facial_hair_pressed():
 		broadcast_character_change("facial_hair", character_data.facial_hair)
 
 func _on_facial_hair_color_picker_color_changed(color):
-	"""Handle facial hair color selection changes"""
 	character_data.facial_hair_color = color
 	_update_character_preview()
 	broadcast_character_change("facial_hair_color", color)
 
 func _on_prev_underwear_pressed():
-	"""Handle previous underwear selection button press"""
 	if available_underwear.size() == 0:
 		return
 		
@@ -1096,7 +1261,6 @@ func _on_prev_underwear_pressed():
 	broadcast_character_change("underwear", character_data.underwear)
 
 func _on_next_underwear_pressed():
-	"""Handle next underwear selection button press"""
 	if available_underwear.size() == 0:
 		return
 
@@ -1109,7 +1273,6 @@ func _on_next_underwear_pressed():
 	broadcast_character_change("underwear", character_data.underwear)
 
 func _on_prev_undershirt_pressed():
-	"""Handle previous undershirt selection button press"""
 	if available_undershirts.size() == 0:
 		return
 	
@@ -1125,7 +1288,6 @@ func _on_prev_undershirt_pressed():
 	broadcast_character_change("undershirt", character_data.undershirt)
 
 func navigate_female_undershirt_previous():
-	"""Navigate previous undershirt options for female characters, skipping 'None'"""
 	var original_index = character_data.undershirt
 	var attempts = 0
 	
@@ -1143,7 +1305,6 @@ func navigate_female_undershirt_previous():
 		character_data.undershirt = original_index
 
 func _on_next_undershirt_pressed():
-	"""Handle next undershirt selection button press"""
 	if available_undershirts.size() == 0:
 		return
 	
@@ -1161,7 +1322,6 @@ func _on_next_undershirt_pressed():
 	broadcast_character_change("undershirt", character_data.undershirt)
 
 func navigate_female_undershirt_next(current_index: int, total: int) -> int:
-	"""Navigate next undershirt options for female characters, skipping 'None'"""
 	var original_index = current_index
 	var attempts = 0
 	var index = current_index
@@ -1178,7 +1338,6 @@ func navigate_female_undershirt_next(current_index: int, total: int) -> int:
 	return index
 
 func _on_prev_clothing_pressed():
-	"""Handle previous clothing selection button press"""
 	if available_clothing.size() == 0:
 		return
 		
@@ -1191,7 +1350,6 @@ func _on_prev_clothing_pressed():
 	broadcast_character_change("clothing", character_data.clothing)
 
 func _on_next_clothing_pressed():
-	"""Handle next clothing selection button press"""
 	if available_clothing.size() == 0:
 		return
 		
@@ -1201,17 +1359,14 @@ func _on_next_clothing_pressed():
 	broadcast_character_change("clothing", character_data.clothing)
 
 func _on_background_text_text_changed():
-	"""Handle background text input changes"""
 	character_data.background_text = background_text.text
 	broadcast_character_change("background_text", character_data.background_text)
 
 func _on_medical_text_text_changed():
-	"""Handle medical text input changes"""
 	character_data.medical_text = medical_text.text
 	broadcast_character_change("medical_text", character_data.medical_text)
 
 func _on_rotate_left_button_pressed():
-	"""Handle character preview rotation left button press"""
 	if preview_sprites.has("sprite_system"):
 		var sprite_system = preview_sprites["sprite_system"]
 		if sprite_system.has_method("rotate_left"):
@@ -1234,7 +1389,6 @@ func _on_rotate_left_button_pressed():
 			sprite_system.set_direction(preview_direction)
 
 func _on_rotate_right_button_pressed():
-	"""Handle character preview rotation right button press"""
 	if preview_sprites.has("sprite_system"):
 		var sprite_system = preview_sprites["sprite_system"]
 		if sprite_system.has_method("rotate_right"):
@@ -1255,7 +1409,6 @@ func _on_rotate_right_button_pressed():
 			sprite_system.set_direction(preview_direction)
 
 func _on_prev_background_pressed():
-	"""Handle previous background environment button press"""
 	if not asset_manager or asset_manager.background_textures.size() == 0:
 		return
 
@@ -1271,7 +1424,6 @@ func _on_prev_background_pressed():
 	broadcast_character_change("preview_background", character_data.preview_background)
 
 func _on_next_background_pressed():
-	"""Handle next background environment button press"""
 	if not asset_manager or asset_manager.background_textures.size() == 0:
 		return
 
@@ -1284,7 +1436,6 @@ func _on_next_background_pressed():
 	broadcast_character_change("preview_background", character_data.preview_background)
 
 func _on_randomize_button_pressed():
-	"""Handle randomize character button press"""
 	if not asset_manager:
 		return
 	
@@ -1316,13 +1467,19 @@ func _on_randomize_button_pressed():
 	_setup_ui()
 	_update_character_preview()
 	
+	if character_data.occupation < asset_manager.occupations.size():
+		var occupation_name = asset_manager.occupations[character_data.occupation]
+		_select_occupation_in_list(occupation_name)
+		_update_occupation_details(occupation_name)
+		if character_data.loadout_enabled:
+			_apply_loadout_to_preview()
+	
 	_show_notification("Random personnel generated", Color(0.4, 1, 0.4))
 	
 	if is_multiplayer_mode:
 		broadcast_character_change("randomized", character_data)
 
 func randomize_undershirt():
-	"""Randomize undershirt selection based on gender requirements"""
 	if character_data.sex == 1:
 		var valid_tops = []
 		for i in range(available_undershirts.size()):
@@ -1337,7 +1494,6 @@ func randomize_undershirt():
 		character_data.undershirt = randi() % available_undershirts.size()
 
 func _on_cancel_button_pressed():
-	"""Handle cancel button press to abort character creation"""
 	var game_manager = get_node_or_null("/root/GameManager")
 	if game_manager and game_manager.has_method("handle_character_creation_cancel"):
 		game_manager.handle_character_creation_cancel()
@@ -1345,7 +1501,6 @@ func _on_cancel_button_pressed():
 		_transition_to_scene(func(): get_tree().change_scene_to_file("res://Scenes/UI/Menus/Main_menu.tscn"))
 
 func _on_confirm_button_pressed():
-	"""Handle confirm button press to finalize character creation"""
 	var complete_data = get_character_data()
 	
 	if complete_data.is_empty():
@@ -1368,26 +1523,3 @@ func _on_confirm_button_pressed():
 	broadcast_final_character_data(complete_data)
 	
 	_show_notification("Personnel registered successfully", Color(0.4, 1, 0.4))
-
-func save_character_data_locally(complete_data: Dictionary):
-	"""Save character data to local storage when GameManager is unavailable"""
-	var save_path = "user://character_data.json"
-	var file = FileAccess.open(save_path, FileAccess.WRITE)
-	if file:
-		file.store_line(JSON.stringify(complete_data))
-		file.close()
-
-func handle_character_creation_fallback():
-	"""Handle character creation completion when GameManager is unavailable"""
-	var next_scene = "res://Scenes/Maps/Zypharion.tscn"
-	
-	if ResourceLoader.exists(next_scene):
-		_transition_to_scene(func(): get_tree().change_scene_to_file(next_scene))
-	else:
-		_transition_to_scene(func(): get_tree().change_scene_to_file("res://Scenes/UI/Menus/Main_menu.tscn"))
-
-func _transition_to_scene(callback: Callable):
-	"""Perform fade-out transition before executing callback"""
-	var exit_tween = create_tween()
-	exit_tween.tween_property(self, "modulate:a", 0.0, 0.4)
-	exit_tween.tween_callback(callback)

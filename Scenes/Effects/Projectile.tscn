@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://c7xqv2iak3l6o"]
+
+[ext_resource type="Script" uid="uid://c2ntiu6q56sgr" path="res://Code/Effects/Projectile.gd" id="1_2ijkr"]
+[ext_resource type="Texture2D" uid="uid://cp5yt72y237ll" path="res://Assets/Weapons/Particals/Bullet.png" id="2_haqxo"]
+
+[node name="Projectile" type="Area2D"]
+collision_layer = 0
+script = ExtResource("1_2ijkr")
+damage = 35.0
+speed = 1200.0
+max_distance = 500.0
+lifetime = 3.0
+
+[node name="ProjectileSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_haqxo")
+
+[node name="ProjectileCollision" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-1, -1, -1, 0, -2, 0, -2, 1, -1, 1, -1, 2, 2, 2, 2, 1, 3, 1, 3, 0, 2, 0, 2, -1)
