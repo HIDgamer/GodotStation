@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://dhuw4iow1lpu5"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_lsrst"]
+[ext_resource type="Texture2D" uid="uid://ns8drtgs03b2" path="res://Assets/Icons/Items/Clothing/Uniforms/Formal_Black.png" id="2_g6qcf"]
+[ext_resource type="Texture2D" uid="uid://cmett3fej8wic" path="res://Assets/Icons/Clothing/Uniforms/Formal_black.png" id="3_rs6u3"]
+
+[node name="BlackSuit" type="Node2D"]
+script = ExtResource("1_lsrst")
+item_name = "BlackSuit"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_g6qcf")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_rs6u3")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -6, -5, -5, -6, -5, -6, -3, -7, -3, -7, 0, -6, 0, -6, 1, -5, 1, -5, 7, -4, 7, -4, 8, -1, 8, -1, 7, 0, 7, 0, 8, 3, 8, 3, 7, 4, 7, 4, 1, 5, 1, 5, 0, 6, 0, 6, -3, 5, -3, 5, -5, 4, -5, 4, -6, 1, -6, 1, -5, -2, -5, -2, -6)

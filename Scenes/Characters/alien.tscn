@@ -1,82 +1,465 @@
-[gd_scene load_steps=16 format=3 uid="uid://buuusq0mxebc1"]
+[gd_scene load_steps=66 format=3 uid="uid://buuusq0mxebc1"]
 
-[ext_resource type="Script" uid="uid://ch1jwonqft1ah" path="res://Code/Aliens/AlienController.gd" id="1_cpwxp"]
-[ext_resource type="PackedScene" uid="uid://cd5564cr2suu0" path="res://Scenes/Sprites/alien_sprite_system.tscn" id="2_exf7r"]
+[ext_resource type="Script" uid="uid://csnfssyvu6rdx" path="res://Code/Aliens/AlienController.gd" id="1_hn6nn"]
+[ext_resource type="Texture2D" uid="uid://chhvaw7xqxqgx" path="res://Assets/Aliens/Drone/Drone Sheet.png" id="2_lwi4q"]
+[ext_resource type="Script" uid="uid://chnw437ejhnj4" path="res://Code/Humanoids/Systems/CameraSystem.gd" id="2_np0x0"]
 [ext_resource type="Script" uid="uid://dilpklot1quje" path="res://Code/Helpers/SensorySystem.gd" id="3_aqftw"]
-[ext_resource type="Script" uid="uid://ctk7b455p47ul" path="res://Code/OnClick/ClickComponent.gd" id="3_s81oj"]
-[ext_resource type="Script" uid="uid://mt0rh1vdlm7n" path="res://Code/Aliens/AlienHealthSystem.gd" id="4_aqftw"]
-[ext_resource type="Script" uid="uid://w2tld6m0n26q" path="res://Code/Aliens/AlienGrabPullComponent.gd" id="5_k8ohx"]
-[ext_resource type="Script" uid="uid://djrs5msigc2l0" path="res://Code/Humanoids/Systems/InventorySystem.gd" id="5_s81oj"]
-[ext_resource type="Script" uid="uid://dkur85cr3skgb" path="res://Code/Aliens/AlienInputController.gd" id="6_857qp"]
-[ext_resource type="Script" uid="uid://hn6hdyerw2dv" path="res://Code/Aliens/AlienPostureComponent.gd" id="7_b0yg3"]
-[ext_resource type="Script" uid="uid://bfd8pa8r6iu6a" path="res://Code/Aliens/AlienVisionComponent.gd" id="8_5qcjo"]
-[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Humanoids/Systems/MovementComponent.gd" id="9_lwi4q"]
-[ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Humanoids/Systems/ZLevelMovementComponent.gd" id="10_np0x0"]
-[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Humanoids/Systems/StatusEffectComponent.gd" id="11_imbpr"]
-[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Humanoids/Systems/InteractionComponent.gd" id="12_on0hc"]
-[ext_resource type="Script" uid="uid://bha58yd6dhqr6" path="res://Code/Aliens/AlienAI.gd" id="13_2tj6m"]
+[ext_resource type="Texture2D" uid="uid://bn5v6lncpgekh" path="res://Assets/Aliens/Drone/Drone East.png" id="3_np0x0"]
+[ext_resource type="Script" uid="uid://beclbd7eewya4" path="res://Code/Aliens/AlienAIComponent.gd" id="3_x8lb2"]
+[ext_resource type="Texture2D" uid="uid://5fjlfb061wnb" path="res://Assets/Aliens/Drone/Drone North.png" id="4_imbpr"]
+[ext_resource type="Script" uid="uid://baetri4cydlnr" path="res://Code/Aliens/AlienSpriteSystem.gd" id="4_uj2sv"]
+[ext_resource type="Texture2D" uid="uid://qjsi66gcf1ax" path="res://Assets/Aliens/Drone/Drone South.png" id="5_on0hc"]
+[ext_resource type="Texture2D" uid="uid://ckvc6e37sx8w4" path="res://Assets/Aliens/Drone/Drone West.png" id="6_2tj6m"]
+[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Humanoids/Components/MovementComponent.gd" id="12_dpxj7"]
+[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Humanoids/Components/InteractionComponent.gd" id="13_i5qku"]
+[ext_resource type="Script" uid="uid://c3u73hjth48ct" path="res://Code/Humanoids/Components/ItemInteractionComponent.gd" id="14_dx5ic"]
+[ext_resource type="Script" uid="uid://57gv3jq6b82j" path="res://Code/Humanoids/Components/GrabPullComponent.gd" id="15_ciwyd"]
+[ext_resource type="Script" uid="uid://dahxqtbwo8bw7" path="res://Code/Humanoids/Components/BodyTargetingComponent.gd" id="16_l0ueb"]
+[ext_resource type="Script" uid="uid://bu4qlco8mbb3m" path="res://Code/Humanoids/Components/IntentComponent.gd" id="17_jm52e"]
+[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Humanoids/Components/StatusEffectComponent.gd" id="18_8lmuh"]
+[ext_resource type="Script" uid="uid://crcieeppmdsku" path="res://Code/Humanoids/Components/PostureComponent.gd" id="19_dfqdr"]
+[ext_resource type="Script" uid="uid://co3fb4yan7sep" path="res://Code/Humanoids/Components/WeaponHandlingComponent.gd" id="20_oiba2"]
+[ext_resource type="Script" uid="uid://b1jm4ncthdjdq" path="res://Code/Humanoids/Components/DoAfterComponent.gd" id="21_56pst"]
+[ext_resource type="Script" uid="uid://dh2tm0dwjxdiw" path="res://Code/Humanoids/Systems/HealthSystem.gd" id="24_jiwf2"]
+[ext_resource type="Script" uid="uid://dj4qyr2yg1rim" path="res://Code/Humanoids/Controllers/HealthConnector.gd" id="25_dpxj7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ww4h0"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(288, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_np0x0"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(0, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_imbpr"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(48, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_on0hc"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(96, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2tj6m"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(144, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_acnrc"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(192, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jiwf2"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(240, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dpxj7"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(288, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i5qku"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(336, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dx5ic"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(0, 96, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ciwyd"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(48, 96, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l0ueb"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(96, 96, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a34v0"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nbr6e"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5otg0"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a8qc1"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d7c45"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rdm44"]
+atlas = ExtResource("2_lwi4q")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_seyqj"]
+atlas = ExtResource("3_np0x0")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ak8l2"]
+atlas = ExtResource("3_np0x0")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s2bkx"]
+atlas = ExtResource("3_np0x0")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wlnoo"]
+atlas = ExtResource("3_np0x0")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fvitm"]
+atlas = ExtResource("3_np0x0")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gor83"]
+atlas = ExtResource("3_np0x0")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pw314"]
+atlas = ExtResource("4_imbpr")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7fclm"]
+atlas = ExtResource("4_imbpr")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_16ahe"]
+atlas = ExtResource("4_imbpr")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_36wma"]
+atlas = ExtResource("4_imbpr")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7tw48"]
+atlas = ExtResource("4_imbpr")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bais8"]
+atlas = ExtResource("4_imbpr")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wh7xw"]
+atlas = ExtResource("5_on0hc")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y8wk3"]
+atlas = ExtResource("5_on0hc")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5kahh"]
+atlas = ExtResource("5_on0hc")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4c038"]
+atlas = ExtResource("5_on0hc")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7r5fg"]
+atlas = ExtResource("5_on0hc")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8roob"]
+atlas = ExtResource("5_on0hc")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5bqfi"]
+atlas = ExtResource("6_2tj6m")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0pbj1"]
+atlas = ExtResource("6_2tj6m")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nilbh"]
+atlas = ExtResource("6_2tj6m")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wripu"]
+atlas = ExtResource("6_2tj6m")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4tk6u"]
+atlas = ExtResource("6_2tj6m")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fdstw"]
+atlas = ExtResource("6_2tj6m")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fevsn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ww4h0")
+}],
+"loop": true,
+"name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_np0x0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_imbpr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_on0hc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2tj6m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_acnrc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jiwf2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dpxj7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i5qku")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dx5ic")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ciwyd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l0ueb")
+}],
+"loop": false,
+"name": &"gib",
+"speed": 13.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a34v0")
+}],
+"loop": true,
+"name": &"idle_east",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nbr6e")
+}],
+"loop": true,
+"name": &"idle_north",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5otg0")
+}],
+"loop": true,
+"name": &"idle_south",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a8qc1")
+}],
+"loop": true,
+"name": &"idle_west",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d7c45")
+}],
+"loop": true,
+"name": &"rest",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rdm44")
+}],
+"loop": true,
+"name": &"stunned",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_seyqj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ak8l2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s2bkx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wlnoo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fvitm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gor83")
+}],
+"loop": true,
+"name": &"walk_east",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pw314")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7fclm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_16ahe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_36wma")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7tw48")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bais8")
+}],
+"loop": true,
+"name": &"walk_north",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wh7xw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y8wk3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5kahh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4c038")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7r5fg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8roob")
+}],
+"loop": true,
+"name": &"walk_south",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5bqfi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0pbj1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nilbh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wripu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4tk6u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fdstw")
+}],
+"loop": true,
+"name": &"walk_west",
+"speed": 10.0
+}]
 
 [node name="AlienController" type="Node2D"]
-script = ExtResource("1_cpwxp")
-is_npc = true
-entity_type = "mob"
-no_pull = true
+script = ExtResource("1_hn6nn")
+entity_type = "character"
 health = 200.0
 max_health = 200.0
-metadata/_custom_type_script = "uid://ch1jwonqft1ah"
 
-[node name="AlienSpriteSystem" parent="." instance=ExtResource("2_exf7r")]
-position = Vector2(0, -8)
+[node name="Camera2D" type="Camera2D" parent="." groups=["PlayerCamera"]]
+zoom = Vector2(2, 2)
+process_callback = 0
+limit_smoothed = true
+position_smoothing_enabled = true
+rotation_smoothing_enabled = true
+editor_draw_limits = true
+script = ExtResource("2_np0x0")
+target_path = NodePath("..")
+camera_easing = 2
+camera_transition = 0
+default_zoom = Vector2(2.5, 2.5)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_fevsn")
+animation = &"walk_east"
 
 [node name="SensorySystem" type="Node2D" parent="."]
 script = ExtResource("3_aqftw")
 metadata/_custom_type_script = "uid://dilpklot1quje"
 
-[node name="AlienAI" type="Node" parent="."]
-script = ExtResource("13_2tj6m")
-metadata/_custom_type_script = "uid://bha58yd6dhqr6"
+[node name="AlienAIComponent" type="Node" parent="."]
+script = ExtResource("3_x8lb2")
+metadata/_custom_type_script = "uid://beclbd7eewya4"
 
-[node name="ClickComponent" type="Node" parent="."]
-script = ExtResource("3_s81oj")
-metadata/_custom_type_script = "uid://ctk7b455p47ul"
-
-[node name="InventorySystem" type="Node" parent="."]
-script = ExtResource("5_s81oj")
-metadata/_custom_type_script = "uid://djrs5msigc2l0"
-
-[node name="HealthSystem" type="Node" parent="."]
-script = ExtResource("4_aqftw")
-metadata/_custom_type_script = "uid://mt0rh1vdlm7n"
-
-[node name="AlienGrabPullComponent" type="Node" parent="."]
-script = ExtResource("5_k8ohx")
-metadata/_custom_type_script = "uid://w2tld6m0n26q"
-
-[node name="AlienInputController" type="Node" parent="."]
-script = ExtResource("6_857qp")
-metadata/_custom_type_script = "uid://dkur85cr3skgb"
-
-[node name="AlienPostureComponent" type="Node" parent="."]
-script = ExtResource("7_b0yg3")
-can_crawl = false
-metadata/_custom_type_script = "uid://hn6hdyerw2dv"
-
-[node name="AlienVisionComponent" type="Node" parent="."]
-script = ExtResource("8_5qcjo")
-metadata/_custom_type_script = "uid://bfd8pa8r6iu6a"
+[node name="AlienSpriteSystem" type="Node" parent="."]
+script = ExtResource("4_uj2sv")
+alien_type = "Drone"
+metadata/_custom_type_script = "uid://baetri4cydlnr"
 
 [node name="MovementComponent" type="Node" parent="."]
-script = ExtResource("9_lwi4q")
+script = ExtResource("12_dpxj7")
 metadata/_custom_type_script = "uid://cl82bkxuc28j"
 
-[node name="ZLevelMovementComponent" type="Node" parent="."]
-script = ExtResource("10_np0x0")
-metadata/_custom_type_script = "uid://bbv4x26754up"
+[node name="InteractionComponent" type="Node" parent="."]
+script = ExtResource("13_i5qku")
+metadata/_custom_type_script = "uid://ca4n5hj0ijsn6"
+
+[node name="ItemInteractionComponent" type="Node" parent="."]
+script = ExtResource("14_dx5ic")
+metadata/_custom_type_script = "uid://c3u73hjth48ct"
+
+[node name="GrabPullComponent" type="Node" parent="."]
+script = ExtResource("15_ciwyd")
+metadata/_custom_type_script = "uid://57gv3jq6b82j"
+
+[node name="BodyTargetingComponent" type="Node" parent="."]
+script = ExtResource("16_l0ueb")
+metadata/_custom_type_script = "uid://dahxqtbwo8bw7"
+
+[node name="WeaponHandlingComponent" type="Node" parent="."]
+script = ExtResource("20_oiba2")
+metadata/_custom_type_script = "uid://co3fb4yan7sep"
+
+[node name="IntentComponent" type="Node" parent="."]
+script = ExtResource("17_jm52e")
+metadata/_custom_type_script = "uid://bu4qlco8mbb3m"
 
 [node name="StatusEffectComponent" type="Node" parent="."]
-script = ExtResource("11_imbpr")
+script = ExtResource("18_8lmuh")
 metadata/_custom_type_script = "uid://ceqlv6f14jwgs"
 
-[node name="InteractionComponent" type="Node" parent="."]
-script = ExtResource("12_on0hc")
-metadata/_custom_type_script = "uid://ca4n5hj0ijsn6"
+[node name="PostureComponent" type="Node" parent="."]
+script = ExtResource("19_dfqdr")
+metadata/_custom_type_script = "uid://crcieeppmdsku"
+
+[node name="DoAfterComponent" type="Node" parent="."]
+script = ExtResource("21_56pst")
+metadata/_custom_type_script = "uid://b1jm4ncthdjdq"
+
+[node name="HealthSystem" type="Node" parent="."]
+script = ExtResource("24_jiwf2")
+metadata/_custom_type_script = "uid://dh2tm0dwjxdiw"
+
+[node name="HealthConnector" type="Node" parent="."]
+script = ExtResource("25_dpxj7")
+metadata/_custom_type_script = "uid://dj4qyr2yg1rim"

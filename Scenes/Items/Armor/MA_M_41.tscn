@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3 uid="uid://dkdhjucuounfh"]
+
+[ext_resource type="Script" uid="uid://b30v47uc3dumj" path="res://Code/Items/Armor/Armor.gd" id="1_o6mn2"]
+[ext_resource type="Texture2D" uid="uid://bvw44r8yx6ltj" path="res://Assets/Icons/Items/Clothing/Suits/MA_Medium2.png" id="2_c5tax"]
+[ext_resource type="Texture2D" uid="uid://banod1ehhnngl" path="res://Assets/Icons/Clothing/Suit/MA_Medium2.png" id="3_42xka"]
+
+[node name="MA_M_41" type="Node2D"]
+script = ExtResource("1_o6mn2")
+armor_melee = 80
+armor_bullet = 60
+armor_laser = 20
+armor_energy = 20
+armor_bomb = 30
+storage_type = 2
+storage_max_size = 2
+storage_slots = 2
+max_storage_space = 2
+item_name = "MA_M_40"
+w_class = 5
+equip_delay = 0.5
+unequip_delay = 0.5
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_c5tax")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_42xka")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -7, -5, -6, -7, -6, -7, -5, -8, -5, -8, -2, -5, -2, -5, -3, -4, -3, -4, -1, -5, -1, -5, 3, 4, 3, 4, -1, 3, -1, 3, -3, 4, -3, 4, -2, 7, -2, 7, -5, 6, -5, 6, -6, 4, -6, 4, -7, 3, -7, 3, -6, 2, -6, 2, -4, -3, -4, -3, -6, -4, -6, -4, -7)

@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://dlt5rukxoet2s"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_017uw"]
+[ext_resource type="Texture2D" uid="uid://bxs5wjtyg6rnt" path="res://Assets/Icons/Clothing/Uniforms/Working_Droid4.png" id="2_koqsw"]
+[ext_resource type="Texture2D" uid="uid://d2clcd3dg1gmk" path="res://Assets/Icons/Clothing/Uniforms/Working_Droid2.png" id="3_rivw4"]
+[ext_resource type="Texture2D" uid="uid://ifk0ag3echys" path="res://Assets/Icons/Items/Clothing/Uniforms/Working_Droid.png" id="4_dt22k"]
+
+[node name="WorkingDroid_HazardUniform" type="Node2D"]
+script = ExtResource("1_017uw")
+texture1 = ExtResource("2_koqsw")
+texture2 = ExtResource("3_rivw4")
+armor_melee = 60
+armor_bomb = 50
+armor_bio = 150
+armor_rad = 200
+item_name = "WorkingDroid_HazardUniform"
+w_class = 4
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("4_dt22k")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("2_koqsw")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-3, -10, -3, -9, -4, -9, -4, -8, -5, -8, -5, -5, -6, -5, -6, -3, -7, -3, -7, 0, -6, 0, -6, 1, -5, 1, -5, 3, -6, 3, -6, 7, -5, 7, -5, 8, 4, 8, 4, 7, 5, 7, 5, 3, 4, 3, 4, 1, 5, 1, 5, 0, 6, 0, 6, -3, 5, -3, 5, -5, 4, -5, 4, -8, 3, -8, 3, -9, 2, -9, 2, -10)

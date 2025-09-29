@@ -1,0 +1,72 @@
+[gd_scene load_steps=8 format=3 uid="uid://donme4ydi0n1y"]
+
+[ext_resource type="Script" uid="uid://bfj73ll6r08pv" path="res://Code/Items/Uniform/Back.gd" id="1_mrqhd"]
+[ext_resource type="Texture2D" uid="uid://cxysakojxbvw" path="res://Assets/Icons/Items/Storage/Backpacks/Engineering_Backpack.png" id="2_wmj4o"]
+[ext_resource type="Texture2D" uid="uid://byvbx8juca6as" path="res://Assets/Icons/Clothing/Backpacks/Tech_Backpack.png" id="3_b6e63"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tosds"]
+atlas = ExtResource("2_wmj4o")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aaqk3"]
+atlas = ExtResource("2_wmj4o")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qq0nw"]
+atlas = ExtResource("2_wmj4o")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_y06yh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tosds")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aaqk3")
+}],
+"loop": true,
+"name": &"half",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qq0nw")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="Engineering_Backpack" type="Node2D"]
+script = ExtResource("1_mrqhd")
+drag_unequip = true
+storage_type = 1
+has_open_close_animation = true
+item_name = "Engineering_Backpack"
+w_class = 5
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_y06yh")
+animation = &"open"
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_wmj4o")
+hframes = 3
+frame = 2
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_b6e63")
+hframes = 4
+frame = 1
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-8, -2, -10, -2, -10, 5, -9, 5, -9, 6, -8, 6, -8, 8, -6, 8, -6, 9, 6, 9, 6, 8, 8, 8, 8, 6, 9, 6, 9, 5, 10, 5, 10, -2, 8, -2, 8, -11, 5, -11, 5, -10, 2, -10, 2, -11, -2, -11, -2, -10, -5, -10, -5, -11, -8, -11)

@@ -79,7 +79,6 @@ var last_bump_time: float = 0.0
 var door_tiles: Array[Vector2i] = []
 var occupied_tiles: Array[Vector2i] = []
 var current_tile_position: Vector2i
-var current_z_level: int = 0
 
 var autoclose_timer: Timer
 var operation_timer: Timer
@@ -117,6 +116,7 @@ func _ready():
 	pickupable = false
 	can_be_bumped = true
 	anchored = true
+	can_block_movement = true
 	
 	requires_power = (door_type in [DoorType.BLAST_DOOR, DoorType.SECURITY])
 	power_usage = 0.1 if requires_power else 0.0
@@ -133,8 +133,9 @@ func _ready():
 	_setup_systems()
 	_setup_timers()
 	
-	call_deferred("_setup_initial_state")
-	call_deferred("_register_with_systems")
+	await get_tree().process_frame
+	_setup_initial_state()
+	_register_with_systems()
 	
 	add_to_group("doors")
 
@@ -214,11 +215,16 @@ func _setup_initial_state():
 	_update_collision_and_opacity()
 
 func _register_with_systems():
+	await get_tree().process_frame
+	
 	if collision_component:
-		await get_tree().process_frame
 		collision_component.force_collision_update()
-	elif tile_occupancy_system:
-		tile_occupancy_system.register_multi_tile_entity(self, door_tiles, current_z_level)
+	
+	if tile_occupancy_system and door_tiles.size() > 0:
+		var success = tile_occupancy_system.register_multi_tile_entity(self, door_tiles, current_z_level)
+		if not success:
+			for tile_pos in door_tiles:
+				tile_occupancy_system.register_entity_at_tile(self, tile_pos, current_z_level)
 
 func _set_door_width(value: int):
 	var old_tiles = door_tiles.duplicate()
@@ -292,7 +298,7 @@ func interact(user) -> bool:
 	
 	return false
 
-func on_bump(bumper) -> bool:
+func on_bump(bumper, direction: Vector2i = Vector2i.ZERO) -> bool:
 	if not can_be_bumped:
 		return blocks_movement()
 	
@@ -322,6 +328,9 @@ func blocks_light() -> bool:
 	return _blocks_light and is_closed
 
 func blocks_movement() -> bool:
+	return entity_dense and can_block_movement and _door_blocks_movement()
+
+func _door_blocks_movement() -> bool:
 	match current_door_state:
 		DoorState.CLOSED:
 			return true
@@ -481,7 +490,7 @@ func _change_door_state(new_state: DoorState):
 	var old_state = current_door_state
 	current_door_state = new_state
 	
-	entity_dense = (current_door_state == DoorState.CLOSED)
+	entity_dense = _should_be_dense()
 	
 	match new_state:
 		DoorState.OPEN:
@@ -496,6 +505,9 @@ func _change_door_state(new_state: DoorState):
 			machinery_state = "processing"
 	
 	emit_signal("door_state_changed", self, old_state, new_state)
+
+func _should_be_dense() -> bool:
+	return current_door_state in [DoorState.CLOSED, DoorState.CLOSING, DoorState.DENIED]
 
 func _on_operation_complete():
 	is_operating = false
@@ -559,11 +571,11 @@ func _update_collision_and_opacity():
 	if not world:
 		return
 	
-	entity_dense = (current_door_state == DoorState.CLOSED)
+	entity_dense = _should_be_dense()
 	
 	if world.has_method("update_tile_opacity"):
 		for tile_pos in door_tiles:
-			var blocks_light_now = (current_door_state == DoorState.CLOSED) and _blocks_light and not glass_door
+			var blocks_light_now = entity_dense and _blocks_light and not glass_door
 			world.update_tile_opacity(tile_pos, current_z_level, blocks_light_now)
 
 func _get_door_type_prefix() -> String:

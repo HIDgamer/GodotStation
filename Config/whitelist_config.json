@@ -1,0 +1,151 @@
+{
+  "commanding_officer_weapons": {
+    "Combat_Rifle": {
+      "description": "Standard issue combat rifle",
+      "name": "Combat Rifle",
+      "scene_path": "res://Objects/Weapons/Combat_Rifle.tscn"
+    },
+    "Command_Baton": {
+      "description": "Symbol of authority",
+      "name": "Command Baton",
+      "scene_path": "res://Objects/Weapons/Command_Baton.tscn"
+    },
+    "Plasma_Pistol": {
+      "description": "High-energy sidearm",
+      "name": "Plasma Pistol",
+      "scene_path": "res://Objects/Weapons/Plasma_Pistol.tscn"
+    }
+  },
+  "status_loadouts": {
+    "Councilor": {
+      "CommandingOfficer": {
+        "clothing": {
+          "HEAD": "Councilor_Cap",
+          "SHOES": "Councilor_Boots",
+          "UNIFORM": "Councilor_Command_Uniform"
+        },
+        "inventory": {
+          "BACK": "Command_Pack",
+          "BELT": "Councilor_Belt",
+          "RIGHT_HAND": "Plasma_Pistol"
+        }
+      },
+      "Synthetic": {
+        "clothing": {
+          "HEAD": "Councilor_Visor",
+          "SHOES": "Councilor_Boots",
+          "UNIFORM": "Councilor_Synthetic_Jumpsuit"
+        },
+        "inventory": {
+          "BACK": "Councilor_Pack",
+          "BELT": "Advanced_Belt"
+        }
+      }
+    },
+    "Normal": {
+      "CommandingOfficer": {
+        "clothing": {
+          "HEAD": "Command_Cap",
+          "SHOES": "Officer_Boots",
+          "UNIFORM": "Command_Uniform"
+        },
+        "inventory": {
+          "BELT": "Command_Belt",
+          "RIGHT_HAND": "Command_Baton"
+        }
+      },
+      "Synthetic": {
+        "clothing": {
+          "SHOES": "Synthetic_Boots",
+          "UNIFORM": "Synthetic_Jumpsuit"
+        },
+        "inventory": {
+          "BELT": "Utility_Belt"
+        }
+      }
+    },
+    "Senate": {
+      "CommandingOfficer": {
+        "clothing": {
+          "HEAD": "Senate_Crown",
+          "SHOES": "Senate_Boots",
+          "UNIFORM": "Senate_Command_Uniform"
+        },
+        "inventory": {
+          "BACK": "Senate_Command_Pack",
+          "BELT": "Senate_Belt",
+          "RIGHT_HAND": "Combat_Rifle"
+        }
+      },
+      "Synthetic": {
+        "clothing": {
+          "HEAD": "Senate_Circlet",
+          "SHOES": "Senate_Boots",
+          "UNIFORM": "Senate_Synthetic_Jumpsuit"
+        },
+        "inventory": {
+          "BACK": "Senate_Pack",
+          "BELT": "Senate_Belt"
+        }
+      }
+    }
+  },
+  "synthetic_wardrobe": {
+    "BELT": [
+      {
+        "item_name": "Utility_Belt",
+        "name": "Utility Belt"
+      },
+      {
+        "item_name": "Tech_Belt",
+        "name": "Tech Belt"
+      },
+      {
+        "item_name": "",
+        "name": "None"
+      }
+    ],
+    "HEAD": [
+      {
+        "item_name": "Synthetic_Cap",
+        "name": "Synthetic Cap"
+      },
+      {
+        "item_name": "Tech_Visor",
+        "name": "Tech Visor"
+      },
+      {
+        "item_name": "",
+        "name": "None"
+      }
+    ],
+    "SHOES": [
+      {
+        "item_name": "Synthetic_Boots",
+        "name": "Synthetic Boots"
+      },
+      {
+        "item_name": "Tech_Shoes",
+        "name": "Tech Shoes"
+      },
+      {
+        "item_name": "Standard_Boots",
+        "name": "Standard Boots"
+      }
+    ],
+    "UNIFORM": [
+      {
+        "item_name": "Synthetic_Jumpsuit",
+        "name": "Synthetic Jumpsuit"
+      },
+      {
+        "item_name": "Tech_Uniform",
+        "name": "Tech Uniform"
+      },
+      {
+        "item_name": "Standard_Jumpsuit",
+        "name": "Standard Issue"
+      }
+    ]
+  }
+}

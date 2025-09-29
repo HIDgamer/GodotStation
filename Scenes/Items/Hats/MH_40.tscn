@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3 uid="uid://bc6r27ucx88i"]
+
+[ext_resource type="Script" uid="uid://dgp7v7lxba43" path="res://Code/Items/Uniform/Head.gd" id="1_48m0o"]
+[ext_resource type="Texture2D" uid="uid://bdj6icim0soqa" path="res://Assets/Icons/Items/Clothing/Hats/Marine_Helmet.png" id="2_ktecq"]
+[ext_resource type="Texture2D" uid="uid://dk7tn1tnjv0h6" path="res://Assets/Icons/Clothing/Hats/Marine_Helmet.png" id="3_2n7t5"]
+
+[node name="MH_40" type="Node2D"]
+script = ExtResource("1_48m0o")
+armor_melee = 100
+armor_bullet = 80
+armor_laser = 20
+armor_energy = 20
+armor_bomb = 30
+armor_rad = 30
+armor_internal_damage = 30
+storage_type = 2
+storage_max_size = 3
+storage_slots = 3
+max_storage_space = 3
+item_name = "MH_40"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_ktecq")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 32)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_2n7t5")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-3, -6, -3, -5, -4, -5, -4, -4, -5, -4, -5, -2, -6, -2, -6, 2, -5, 2, -5, 5, -4, 5, -4, 6, 3, 6, 3, 5, 4, 5, 4, 2, 5, 2, 5, -2, 4, -2, 4, -4, 3, -4, 3, -5, 2, -5, 2, -6)

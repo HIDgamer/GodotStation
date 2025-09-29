@@ -1,0 +1,74 @@
+{
+  "Combat_Knife": {
+    "clearance_level": 1,
+    "damage": 25,
+    "display_name": "Combat Knife",
+    "rarity": "common",
+    "scene_path": "res://Objects/Weapons/Combat_Knife.tscn",
+    "weapon_type": "melee"
+  },
+  "Energy_Sword": {
+    "clearance_level": 5,
+    "damage": 75,
+    "display_name": "Type-1 Energy Sword",
+    "rarity": "legendary",
+    "scene_path": "res://Objects/Weapons/Energy_Sword.tscn",
+    "weapon_type": "energy_melee"
+  },
+  "Grenade_Launcher": {
+    "clearance_level": 5,
+    "damage": 100,
+    "display_name": "M92 Grenade Launcher",
+    "rarity": "epic",
+    "scene_path": "res://Objects/Weapons/Grenade_Launcher.tscn",
+    "weapon_type": "explosive"
+  },
+  "Plasma_Caster": {
+    "clearance_level": 4,
+    "damage": 80,
+    "display_name": "Plasma Caster",
+    "rarity": "rare",
+    "scene_path": "res://Objects/Weapons/Plasma_Caster.tscn",
+    "weapon_type": "energy"
+  },
+  "Pulse_Rifle": {
+    "clearance_level": 3,
+    "damage": 45,
+    "display_name": "M41A Pulse Rifle",
+    "rarity": "standard",
+    "scene_path": "res://Objects/Weapons/Pulse_Rifle.tscn",
+    "weapon_type": "rifle"
+  },
+  "Rail_Gun": {
+    "clearance_level": 6,
+    "damage": 120,
+    "display_name": "Experimental Rail Gun",
+    "rarity": "legendary",
+    "scene_path": "res://Objects/Weapons/Rail_Gun.tscn",
+    "weapon_type": "experimental"
+  },
+  "Shotgun": {
+    "clearance_level": 3,
+    "damage": 65,
+    "display_name": "M37A2 Shotgun",
+    "rarity": "uncommon",
+    "scene_path": "res://Objects/Weapons/Shotgun.tscn",
+    "weapon_type": "shotgun"
+  },
+  "Sidearm": {
+    "clearance_level": 2,
+    "damage": 30,
+    "display_name": "M4A3 Service Pistol",
+    "rarity": "standard",
+    "scene_path": "res://Objects/Weapons/Sidearm.tscn",
+    "weapon_type": "pistol"
+  },
+  "Sniper_Rifle": {
+    "clearance_level": 4,
+    "damage": 90,
+    "display_name": "M42A Sniper Rifle",
+    "rarity": "rare",
+    "scene_path": "res://Objects/Weapons/Sniper_Rifle.tscn",
+    "weapon_type": "sniper"
+  }
+}

@@ -1,18 +1,10 @@
 extends Node2D
 class_name World
 
-# =============================================================================
-# CONSTANTS
-# =============================================================================
-
 const TILE_SIZE = 32
 const SPATIAL_CELL_SIZE = 4
 const CHUNK_SIZE = 16
 const ATMOSPHERE_UPDATE_INTERVAL = 0.5
-
-# =============================================================================
-# ENUMS
-# =============================================================================
 
 enum TileLayer {
 	FLOOR,
@@ -21,10 +13,6 @@ enum TileLayer {
 	PIPE,
 	ATMOSPHERE
 }
-
-# =============================================================================
-# EXPORTS
-# =============================================================================
 
 @export_group("World Configuration")
 @export var current_z_level: int = 0
@@ -63,10 +51,6 @@ enum TileLayer {
 @export var log_entity_operations: bool = false
 @export var show_performance_stats: bool = false
 
-# =============================================================================
-# SIGNALS
-# =============================================================================
-
 signal tile_changed(tile_coords, z_level, old_data, new_data)
 signal tile_destroyed(coords, z_level)
 signal player_changed_position(position, z_level)
@@ -75,11 +59,6 @@ signal chunks_loaded(chunk_positions, z_level)
 signal room_detected(room_id, room_data)
 signal atmosphere_initialized(z_level, tile_count)
 
-# =============================================================================
-# PRIVATE VARIABLES
-# =============================================================================
-
-# Core world data
 var world_data = {}
 var loaded_chunks = {}
 var chunk_entities = {}
@@ -88,17 +67,15 @@ var rooms = {}
 var tile_to_room = {}
 var door_collision_data: Dictionary = {}
 
-# Timing and updates
 var atmosphere_step_timer = 0.0
 var sync_timer = 0.0
 var entity_update_timer = 0.0
 
-# Player tracking
 var player = null
 var local_player = null
+var tilemap_visualizer_ref: Node = null
 var all_players = []
 
-# System references
 @onready var spatial_manager = $SpatialManager
 @onready var tile_occupancy_system = $TileOccupancySystem
 @onready var atmosphere_system = $AtmosphereSystem
@@ -114,27 +91,30 @@ var all_players = []
 @onready var system_manager = $SystemManager
 @onready var player_spawner = $"../MultiplayerSpawner"
 
-# Threading
 var thread_manager = null
 
-# =============================================================================
-# LIFECYCLE
-# =============================================================================
+var initialization_step = 0
+var initialization_complete = false
+var initialization_timer = 0.0
+var initialization_frame_budget = 8.0
 
 func _ready():
-	_setup_multiplayer()
-	_initialize_world_structure()
-	_setup_systems()
-	_load_world_data()
-	_connect_to_door_manager()
-	
-	if enable_atmosphere_system:
-		_initialize_atmosphere()
-	
-	_setup_player()
-	_finalize_initialization()
+	set_process(true)
+	call_deferred("begin_staged_initialization")
+
+func begin_staged_initialization():
+	initialization_step = 0
+	initialization_timer = 0.0
+	initialization_complete = false
 
 func _process(delta):
+	if not initialization_complete:
+		initialization_timer += delta
+		if initialization_timer >= 0.05:
+			process_initialization_step()
+			initialization_timer = 0.0
+		return
+	
 	_update_atmosphere(delta)
 	_update_multiplayer(delta)
 	_update_entities(delta)
@@ -145,9 +125,47 @@ func _process(delta):
 	if Engine.get_frames_drawn() % 30 == 0:
 		_update_players()
 
-# =============================================================================
-# INITIALIZATION
-# =============================================================================
+func process_initialization_step():
+	var step_start_time = Time.get_ticks_msec()
+	
+	match initialization_step:
+		0:
+			_setup_multiplayer()
+			initialization_step += 1
+		1:
+			_initialize_world_structure()
+			initialization_step += 1
+		2:
+			_setup_basic_systems()
+			initialization_step += 1
+		3:
+			call_deferred("_load_initial_world_data")
+			initialization_step += 1
+		4:
+			initialization_step += 1
+		5:
+			_connect_to_door_manager()
+			initialization_step += 1
+		6:
+			if enable_atmosphere_system:
+				call_deferred("_initialize_atmosphere_deferred")
+			initialization_step += 1
+		7:
+			call_deferred("_setup_player_deferred")
+			initialization_step += 1
+		8:
+			call_deferred("_finalize_initialization")
+			initialization_step += 1
+		9:
+			initialization_complete = true
+	
+	var step_time = Time.get_ticks_msec() - step_start_time
+	if step_time > initialization_frame_budget:
+		print("World: Initialization step ", initialization_step - 1, " took ", step_time, "ms")
+
+func set_tilemap_visualizer(visualizer: Node):
+	tilemap_visualizer_ref = visualizer
+	print("World: Registered VisualTileMap for Z-level support")
 
 func _setup_multiplayer():
 	if auto_detect_multiplayer:
@@ -158,12 +176,15 @@ func _initialize_world_structure():
 	for z in range(z_levels):
 		world_data[z] = {}
 
-func _setup_systems():
+func _setup_basic_systems():
 	_setup_threading()
 	_connect_player_spawner()
 	_connect_atmosphere_system()
 
 func _setup_threading():
+	if thread_manager:
+		return
+	
 	thread_manager = ThreadManager.new()
 	thread_manager.name = "ThreadManager"
 	add_child(thread_manager)
@@ -181,53 +202,271 @@ func _connect_atmosphere_system():
 		atmosphere_system.connect("breach_sealed", Callable(self, "_on_breach_sealed"))
 		atmosphere_system.world = self
 
-func _load_world_data():
-	var registered = _register_tilemap_tiles()
+func _load_initial_world_data():
+	await get_tree().process_frame
+	
+	var registered = await _register_critical_tiles_only()
 	_add_z_connections()
-	update_spatial_hash()
+	
+	if enable_spatial_optimization:
+		call_deferred("update_spatial_hash")
 	
 	if room_detection_enabled:
-		detect_rooms()
+		call_deferred("detect_rooms_deferred")
 	
-	_setup_initial_chunks()
+	call_deferred("_setup_initial_chunks")
 	
 	if debug_mode:
-		print("World: Loaded ", registered, " tiles from tilemaps")
+		print("World: Loaded ", registered, " critical tiles from tilemaps")
 
-func _initialize_atmosphere():
+func _register_critical_tiles_only() -> int:
+	if not floor_tilemap or not wall_tilemap:
+		return 0
+
+	var registered_count = 0
+	var frame_start_time = Time.get_ticks_msec()
+	var processed_tiles = 0
+	var max_tiles_per_frame = 50
+	
+	var floor_cells = floor_tilemap.get_used_cells(0)
+	var wall_cells = wall_tilemap.get_used_cells(0)
+	
+	for cell in floor_cells:
+		if processed_tiles >= max_tiles_per_frame:
+			await get_tree().process_frame
+			processed_tiles = 0
+			frame_start_time = Time.get_ticks_msec()
+		
+		var tile_coords = Vector2i(cell.x, cell.y)
+		var tile_data = _ensure_tile_exists(tile_coords, 0)
+		
+		var floor_type = _determine_floor_type_fast(tile_coords)
+		tile_data[TileLayer.FLOOR] = {
+			"type": floor_type,
+			"collision": false,
+			"health": 100,
+			"material": floor_type
+		}
+		registered_count += 1
+		processed_tiles += 1
+	
+	await get_tree().process_frame
+	
+	for cell in wall_cells:
+		if processed_tiles >= max_tiles_per_frame:
+			await get_tree().process_frame
+			processed_tiles = 0
+		
+		var tile_coords = Vector2i(cell.x, cell.y)
+		var tile_data = _ensure_tile_exists(tile_coords, 0)
+		
+		tile_data[TileLayer.WALL] = {
+			"type": "wall",
+			"material": "metal",
+			"health": 100
+		}
+		tile_data["is_walkable"] = false
+		registered_count += 1
+		processed_tiles += 1
+	
+	return registered_count
+
+func _determine_floor_type_fast(coords: Vector2i) -> String:
+	var atlas_coords = floor_tilemap.get_cell_atlas_coords(0, coords)
+	match atlas_coords.y:
+		0: return "metal"
+		1: return "carpet"
+		_: return "floor"
+
+func detect_rooms_deferred():
+	await get_tree().process_frame
+	await get_tree().process_frame
+	
+	rooms.clear()
+	tile_to_room.clear()
+	
+	for z in world_data.keys():
+		await _detect_rooms_for_z_level_deferred(z)
+
+func _detect_rooms_for_z_level_deferred(z: int):
+	if not world_data.has(z):
+		return
+
+	var layer = world_data[z]
+	if typeof(layer) != TYPE_DICTIONARY:
+		return
+
+	var visited = {}
+	var room_id = 0
+	var processed_tiles = 0
+	var max_tiles_per_frame = 30
+	
+	for coords in layer.keys():
+		if processed_tiles >= max_tiles_per_frame:
+			await get_tree().process_frame
+			processed_tiles = 0
+		
+		if coords in visited:
+			continue
+		
+		var room_tiles = _flood_fill_room(coords, z, visited)
+		if room_tiles.size() > 0:
+			_create_room(room_id, room_tiles, z)
+			room_id += 1
+		
+		processed_tiles += 1
+
+func _initialize_atmosphere_deferred():
 	if not atmosphere_system:
 		return
+	
+	await get_tree().process_frame
 	
 	atmosphere_system.active_cells = []
 	atmosphere_system.active_count = 0
 	
 	var standard_atmosphere = _create_standard_atmosphere()
 	
-	for z in range(z_levels):
-		var tile_count = _initialize_z_level_atmosphere(z, standard_atmosphere)
-		emit_signal("atmosphere_initialized", z, tile_count)
+	for z in range(min(2, z_levels)):
+		await _initialize_z_level_atmosphere_deferred(z, standard_atmosphere)
+		await get_tree().process_frame
 	
 	if auto_generate_space_tiles:
-		_initialize_space_tiles()
+		call_deferred("_initialize_space_tiles_deferred")
 
-func _setup_player():
+func _initialize_z_level_atmosphere_deferred(z: int, standard_atmosphere: Dictionary):
+	var tiles_to_init = []
+	var processed_tiles = 0
+	var max_tiles_per_frame = 20
+	
+	if z in world_data:
+		for coords in world_data[z]:
+			if processed_tiles >= max_tiles_per_frame:
+				await get_tree().process_frame
+				processed_tiles = 0
+			
+			var tile = world_data[z][coords]
+			
+			if TileLayer.ATMOSPHERE in tile:
+				atmosphere_system.add_active_cell(Vector3(coords.x, coords.y, z))
+				continue
+			
+			if TileLayer.FLOOR in tile:
+				tiles_to_init.append(coords)
+			
+			processed_tiles += 1
+	
+	if z == 0 and floor_tilemap:
+		await _add_tilemap_atmosphere_tiles_deferred(tiles_to_init, z)
+	
+	processed_tiles = 0
+	for coords in tiles_to_init:
+		if processed_tiles >= max_tiles_per_frame:
+			await get_tree().process_frame
+			processed_tiles = 0
+		
+		add_atmosphere_to_tile(coords, z, standard_atmosphere)
+		processed_tiles += 1
+	
+	emit_signal("atmosphere_initialized", z, tiles_to_init.size())
+
+func _add_tilemap_atmosphere_tiles_deferred(tiles_to_init: Array, z: int):
+	var processed_tiles = 0
+	var max_tiles_per_frame = 30
+	
+	for cell in floor_tilemap.get_used_cells(0):
+		if processed_tiles >= max_tiles_per_frame:
+			await get_tree().process_frame
+			processed_tiles = 0
+		
+		if cell in tiles_to_init:
+			continue
+		
+		if not (z in world_data and cell in world_data[z]):
+			add_tile(Vector3(cell.x, cell.y, z))
+		
+		if not (z in world_data and cell in world_data[z] and TileLayer.ATMOSPHERE in world_data[z][cell]):
+			tiles_to_init.append(cell)
+		
+		processed_tiles += 1
+
+func _initialize_space_tiles_deferred():
+	await get_tree().process_frame
+	
+	var perimeter_tiles = _find_perimeter_tiles_limited()
+	
+	if is_multiplayer_active and not is_server:
+		return
+	
+	await _generate_space_around_perimeter_deferred(perimeter_tiles)
+
+func _find_perimeter_tiles_limited() -> Array:
+	var perimeter_tiles = []
+	var max_tiles = 100
+	
+	if zone_tilemap:
+		var zone_tiles = zone_tilemap.get_used_cells(0)
+		var processed = 0
+		
+		for zone_tile in zone_tiles:
+			if processed >= max_tiles:
+				break
+			
+			if _is_perimeter_tile(zone_tile):
+				perimeter_tiles.append(zone_tile)
+			
+			processed += 1
+	
+	return perimeter_tiles
+
+func _generate_space_around_perimeter_deferred(perimeter_tiles: Array):
+	var processed_tiles = 0
+	var max_tiles_per_frame = 10
+	
+	for perimeter_tile in perimeter_tiles:
+		if processed_tiles >= max_tiles_per_frame:
+			await get_tree().process_frame
+			processed_tiles = 0
+		
+		_generate_limited_space_grid_around_tile(perimeter_tile)
+		processed_tiles += 1
+
+func _generate_limited_space_grid_around_tile(tile: Vector2i) -> int:
+	var space_count = 0
+	
+	for x in range(-2, 3):
+		for y in range(-2, 3):
+			var space_tile = Vector2i(tile.x + x, tile.y + y)
+			
+			if _should_skip_space_tile(space_tile):
+				continue
+			
+			space_count += _create_or_update_space_tile(space_tile)
+			
+			if space_count >= 5:
+				break
+		
+		if space_count >= 5:
+			break
+	
+	return space_count
+
+func _setup_player_deferred():
+	await get_tree().process_frame
+	
 	if is_multiplayer_active:
 		return
 	
 	create_local_player()
 
 func _finalize_initialization():
-	await get_tree().create_timer(0.1).timeout
+	await get_tree().process_frame
 	
 	if context_interaction_system:
 		context_interaction_system.world = self
 	
 	if enable_chunk_loading:
-		_initialize_chunk_culling()
-
-# =============================================================================
-# TILE MANAGEMENT
-# =============================================================================
+		call_deferred("_initialize_chunk_culling")
 
 func add_tile(coords: Vector3) -> Dictionary:
 	var tile_data = _create_default_tile(coords)
@@ -300,9 +539,12 @@ func get_tile_data(coords, layer = null):
 	
 	return null
 
-func is_valid_tile(coords, z_level = current_z_level) -> bool:
-	var tile_coords = _get_coords_2d(coords)
+func is_valid_tile(tile_coords: Vector2i, z_level = current_z_level) -> bool:
+	# First try Z-level specific tilemap if visualizer is available
+	if tilemap_visualizer_ref and tilemap_visualizer_ref.has_method("is_valid_tile_at_z_level"):
+		return tilemap_visualizer_ref.is_valid_tile_at_z_level(tile_coords, z_level)
 	
+	# Fallback to original logic
 	if z_level == 0:
 		if zone_tilemap and zone_tilemap.get_cell_source_id(0, tile_coords) != -1:
 			return true
@@ -320,11 +562,45 @@ func is_valid_tile(coords, z_level = current_z_level) -> bool:
 	return z_level in world_data and tile_coords in world_data[z_level]
 
 func is_wall_at(tile_coords: Vector2i, z_level: int = current_z_level) -> bool:
-	if wall_tilemap.get_cell_source_id(0, tile_coords) != -1:
+	# First try Z-level specific tilemap if visualizer is available
+	if tilemap_visualizer_ref and tilemap_visualizer_ref.has_method("is_wall_at_z_level"):
+		return tilemap_visualizer_ref.is_wall_at_z_level(tile_coords, z_level)
+	
+	# Fallback to original logic for backward compatibility
+	if wall_tilemap and wall_tilemap.get_cell_source_id(0, tile_coords) != -1:
 		return true
 	
 	var tile_data = get_tile_data(tile_coords, z_level)
 	return tile_data is Dictionary and TileLayer.WALL in tile_data and tile_data[TileLayer.WALL] != null
+
+func has_z_level(z_level: int) -> bool:
+	if tilemap_visualizer_ref and tilemap_visualizer_ref.has_method("has_z_level"):
+		return tilemap_visualizer_ref.has_z_level(z_level)
+	
+	# Fallback - check if we have world data for this level
+	return z_level in world_data
+
+func has_ceiling_at(tile_coords: Vector2i, z_level: int) -> bool:
+	# Check if there's a floor on the level above
+	var above_z = z_level + 1
+	if tilemap_visualizer_ref and tilemap_visualizer_ref.has_method("get_floor_tilemap"):
+		var floor_above = tilemap_visualizer_ref.get_floor_tilemap(above_z)
+		if floor_above:
+			return floor_above.get_cell_source_id(0, tile_coords) != -1
+	
+	# Check world data
+	var tile_above = get_tile_data(tile_coords, above_z)
+	return tile_above != null and TileLayer.FLOOR in tile_above
+
+func has_solid_floor_at(tile_coords: Vector2i, z_level: int) -> bool:
+	if tilemap_visualizer_ref and tilemap_visualizer_ref.has_method("get_floor_tilemap"):
+		var floor_tilemap = tilemap_visualizer_ref.get_floor_tilemap(z_level)
+		if floor_tilemap:
+			return floor_tilemap.get_cell_source_id(0, tile_coords) != -1
+	
+	# Check world data
+	var tile_data = get_tile_data(tile_coords, z_level)
+	return tile_data != null and TileLayer.FLOOR in tile_data
 
 func is_space(tile_coords: Vector2i, z_level: int = current_z_level) -> bool:
 	if z_level == 0:
@@ -355,10 +631,6 @@ func is_tile_blocked(coords, z_level = current_z_level):
 	var tile = get_tile_data(tile_coords, z_level)
 	return _has_blocking_contents(tile)
 
-# =============================================================================
-# COORDINATE CONVERSION
-# =============================================================================
-
 func get_tile_at(world_position: Vector2, z_level = current_z_level) -> Vector2i:
 	var tile_x = floor(world_position.x / tile_size)
 	var tile_y = floor(world_position.y / tile_size)
@@ -369,10 +641,6 @@ func tile_to_world(tile_pos: Vector2) -> Vector2:
 		(tile_pos.x * tile_size) + (tile_size / 2.0), 
 		(tile_pos.y * tile_size) + (tile_size / 2.0)
 	)
-
-# =============================================================================
-# ENTITY MANAGEMENT
-# =============================================================================
 
 func get_entities_at_tile(tile_coords, z_level):
 	if tile_occupancy_system:
@@ -405,10 +673,6 @@ func check_entity_void_status(entity, tile_pos, z_level):
 			zero_g_controller.activate_zero_g()
 		elif not in_space and zero_g_controller.is_in_zero_g():
 			zero_g_controller.deactivate_zero_g()
-
-# =============================================================================
-# CHUNK MANAGEMENT
-# =============================================================================
 
 func load_chunks_around(world_position: Vector2, z_level: int = current_z_level, radius: int = 2):
 	var culling_system = get_node_or_null("ChunkCullingSystem")
@@ -448,17 +712,6 @@ func unload_chunk_entities(chunk_pos: Vector2i, z_level: int):
 	
 	chunk_entities.erase(chunk_key)
 
-# =============================================================================
-# ROOM DETECTION SYSTEM
-# =============================================================================
-
-func detect_rooms():
-	rooms.clear()
-	tile_to_room.clear()
-	
-	for z in world_data.keys():
-		_detect_rooms_for_z_level(z)
-
 func get_room_at_tile(tile_coords: Vector2i, z_level: int) -> Dictionary:
 	var room_key = Vector3(tile_coords.x, tile_coords.y, z_level)
 	if room_key in tile_to_room:
@@ -467,10 +720,6 @@ func get_room_at_tile(tile_coords: Vector2i, z_level: int) -> Dictionary:
 			return rooms[room_id]
 	
 	return {}
-
-# =============================================================================
-# PLAYER MANAGEMENT
-# =============================================================================
 
 func create_local_player():
 	local_player = get_node_or_null("GridMovementController")
@@ -492,10 +741,6 @@ func find_spawn_position() -> Vector2:
 			spawn_pos = _calculate_center_position(cells)
 	
 	return spawn_pos
-
-# =============================================================================
-# ATMOSPHERE SYSTEM INTEGRATION
-# =============================================================================
 
 func create_standard_atmosphere() -> Dictionary:
 	return {
@@ -523,10 +768,6 @@ func add_atmosphere_to_tile(coords: Vector2i, z: int, standard_atmosphere: Dicti
 	else:
 		push_error("Tile at %s is not a Dictionary: %s" % [coords, typeof(tile)])
 
-# =============================================================================
-# SPATIAL OPTIMIZATION
-# =============================================================================
-
 func get_nearby_tiles(center: Vector2, radius: float, z_level = current_z_level) -> Array:
 	var cell_bounds = _calculate_search_bounds(center, radius)
 	var result = []
@@ -544,15 +785,20 @@ func update_spatial_hash():
 	if not enable_spatial_optimization:
 		return
 		
+	await get_tree().process_frame
+	
 	spatial_hash.clear()
+	var processed_tiles = 0
+	var max_tiles_per_frame = 100
 	
 	for z in world_data.keys():
 		for coords in world_data[z].keys():
+			if processed_tiles >= max_tiles_per_frame:
+				await get_tree().process_frame
+				processed_tiles = 0
+			
 			_add_to_spatial_hash(coords, z)
-
-# =============================================================================
-# DOOR MANAGEMENT
-# =============================================================================
+			processed_tiles += 1
 
 func _connect_to_door_manager():
 	var door_manager = get_node_or_null("/root/DoorManager")
@@ -706,10 +952,6 @@ func get_door_collision_info(tile_pos: Vector2i, z_level: int) -> Dictionary:
 	
 	return info
 
-# =============================================================================
-# UTILITIES
-# =============================================================================
-
 func get_adjacent_tiles(coords, z_level):
 	var adjacents = [
 		Vector2(coords.x + 1, coords.y),
@@ -748,12 +990,8 @@ func is_airtight_barrier(tile1_coords, tile2_coords, z_level):
 	
 	return (_has_wall_layer(tile1) or _has_wall_layer(tile2))
 
-# =============================================================================
-# UPDATE LOOPS
-# =============================================================================
-
 func _update_atmosphere(delta: float):
-	if not enable_atmosphere_system:
+	if not enable_atmosphere_system or not initialization_complete:
 		return
 		
 	atmosphere_step_timer += delta
@@ -771,22 +1009,24 @@ func _update_multiplayer(delta: float):
 		sync_timer = 0.0
 
 func _update_entities(delta: float):
+	if not initialization_complete:
+		return
+	
 	entity_update_timer += delta
 	if entity_update_timer >= entity_update_interval:
 		entity_update_timer = 0.0
 		_process_entity_updates()
 
 func _update_chunk_loading():
-	if is_server:
+	if is_server and initialization_complete:
 		_load_chunks_for_all_players()
 
 func _update_players():
+	if not initialization_complete:
+		return
+	
 	_track_all_players()
 	_update_player_states()
-
-# =============================================================================
-# PRIVATE HELPER METHODS
-# =============================================================================
 
 func _get_z_level(coords, z_level):
 	if coords is Vector3:
@@ -847,131 +1087,11 @@ func _create_standard_atmosphere() -> Dictionary:
 		"temperature": atmosphere_system.T20C
 	}
 
-func _register_tilemap_tiles() -> int:
-	if not floor_tilemap or not wall_tilemap:
-		return 0
-
-	var registered_count = 0
-	
-	registered_count += _register_floor_tiles()
-	registered_count += _register_wall_tiles()
-	registered_count += _register_object_tiles()
-	
-	return registered_count
-
-func _register_floor_tiles() -> int:
-	var count = 0
-	
-	for cell in floor_tilemap.get_used_cells(0):
-		var tile_coords = Vector2i(cell.x, cell.y)
-		var tile_data = _ensure_tile_exists(tile_coords, 0)
-		
-		var floor_type = _determine_floor_type(tile_coords)
-		tile_data[TileLayer.FLOOR] = {
-			"type": floor_type,
-			"collision": false,
-			"health": 100,
-			"material": floor_type
-		}
-		count += 1
-	
-	return count
-
-func _register_wall_tiles() -> int:
-	var count = 0
-	
-	for cell in wall_tilemap.get_used_cells(0):
-		var tile_coords = Vector2i(cell.x, cell.y)
-		var tile_data = _ensure_tile_exists(tile_coords, 0)
-		
-		var wall_material = _determine_wall_material(tile_coords)
-		tile_data[TileLayer.WALL] = {
-			"type": "wall",
-			"material": wall_material,
-			"health": 100
-		}
-		tile_data["is_walkable"] = false
-		count += 1
-	
-	return count
-
-func _register_object_tiles() -> int:
-	var objects_tilemap = get_node_or_null("VisualTileMap/ObjectsTileMap")
-	if not objects_tilemap:
-		return 0
-	
-	var count = 0
-	
-	for cell in objects_tilemap.get_used_cells(0):
-		var tile_coords = Vector2i(cell.x, cell.y)
-		var tile_data = _ensure_tile_exists(tile_coords, 0)
-		
-		_register_object_at_tile(tile_data, tile_coords, objects_tilemap)
-		count += 1
-	
-	return count
-
 func _ensure_tile_exists(coords: Vector2i, z_level: int) -> Dictionary:
 	var tile_data = get_tile_data(coords, z_level)
 	if not tile_data:
 		tile_data = add_tile(Vector3(coords.x, coords.y, z_level))
 	return tile_data
-
-func _determine_floor_type(coords: Vector2i) -> String:
-	var tile_data_obj = floor_tilemap.get_cell_tile_data(0, coords)
-	if tile_data_obj:
-		var terrain_id = tile_data_obj.terrain
-		var floor_type = _get_floor_type_from_terrain(terrain_id)
-		if floor_type:
-			return floor_type
-	
-	var atlas_coords = floor_tilemap.get_cell_atlas_coords(0, coords)
-	return _get_floor_type_from_atlas(atlas_coords)
-
-func _get_floor_type_from_terrain(terrain_id: int) -> String:
-	var visualizer = get_node_or_null("VisualTileMap/TileMapVisualizer")
-	if visualizer and "floor_terrain_mapping" in visualizer:
-		for type_name in visualizer.floor_terrain_mapping.keys():
-			var terrain_info = visualizer.floor_terrain_mapping[type_name]
-			if terrain_info.terrain == terrain_id:
-				return type_name
-	return ""
-
-func _get_floor_type_from_atlas(atlas_coords: Vector2i) -> String:
-	match atlas_coords.y:
-		0: return "metal"
-		1: return "carpet"
-		_: return "floor"
-
-func _determine_wall_material(coords: Vector2i) -> String:
-	var tile_data_obj = wall_tilemap.get_cell_tile_data(0, coords)
-	if tile_data_obj:
-		var terrain_id = tile_data_obj.terrain
-		var wall_material = _get_wall_material_from_terrain(terrain_id)
-		if wall_material:
-			return wall_material
-	
-	var atlas_coords = wall_tilemap.get_cell_atlas_coords(0, coords)
-	return _get_wall_material_from_atlas(atlas_coords)
-
-func _get_wall_material_from_terrain(terrain_id: int) -> String:
-	var visualizer = get_node_or_null("VisualTileMap/TileMapVisualizer")
-	if visualizer and "wall_terrain_mapping" in visualizer:
-		for type_name in visualizer.wall_terrain_mapping.keys():
-			var terrain_info = visualizer.wall_terrain_mapping[type_name]
-			if terrain_info.terrain == terrain_id:
-				return type_name
-	return ""
-
-func _get_wall_material_from_atlas(atlas_coords: Vector2i) -> String:
-	match atlas_coords.y:
-		1: return "insulated"
-		2: return "glass"
-		_: return "metal"
-
-func _register_object_at_tile(tile_data: Dictionary, coords: Vector2i, objects_tilemap: TileMap):
-	# Register any special objects found at this tile
-	pass
 
 func _update_tilemap_wall(coords: Vector2i, z_level: int, wall_exists: bool):
 	if wall_tilemap and z_level == 0:
@@ -979,39 +1099,6 @@ func _update_tilemap_wall(coords: Vector2i, z_level: int, wall_exists: bool):
 			wall_tilemap.set_cell(0, coords, 0, Vector2i(0, 0))
 		else:
 			wall_tilemap.set_cell(0, coords, -1)
-
-func _initialize_z_level_atmosphere(z: int, standard_atmosphere: Dictionary) -> int:
-	var tiles_to_init = []
-	
-	if z in world_data:
-		for coords in world_data[z]:
-			var tile = world_data[z][coords]
-			
-			if TileLayer.ATMOSPHERE in tile:
-				atmosphere_system.add_active_cell(Vector3(coords.x, coords.y, z))
-				continue
-			
-			if TileLayer.FLOOR in tile:
-				tiles_to_init.append(coords)
-	
-	if z == 0 and floor_tilemap:
-		_add_tilemap_atmosphere_tiles(tiles_to_init, z)
-	
-	for coords in tiles_to_init:
-		add_atmosphere_to_tile(coords, z, standard_atmosphere)
-	
-	return tiles_to_init.size()
-
-func _add_tilemap_atmosphere_tiles(tiles_to_init: Array, z: int):
-	for cell in floor_tilemap.get_used_cells(0):
-		if cell in tiles_to_init:
-			continue
-		
-		if not (z in world_data and cell in world_data[z]):
-			add_tile(Vector3(cell.x, cell.y, z))
-		
-		if not (z in world_data and cell in world_data[z] and TileLayer.ATMOSPHERE in world_data[z][cell]):
-			tiles_to_init.append(cell)
 
 func _determine_tile_atmosphere(tile: Dictionary, standard_atmosphere: Dictionary) -> Dictionary:
 	if "tile_type" in tile:
@@ -1075,29 +1162,9 @@ func _create_bidirectional_z_connection(point: Vector2, z: int, lower_tile: Dict
 		"target": Vector3(point.x, point.y, z)
 	}
 
-func _detect_rooms_for_z_level(z: int):
-	if not world_data.has(z):
-		return
-
-	var layer = world_data[z]
-	if typeof(layer) != TYPE_DICTIONARY:
-		return
-
-	var visited = {}
-	var room_id = 0
-	
-	for coords in layer.keys():
-		if coords in visited:
-			continue
-		
-		var room_tiles = _flood_fill_room(coords, z, visited)
-		if room_tiles.size() > 0:
-			_create_room(room_id, room_tiles, z)
-			room_id += 1
-
-func _flood_fill_room(start_coords: Vector2i, z_level: int, visited: Dictionary) -> Array:
+func _flood_fill_room(start_coord: Vector2i, z_level: int, visited: Dictionary) -> Array:
 	var room_tiles = []
-	var to_visit = [start_coords]
+	var to_visit = [start_coord]
 	
 	while to_visit.size() > 0:
 		var current = to_visit.pop_front()
@@ -1362,6 +1429,8 @@ func _setup_initial_chunks():
 		load_chunks_around(spawn_pos, 0, 2)
 
 func _initialize_chunk_culling():
+	await get_tree().process_frame
+	
 	var culling_system = ChunkCullingSystem.new()
 	culling_system.name = "ChunkCullingSystem"
 	add_child(culling_system)
@@ -1377,34 +1446,6 @@ func _setup_culling_optimization(culling_system: Node):
 		culling_system.occlusion_enabled = optimization_manager.settings.occlusion_culling
 		optimization_manager.connect("settings_changed", Callable(self, "_on_optimization_settings_changed"))
 
-func _initialize_space_tiles():
-	var perimeter_tiles = _find_perimeter_tiles()
-	
-	if is_multiplayer_active and not is_server:
-		return
-	
-	_generate_space_around_perimeter(perimeter_tiles)
-
-func _find_perimeter_tiles() -> Array:
-	var perimeter_tiles = []
-	
-	if zone_tilemap:
-		perimeter_tiles = _find_zone_perimeter_tiles()
-	else:
-		perimeter_tiles = _find_wall_perimeter_tiles()
-	
-	return perimeter_tiles
-
-func _find_zone_perimeter_tiles() -> Array:
-	var perimeter_tiles = []
-	var zone_tiles = zone_tilemap.get_used_cells(0)
-	
-	for zone_tile in zone_tiles:
-		if _is_perimeter_tile(zone_tile):
-			perimeter_tiles.append(zone_tile)
-	
-	return perimeter_tiles
-
 func _is_perimeter_tile(tile: Vector2i) -> bool:
 	var neighbors = [
 		Vector2i(tile.x + 1, tile.y),
@@ -1418,53 +1459,6 @@ func _is_perimeter_tile(tile: Vector2i) -> bool:
 			return true
 	
 	return false
-
-func _find_wall_perimeter_tiles() -> Array:
-	var perimeter_tiles = []
-	
-	for z in world_data.keys():
-		if int(z) != 0:
-			continue
-		
-		for coords in world_data[z].keys():
-			if is_wall_at(coords, z) and _has_empty_neighbors(coords, z):
-				perimeter_tiles.append(coords)
-	
-	return perimeter_tiles
-
-func _has_empty_neighbors(coords: Vector2i, z_level: int) -> bool:
-	var neighbors = [
-		Vector2i(coords.x + 1, coords.y),
-		Vector2i(coords.x - 1, coords.y),
-		Vector2i(coords.x, coords.y + 1),
-		Vector2i(coords.x, coords.y - 1)
-	]
-	
-	for neighbor in neighbors:
-		if not is_valid_tile(neighbor, z_level):
-			return true
-	
-	return false
-
-func _generate_space_around_perimeter(perimeter_tiles: Array):
-	var space_count = 0
-	
-	for perimeter_tile in perimeter_tiles:
-		space_count += _generate_space_grid_around_tile(perimeter_tile)
-
-func _generate_space_grid_around_tile(tile: Vector2i) -> int:
-	var space_count = 0
-	
-	for x in range(-3, 4):
-		for y in range(-3, 4):
-			var space_tile = Vector2i(tile.x + x, tile.y + y)
-			
-			if _should_skip_space_tile(space_tile):
-				continue
-			
-			space_count += _create_or_update_space_tile(space_tile)
-	
-	return space_count
 
 func _should_skip_space_tile(coords: Vector2i) -> bool:
 	if zone_tilemap and zone_tilemap.get_cell_source_id(0, coords) != -1:
@@ -1578,12 +1572,12 @@ func _has_existing_tile(coords: Vector2i, z_level: int) -> bool:
 func _should_generate_tile(coords: Vector2i, bounds: Dictionary, is_station_chunk: bool) -> bool:
 	return _has_existing_tile(coords, 0)
 
-func _should_create_space_tile(coords: Vector2i, bounds: Dictionary, is_station_chunk: bool) -> bool:
+func _should_create_space_tile(tile_coords: Vector2i, bounds: Dictionary, is_station_chunk: bool) -> bool:
 	if is_station_chunk:
 		return false
 	
-	var is_edge = (coords.x == bounds.start_x or coords.x == bounds.end_x or 
-				   coords.y == bounds.start_y or coords.y == bounds.end_y)
+	var is_edge = (tile_coords.x == bounds.start_x or tile_coords.x == bounds.end_x or 
+				   tile_coords.y == bounds.start_y or tile_coords.y == bounds.end_y)
 	
 	return is_edge and randf() < space_tile_probability
 
@@ -1666,7 +1660,6 @@ func _update_player_states():
 	pass
 
 func _process_entity_updates():
-	# Process entity updates in batches for performance
 	pass
 
 func _create_player_node() -> Node2D:
@@ -1759,10 +1752,6 @@ func _calculate_center_position(cells: Array) -> Vector2:
 		(sum_y / cells.size()) * tile_size
 	)
 
-# =============================================================================
-# RPC METHODS
-# =============================================================================
-
 @rpc("authority", "call_remote", "reliable")
 func network_sync_chunks(chunk_positions, z_level):
 	if is_server:
@@ -1832,10 +1821,6 @@ func _apply_wall_toggle_result(coords: Vector2i, z_level: int, wall_exists: bool
 func network_request_wall_toggle(x, y, z_level):
 	if is_server:
 		toggle_wall_at(Vector2i(x, y), z_level)
-
-# =============================================================================
-# SIGNAL HANDLERS
-# =============================================================================
 
 func _on_player_spawned(node):
 	if node.is_in_group("player_controller"):

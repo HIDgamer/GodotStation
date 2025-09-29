@@ -1,0 +1,67 @@
+[gd_scene load_steps=8 format=3 uid="uid://cq67glaa2tdkw"]
+
+[ext_resource type="Script" uid="uid://bfj73ll6r08pv" path="res://Code/Items/Uniform/Back.gd" id="1_kta7v"]
+[ext_resource type="Texture2D" uid="uid://bagv35vyuuoqg" path="res://Assets/Icons/Items/Storage/Backpacks/Marinesatch_Medic.png" id="2_uausy"]
+[ext_resource type="Texture2D" uid="uid://b4w5cdeumxtl" path="res://Assets/Icons/Clothing/Backpacks/Medic_Satchel.png" id="3_u8r5p"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8g1yf"]
+atlas = ExtResource("2_uausy")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qlc72"]
+atlas = ExtResource("2_uausy")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_00b54"]
+atlas = ExtResource("2_uausy")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_n1nwl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8g1yf")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qlc72")
+}],
+"loop": true,
+"name": &"half",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_00b54")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="Medic_Satchel" type="Node2D"]
+script = ExtResource("1_kta7v")
+drag_unequip = true
+storage_type = 1
+storage_max_size = 10
+has_open_close_animation = true
+item_name = "Medic_Satchel"
+w_class = 4
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_n1nwl")
+animation = &"open"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_u8r5p")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(8, -8, 7, -8, 7, -4, 2, -4, 2, -5, -3, -5, -3, -4, -10, -4, -10, 10, 7, 10, 7, 11, 8, 11, 8, 12, 11, 12, 11, -9, 8, -9)

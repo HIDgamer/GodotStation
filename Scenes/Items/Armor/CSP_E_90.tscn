@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=3 uid="uid://bghoygk43oluq"]
+
+[ext_resource type="Script" uid="uid://b30v47uc3dumj" path="res://Code/Items/Armor/Armor.gd" id="1_3ript"]
+[ext_resource type="Texture2D" uid="uid://dk0idk0jrkk44" path="res://Assets/Icons/Items/Clothing/Suits/Combat_Synthetic_Suit.png" id="2_nia3k"]
+[ext_resource type="Texture2D" uid="uid://4103toof0elh" path="res://Assets/Icons/Clothing/Suit/Combat_Synthetic_Suit.png" id="3_nwqdo"]
+
+[node name="CSP_E_90" type="Node2D"]
+script = ExtResource("1_3ript")
+fire_resist = 200.0
+armor_melee = 150
+armor_bullet = 230
+armor_laser = 120
+armor_energy = 120
+armor_bomb = 200
+armor_bio = 120
+armor_internal_damage = 200
+storage_type = 2
+storage_max_size = 3
+storage_slots = 3
+max_storage_space = 3
+item_name = "CSP_E_90"
+w_class = 6
+equip_delay = 0.6
+unequip_delay = 0.6
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_nia3k")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_nwqdo")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+visible = false
+polygon = PackedVector2Array(-3, -10, -3, -9, -5, -9, -5, -8, -6, -8, -6, -7, -7, -7, -7, -5, -8, -5, -8, -3, -9, -3, -9, -1, -6, -1, -6, -2, -5, -2, -5, 1, -6, 1, -6, 7, -5, 7, -5, 8, -6, 8, -6, 11, -4, 11, -4, 10, -1, 10, -1, 8, -3, 8, -3, 7, -4, 7, -4, 6, -2, 6, -2, 7, -1, 7, -1, 5, -2, 5, -2, 4, -3, 4, -3, 3, 2, 3, 2, 4, 1, 4, 1, 5, 0, 5, 0, 7, 1, 7, 1, 6, 3, 6, 3, 7, 2, 7, 2, 8, 0, 8, 0, 10, 3, 10, 3, 11, 5, 11, 5, 8, 4, 8, 4, 7, 5, 7, 5, 1, 4, 1, 4, -2, 5, -2, 5, -1, 8, -1, 8, -3, 7, -3, 7, -5, 6, -5, 6, -7, 5, -7, 5, -8, 4, -8, 4, -9, 2, -9, 2, -10)

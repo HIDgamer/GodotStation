@@ -762,6 +762,107 @@ theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "▶"
 
+[node name="WhitelistTab" type="PanelContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_section")
+
+[node name="WhitelistMargin" type="MarginContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="WhitelistContent" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="WhitelistHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "🔐 SECURITY CLEARANCE"
+
+[node name="WhitelistTypeOption" type="OptionButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+
+[node name="PlayerStatusOption" type="OptionButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+
+[node name="SyntheticControls" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SyntheticHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent/SyntheticControls"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "🤖 SYNTHETIC CONFIGURATION"
+
+[node name="SyntheticGenerationOption" type="OptionButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent/SyntheticControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+
+[node name="WardrobeHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent/SyntheticControls"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "Wardrobe Configuration:"
+
+[node name="WardrobeScrollContainer" type="ScrollContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent/SyntheticControls"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="WardrobeContainer" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent/SyntheticControls/WardrobeScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="COControls" type="VBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="COHeader" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent/COControls"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "⚔️ COMMANDING OFFICER"
+
+[node name="WeaponLabel" type="Label" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent/COControls"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "Weapon Selection:"
+
+[node name="COWeaponOption" type="OptionButton" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/TabSection/WhitelistTab/WhitelistMargin/WhitelistContent/COControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_input")
+
 [node name="ActionBar" type="HBoxContainer" parent="MainInterface/LeftPanel/LeftMargin/LeftContent"]
 layout_mode = 2
 theme_override_constants/separation = 6
@@ -775,6 +876,16 @@ theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 text = "🎲 RANDOM"
+
+[node name="ToggleAttireButton" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/ActionBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 1, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "👖Toggle Clothing"
 
 [node name="CancelButton" type="Button" parent="MainInterface/LeftPanel/LeftMargin/LeftContent/ActionBar"]
 unique_name_in_owner = true

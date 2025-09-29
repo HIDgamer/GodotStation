@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3 uid="uid://q4i1qhrhmavc"]
+
+[ext_resource type="Script" uid="uid://b30v47uc3dumj" path="res://Code/Items/Armor/Armor.gd" id="1_pvlcq"]
+[ext_resource type="Texture2D" uid="uid://bsvnljmqmycwa" path="res://Assets/Icons/Items/Clothing/Suits/CMB_Armor.png" id="2_y4ggp"]
+[ext_resource type="Texture2D" uid="uid://5bqxysgyyj1e" path="res://Assets/Icons/Clothing/Suit/CMP_Riot_Armor.png" id="3_k35ye"]
+
+[node name="CMP_Riot_Armor" type="Node2D"]
+script = ExtResource("1_pvlcq")
+armor_melee = 200
+armor_bullet = 150
+armor_energy = 50
+armor_bomb = 30
+armor_bio = 30
+armor_internal_damage = 50
+storage_type = 2
+storage_max_size = 2
+storage_slots = 2
+max_storage_space = 2
+item_name = "CMP_Riot_Armor"
+w_class = 6
+equip_delay = 0.5
+unequip_delay = 0.5
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_y4ggp")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_k35ye")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -7, -5, -6, -6, -6, -6, -5, -7, -5, -7, -4, -8, -4, -8, -2, -7, -2, -7, -1, -5, -1, -5, 2, -4, 2, -4, 5, -3, 5, -3, 6, -2, 6, -2, 7, 1, 7, 1, 6, 2, 6, 2, 5, 3, 5, 3, 2, 4, 2, 4, -1, 6, -1, 6, -2, 7, -2, 7, -4, 6, -4, 6, -5, 5, -5, 5, -6, 4, -6, 4, -7, 1, -7, 1, -6, -2, -6, -2, -7)

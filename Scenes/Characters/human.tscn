@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://c6mxm7u3f5n4g"]
+[gd_scene load_steps=45 format=3 uid="uid://c6mxm7u3f5n4g"]
 
 [ext_resource type="Script" uid="uid://b2bi0dloqd2xs" path="res://Code/Humanoids/Controllers/Controller.gd" id="1_uwpdh"]
 [ext_resource type="AudioStream" uid="uid://xljtqhwduorn" path="res://Sound/weapons/punch1.ogg" id="2_6kg4y"]
@@ -12,21 +12,23 @@
 [ext_resource type="Script" uid="uid://dj4qyr2yg1rim" path="res://Code/Humanoids/Controllers/HealthConnector.gd" id="5_ntngp"]
 [ext_resource type="Script" uid="uid://dh2tm0dwjxdiw" path="res://Code/Humanoids/Systems/HealthSystem.gd" id="6_nypa4"]
 [ext_resource type="Script" uid="uid://ctk7b455p47ul" path="res://Code/OnClick/ClickComponent.gd" id="6_sjx5i"]
-[ext_resource type="Script" uid="uid://dbg635erwfw8b" path="res://Code/Humanoids/Systems/VisionComponent.gd" id="7_nypa4"]
+[ext_resource type="Script" uid="uid://dbg635erwfw8b" path="res://Code/Humanoids/Components/VisionComponent.gd" id="7_nypa4"]
 [ext_resource type="Script" uid="uid://byp73f8op172y" path="res://Code/Humanoids/Systems/ReagentSystem.gd" id="10_o264j"]
-[ext_resource type="Script" uid="uid://co3fb4yan7sep" path="res://Code/Humanoids/Systems/WeaponHandlingComponent.gd" id="15_ntngp"]
-[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Humanoids/Systems/MovementComponent.gd" id="16_gwepp"]
-[ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Humanoids/Systems/ZLevelMovementComponent.gd" id="17_o264j"]
-[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Humanoids/Systems/InteractionComponent.gd" id="17_sjx5i"]
-[ext_resource type="Script" uid="uid://c3u73hjth48ct" path="res://Code/Humanoids/Systems/ItemInteractionComponent.gd" id="18_3dn6y"]
-[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Humanoids/Systems/StatusEffectComponent.gd" id="19_vb0nj"]
-[ext_resource type="Script" uid="uid://dahxqtbwo8bw7" path="res://Code/Humanoids/Systems/BodyTargetingComponent.gd" id="20_38qpi"]
-[ext_resource type="Script" uid="uid://57gv3jq6b82j" path="res://Code/Humanoids/Systems/GrabPullComponent.gd" id="21_3u27n"]
-[ext_resource type="Script" uid="uid://crcieeppmdsku" path="res://Code/Humanoids/Systems/PostureComponent.gd" id="22_3dn6y"]
-[ext_resource type="Script" uid="uid://c0gd3pjre5rg0" path="res://Code/Humanoids/Systems/SkillComponent.gd" id="23_3dn6y"]
-[ext_resource type="Script" uid="uid://bu4qlco8mbb3m" path="res://Code/Humanoids/Systems/IntentComponent.gd" id="23_vb0nj"]
+[ext_resource type="Script" uid="uid://co3fb4yan7sep" path="res://Code/Humanoids/Components/WeaponHandlingComponent.gd" id="15_ntngp"]
+[ext_resource type="Script" uid="uid://cl82bkxuc28j" path="res://Code/Humanoids/Components/MovementComponent.gd" id="16_gwepp"]
+[ext_resource type="Script" uid="uid://bbv4x26754up" path="res://Code/Humanoids/Components/ZLevelMovementComponent.gd" id="17_o264j"]
+[ext_resource type="Script" uid="uid://ca4n5hj0ijsn6" path="res://Code/Humanoids/Components/InteractionComponent.gd" id="17_sjx5i"]
+[ext_resource type="Script" uid="uid://c3u73hjth48ct" path="res://Code/Humanoids/Components/ItemInteractionComponent.gd" id="18_3dn6y"]
+[ext_resource type="Script" uid="uid://ceqlv6f14jwgs" path="res://Code/Humanoids/Components/StatusEffectComponent.gd" id="19_vb0nj"]
+[ext_resource type="Script" uid="uid://dahxqtbwo8bw7" path="res://Code/Humanoids/Components/BodyTargetingComponent.gd" id="20_38qpi"]
+[ext_resource type="Script" uid="uid://57gv3jq6b82j" path="res://Code/Humanoids/Components/GrabPullComponent.gd" id="21_3u27n"]
+[ext_resource type="Script" uid="uid://crcieeppmdsku" path="res://Code/Humanoids/Components/PostureComponent.gd" id="22_3dn6y"]
+[ext_resource type="Script" uid="uid://c0gd3pjre5rg0" path="res://Code/Humanoids/Components/SkillComponent.gd" id="23_3dn6y"]
+[ext_resource type="Script" uid="uid://bu4qlco8mbb3m" path="res://Code/Humanoids/Components/IntentComponent.gd" id="23_vb0nj"]
 [ext_resource type="Script" uid="uid://dilpklot1quje" path="res://Code/Helpers/SensorySystem.gd" id="24_38qpi"]
 [ext_resource type="Texture2D" uid="uid://b0tfvqv883853" path="res://Assets/Effects/Light/light_224.png" id="24_vb0nj"]
+[ext_resource type="Script" uid="uid://b1jm4ncthdjdq" path="res://Code/Humanoids/Components/DoAfterComponent.gd" id="25_gb7n1"]
+[ext_resource type="Texture2D" uid="uid://cqglc2mfqbup1" path="res://Assets/Effects/DoAfter/Do_after_Tinker.png" id="26_l4g0b"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kqdsm"]
 atlas = ExtResource("4_vqrbj")
@@ -137,38 +139,6 @@ animations = [{
 "speed": 15.0
 }]
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_bgoxp"]
-properties/0/path = NodePath(".:position")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:can_be_interacted_with")
-properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath(".:entity_type")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:no_pull")
-properties/3/spawn = true
-properties/3/replication_mode = 1
-properties/4/path = NodePath(".:is_lying")
-properties/4/spawn = true
-properties/4/replication_mode = 1
-properties/5/path = NodePath(".:is_stunned")
-properties/5/spawn = true
-properties/5/replication_mode = 1
-properties/6/path = NodePath(".:health")
-properties/6/spawn = true
-properties/6/replication_mode = 1
-properties/7/path = NodePath(".:max_health")
-properties/7/spawn = true
-properties/7/replication_mode = 1
-properties/8/path = NodePath("HumanSpriteSystem:position")
-properties/8/spawn = true
-properties/8/replication_mode = 1
-properties/9/path = NodePath("Effect:position")
-properties/9/spawn = true
-properties/9/replication_mode = 1
-
 [node name="GridMovementController" type="Node2D" groups=["player_controller"]]
 script = ExtResource("1_uwpdh")
 entity_type = "mob"
@@ -179,6 +149,20 @@ destroy_sound = ExtResource("3_yoeyc")
 layer = 128
 
 [node name="HumanSpriteSystem" parent="." instance=ExtResource("3_lq0mj")]
+sprite_frames_horizontal = null
+sprite_frames_vertical = null
+sprite_frame_width = null
+sprite_frame_height = null
+auto_initialize_on_ready = null
+thrust_animation_duration = null
+thrust_return_duration = null
+thrust_distance = null
+lying_offset = null
+sync_direction_changes = null
+_sync_lying_state = null
+sync_customization = null
+debug_sprite_updates = null
+log_texture_loading = null
 
 [node name="Camera2D" type="Camera2D" parent="." groups=["PlayerCamera"]]
 zoom = Vector2(2, 2)
@@ -191,7 +175,7 @@ script = ExtResource("2_8mbkt")
 target_path = NodePath("..")
 camera_easing = 2
 camera_transition = 0
-default_zoom = Vector2(3, 3)
+default_zoom = Vector2(2.5, 2.5)
 
 [node name="Effect" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_sq5fq")
@@ -237,8 +221,6 @@ metadata/_custom_type_script = "uid://cl82bkxuc28j"
 
 [node name="ZLevelMovementComponent" type="Node" parent="."]
 script = ExtResource("17_o264j")
-ladder_climb_sound = "catwalk1"
-movement_sound = "catwalk1"
 metadata/_custom_type_script = "uid://bbv4x26754up"
 
 [node name="InteractionComponent" type="Node" parent="."]
@@ -288,6 +270,15 @@ metadata/_custom_type_script = "uid://crcieeppmdsku"
 script = ExtResource("23_vb0nj")
 metadata/_custom_type_script = "uid://bu4qlco8mbb3m"
 
+[node name="DoAfterComponent" type="Node" parent="."]
+script = ExtResource("25_gb7n1")
+default_spritesheet = ExtResource("26_l4g0b")
+default_frame_count = 20
+animation_fps = 15.0
+indicator_offset = Vector2(0, 0)
+allow_facing_changes = true
+metadata/_custom_type_script = "uid://b1jm4ncthdjdq"
+
 [node name="SkillComponent" type="Node" parent="."]
 script = ExtResource("23_3dn6y")
 skillset_name = "marine"
@@ -297,12 +288,7 @@ metadata/_custom_type_script = "uid://c0gd3pjre5rg0"
 script = ExtResource("24_38qpi")
 metadata/_custom_type_script = "uid://dilpklot1quje"
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_bgoxp")
-visibility_update_mode = 1
-
 [node name="AmbientLight" type="PointLight2D" parent="."]
-energy = 0.3
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 5.0

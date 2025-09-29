@@ -1,12 +1,11 @@
 extends Node
 class_name ThreadManager
 
-var MAX_WORKER_THREADS = 4
-var TASK_QUEUE_LIMIT = 100
-var FRAME_BUDGET_MS = 8.0
-var FRAME_BUDGET_STARTUP_MS = 16.0
-var THREAD_SHUTDOWN_TIMEOUT_MS = 2000
-var TASK_TIMEOUT_MS = 10000
+var MAX_WORKER_THREADS = 2
+var TASK_QUEUE_LIMIT = 30
+var FRAME_BUDGET_MS = 3.0
+var THREAD_SHUTDOWN_TIMEOUT_MS = 500
+var TASK_TIMEOUT_MS = 3000
 
 enum TaskPriority {
 	CRITICAL,
@@ -35,107 +34,76 @@ var completed_tasks = []
 var active_tasks = {}
 var thread_mutex = Mutex.new()
 var result_mutex = Mutex.new()
-var shutdown_mutex = Mutex.new()
 var world_data_mutex = Mutex.new()
 
 var scene_pools = {}
 var scene_cache = {}
 var pooled_scene_limits = {
-	"Characters": 20,
-	"Effects": 50,
-	"Items": 100,
-	"UI": 10
+	"Characters": 3,
+	"Effects": 8,
+	"Items": 10,
+	"UI": 2
 }
 
 var task_performance = {}
-var queue_warnings_sent = 0
-var last_performance_report = 0
-var failed_tasks = {}
-
 var world_ref = null
 var thread_safe_world_data = {}
 
 var is_shutting_down = false
 var is_initialized = false
-var startup_complete = false
-var startup_timer = 0.0
+var threads_created = false
+var last_task_time = 0
+var idle_thread_shutdown_delay = 8000
+var performance_check_interval = 15000
+var last_performance_check = 0
 
 signal task_completed(task_id, result)
-signal scene_pool_ready(category, pool_size)
-signal entity_batch_processed(batch_id, results)
 signal performance_warning(task_type, execution_time)
 signal thread_error(thread_id, error_message)
 
 func _init():
 	name = "ThreadManager"
 	add_to_group("thread_manager")
-	preload_critical_resources()
 
 func _ready():
-	if not is_initialized and not is_shutting_down:
-		initialize_thread_system()
+	set_process(false)
+	is_initialized = true
 
 func _process(delta):
-	if not is_initialized:
+	if is_shutting_down or not is_initialized:
 		return
 	
-	if not startup_complete:
-		startup_timer += delta
-		if startup_timer > 3.0:
-			startup_complete = true
-			print("ThreadManager: Startup phase completed")
+	var frame_start = Time.get_ticks_msec()
+	var budget_remaining = FRAME_BUDGET_MS
 	
-	if is_shutting_down:
-		return
-	
-	process_completed_tasks()
-	process_main_thread_tasks()
-	
-	if startup_complete:
-		monitor_system_health()
+	if has_pending_work():
+		if not threads_created:
+			create_worker_threads_if_needed()
+			budget_remaining -= (Time.get_ticks_msec() - frame_start)
+			if budget_remaining <= 0:
+				return
+		
+		process_completed_tasks()
+		budget_remaining -= (Time.get_ticks_msec() - frame_start)
+		if budget_remaining <= 1:
+			return
+		
+		process_main_thread_tasks(budget_remaining)
+	else:
+		check_idle_thread_shutdown()
 	
 	var current_time = Time.get_ticks_msec()
-	if current_time - last_performance_report > 5000:
-		report_performance()
-		last_performance_report = current_time
+	if current_time - last_performance_check > performance_check_interval:
+		cleanup_old_performance_data()
+		last_performance_check = current_time
 
-func _exit_tree():
-	shutdown_all_threads()
+func has_pending_work() -> bool:
+	return task_queue.size() > 0 or completed_tasks.size() > 0 or active_tasks.size() > 0
 
-func preload_critical_resources():
-	var dummy_mutex = Mutex.new()
-	var dummy_thread = Thread.new()
-	setup_performance_tracking()
-	for i in range(10):
-		randi()
-
-func initialize_thread_system():
-	if is_initialized or is_shutting_down:
+func create_worker_threads_if_needed():
+	if threads_created or is_shutting_down:
 		return
 	
-	print("ThreadManager: Starting optimized initialization...")
-	var init_start_time = Time.get_ticks_msec()
-	
-	cleanup_orphaned_threads()
-	initialize_scene_pools()
-	initialize_worker_threads()
-	
-	is_initialized = true
-	
-	var init_time = Time.get_ticks_msec() - init_start_time
-	print("ThreadManager: Initialization completed in ", init_time, "ms")
-
-func cleanup_orphaned_threads():
-	for worker in worker_threads:
-		if worker and is_instance_valid(worker):
-			worker.force_shutdown()
-	
-	worker_threads.clear()
-	task_queue.clear()
-	completed_tasks.clear()
-	active_tasks.clear()
-
-func initialize_worker_threads():
 	for i in range(MAX_WORKER_THREADS):
 		var worker = WorkerThread.new()
 		worker.thread_id = i
@@ -147,42 +115,36 @@ func initialize_worker_threads():
 		
 		if worker.start():
 			worker_threads.append(worker)
-			print("ThreadManager: Worker thread ", i, " started successfully")
 		else:
-			print("ThreadManager: Failed to start worker thread ", i)
 			worker.cleanup()
+	
+	threads_created = true
+	set_process(true)
 
-func initialize_scene_pools():
-	for category in pooled_scene_limits.keys():
-		scene_pools[category] = []
-	call_deferred("create_initial_pools")
+func check_idle_thread_shutdown():
+	var current_time = Time.get_ticks_msec()
+	
+	if current_time - last_task_time > idle_thread_shutdown_delay and threads_created:
+		shutdown_idle_threads()
 
-func create_initial_pools():
-	for category in pooled_scene_limits.keys():
-		var initial_count = min(3, pooled_scene_limits[category] / 4)
-		create_pooled_scenes(category, initial_count)
-
-func setup_performance_tracking():
-	for task_type in TaskType.values():
-		task_performance[task_type] = {
-			"total_time": 0.0,
-			"count": 0,
-			"avg_time": 0.0,
-			"max_time": 0.0,
-			"failures": 0
-		}
+func shutdown_idle_threads():
+	for worker in worker_threads:
+		if worker and is_instance_valid(worker):
+			worker.request_shutdown()
+	
+	worker_threads.clear()
+	threads_created = false
+	set_process(false)
 
 func submit_task(task_type: TaskType, priority: TaskPriority, task_data: Dictionary, callback: Callable = Callable()) -> String:
 	if is_shutting_down or not is_initialized:
 		return ""
 	
 	if task_queue.size() >= TASK_QUEUE_LIMIT:
-		if queue_warnings_sent < 5:
-			print("ThreadManager: Task queue at limit, dropping task")
-			queue_warnings_sent += 1
 		return ""
 	
 	var task_id = generate_task_id()
+	last_task_time = Time.get_ticks_msec()
 	
 	var task = {
 		"id": task_id,
@@ -190,8 +152,8 @@ func submit_task(task_type: TaskType, priority: TaskPriority, task_data: Diction
 		"priority": priority,
 		"data": task_data,
 		"callback": callback,
-		"submitted_time": Time.get_ticks_msec(),
-		"timeout": Time.get_ticks_msec() + TASK_TIMEOUT_MS
+		"submitted_time": last_task_time,
+		"timeout": last_task_time + TASK_TIMEOUT_MS
 	}
 	
 	if priority == TaskPriority.CRITICAL:
@@ -202,10 +164,15 @@ func submit_task(task_type: TaskType, priority: TaskPriority, task_data: Diction
 	
 	thread_mutex.lock()
 	task_queue.append(task)
-	task_queue.sort_custom(func(a, b): return a.priority < b.priority)
+	if task_queue.size() > 1:
+		task_queue.sort_custom(func(a, b): return a.priority < b.priority)
 	thread_mutex.unlock()
 	
 	active_tasks[task_id] = task
+	
+	if not is_processing():
+		set_process(true)
+	
 	return task_id
 
 func process_completed_tasks():
@@ -220,11 +187,7 @@ func process_completed_tasks():
 		var execution_time = task_result.execution_time
 		var success = task_result.get("success", true)
 		
-		if success:
-			update_task_performance(task_result.type, execution_time, false)
-		else:
-			update_task_performance(task_result.type, execution_time, true)
-			print("ThreadManager: Task failed: ", task_id, " - ", task_result.get("error", "Unknown error"))
+		update_task_performance(task_result.type, execution_time, not success)
 		
 		task_completed.emit(task_id, result)
 		
@@ -234,13 +197,11 @@ func process_completed_tasks():
 		if task_id in active_tasks:
 			active_tasks.erase(task_id)
 
-func process_main_thread_tasks():
-	var budget = FRAME_BUDGET_STARTUP_MS if not startup_complete else FRAME_BUDGET_MS
-	var budget_remaining = budget
+func process_main_thread_tasks(budget_ms: float):
+	var budget_per_task = budget_ms / 2.0
 	
-	process_pending_scene_creations(budget_remaining * 0.5)
-	process_pending_entity_spawns(budget_remaining * 0.3)
-	process_pending_cleanup(budget_remaining * 0.2)
+	process_pending_scene_creations(budget_per_task)
+	process_pending_cleanup(budget_per_task)
 
 func execute_task_on_main_thread(task: Dictionary):
 	var start_time = Time.get_ticks_msec()
@@ -254,7 +215,7 @@ func execute_task_on_main_thread(task: Dictionary):
 		TaskType.CLEANUP:
 			result = perform_cleanup(task.data)
 		_:
-			print("ThreadManager: Unknown main thread task type: ", task.type)
+			result = {"error": "Unknown task type"}
 	
 	var execution_time = Time.get_ticks_msec() - start_time
 	update_task_performance(task.type, execution_time, false)
@@ -278,10 +239,12 @@ func execute_worker_task(task: Dictionary):
 		TaskType.VISIBILITY_UPDATE:
 			return process_visibility_update_threaded(task.data)
 		_:
-			print("ThreadManager: Unknown worker task type: ", task.type)
-			return null
+			return {"error": "Unknown worker task type"}
 
 func queue_atmosphere_processing(coordinates: Array, priority: TaskPriority = TaskPriority.MEDIUM) -> String:
+	if coordinates.size() > 50:
+		coordinates = coordinates.slice(0, 50)
+	
 	var task_data = {
 		"coordinates": coordinates,
 		"world_data": get_thread_safe_world_snapshot()
@@ -299,7 +262,7 @@ func queue_vision_calculation(entity_pos: Vector2i, z_level: int, vision_radius:
 	var task_data = {
 		"entity_pos": entity_pos,
 		"z_level": z_level,
-		"vision_radius": vision_radius,
+		"vision_radius": min(vision_radius, 10),
 		"vision_blocked_by_doors": vision_blocked_by_doors,
 		"world_data": world_data
 	}
@@ -316,6 +279,9 @@ func queue_visibility_update(tile_updates: Dictionary, visible_tiles: Dictionary
 	return submit_task(TaskType.VISIBILITY_UPDATE, TaskPriority.HIGH, task_data)
 
 func queue_inventory_operations(inventory_data: Array, priority: TaskPriority = TaskPriority.LOW) -> String:
+	if inventory_data.size() > 5:
+		inventory_data = inventory_data.slice(0, 5)
+	
 	var task_data = {
 		"inventories": inventory_data
 	}
@@ -455,7 +421,8 @@ func calculate_atmosphere_data(task_data: Dictionary) -> Dictionary:
 	var world_data = task_data.get("world_data", {})
 	var results = []
 	
-	for coord in coordinates:
+	for i in range(min(coordinates.size(), 25)):
+		var coord = coordinates[i]
 		var pressure = calculate_pressure_at_coordinate(coord, world_data)
 		var temperature = calculate_temperature_at_coordinate(coord, world_data)
 		var gas_mix = calculate_gas_mixture(coord, world_data)
@@ -476,8 +443,13 @@ func detect_rooms(task_data: Dictionary) -> Dictionary:
 	var rooms = {}
 	var visited = {}
 	var room_id = 0
+	var processed_coords = 0
+	var max_coords = 100
 	
 	for coord in world_data.keys():
+		if processed_coords >= max_coords:
+			break
+		
 		if coord in visited:
 			continue
 		
@@ -490,6 +462,8 @@ func detect_rooms(task_data: Dictionary) -> Dictionary:
 				"area": room_tiles.size()
 			}
 			room_id += 1
+		
+		processed_coords += 1
 	
 	return {"rooms": rooms, "z_level": z_level}
 
@@ -510,11 +484,7 @@ func sort_inventory_data(task_data: Dictionary) -> Dictionary:
 	return {"sorted_inventories": sorted_inventories}
 
 func get_pooled_scene(category: String) -> Node:
-	if not scene_pools.has(category):
-		return null
-	
-	if scene_pools[category].is_empty():
-		create_pooled_scenes(category, 5)
+	if not scene_pools.has(category) or scene_pools[category].is_empty():
 		return null
 	
 	return scene_pools[category].pop_front()
@@ -528,30 +498,11 @@ func return_scene_to_pool(scene: Node, category: String):
 	
 	reset_scene_for_pooling(scene)
 	
-	var limit = pooled_scene_limits.get(category, 20)
+	var limit = pooled_scene_limits.get(category, 8)
 	if scene_pools[category].size() < limit:
 		scene_pools[category].append(scene)
 	else:
 		scene.queue_free()
-
-func create_pooled_scenes(category: String, count: int):
-	var scenes_created = 0
-	var start_time = Time.get_ticks_msec()
-	var budget = FRAME_BUDGET_STARTUP_MS if not startup_complete else FRAME_BUDGET_MS
-	
-	while scenes_created < count and (Time.get_ticks_msec() - start_time) < budget:
-		var scene = create_scene_for_category(category)
-		if scene:
-			scene_pools[category].append(scene)
-			scenes_created += 1
-		else:
-			break
-	
-	if scenes_created > 0:
-		scene_pool_ready.emit(category, scene_pools[category].size())
-
-func create_scene_for_category(category: String) -> Node:
-	return null
 
 func reset_scene_for_pooling(scene: Node):
 	if scene.has_method("set_position"):
@@ -565,114 +516,84 @@ func reset_scene_for_pooling(scene: Node):
 
 func set_world_reference(world):
 	world_ref = world
-	update_thread_safe_world_data()
-
-func update_thread_safe_world_data():
-	if not world_ref:
-		return
-	
-	world_data_mutex.lock()
-	if world_ref.has_method("get_thread_safe_data"):
-		thread_safe_world_data = world_ref.get_thread_safe_data()
-	world_data_mutex.unlock()
 
 func get_thread_safe_world_snapshot(z_level: int = -1) -> Dictionary:
+	if not world_ref:
+		return {}
+	
 	world_data_mutex.lock()
 	var data = {}
-	if z_level >= 0 and z_level in thread_safe_world_data:
-		data = thread_safe_world_data[z_level].duplicate(true)
-	else:
-		data = thread_safe_world_data.duplicate(true)
+	
+	if world_ref.has_method("get_thread_safe_data"):
+		var full_data = world_ref.get_thread_safe_data()
+		if z_level >= 0 and z_level in full_data:
+			data = full_data[z_level].duplicate(true)
+		else:
+			data = full_data.duplicate(true)
+	elif world_ref.has_method("get_tile_data"):
+		data = _extract_basic_world_data(z_level)
+	
 	world_data_mutex.unlock()
 	return data
 
+func _extract_basic_world_data(z_level: int) -> Dictionary:
+	var data = {}
+	
+	if z_level >= 0:
+		for x in range(-25, 26):
+			for y in range(-25, 26):
+				var tile_pos = Vector2i(x, y)
+				var tile_data = world_ref.get_tile_data(tile_pos, z_level)
+				if tile_data:
+					data[tile_pos] = {"blocks_vision": tile_data.get("is_walkable", true) == false}
+	
+	return data
+
 func update_task_performance(task_type: TaskType, execution_time: float, is_failure: bool):
-	if task_type in task_performance:
-		var perf = task_performance[task_type]
-		perf.total_time += execution_time
-		perf.count += 1
-		perf.avg_time = perf.total_time / perf.count
-		perf.max_time = max(perf.max_time, execution_time)
-		
-		if is_failure:
-			perf.failures += 1
-		
-		if execution_time > 50:
-			performance_warning.emit(task_type, execution_time)
-
-func monitor_system_health():
-	check_task_timeouts()
-	check_thread_health()
-	monitor_queue_health()
-
-func check_task_timeouts():
-	var current_time = Time.get_ticks_msec()
-	var timed_out_tasks = []
+	if not task_performance.has(task_type):
+		task_performance[task_type] = {
+			"total_time": 0.0,
+			"count": 0,
+			"avg_time": 0.0,
+			"max_time": 0.0,
+			"failures": 0
+		}
 	
-	for task_id in active_tasks.keys():
-		var task = active_tasks[task_id]
-		if current_time > task.get("timeout", current_time + 1000):
-			timed_out_tasks.append(task_id)
+	var perf = task_performance[task_type]
+	perf.total_time += execution_time
+	perf.count += 1
+	perf.avg_time = perf.total_time / perf.count
+	perf.max_time = max(perf.max_time, execution_time)
 	
-	for task_id in timed_out_tasks:
-		print("ThreadManager: Task timeout: ", task_id)
-		if task_id in active_tasks:
-			var task = active_tasks[task_id]
-			update_task_performance(task.type, TASK_TIMEOUT_MS, true)
-			active_tasks.erase(task_id)
+	if is_failure:
+		perf.failures += 1
+	
+	if execution_time > 50:
+		performance_warning.emit(task_type, execution_time)
 
-func check_thread_health():
-	for i in range(worker_threads.size() - 1, -1, -1):
-		var worker = worker_threads[i]
-		if not worker or not is_instance_valid(worker) or not worker.is_healthy():
-			print("ThreadManager: Removing unhealthy worker thread ", i)
-			if worker:
-				worker.force_shutdown()
-			worker_threads.remove_at(i)
-
-func monitor_queue_health():
-	var queue_size = task_queue.size()
-	var active_count = active_tasks.size()
-	
-	if Time.get_ticks_msec() % 10000 == 0:
-		queue_warnings_sent = 0
-	
-	if queue_size > 50 and queue_warnings_sent < 3:
-		print("ThreadManager: Task queue size: ", queue_size, ", active: ", active_count)
-		queue_warnings_sent += 1
-
-func report_performance():
-	var total_tasks = 0
-	var total_time = 0.0
-	var total_failures = 0
-	
+func cleanup_old_performance_data():
 	for task_type in task_performance:
 		var perf = task_performance[task_type]
-		total_tasks += perf.count
-		total_time += perf.total_time
-		total_failures += perf.failures
-	
-	if total_tasks > 0:
-		print("ThreadManager: Processed ", total_tasks, " tasks, avg time: ", total_time / total_tasks, "ms, failures: ", total_failures)
+		if perf.count > 1000:
+			perf.total_time *= 0.8
+			perf.count = int(perf.count * 0.8)
+			perf.avg_time = perf.total_time / perf.count
 
 func generate_task_id() -> String:
-	return "task_" + str(Time.get_ticks_msec()) + "_" + str(randi())
+	return "task_" + str(Time.get_ticks_msec()) + "_" + str(randi() % 1000)
 
 func shutdown_all_threads():
 	if is_shutting_down:
 		return
 	
-	shutdown_mutex.lock()
 	is_shutting_down = true
-	shutdown_mutex.unlock()
-	
-	print("ThreadManager: Shutting down worker threads")
-	
-	var shutdown_start = Time.get_ticks_msec()
+	set_process(false)
 	
 	for worker in worker_threads:
 		if worker and is_instance_valid(worker):
 			worker.request_shutdown()
+	
+	var shutdown_start = Time.get_ticks_msec()
 	
 	while worker_threads.size() > 0 and (Time.get_ticks_msec() - shutdown_start) < THREAD_SHUTDOWN_TIMEOUT_MS:
 		for i in range(worker_threads.size() - 1, -1, -1):
@@ -690,14 +611,12 @@ func shutdown_all_threads():
 	worker_threads.clear()
 	task_queue.clear()
 	active_tasks.clear()
-	
-	print("ThreadManager: All threads shut down")
 
 func calculate_pressure_at_coordinate(coord: Vector2i, world_data: Dictionary) -> float:
-	return 101.3 + randf_range(-5.0, 5.0)
+	return 101.3 + randf_range(-1.0, 1.0)
 
 func calculate_temperature_at_coordinate(coord: Vector2i, world_data: Dictionary) -> float:
-	return 293.0 + randf_range(-10.0, 10.0)
+	return 293.0 + randf_range(-3.0, 3.0)
 
 func calculate_gas_mixture(coord: Vector2i, world_data: Dictionary) -> Dictionary:
 	return {"oxygen": 0.21, "nitrogen": 0.78, "other": 0.01}
@@ -705,8 +624,9 @@ func calculate_gas_mixture(coord: Vector2i, world_data: Dictionary) -> Dictionar
 func flood_fill_room(start_coord: Vector2i, world_data: Dictionary, visited: Dictionary) -> Array:
 	var room_tiles = []
 	var to_check = [start_coord]
+	var max_tiles = 30
 	
-	while to_check.size() > 0:
+	while to_check.size() > 0 and room_tiles.size() < max_tiles:
 		var coord = to_check.pop_front()
 		
 		if coord in visited or coord not in world_data:
@@ -733,6 +653,9 @@ func is_wall_between(coord1: Vector2i, coord2: Vector2i, world_data: Dictionary)
 	return false
 
 func sort_items_by_category(items: Array) -> Array:
+	if items.size() > 50:
+		items = items.slice(0, 50)
+	
 	items.sort_custom(func(a, b):
 		var cat_a = a.get("category", "unknown")
 		var cat_b = b.get("category", "unknown")
@@ -756,9 +679,6 @@ func perform_cleanup(task_data: Dictionary) -> Dictionary:
 	return {"cleanup_completed": true}
 
 func process_pending_scene_creations(budget_ms: float):
-	pass
-
-func process_pending_entity_spawns(budget_ms: float):
 	pass
 
 func process_pending_cleanup(budget_ms: float):
@@ -789,11 +709,9 @@ class WorkerThread:
 		
 		var error = thread.start(_thread_function)
 		if error != OK:
-			print("WorkerThread: Failed to start thread ", thread_id, " - Error: ", error)
 			cleanup()
 			return false
 		
-		OS.delay_msec(1)
 		return true
 	
 	func request_shutdown():
@@ -806,11 +724,8 @@ class WorkerThread:
 		
 		if thread and thread.is_started():
 			var wait_start = Time.get_ticks_msec()
-			while thread.is_alive() and (Time.get_ticks_msec() - wait_start) < 1000:
-				OS.delay_msec(10)
-			
-			if thread.is_alive():
-				print("WorkerThread: Force terminating thread ", thread_id)
+			while thread.is_alive() and (Time.get_ticks_msec() - wait_start) < 250:
+				OS.delay_msec(5)
 		
 		cleanup()
 	
@@ -822,7 +737,7 @@ class WorkerThread:
 			return false
 		
 		var current_time = Time.get_ticks_msec()
-		return (current_time - last_activity) < (health_check_interval * 3)
+		return (current_time - last_activity) < (health_check_interval * 2)
 	
 	func cleanup():
 		is_running = false
@@ -831,12 +746,8 @@ class WorkerThread:
 		thread = null
 	
 	func _thread_function():
-		print("WorkerThread: Thread ", thread_id, " started")
-		
-		var warmup_start = Time.get_ticks_msec()
-		for i in range(100):
-			var dummy = Vector2i(i, i * 2).distance_to(Vector2i.ZERO)
-		var warmup_time = Time.get_ticks_msec() - warmup_start
+		var idle_count = 0
+		var max_idle_cycles = 80
 		
 		while not should_exit and manager and is_instance_valid(manager):
 			var task = get_next_task()
@@ -844,15 +755,20 @@ class WorkerThread:
 			if task:
 				last_activity = Time.get_ticks_msec()
 				process_task(task)
+				idle_count = 0
 			else:
-				OS.delay_msec(5)
+				idle_count += 1
+				if idle_count >= max_idle_cycles:
+					should_exit = true
+					break
+				
+				OS.delay_msec(15)
 				
 				var current_time = Time.get_ticks_msec()
 				if (current_time - last_activity) > health_check_interval:
 					last_activity = current_time
 		
 		is_running = false
-		print("WorkerThread: Thread ", thread_id, " finished")
 	
 	func get_next_task():
 		if not thread_mutex:
@@ -875,9 +791,9 @@ class WorkerThread:
 		
 		if manager and is_instance_valid(manager):
 			result = manager.execute_worker_task(task)
-			if result == null:
+			if result == null or (result is Dictionary and result.has("error")):
 				success = false
-				error_message = "Task returned null result"
+				error_message = result.get("error", "Task failed") if result else "Task returned null"
 		else:
 			success = false
 			error_message = "Manager reference lost"

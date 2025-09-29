@@ -1,15 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://d38s16gde836l"]
+[gd_scene load_steps=6 format=3 uid="uid://d38s16gde836l"]
 
 [ext_resource type="Script" uid="uid://cogtt8qcqymsc" path="res://Code/Items/Magazines/PistolMagazine.gd" id="1_p3708"]
 [ext_resource type="AudioStream" uid="uid://bx4yrtl3s0lc" path="res://Sound/weapons/singlebullet.wav" id="2_p3708"]
-[ext_resource type="Texture2D" uid="uid://bfhxtypb16dj2" path="res://Assets/Weapons/Magazines/Pistol_Magazine.png" id="2_peuec"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_83tyk"]
-atlas = ExtResource("2_peuec")
 region = Rect2(32, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hoxa4"]
-atlas = ExtResource("2_peuec")
 region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_peuec"]
@@ -39,9 +36,6 @@ sprite_frames = SubResource("SpriteFrames_peuec")
 animation = &"Empty"
 
 [node name="InteractionArea" type="Area2D" parent="."]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
-polygon = PackedVector2Array(-1, -1, -1, 1, -2, 1, -2, 4, -3, 4, -3, 7, -4, 7, -4, 10, -5, 10, -5, 13, -4, 13, -4, 14, 2, 14, 2, 13, 3, 13, 3, 12, 2, 12, 2, 10, 3, 10, 3, 7, 4, 7, 4, 4, 5, 4, 5, 0, 4, 0, 4, -1)
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("2_p3708")

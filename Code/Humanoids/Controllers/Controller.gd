@@ -41,6 +41,7 @@ signal body_part_damaged(part_name: String, current_health: float)
 @onready var posture_component: PostureComponent = $PostureComponent
 @onready var weapon_handling_component: WeaponHandlingComponent = $WeaponHandlingComponent
 @onready var skill_component: SkillComponent = $SkillComponent
+@onready var do_after_component: DoAfterComponent = $DoAfterComponent
 
 # Player-only components
 @onready var input_controller: InputController = $InputController
@@ -49,7 +50,6 @@ signal body_part_damaged(part_name: String, current_health: float)
 # Entity identification and state
 var entity_id: String = ""
 var is_local_player: bool = false
-var current_z_level: int = 0
 
 # External system references
 var world: Node = null
@@ -58,6 +58,7 @@ var sensory_system: Node = null
 var inventory_system: Node = null
 var sprite_system: Node = null
 var audio_system: Node = null
+var health_system: Node = null
 var player_ui = null
 
 # Initialization state tracking
@@ -119,6 +120,7 @@ func _create_components():
 	_create_posture_component()
 	_create_weapon_handling_component()
 	_create_skill_component()
+	_create_do_after_component()
 	_create_player_only_components()
 	
 	await get_tree().process_frame
@@ -189,6 +191,12 @@ func _create_skill_component():
 		skill_component.name = "SkillComponent"
 		add_child(skill_component)
 
+func _create_do_after_component():
+	if not do_after_component:
+		do_after_component = DoAfterComponent.new()
+		do_after_component.name = "DoAfterComponent"
+		add_child(do_after_component)
+
 func _create_player_only_components():
 	# Create or remove player-only components based on entity type
 	if not is_npc and not input_controller:
@@ -211,7 +219,11 @@ func _create_player_only_components():
 func _initialize_components():
 	var init_data = _build_initialization_data()
 	
-	# Initialize core components
+	# Initialize core components first
+	_initialize_component(skill_component, init_data)
+	_initialize_component(do_after_component, init_data)
+	
+	# Initialize other components
 	_initialize_component(movement_component, init_data)
 	_initialize_component(interaction_component, init_data)
 	_initialize_component(grab_pull_component, init_data)
@@ -222,7 +234,6 @@ func _initialize_components():
 	_initialize_component(item_interaction_component, init_data)
 	_initialize_component(posture_component, init_data)
 	_initialize_component(weapon_handling_component, init_data)
-	_initialize_component(skill_component, init_data)
 	
 	# Initialize player-only components
 	if input_controller and not is_npc:
@@ -248,11 +259,14 @@ func _build_initialization_data() -> Dictionary:
 		"inventory_system": inventory_system,
 		"sprite_system": sprite_system,
 		"audio_system": audio_system,
+		"health_system": health_system,
 		"skill_component": skill_component,
+		"do_after_component": do_after_component,
 		"entity_id": entity_id,
 		"entity_name": _get_entity_name(entity_name),
 		"is_local_player": is_local_player,
-		"is_npc": is_npc
+		"is_npc": is_npc,
+		"peer_id": 1 if not is_npc else 0
 	}
 
 func _initialize_component(component: Node, init_data: Dictionary):
@@ -421,6 +435,7 @@ func _find_world_system(system_names: Array) -> Node:
 func _find_entity_systems():
 	inventory_system = get_node_or_null("InventorySystem")
 	sprite_system = get_node_or_null("HumanSpriteSystem")
+	health_system = get_parent().get_node_or_null("HealthSystem") if get_parent() else null
 
 func _setup_entity_properties():
 	if "entity_name" in self:
@@ -436,6 +451,7 @@ func _connect_component_signals():
 	_connect_status_signals()
 	_connect_posture_signals()
 	_connect_weapon_signals()
+	_connect_do_after_signals()
 
 func _connect_movement_signals():
 	if movement_component:
@@ -471,6 +487,92 @@ func _connect_weapon_signals():
 	if weapon_handling_component:
 		if not weapon_handling_component.both_hands_occupied_changed.is_connected(_on_both_hands_occupied_changed):
 			weapon_handling_component.both_hands_occupied_changed.connect(_on_both_hands_occupied_changed)
+
+func _connect_do_after_signals():
+	if do_after_component:
+		if not do_after_component.do_after_started.is_connected(_on_do_after_started):
+			do_after_component.do_after_started.connect(_on_do_after_started)
+		if not do_after_component.do_after_completed.is_connected(_on_do_after_completed):
+			do_after_component.do_after_completed.connect(_on_do_after_completed)
+		if not do_after_component.do_after_cancelled.is_connected(_on_do_after_cancelled):
+			do_after_component.do_after_cancelled.connect(_on_do_after_cancelled)
+
+# DoAfter interface functions
+func start_do_after_action(action_name: String, config_override: Dictionary = {}, callback: Callable = Callable(), target: Node = null) -> bool:
+	if do_after_component:
+		return do_after_component.start_action(action_name, config_override, callback, target)
+	return false
+
+func start_instant_action(action_name: String, callback: Callable = Callable(), target: Node = null) -> bool:
+	if do_after_component:
+		return do_after_component.start_instant_action(action_name, callback, target)
+	return false
+
+func cancel_current_action(reason: String = "manual") -> bool:
+	if do_after_component:
+		return do_after_component.cancel_action(reason)
+	return false
+
+func force_complete_current_action() -> bool:
+	if do_after_component:
+		return do_after_component.force_complete_action()
+	return false
+
+func is_performing_action() -> bool:
+	if do_after_component:
+		return do_after_component.is_performing_action()
+	return false
+
+func get_current_action() -> String:
+	if do_after_component:
+		return do_after_component.get_current_action()
+	return ""
+
+func get_action_progress() -> float:
+	if do_after_component:
+		return do_after_component.get_action_progress()
+	return 0.0
+
+func get_action_remaining_time() -> float:
+	if do_after_component:
+		return do_after_component.get_remaining_time()
+	return 0.0
+
+func can_start_new_action() -> bool:
+	if do_after_component:
+		return do_after_component.can_start_new_action()
+	return true
+
+func should_block_movement() -> bool:
+	if do_after_component:
+		return do_after_component.should_block_movement()
+	return false
+
+func should_block_interactions() -> bool:
+	if do_after_component:
+		return do_after_component.should_block_interactions()
+	return false
+
+# Action-specific convenience functions
+func start_medical_action(action_type: String, target: Node = null, callback: Callable = Callable()) -> bool:
+	if do_after_component:
+		return do_after_component.start_medical_action(action_type, target, callback)
+	return false
+
+func start_combat_action(action_type: String, target: Node = null, callback: Callable = Callable()) -> bool:
+	if do_after_component:
+		return do_after_component.start_combat_action(action_type, target, callback)
+	return false
+
+func start_engineering_action(action_type: String, target: Node = null, callback: Callable = Callable()) -> bool:
+	if do_after_component:
+		return do_after_component.start_engineering_action(action_type, target, callback)
+	return false
+
+func start_posture_action(action_type: String, callback: Callable = Callable()) -> bool:
+	if do_after_component:
+		return do_after_component.start_posture_action(action_type, callback)
+	return false
 
 # NPC control interface
 func npc_move_to_tile(target_tile: Vector2i) -> bool:
@@ -660,6 +762,27 @@ func _on_both_hands_occupied_changed(is_occupied: bool):
 	# Tracked by UI systems for hand switching controls
 	pass
 
+func _on_do_after_started(action_name: String, duration: float):
+	emit_signal("interaction_started", self, action_name)
+	
+	# Notify systems that the entity is busy
+	if movement_component and do_after_component.should_block_movement():
+		movement_component.set_movement_blocked(true)
+
+func _on_do_after_completed(action_name: String, success: bool):
+	emit_signal("interaction_completed", self, action_name, success)
+	
+	# Restore movement if it was blocked
+	if movement_component:
+		movement_component.set_movement_blocked(false)
+
+func _on_do_after_cancelled(action_name: String, reason: String):
+	emit_signal("interaction_completed", self, action_name, false)
+	
+	# Restore movement if it was blocked
+	if movement_component:
+		movement_component.set_movement_blocked(false)
+
 func _on_npc_interaction_requested(target: Node, interaction_type: String):
 	if not is_npc:
 		return
@@ -708,7 +831,8 @@ func _count_created_components() -> int:
 		movement_component, interaction_component, grab_pull_component,
 		z_level_component, body_targeting_component, intent_component,
 		status_effect_component, item_interaction_component, posture_component,
-		weapon_handling_component, skill_component, input_controller, click_component
+		weapon_handling_component, skill_component, do_after_component,
+		input_controller, click_component
 	]
 	
 	for component in components:
@@ -719,6 +843,9 @@ func _count_created_components() -> int:
 
 # Cleanup function
 func _exit_tree():
+	if do_after_component and do_after_component.has_method("cancel_action"):
+		do_after_component.cancel_action("entity_cleanup")
+	
 	if grab_pull_component and grab_pull_component.has_method("cleanup"):
 		grab_pull_component.cleanup()
 	

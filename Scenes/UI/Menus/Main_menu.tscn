@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bm6k8x40an2pq"]
+[gd_scene load_steps=5 format=3 uid="uid://bm6k8x40an2pq"]
 
 [ext_resource type="Script" uid="uid://d2yxswdtbk034" path="res://Code/UserInterface/main_menu.gd" id="1_main"]
+[ext_resource type="AudioStream" uid="uid://bmt2fsoo1805o" path="res://Sound/Ambiance/Lobby_Music/The Warrior Song (Instrumental).mp3" id="2_h0f1i"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
 bg_color = Color(0.05, 0.1, 0.2, 0.9)
@@ -187,3 +188,8 @@ theme_override_colors/font_color = Color(0.4, 0.5, 0.6, 0.8)
 theme_override_font_sizes/font_size = 12
 text = "BUILD v0.1.0-alpha"
 horizontal_alignment = 2
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_h0f1i")
+volume_db = -12.0
+autoplay = true

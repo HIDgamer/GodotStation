@@ -1,0 +1,55 @@
+[gd_scene load_steps=7 format=3 uid="uid://bj7g2ly36tavj"]
+
+[ext_resource type="Script" uid="uid://cogtt8qcqymsc" path="res://Code/Items/Magazines/PistolMagazine.gd" id="1_p5jof"]
+[ext_resource type="Texture2D" uid="uid://c54jugvsjy2od" path="res://Assets/Icons/Items/Guns/Magazines/M-36_Magazine.png" id="2_ag8l4"]
+[ext_resource type="AudioStream" uid="uid://bx4yrtl3s0lc" path="res://Sound/weapons/singlebullet.wav" id="3_nof5b"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qhbm1"]
+atlas = ExtResource("2_ag8l4")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nw26e"]
+atlas = ExtResource("2_ag8l4")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ubdrf"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qhbm1")
+}],
+"loop": true,
+"name": &"Empty",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nw26e")
+}],
+"loop": true,
+"name": &"Full",
+"speed": 5.0
+}]
+
+[node name="M-36 Box_Magazine" type="Node2D"]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("1_p5jof")
+max_rounds = 30
+current_rounds = 30
+compatible_ammo_type = 1
+bullet_type = "7.8mm x 60mm"
+magazine_name = "M-36 Box Magazine"
+item_name = "M-36 Box_Magazine"
+w_class = 2
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ubdrf")
+animation = &"Empty"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-7, -11, -8, -11, -8, 10, -9, 10, -9, 11, -10, 11, -10, 12, 11, 12, 11, 11, 10, 11, 10, 10, 9, 10, 9, -11, 8, -11, 8, -12, -7, -12)
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_nof5b")

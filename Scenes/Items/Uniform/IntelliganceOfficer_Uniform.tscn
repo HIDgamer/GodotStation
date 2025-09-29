@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://dbrmtfmabud7a"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_mofpo"]
+[ext_resource type="Texture2D" uid="uid://dh8rako23ofai" path="res://Assets/Icons/Clothing/Uniforms/Marine_IO.png" id="2_hgcui"]
+[ext_resource type="Texture2D" uid="uid://cqpom0cxqq11j" path="res://Assets/Icons/Clothing/Uniforms/Marine_IO_ds.png" id="3_hqgxk"]
+[ext_resource type="Texture2D" uid="uid://cgxrcgmpk7r4m" path="res://Assets/Icons/Items/Clothing/Uniforms/Marine_IO.png" id="4_hdyii"]
+
+[node name="IntelliganceOfficer_Uniform" type="Node2D"]
+script = ExtResource("1_mofpo")
+texture1 = ExtResource("2_hgcui")
+texture2 = ExtResource("3_hqgxk")
+storage_type = 2
+storage_max_size = 3
+storage_slots = 3
+max_storage_space = 3
+item_name = "IntelliganceOfficer_Uniform"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("4_hdyii")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("2_hgcui")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -6, -5, -5, -6, -5, -6, -3, -7, -3, -7, 0, -6, 0, -6, 1, -5, 1, -5, 2, -6, 2, -6, 7, -5, 7, -5, 8, 4, 8, 4, 7, 5, 7, 5, 2, 4, 2, 4, 1, 5, 1, 5, 0, 6, 0, 6, -3, 5, -3, 5, -5, 4, -5, 4, -6, 1, -6, 1, -5, -2, -5, -2, -6)

@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://d2e1bolihyirs"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_r7a7u"]
+[ext_resource type="Texture2D" uid="uid://dro3r4p6cqivt" path="res://Assets/Icons/Items/Clothing/Uniforms/Doctor_Scrubs.png" id="2_w3573"]
+[ext_resource type="Texture2D" uid="uid://d3vyqgni2ch7r" path="res://Assets/Icons/Clothing/Uniforms/Doctor_Scrubs.png" id="3_xvuu8"]
+
+[node name="Doctor_Scrubs" type="Node2D"]
+script = ExtResource("1_r7a7u")
+item_name = "Doctor_Scrubs"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_w3573")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_xvuu8")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -6, -5, -5, -6, -5, -6, -4, -7, -4, -7, -3, -8, -3, -8, -1, -9, -1, -9, 1, -8, 1, -8, 2, -6, 2, -6, 1, -5, 1, -5, 3, -6, 3, -6, 9, -5, 9, -5, 10, -1, 10, -1, 9, 0, 9, 0, 10, 4, 10, 4, 9, 5, 9, 5, 3, 4, 3, 4, 1, 5, 1, 5, 2, 7, 2, 7, 1, 8, 1, 8, -1, 7, -1, 7, -3, 6, -3, 6, -4, 5, -4, 5, -5, 4, -5, 4, -6, 1, -6, 1, -5, -2, -5, -2, -6)

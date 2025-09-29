@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://qbi7nn3aqan0"]
+
+[ext_resource type="Script" uid="uid://b30v47uc3dumj" path="res://Code/Items/Armor/Armor.gd" id="1_6d8h6"]
+[ext_resource type="Texture2D" uid="uid://d16lw8gjuiuoe" path="res://Assets/Icons/Items/Clothing/Suits/GasInspector_Suit.png" id="2_15dw6"]
+[ext_resource type="Texture2D" uid="uid://deu7k5inlsqpu" path="res://Assets/Icons/Clothing/Suit/GasInspector_Suit.png" id="3_3mo8k"]
+
+[node name="GasInspector_Suit" type="Node2D"]
+script = ExtResource("1_6d8h6")
+armor_bomb = 50
+armor_bio = 80
+storage_type = 2
+storage_max_size = 2
+storage_slots = 2
+item_name = "GasInspector_Suit"
+w_class = 4
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_15dw6")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_3mo8k")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4, -8, -4, -7, -5, -7, -5, -6, -6, -6, -6, -5, -7, -5, -7, -4, -8, -4, -8, -1, -7, -1, -7, 0, -5, 0, -5, 5, -6, 5, -6, 9, -4, 9, -4, 10, 3, 10, 3, 9, 5, 9, 5, 5, 4, 5, 4, 0, 6, 0, 6, -1, 7, -1, 7, -4, 6, -4, 6, -5, 5, -5, 5, -6, 4, -6, 4, -7, 3, -7, 3, -8, 1, -8, 1, -7, -2, -7, -2, -8)

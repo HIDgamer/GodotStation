@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://bhi1xjl3br3q5"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_pixq7"]
+[ext_resource type="Texture2D" uid="uid://bmwywkh0qfvu" path="res://Assets/Icons/Items/Clothing/Uniforms/Wedding_Dress.png" id="2_uxait"]
+[ext_resource type="Texture2D" uid="uid://cr0ce4a3i33ae" path="res://Assets/Icons/Clothing/Uniforms/Wedding_Dress.png" id="3_0bxbq"]
+
+[node name="Wedding_Dress" type="Node2D"]
+script = ExtResource("1_pixq7")
+item_name = "Wedding_Dress"
+w_class = 2
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_uxait")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_0bxbq")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-3, -9, -3, -8, -4, -8, -4, -6, -3, -6, -3, -5, -4, -5, -4, -2, -5, -2, -5, 2, -6, 2, -6, 7, -5, 7, -5, 8, -4, 8, -4, 9, -3, 9, -3, 10, 4, 10, 4, 9, 5, 9, 5, 8, 6, 8, 6, 7, 7, 7, 7, 2, 6, 2, 6, -2, 5, -2, 5, -5, 4, -5, 4, -6, 5, -6, 5, -8, 4, -8, 4, -9, 2, -9, 2, -8, 1, -8, 1, -7, 0, -7, 0, -8, -1, -8, -1, -9)

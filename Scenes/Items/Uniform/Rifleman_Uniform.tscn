@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://dcoqnrleoey1s"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_od30d"]
+[ext_resource type="Texture2D" uid="uid://dwy6j1n08llbo" path="res://Assets/Icons/Clothing/Uniforms/Marine_RM.png" id="2_tv0s6"]
+[ext_resource type="Texture2D" uid="uid://cn6kh65g1j4xv" path="res://Assets/Icons/Clothing/Uniforms/Marine_RM_dj.png" id="3_nvc2m"]
+[ext_resource type="Texture2D" uid="uid://b1jgf7ekhhhly" path="res://Assets/Icons/Items/Clothing/Uniforms/Marine_RM.png" id="4_7klwq"]
+
+[node name="Rifleman_Uniform" type="Node2D"]
+script = ExtResource("1_od30d")
+texture1 = ExtResource("2_tv0s6")
+texture2 = ExtResource("3_nvc2m")
+item_name = "Rifleman_Uniform"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("4_7klwq")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("2_tv0s6")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -6, -5, -5, -6, -5, -6, -3, -7, -3, -7, 0, -6, 0, -6, 1, -5, 1, -5, 3, -6, 3, -6, 7, -5, 7, -5, 8, 4, 8, 4, 7, 5, 7, 5, 3, 4, 3, 4, 1, 5, 1, 5, 0, 6, 0, 6, -3, 5, -3, 5, -5, 4, -5, 4, -6, 1, -6, 1, -5, -2, -5, -2, -6)

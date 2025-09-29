@@ -1,0 +1,67 @@
+[gd_scene load_steps=8 format=3 uid="uid://dudyftfv1dcco"]
+
+[ext_resource type="Script" uid="uid://bfj73ll6r08pv" path="res://Code/Items/Uniform/Back.gd" id="1_i4ysm"]
+[ext_resource type="Texture2D" uid="uid://coi54peb76wuv" path="res://Assets/Icons/Items/Storage/Backpacks/Marinesatch.png" id="2_v164u"]
+[ext_resource type="Texture2D" uid="uid://bcs6ypeplmmeb" path="res://Assets/Icons/Clothing/Backpacks/Marine_Satchel.png" id="3_ulp3m"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tq1p5"]
+atlas = ExtResource("2_v164u")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lioth"]
+atlas = ExtResource("2_v164u")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7gch6"]
+atlas = ExtResource("2_v164u")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_5gm42"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tq1p5")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lioth")
+}],
+"loop": true,
+"name": &"half",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7gch6")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="Marine_Satchel" type="Node2D"]
+script = ExtResource("1_i4ysm")
+drag_unequip = true
+storage_type = 1
+storage_max_size = 10
+has_open_close_animation = true
+item_name = "Marine_Satchel"
+w_class = 4
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_5gm42")
+animation = &"open"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_ulp3m")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(7, -8, 6, -8, 6, -4, -10, -4, -10, 10, 6, 10, 6, 11, 7, 11, 7, 12, 10, 12, 10, -9, 7, -9)

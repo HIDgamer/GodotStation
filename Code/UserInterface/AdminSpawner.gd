@@ -1,11 +1,13 @@
 extends Control
 class_name AdminSpawner
 
-signal item_spawned(item_path: String, position: Vector2)
+signal entity_spawned(occupation_name: String, position: Vector2)
 signal spawner_closed
 
 var world_node = null
 var game_manager = null
+var asset_manager = null
+var asset_registry = null
 
 @onready var main_panel = $MainPanel
 @onready var close_button = $MainPanel/VBox/Header/TitleBar/CloseButton
@@ -17,11 +19,12 @@ var game_manager = null
 @onready var spawn_mode_button = $MainPanel/VBox/Footer/ButtonsContainer/SpawnModeButton
 @onready var quick_spawn_button = $MainPanel/VBox/Footer/ButtonsContainer/QuickSpawnButton
 
-var spawnable_items: Dictionary = {}
+var available_occupations: Array = []
+var available_objects: Array = []
 var filtered_items: Array = []
 var selected_item = null
 var spawn_mode: bool = false
-var categories: Array = ["All"]
+var categories: Array = ["All", "Personnel", "Objects"]
 
 var is_dragging: bool = false
 var is_resizing: bool = false
@@ -32,16 +35,6 @@ var min_size: Vector2 = Vector2(400, 300)
 var max_size: Vector2 = Vector2(1200, 800)
 var resize_start_pos: Vector2
 var resize_start_size: Vector2
-
-var configured_directories = [
-	"res://Scenes/Characters/",
-	"res://Scenes/Items/Bullets_Magazines/",
-	"res://Scenes/Items/Grenades/",
-	"res://Scenes/Items/Guns/",
-	"res://Scenes/Items/Medical/",
-	"res://Scenes/Items/Melee/",
-	"res://Scenes/Objects/Machinery/"
-]
 
 func _ready():
 	main_panel.gui_input.connect(_on_panel_gui_input)
@@ -81,6 +74,9 @@ func find_world_systems():
 		var managers = get_tree().get_nodes_in_group("game_manager")
 		if managers.size() > 0:
 			game_manager = managers[0]
+	
+	asset_manager = get_node_or_null("/root/CharacterAssetManager")
+	asset_registry = get_node_or_null("/root/AssetRegistry")
 
 func setup_ui():
 	category_option.clear()
@@ -96,109 +92,71 @@ func setup_ui():
 	update_ui_state()
 
 func load_all_items():
-	var total_items = 0
-	for dir_path in configured_directories:
-		if DirAccess.dir_exists_absolute(dir_path):
-			var items_before = spawnable_items.size()
-			scan_directory(dir_path)
-			var items_added = spawnable_items.size() - items_before
-			total_items += items_added
+	available_occupations.clear()
+	available_objects.clear()
 	
-	refresh_categories()
+	load_occupations()
+	load_spawnable_objects()
+	
 	filter_and_display_items()
 
-func scan_directory(dir_path: String):
-	var dir = DirAccess.open(dir_path)
-	if not dir:
+func load_occupations():
+	if not asset_manager:
 		return
 	
-	_scan_recursive(dir, dir_path, get_category_from_path(dir_path))
-
-func _scan_recursive(dir: DirAccess, current_path: String, category: String):
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-	
-	while file_name != "":
-		if dir.current_is_dir() and not file_name.begins_with("."):
-			var subdir = DirAccess.open(current_path + "/" + file_name)
-			if subdir:
-				_scan_recursive(subdir, current_path + "/" + file_name, category)
-		elif file_name.ends_with(".tscn"):
-			add_item_from_file(current_path + "/" + file_name, category)
+	for occupation_name in asset_manager.occupations:
+		var display_name = asset_manager.get_occupation_display_name(occupation_name)
+		var description = asset_manager.get_occupation_description(occupation_name)
 		
-		file_name = dir.get_next()
+		available_occupations.append({
+			"name": occupation_name,
+			"display_name": display_name,
+			"description": description,
+			"category": "Personnel",
+			"type": "occupation"
+		})
 
-func get_category_from_path(path: String) -> String:
-	var segments = path.split("/")
-	if segments.size() > 0:
-		var last_segment = segments[-1]
-		if last_segment != "":
-			return last_segment.capitalize()
-	return "Custom"
-
-func add_item_from_file(file_path: String, category: String):
-	if not ResourceLoader.exists(file_path):
+func load_spawnable_objects():
+	if not asset_registry:
 		return
 	
-	var scene_resource = load(file_path)
-	if not scene_resource:
-		return
+	var scene_assets = asset_registry.get_assets_by_type("scenes")
+	var object_directories = [
+		"res://Scenes/Objects/",
+		"res://Scenes/Items/"
+	]
 	
-	var scene_name = file_path.get_file().get_basename()
-	
-	if scene_name in spawnable_items:
-		return
-	
-	if category == "Custom":
-		category = detect_category_from_name(scene_name, file_path)
-	
-	var item_data = {
-		"name": scene_name,
-		"display_name": format_display_name(scene_name),
-		"scene_path": file_path,
-		"category": category
-	}
-	
-	spawnable_items[scene_name] = item_data
+	for scene_path in scene_assets:
+		var should_include = false
+		for dir_path in object_directories:
+			if scene_path.begins_with(dir_path):
+				should_include = true
+				break
+		
+		if should_include and not is_character_scene(scene_path):
+			var scene_name = scene_path.get_file().get_basename()
+			var display_name = format_display_name(scene_name)
+			
+			available_objects.append({
+				"name": scene_name,
+				"display_name": display_name,
+				"scene_path": scene_path,
+				"category": "Objects",
+				"type": "object"
+			})
 
-func detect_category_from_name(name: String, path: String) -> String:
-	var name_lower = name.to_lower()
-	var path_lower = path.to_lower()
+func is_character_scene(scene_path: String) -> bool:
+	var character_indicators = ["human", "character", "mob", "npc", "person"]
+	var path_lower = scene_path.to_lower()
 	
-	var keywords = {
-		"Characters": ["human", "character", "mob", "npc", "person"],
-		"Medical": ["medkit", "bandage", "syringe", "pill", "medical"],
-		"Weapons": ["gun", "rifle", "pistol", "weapon", "knife", "sword"],
-		"Tools": ["wrench", "screwdriver", "crowbar", "tool"],
-		"Machines": ["vendor", "machine", "computer", "console"],
-		"Structures": ["wall", "door", "window", "structure"]
-	}
+	for indicator in character_indicators:
+		if indicator in path_lower:
+			return true
 	
-	for category in keywords:
-		for keyword in keywords[category]:
-			if keyword in name_lower or keyword in path_lower:
-				return category
-	
-	return "Items"
+	return false
 
 func format_display_name(name: String) -> String:
 	return name.replace("_", " ").capitalize()
-
-func refresh_categories():
-	var new_categories = ["All"]
-	for item in spawnable_items.values():
-		if item.category not in new_categories:
-			new_categories.append(item.category)
-	
-	categories = new_categories
-	
-	var selected = category_option.selected if category_option.selected >= 0 else 0
-	category_option.clear()
-	for category in categories:
-		category_option.add_item(category)
-	
-	if selected < categories.size():
-		category_option.selected = selected
 
 func filter_and_display_items():
 	filtered_items.clear()
@@ -206,7 +164,11 @@ func filter_and_display_items():
 	var search_text = search_edit.text.to_lower()
 	var selected_category = categories[category_option.selected] if category_option.selected >= 0 else "All"
 	
-	for item in spawnable_items.values():
+	var all_items = []
+	all_items.append_array(available_occupations)
+	all_items.append_array(available_objects)
+	
+	for item in all_items:
 		if selected_category != "All" and item.category != selected_category:
 			continue
 		
@@ -232,10 +194,20 @@ func update_items_display():
 func create_item_button(item: Dictionary) -> Button:
 	var button = Button.new()
 	button.text = item.display_name
-	button.tooltip_text = "Path: " + item.scene_path + "\nCategory: " + item.category
+	
+	var tooltip_text = ""
+	if item.type == "occupation":
+		tooltip_text = "Personnel: " + item.get("description", "No description")
+	else:
+		tooltip_text = "Object: " + item.get("scene_path", "Unknown path")
+	
+	button.tooltip_text = tooltip_text
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.custom_minimum_size.y = 32
+	
+	if item.type == "occupation":
+		button.modulate = Color(0.8, 1.0, 0.9)
 	
 	button.pressed.connect(_on_item_selected.bind(item))
 	
@@ -243,7 +215,12 @@ func create_item_button(item: Dictionary) -> Button:
 
 func update_ui_state():
 	if selected_item:
-		selected_info.text = "Selected: " + selected_item.display_name
+		var info_text = "Selected: " + selected_item.display_name
+		if selected_item.type == "occupation":
+			info_text += " (Personnel)"
+		else:
+			info_text += " (Object)"
+		selected_info.text = info_text
 	else:
 		selected_info.text = "No item selected"
 	
@@ -272,7 +249,10 @@ func update_button_selection():
 			if selected_item and child.text == selected_item.display_name:
 				child.modulate = Color(0.8, 1.0, 0.8)
 			else:
-				child.modulate = Color.WHITE
+				if selected_item and selected_item.type == "occupation":
+					child.modulate = Color(0.8, 1.0, 0.9)
+				else:
+					child.modulate = Color.WHITE
 
 func _input(event):
 	if not visible:
@@ -307,51 +287,260 @@ func handle_spawn_click(global_pos: Vector2):
 	
 	var success = false
 	
-	if is_character_item(selected_item):
-		success = await spawn_as_character(world_pos)
-	
-	if not success:
-		success = spawn_as_object(world_pos)
+	if selected_item.type == "occupation":
+		success = await spawn_personnel(world_pos)
+	else:
+		success = spawn_object(world_pos)
 	
 	if success:
-		emit_signal("item_spawned", selected_item.scene_path, world_pos)
+		emit_signal("entity_spawned", selected_item.name, world_pos)
 		cancel_spawn_mode()
 
-func is_character_item(item: Dictionary) -> bool:
-	var indicators = ["human", "character", "mob", "npc", "person"]
-	var name_lower = item.name.to_lower()
-	var category_lower = item.category.to_lower()
-	var path_lower = item.scene_path.to_lower()
-	
-	for indicator in indicators:
-		if indicator in name_lower or indicator in category_lower or indicator in path_lower:
-			return true
-	
-	return false
-
-func spawn_as_character(world_pos: Vector2) -> bool:
+func spawn_personnel(world_pos: Vector2) -> bool:
 	if not game_manager:
 		return false
 	
 	var tile_pos = world_pos_to_tile(world_pos)
 	var z_level = get_current_z_level()
 	
-	if game_manager.has_method("spawn_npc_at_tile"):
-		var npc_name = selected_item.name + "_" + str(Time.get_ticks_msec())
-		var result = await game_manager.spawn_npc_at_tile(tile_pos, z_level, npc_name)
-		return result != null
-	else:
-		return false
+	var character_data = build_complete_character_data()
+	character_data.occupation = asset_manager.occupations.find(selected_item.name)
+	character_data.loadout_enabled = true
+	
+	var npc_name = selected_item.name + "_" + str(Time.get_ticks_msec())
+	
+	var npc_instance = await game_manager.spawn_npc_at_tile(tile_pos, z_level, npc_name)
+	if npc_instance:
+		await apply_complete_character_to_npc(npc_instance, character_data)
+		await apply_occupation_loadout(npc_instance, character_data)
+		return true
+	
+	return false
 
-func spawn_as_object(world_pos: Vector2) -> bool:
-	if not ResourceLoader.exists(selected_item.scene_path):
+func build_complete_character_data() -> Dictionary:
+	if not asset_manager:
+		return {}
+	
+	randomize()
+	
+	var sex = randi() % 2
+	var race = randi() % asset_manager.races.size()
+	var hair_color = Color(randf_range(0.1, 0.9), randf_range(0.1, 0.8), randf_range(0.05, 0.6))
+	
+	var character_data = {
+		"name": generate_random_name(sex),
+		"age": randi() % 63 + 18,
+		"race": race,
+		"sex": sex,
+		"hair_style": 0,
+		"hair_color": hair_color,
+		"facial_hair": 0,
+		"facial_hair_color": hair_color,
+		"occupation": 0,
+		"clothing": 0,
+		"underwear": 0,
+		"undershirt": 0,
+		"background_text": "",
+		"medical_text": "",
+		"preview_background": 0,
+		"loadout_enabled": true,
+		"custom_loadout": {},
+		"character_created_version": "3.0",
+		"creation_timestamp": Time.get_ticks_msec()
+	}
+	
+	add_readable_names_to_character_data(character_data)
+	add_texture_paths_to_character_data(character_data)
+	add_color_data_to_character_data(character_data)
+	
+	return character_data
+
+func add_readable_names_to_character_data(data: Dictionary):
+	data.race_name = asset_manager.races[data.race] if data.race < asset_manager.races.size() else "Human"
+	data.sex_name = "Male" if data.sex == 0 else "Female"
+
+func add_texture_paths_to_character_data(data: Dictionary):
+	var available_hair = asset_manager.get_hair_styles_for_sex(data.sex)
+	if available_hair.size() > 1:
+		data.hair_style = 1 + (randi() % (available_hair.size() - 1))
+		var hair_data = available_hair[data.hair_style]
+		data.hair_texture = hair_data.texture
+		data.hair_style_name = hair_data.name
+	else:
+		data.hair_texture = null
+		data.hair_style_name = "None"
+	
+	if data.sex == 0:
+		var available_facial_hair = asset_manager.get_facial_hair_for_sex(0)
+		if available_facial_hair.size() > 1:
+			data.facial_hair = randi() % available_facial_hair.size()
+			var facial_hair_data = available_facial_hair[data.facial_hair]
+			data.facial_hair_texture = facial_hair_data.texture
+			data.facial_hair_name = facial_hair_data.name
+		else:
+			data.facial_hair_texture = null
+			data.facial_hair_name = "None"
+	else:
+		data.facial_hair_texture = null
+		data.facial_hair_name = "None"
+	
+	var available_clothing = asset_manager.get_clothing_for_sex(data.sex)
+	if available_clothing.size() > 1:
+		data.clothing = 1 + (randi() % (available_clothing.size() - 1))
+		var clothing_data = available_clothing[data.clothing]
+		data.clothing_textures = clothing_data.textures.duplicate()
+		data.clothing_name = clothing_data.name
+	else:
+		data.clothing_textures = {}
+		data.clothing_name = "None"
+	
+	var available_underwear = asset_manager.get_underwear_for_sex(data.sex)
+	if available_underwear.size() > 0:
+		data.underwear = randi() % available_underwear.size()
+		var underwear_data = available_underwear[data.underwear]
+		data.underwear_texture = underwear_data.texture
+		data.underwear_name = underwear_data.name
+	
+	var available_undershirts = asset_manager.get_undershirts_for_sex(data.sex)
+	if available_undershirts.size() > 0:
+		if data.sex == 1:
+			var valid_tops = []
+			for i in range(available_undershirts.size()):
+				if available_undershirts[i].name != "None":
+					valid_tops.append(i)
+			if valid_tops.size() > 0:
+				data.undershirt = valid_tops[randi() % valid_tops.size()]
+				var undershirt_data = available_undershirts[data.undershirt]
+				data.undershirt_texture = undershirt_data.texture
+				data.undershirt_name = undershirt_data.name
+			else:
+				data.undershirt_texture = null
+				data.undershirt_name = "None"
+		else:
+			data.undershirt = randi() % available_undershirts.size()
+			var undershirt_data = available_undershirts[data.undershirt]
+			data.undershirt_texture = undershirt_data.texture
+			data.undershirt_name = undershirt_data.name
+
+func add_color_data_to_character_data(data: Dictionary):
+	data.hair_color_r = data.hair_color.r
+	data.hair_color_g = data.hair_color.g
+	data.hair_color_b = data.hair_color.b
+	data.hair_color_a = data.hair_color.a
+	
+	data.facial_hair_color_r = data.facial_hair_color.r
+	data.facial_hair_color_g = data.facial_hair_color.g
+	data.facial_hair_color_b = data.facial_hair_color.b
+	data.facial_hair_color_a = data.facial_hair_color.a
+
+func generate_random_name(sex: int) -> String:
+	var first_names_male = ["Marcus", "John", "David", "Michael", "James", "Robert", "William", "Richard", "Thomas", "Charles"]
+	var first_names_female = ["Sarah", "Jennifer", "Lisa", "Karen", "Nancy", "Betty", "Helen", "Sandra", "Donna", "Carol"]
+	var last_names = ["Anderson", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"]
+	
+	var first_names = first_names_male if sex == 0 else first_names_female
+	var first_name = first_names[randi() % first_names.size()]
+	var last_name = last_names[randi() % last_names.size()]
+	
+	return first_name + " " + last_name
+
+func apply_complete_character_to_npc(npc_instance: Node, character_data: Dictionary):
+	var sprite_system = get_sprite_system(npc_instance)
+	if not sprite_system:
+		return
+	
+	await get_tree().process_frame
+	
+	if sprite_system.has_method("apply_character_data"):
+		sprite_system.apply_character_data(character_data)
+	else:
+		apply_character_data_manually(sprite_system, character_data)
+	
+	await get_tree().process_frame
+
+func apply_character_data_manually(sprite_system: Node, character_data: Dictionary):
+	if sprite_system.has_method("set_sex"):
+		sprite_system.set_sex(character_data.sex)
+	
+	if sprite_system.has_method("set_race"):
+		sprite_system.set_race(character_data.race)
+	
+	if sprite_system.has_method("set_underwear") and character_data.has("underwear_texture") and character_data.underwear_texture:
+		if ResourceLoader.exists(character_data.underwear_texture):
+			sprite_system.set_underwear(load(character_data.underwear_texture))
+	
+	if sprite_system.has_method("set_undershirt") and character_data.has("undershirt_texture") and character_data.undershirt_texture:
+		if ResourceLoader.exists(character_data.undershirt_texture):
+			sprite_system.set_undershirt(load(character_data.undershirt_texture))
+	
+	if sprite_system.has_method("set_clothing") and character_data.has("clothing_textures"):
+		sprite_system.set_clothing(character_data.clothing_textures)
+	
+	if sprite_system.has_method("set_hair") and character_data.has("hair_texture") and character_data.hair_texture:
+		if ResourceLoader.exists(character_data.hair_texture):
+			sprite_system.set_hair(load(character_data.hair_texture), character_data.hair_color)
+	
+	if character_data.sex == 0 and sprite_system.has_method("set_facial_hair") and character_data.has("facial_hair_texture") and character_data.facial_hair_texture:
+		if ResourceLoader.exists(character_data.facial_hair_texture):
+			sprite_system.set_facial_hair(load(character_data.facial_hair_texture), character_data.facial_hair_color)
+
+func apply_occupation_loadout(npc_instance: Node, character_data: Dictionary):
+	if not asset_manager or not character_data.loadout_enabled:
+		return
+	
+	await get_tree().process_frame
+	
+	var inventory_system = npc_instance.get_node_or_null("InventorySystem")
+	if not inventory_system:
+		return
+	
+	var occupation_index = character_data.occupation
+	if occupation_index >= asset_manager.occupations.size():
+		return
+	
+	var occupation_name = asset_manager.occupations[occupation_index]
+	asset_manager.apply_occupation_loadout(npc_instance, occupation_name)
+
+func get_sprite_system(entity: Node) -> Node:
+	var possible_paths = [
+		"SpriteSystem",
+		"sprite_system",
+		"Sprite",
+		"CharacterSprite",
+		"Visuals/SpriteSystem",
+		"HumanSpriteSystem"
+	]
+	
+	for path in possible_paths:
+		var sprite_system = entity.get_node_or_null(path)
+		if sprite_system:
+			return sprite_system
+	
+	return null
+
+func spawn_object(world_pos: Vector2) -> bool:
+	if not selected_item.has("scene_path"):
 		return false
 	
-	var scene = load(selected_item.scene_path)
-	if not scene:
-		return false
+	var scene_path = selected_item.scene_path
 	
-	var instance = scene.instantiate()
+	if not asset_registry or not asset_registry.is_asset_loaded(scene_path):
+		if not ResourceLoader.exists(scene_path):
+			return false
+		var scene = load(scene_path)
+		if not scene:
+			return false
+		var instance = scene.instantiate()
+		return place_object_instance(instance, world_pos)
+	else:
+		var scene = asset_registry.get_preloaded_asset(scene_path)
+		if scene:
+			var instance = scene.instantiate()
+			return place_object_instance(instance, world_pos)
+	
+	return false
+
+func place_object_instance(instance: Node, world_pos: Vector2) -> bool:
 	if not instance:
 		return false
 	
@@ -426,14 +615,13 @@ func _on_quick_spawn_pressed():
 	
 	var success = false
 	
-	if is_character_item(selected_item):
-		success = await spawn_as_character(center_pos)
-	
-	if not success:
-		success = spawn_as_object(center_pos)
+	if selected_item.type == "occupation":
+		success = await spawn_personnel(center_pos)
+	else:
+		success = spawn_object(center_pos)
 	
 	if success:
-		emit_signal("item_spawned", selected_item.scene_path, center_pos)
+		emit_signal("entity_spawned", selected_item.name, center_pos)
 
 func _on_panel_gui_input(event):
 	if event is InputEventMouseMotion:
@@ -590,6 +778,6 @@ func cancel_spawn_mode():
 	update_ui_state()
 
 func reload_items():
-	spawnable_items.clear()
-	categories = ["All"]
+	available_occupations.clear()
+	available_objects.clear()
 	load_all_items()

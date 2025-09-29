@@ -7,7 +7,7 @@
 [ext_resource type="Material" uid="uid://c0oecrnp7q1a1" path="res://Assets/Godot Resources/shockwave_particle_material.tres" id="3_plhir"]
 [ext_resource type="Texture2D" uid="uid://bjroi2urfpx0p" path="res://Assets/Effects/Particles/Shrapnel.png" id="5_m8ivs"]
 [ext_resource type="AudioStream" uid="uid://ff8dyn8bbkkh" path="res://Sound/Explosions/explosion.wav" id="6_sabd7"]
-[ext_resource type="Texture2D" uid="uid://bx01jo7bajtn6" path="res://Assets/Effects/FX/explosion_spritesheet.png" id="7_ebld0"]
+[ext_resource type="Texture2D" uid="uid://c8t4o0rjoulhe" path="res://Assets/Effects/FX/explosion_spritesheet.png" id="7_ebld0"]
 [ext_resource type="Texture2D" uid="uid://d1pwu8a6c34g3" path="res://Assets/Effects/Light/Light_Circle.png" id="8_h6mvs"]
 
 [sub_resource type="Gradient" id="Gradient_yuxdw"]
@@ -277,9 +277,11 @@ process_material = SubResource("ParticleProcessMaterial_1tmmv")
 stream = ExtResource("6_sabd7")
 
 [node name="Explosion" type="AnimatedSprite2D" parent="."]
-scale = Vector2(10, 10)
+scale = Vector2(5, 5)
 sprite_frames = SubResource("SpriteFrames_lvsv7")
 animation = &"Explosion"
+frame = 11
+frame_progress = 1.0
 
 [node name="ExplosionLight" type="PointLight2D" parent="."]
 color = Color(1, 0.8, 0.4, 1)

@@ -1,7 +1,6 @@
-[gd_scene load_steps=13 format=3 uid="uid://ctk4o3xyuqeq1"]
+[gd_scene load_steps=12 format=3 uid="uid://ctk4o3xyuqeq1"]
 
 [ext_resource type="Script" uid="uid://sgguc62p3ogt" path="res://Code/UserInterface/ChatUI.gd" id="1_ev1gm"]
-[ext_resource type="Script" uid="uid://cjb2rchv2gmly" path="res://Code/Helpers/ChatInputController.gd" id="2_b3oty"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cvjkx"]
 bg_color = Color(0.156863, 0.156863, 0.156863, 0.784314)
@@ -473,6 +472,3 @@ text = "Send"
 libraries = {
 &"": SubResource("AnimationLibrary_ogm5p")
 }
-
-[node name="ChatInputController" type="Node" parent="."]
-script = ExtResource("2_b3oty")

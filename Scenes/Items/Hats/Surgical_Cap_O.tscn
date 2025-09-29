@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://t5r8qrorawro"]
+
+[ext_resource type="Script" uid="uid://dgp7v7lxba43" path="res://Code/Items/Uniform/Head.gd" id="1_1o1a6"]
+[ext_resource type="Texture2D" uid="uid://dfcy7oqaj3mcb" path="res://Assets/Icons/Items/Clothing/Hats/Surgical_Cap_Orange.png" id="2_cf1kk"]
+[ext_resource type="Texture2D" uid="uid://t110iigugpw6" path="res://Assets/Icons/Clothing/Hats/Surgical_Cap_Orange.png" id="3_3ym5j"]
+
+[node name="Surgical_Cap_O" type="Node2D"]
+script = ExtResource("1_1o1a6")
+item_name = "Surgical_Cap_O"
+w_class = 1
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_cf1kk")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 32)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_3ym5j")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-1, -7, -1, -6, -3, -6, -3, -5, -4, -5, -4, -3, -5, -3, -5, 2, -4, 2, -4, 4, -1, 4, -1, 3, 1, 3, 1, 2, 2, 2, 2, 1, 4, 1, 4, 0, 6, 0, 6, -3, 5, -3, 5, -4, 4, -4, 4, -5, 3, -5, 3, -7)

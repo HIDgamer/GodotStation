@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://b561073sl8v2y"]
+
+[ext_resource type="Script" uid="uid://cfqy6ou60h6vw" path="res://Code/Items/Uniform/Jacket.gd" id="1_08w35"]
+[ext_resource type="Texture2D" uid="uid://ctxpdmts8jfoc" path="res://Assets/Icons/Items/Clothing/Jackets/Jacket_Black.png" id="2_0dtq7"]
+[ext_resource type="Texture2D" uid="uid://cm2jndlm5xqsb" path="res://Assets/Icons/Clothing/Jackets/Jacket_black.png" id="3_akles"]
+
+[node name="Jacket_Black" type="Node2D"]
+script = ExtResource("1_08w35")
+storage_type = 2
+storage_max_size = 2
+storage_slots = 2
+max_storage_space = 2
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_0dtq7")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_akles")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -6, -5, -5, -6, -5, -6, -4, -7, -4, -7, -3, -8, -3, -8, -1, -9, -1, -9, 2, -6, 2, -6, 0, -5, 0, -5, 5, -4, 5, -4, 6, 3, 6, 3, 5, 4, 5, 4, 0, 5, 0, 5, 2, 8, 2, 8, -1, 7, -1, 7, -3, 6, -3, 6, -4, 5, -4, 5, -5, 4, -5, 4, -6)

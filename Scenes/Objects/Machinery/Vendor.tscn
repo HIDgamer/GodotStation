@@ -1,0 +1,62 @@
+[gd_scene load_steps=8 format=3 uid="uid://cqeluxb3t5sjq"]
+
+[ext_resource type="Script" uid="uid://cq1k6bo2wsvyq" path="res://Code/Atoms/Object/Machinery/DynamicVendor.gd" id="1_n6faw"]
+[ext_resource type="Texture2D" uid="uid://dao85v6up1ppw" path="res://Assets/Machinery/MedVendor.png" id="2_0j8im"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h5gh1"]
+atlas = ExtResource("2_0j8im")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a4nqg"]
+atlas = ExtResource("2_0j8im")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_36x3k"]
+atlas = ExtResource("2_0j8im")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gk6n0"]
+atlas = ExtResource("2_0j8im")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1kqae"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h5gh1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a4nqg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_36x3k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gk6n0")
+}],
+"loop": true,
+"name": &"Icon",
+"speed": 5.0
+}]
+
+[node name="Vendor" type="Node2D"]
+script = ExtResource("1_n6faw")
+asset_folder_path = "res://Scenes/Items/Grenades/"
+refresh_interval = 0.5
+unlimited_stock = true
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_1kqae")
+animation = &"Icon"
+autoplay = "Icon"
+frame_progress = 0.184957
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+volume_db = -5.0
+max_distance = 500.0
+attenuation = 2.0
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-11, -16, -11, 16, 12, 16, 12, -16)

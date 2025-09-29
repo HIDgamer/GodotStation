@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://bkllohmgaylef"]
+
+[ext_resource type="Script" uid="uid://dgp7v7lxba43" path="res://Code/Items/Uniform/Head.gd" id="1_j0t72"]
+[ext_resource type="Texture2D" uid="uid://dc78tosnvi10w" path="res://Assets/Icons/Items/Clothing/Hats/Headband_Green.png" id="2_2mlir"]
+[ext_resource type="Texture2D" uid="uid://ck014d5w4es4v" path="res://Assets/Icons/Clothing/Hats/Headband_Green.png" id="3_bvmxs"]
+
+[node name="Headband_Green" type="Node2D"]
+script = ExtResource("1_j0t72")
+item_name = "Headband_Green"
+w_class = 1
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_2mlir")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 32)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_bvmxs")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -4, -5, -3, -6, -3, -6, -2, -7, -2, -7, 2, -6, 2, -6, 3, -5, 3, -5, 4, 5, 4, 5, 7, 4, 7, 4, 9, 6, 9, 6, 7, 7, 7, 7, 5, 8, 5, 8, 7, 10, 7, 10, 5, 9, 5, 9, 3, 8, 3, 8, 2, 7, 2, 7, -2, 6, -2, 6, -3, 5, -3, 5, -4)

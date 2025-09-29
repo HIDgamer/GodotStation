@@ -1,0 +1,67 @@
+[gd_scene load_steps=8 format=3 uid="uid://d0plg4ucjr1oj"]
+
+[ext_resource type="Script" uid="uid://bfj73ll6r08pv" path="res://Code/Items/Uniform/Back.gd" id="1_3oim6"]
+[ext_resource type="Texture2D" uid="uid://d1k7qwsur8tuu" path="res://Assets/Icons/Items/Storage/Backpacks/Synthetic_Backpack_White.png" id="2_3p15t"]
+[ext_resource type="Texture2D" uid="uid://crndmyuldnelj" path="res://Assets/Icons/Clothing/Backpacks/Synth_Backpack_White.png" id="3_b0n6s"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_crak3"]
+atlas = ExtResource("2_3p15t")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_owxbw"]
+atlas = ExtResource("2_3p15t")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_slqix"]
+atlas = ExtResource("2_3p15t")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_t23h7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_crak3")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_owxbw")
+}],
+"loop": true,
+"name": &"half",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_slqix")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="Synthetic_Backpack_White" type="Node2D"]
+script = ExtResource("1_3oim6")
+drag_unequip = true
+storage_type = 1
+storage_max_size = 30
+has_open_close_animation = true
+item_name = "Synthetic_Backpack"
+w_class = 5
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_t23h7")
+animation = &"open"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_b0n6s")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-6, -8, -7, -8, -7, -7, -8, -7, -8, 1, -9, 1, -9, 2, -10, 2, -10, 6, -9, 6, -9, 7, -8, 7, -8, 10, -7, 10, -7, 11, 6, 11, 6, 10, 7, 10, 7, 7, 8, 7, 8, 6, 9, 6, 9, 2, 8, 2, 8, 1, 7, 1, 7, -7, 6, -7, 6, -8, 5, -8, 5, -10, 2, -10, 2, -8, -3, -8, -3, -10, -6, -10)

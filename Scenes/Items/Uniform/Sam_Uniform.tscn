@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://w2gewjgfh381"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_tnxna"]
+[ext_resource type="Texture2D" uid="uid://phm72jqn1su3" path="res://Assets/Icons/Items/Clothing/Uniforms/Sam_Uniform.png" id="2_emjs0"]
+[ext_resource type="Texture2D" uid="uid://0lt0sx8vlhea" path="res://Assets/Icons/Clothing/Uniforms/Sam_Uniform.png" id="3_a50u5"]
+
+[node name="Sam_Uniform" type="Node2D"]
+script = ExtResource("1_tnxna")
+item_name = "Sam_Uniform"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_emjs0")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_a50u5")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4, -6, -4, -4, -5, -4, -5, 0, -4, 0, -4, 1, -5, 1, -5, 6, -4, 6, -4, 7, -1, 7, -1, 5, 0, 5, 0, 7, 3, 7, 3, 6, 4, 6, 4, 1, 3, 1, 3, 0, 4, 0, 4, -4, 3, -4, 3, -6, 2, -6, 2, -5, 1, -5, 1, -3, -2, -3, -2, -5, -3, -5, -3, -6)

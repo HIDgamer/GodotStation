@@ -1,0 +1,67 @@
+[gd_scene load_steps=8 format=3 uid="uid://dxwsvct2glwwb"]
+
+[ext_resource type="Script" uid="uid://bfj73ll6r08pv" path="res://Code/Items/Uniform/Back.gd" id="1_yb7kb"]
+[ext_resource type="Texture2D" uid="uid://h68l5sof4bq0" path="res://Assets/Icons/Items/Storage/Backpacks/Corporate_Satchel_black.png" id="2_vlldn"]
+[ext_resource type="Texture2D" uid="uid://crykbnxe66x3y" path="res://Assets/Icons/Clothing/Backpacks/Corporate_Satch_black.png" id="3_4aqgk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j6s5f"]
+atlas = ExtResource("2_vlldn")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3lekb"]
+atlas = ExtResource("2_vlldn")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tl01j"]
+atlas = ExtResource("2_vlldn")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jgxr4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j6s5f")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3lekb")
+}],
+"loop": true,
+"name": &"half",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tl01j")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="Corporate_Satch_Black" type="Node2D"]
+script = ExtResource("1_yb7kb")
+drag_unequip = true
+storage_type = 1
+storage_max_size = 10
+has_open_close_animation = true
+item_name = "Corporate_Satchel_Black"
+w_class = 4
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_jgxr4")
+animation = &"close"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_4aqgk")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4, -7, -5, -7, -5, -6, -6, -6, -6, -5, -10, -5, -10, 7, -9, 7, -9, 8, 9, 8, 9, 7, 10, 7, 10, -5, 6, -5, 6, -6, 5, -6, 5, -7, 4, -7, 4, -8, -4, -8)

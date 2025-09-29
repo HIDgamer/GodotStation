@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8n0pjfagmgil"]
+
+[ext_resource type="Script" uid="uid://b30v47uc3dumj" path="res://Code/Items/Armor/Armor.gd" id="1_kdo3k"]
+[ext_resource type="Texture2D" uid="uid://c2rv202gj1gjl" path="res://Assets/Icons/Items/Clothing/Suits/ERT_Maintiniance_Suit.png" id="2_pa2bv"]
+[ext_resource type="Texture2D" uid="uid://dl5rrebepquli" path="res://Assets/Icons/Clothing/Suit/ERT_Maintiniance_Suit.png" id="3_navg4"]
+
+[node name="ERT_Maintiniance_Suit" type="Node2D"]
+script = ExtResource("1_kdo3k")
+armor_melee = 30
+armor_energy = 30
+storage_type = 2
+storage_max_size = 4
+storage_slots = 4
+max_storage_space = 4
+item_name = "ERT_Maintiniance_Suit"
+w_class = 4
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_pa2bv")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_navg4")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4, -7, -4, -6, -5, -6, -5, -5, -6, -5, -6, -4, -7, -4, -7, -3, -8, -3, -8, -1, -9, -1, -9, 2, -5, 2, -5, 6, -6, 6, -6, 9, -5, 9, -5, 10, -2, 10, -2, 9, 1, 9, 1, 10, 4, 10, 4, 9, 5, 9, 5, 6, 4, 6, 4, 2, 8, 2, 8, -1, 7, -1, 7, -3, 6, -3, 6, -4, 5, -4, 5, -5, 4, -5, 4, -6, 3, -6, 3, -7, 1, -7, 1, -6, -2, -6, -2, -7)

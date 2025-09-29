@@ -1,0 +1,69 @@
+[gd_scene load_steps=8 format=3 uid="uid://c3icp7vd6xamo"]
+
+[ext_resource type="Script" uid="uid://bfj73ll6r08pv" path="res://Code/Items/Uniform/Back.gd" id="1_6a6j1"]
+[ext_resource type="Texture2D" uid="uid://d1678x1dt8f5" path="res://Assets/Icons/Items/Storage/Backpacks/Smock.png" id="2_8aeq5"]
+[ext_resource type="Texture2D" uid="uid://djuiuenvwmnep" path="res://Assets/Icons/Clothing/Backpacks/Smock.png" id="3_85pyb"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_enrh8"]
+atlas = ExtResource("2_8aeq5")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3abrg"]
+atlas = ExtResource("2_8aeq5")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7n43j"]
+atlas = ExtResource("2_8aeq5")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wslvu"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_enrh8")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3abrg")
+}],
+"loop": true,
+"name": &"half",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7n43j")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="Smock" type="Node2D"]
+script = ExtResource("1_6a6j1")
+drag_unequip = true
+storage_type = 1
+has_open_close_animation = true
+item_name = "Smock"
+w_class = 4
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_wslvu")
+animation = &"open"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_85pyb")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4, -6, -6, -6, -6, -5, -7, -5, -7, -4, -8, -4, -8, -3, -9, -3, -9, 3, -8, 3, -8, 4, -7, 4, -7, 5, -6, 5, -6, 6, -5, 6, -5, 7, -4, 7, -4, 8, -3, 8, -3, -7, -4, -7)
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(0, 4, 1, 4, 1, -1, 2, -1, 2, -4, 3, -4, 3, -5, 4, -5, 4, -7, 0, -7)

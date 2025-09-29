@@ -206,6 +206,51 @@ scale_amount_curve = SubResource("Curve_2mwkk")
 [node name="SunLayer" type="ParallaxLayer" parent="ParallaxBackground"]
 motion_scale = Vector2(0.05, 0.05)
 
+[node name="Sun" type="Node2D" parent="ParallaxBackground/SunLayer"]
+visible = false
+position = Vector2(-63392, 87488)
+scale = Vector2(5, 5)
+script = ExtResource("6_ejcwl")
+light_energy = 2.0
+corona_texture = SubResource("GradientTexture2D_72xkh")
+flare_texture = ExtResource("10_1j7gh")
+
+[node name="CoreSprite" type="Sprite2D" parent="ParallaxBackground/SunLayer/Sun"]
+texture = SubResource("GradientTexture2D_72xkh")
+
+[node name="CoronaParticles" type="CPUParticles2D" parent="ParallaxBackground/SunLayer/Sun"]
+material = SubResource("CanvasItemMaterial_f4wub")
+scale = Vector2(0.01, 0.01)
+amount = 100
+texture = ExtResource("10_xmk7j")
+lifetime = 3.0
+local_coords = true
+emission_shape = 1
+emission_sphere_radius = 400.0
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 20.0
+initial_velocity_max = 50.0
+radial_accel_min = -10.0
+radial_accel_max = 10.0
+scale_amount_min = 100.0
+scale_amount_max = 200.0
+color = Color(1, 0.7, 0.2, 0.2)
+
+[node name="Light2D" type="PointLight2D" parent="ParallaxBackground/SunLayer/Sun"]
+z_as_relative = false
+energy = 2.0
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 5.0
+texture = SubResource("GradientTexture2D_72xkh")
+offset = Vector2(10000, -10000)
+texture_scale = 50.0
+height = 1275.0
+metadata/use_color_temperature = false
+metadata/color_temperature = 1000
+metadata/color_filter = Color(1, 1, 1, 0)
+
 [node name="MidgroundLayer" type="Node2D" parent="."]
 
 [node name="AsteroidField1" type="Node2D" parent="MidgroundLayer"]
@@ -242,47 +287,3 @@ initial_velocity_min = 30.0
 initial_velocity_max = 80.0
 scale_amount_max = 8.0
 color = Color(0.8, 0.8, 0.9, 0.3)
-
-[node name="Sun" type="Node2D" parent="."]
-position = Vector2(-63392, 87488)
-scale = Vector2(5, 5)
-script = ExtResource("6_ejcwl")
-light_energy = 2.0
-corona_texture = SubResource("GradientTexture2D_72xkh")
-flare_texture = ExtResource("10_1j7gh")
-
-[node name="CoreSprite" type="Sprite2D" parent="Sun"]
-texture = SubResource("GradientTexture2D_72xkh")
-
-[node name="CoronaParticles" type="CPUParticles2D" parent="Sun"]
-material = SubResource("CanvasItemMaterial_f4wub")
-scale = Vector2(0.01, 0.01)
-amount = 100
-texture = ExtResource("10_xmk7j")
-lifetime = 3.0
-local_coords = true
-emission_shape = 1
-emission_sphere_radius = 400.0
-spread = 180.0
-gravity = Vector2(0, 0)
-initial_velocity_min = 20.0
-initial_velocity_max = 50.0
-radial_accel_min = -10.0
-radial_accel_max = 10.0
-scale_amount_min = 100.0
-scale_amount_max = 200.0
-color = Color(1, 0.7, 0.2, 0.2)
-
-[node name="Light2D" type="PointLight2D" parent="Sun"]
-z_as_relative = false
-energy = 2.0
-shadow_enabled = true
-shadow_filter = 1
-shadow_filter_smooth = 5.0
-texture = SubResource("GradientTexture2D_72xkh")
-offset = Vector2(10000, -10000)
-texture_scale = 50.0
-height = 1275.0
-metadata/use_color_temperature = false
-metadata/color_temperature = 1000
-metadata/color_filter = Color(1, 1, 1, 0)

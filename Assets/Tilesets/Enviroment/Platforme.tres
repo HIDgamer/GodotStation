@@ -1,0 +1,10 @@
+[gd_resource type="CanvasTexture" load_steps=4 format=3 uid="uid://rqlpyd0ma252"]
+
+[ext_resource type="Texture2D" uid="uid://bmwv6aqatghku" path="res://Assets/Tilesets/Enviroment/Platform.png" id="1_ay6l1"]
+[ext_resource type="Texture2D" uid="uid://sp8dk1t2v4m4" path="res://Assets/Tilesets/Enviroment/Platform_n.png" id="2_dwnof"]
+[ext_resource type="Texture2D" uid="uid://2hbyqx6ywv1w" path="res://Assets/Tilesets/Enviroment/Platform_s.png" id="3_a72gm"]
+
+[resource]
+diffuse_texture = ExtResource("1_ay6l1")
+normal_texture = ExtResource("2_dwnof")
+specular_texture = ExtResource("3_a72gm")

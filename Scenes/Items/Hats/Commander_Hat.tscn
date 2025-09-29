@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://dc28uqmyblpae"]
+
+[ext_resource type="Script" uid="uid://b30v47uc3dumj" path="res://Code/Items/Armor/Armor.gd" id="1_muinu"]
+[ext_resource type="Texture2D" uid="uid://cty15063bc6kl" path="res://Assets/Icons/Items/Clothing/Hats/CO_PeakedHat_3.png" id="2_8cj2t"]
+[ext_resource type="Texture2D" uid="uid://c43t388jdyewr" path="res://Assets/Icons/Clothing/Hats/CO_PeakedHat_3.png" id="3_d6wqv"]
+
+[node name="Commander_Hat" type="Node2D"]
+script = ExtResource("1_muinu")
+item_name = "Commander_Hat"
+w_class = 2
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_8cj2t")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 32)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_d6wqv")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-1, -6, -1, -5, -3, -5, -3, -4, -5, -4, -5, -3, -7, -3, -7, -2, -9, -2, -9, -1, -10, -1, -10, 0, -11, 0, -11, 2, -10, 2, -10, 3, -8, 3, -8, 4, -4, 4, -4, 5, -3, 5, -3, 6, -1, 6, -1, 7, 6, 7, 6, 6, 7, 6, 7, 4, 6, 4, 6, 2, 7, 2, 7, 1, 8, 1, 8, -2, 7, -2, 7, -3, 6, -3, 6, -4, 5, -4, 5, -5, 4, -5, 4, -6)

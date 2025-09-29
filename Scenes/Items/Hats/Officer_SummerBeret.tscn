@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://c1g348f21p5dp"]
+
+[ext_resource type="Script" uid="uid://dgp7v7lxba43" path="res://Code/Items/Uniform/Head.gd" id="1_7wdxl"]
+[ext_resource type="Texture2D" uid="uid://cem0evywsa630" path="res://Assets/Icons/Items/Clothing/Hats/CO_Berets2.png" id="2_wn2sp"]
+[ext_resource type="Texture2D" uid="uid://bpr2gjoo47v6f" path="res://Assets/Icons/Clothing/Hats/CO_Beret_8.png" id="3_auxqh"]
+
+[node name="Officer_SummerBeret" type="Node2D"]
+script = ExtResource("1_7wdxl")
+item_name = "Officer_SummerBeret"
+w_class = 2
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_wn2sp")
+region_enabled = true
+region_rect = Rect2(160, 0, 32, 32)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_auxqh")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-1, -5, -1, -4, -4, -4, -4, -3, -6, -3, -6, -2, -7, -2, -7, -1, -8, -1, -8, 1, -9, 1, -9, 4, -8, 4, -8, 5, -7, 5, -7, 6, -3, 6, -3, 5, 5, 5, 5, 4, 6, 4, 6, 3, 7, 3, 7, -3, 6, -3, 6, -4, 4, -4, 4, -5)

@@ -7,7 +7,6 @@ class_name Machinery
 @export var machinery_id: String = ""
 @export var use_cooldown: float = 0.0
 @export var auto_activate: bool = false
-@export var can_be_bumped: bool = true
 
 # === POWER SYSTEM ===
 @export_subgroup("Power")
@@ -318,7 +317,7 @@ func _on_cooldown_finished():
 	pass
 
 # === INTERACTION OVERRIDES ===
-func on_bump(bumper) -> bool:
+func on_bump(bumper, direction: Vector2i = Vector2i.ZERO) -> bool:
 	"""Handle entity bumping into machinery"""
 	if not can_be_bumped:
 		return true  # Block movement

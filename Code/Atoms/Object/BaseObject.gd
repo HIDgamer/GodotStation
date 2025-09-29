@@ -1,10 +1,6 @@
 extends Node2D
 class_name BaseObject
 
-# =============================================================================
-# CONSTANTS AND ENUMS
-# =============================================================================
-
 enum ObjectFlags {
 	IN_USE = 1,
 	CAN_BE_HIT = 2,
@@ -39,10 +35,6 @@ enum PassFlags {
 const CLIMB_DELAY_SHORT = 0.2
 const CLIMB_DELAY_MEDIUM = 1.0
 const CLIMB_DELAY_LONG = 2.0
-
-# =============================================================================
-# EXPORT PROPERTIES
-# =============================================================================
 
 @export_group("Core Object Properties")
 @export var obj_name: String = "object"
@@ -92,16 +84,14 @@ const CLIMB_DELAY_LONG = 2.0
 
 @export_group("Movement and Blocking")
 @export var can_block_movement: bool = true
+@export var can_be_bumped: bool = true
 @export var projectile_coverage: int = 20
-
-# =============================================================================
-# CORE PROPERTIES
-# =============================================================================
 
 var obj_flags: int = ObjectFlags.CAN_BE_HIT
 var resistance_flags: int = 0
 var allow_pass_flags: int = 0
 var flags_can_pass_all_temp: int = 0
+var current_z_level: int = 0
 
 var grabbed_by = null
 var last_thrower = null
@@ -110,13 +100,11 @@ var active_equipment: Dictionary = {}
 var actions: Array = []
 var network_id: String = ""
 
-# Physics state
 var velocity: Vector2 = Vector2.ZERO
 var angular_velocity: float = 0.0
 var is_physically_simulated: bool = false
 var landed: bool = true
 
-# Armor values
 var soft_armor = {
 	"melee": 0, "bullet": 0, "laser": 0, "energy": 0, "bomb": 0,
 	"bio": 100, "rad": 0, "fire": 0, "acid": 0
@@ -127,20 +115,13 @@ var hard_armor = {
 	"bio": 0, "rad": 0, "fire": 0, "acid": 0
 }
 
-# =============================================================================
-# SIGNALS
-# =============================================================================
-
 signal integrity_changed(old_value, new_value)
 signal destroyed(disassembled)
 signal anchored_changed(new_anchored_state)
 signal interacted_with(user)
 signal landed_after_throw(position)
 signal object_hit(hit_by, force)
-
-# =============================================================================
-# INITIALIZATION
-# =============================================================================
+signal bumped(bumper, direction)
 
 func _init():
 	if obj_integrity == null:
@@ -154,6 +135,7 @@ func _init():
 func _ready():
 	_initialize_groups()
 	_initialize_collision()
+	await get_tree().process_frame
 	_register_with_systems()
 
 func _initialize_groups():
@@ -171,21 +153,24 @@ func _initialize_collision():
 		setup_collision()
 
 func _register_with_systems():
-	# Register with spatial manager
-	var world = get_parent()
-	var spatial_manager = world.get_node_or_null("SpatialManager")
-	if spatial_manager and spatial_manager.has_method("register_entity"):
-		spatial_manager.register_entity(self)
+	var world = get_node_or_null("/root/World")
+	if not world:
+		world = get_tree().get_first_node_in_group("world")
 	
-	# Register with tile occupancy system
-	if world and "tile_occupancy_system" in world and world.tile_occupancy_system:
-		var tile_system = world.tile_occupancy_system
-		if tile_system.has_method("register_entity"):
-			tile_system.register_entity(self)
-
-# =============================================================================
-# PHYSICS AND MOVEMENT
-# =============================================================================
+	if world:
+		var tile_occupancy_system = world.get_node_or_null("TileOccupancySystem")
+		if not tile_occupancy_system:
+			tile_occupancy_system = get_tree().get_first_node_in_group("tile_occupancy_system")
+		
+		if tile_occupancy_system and tile_occupancy_system.has_method("register_entity"):
+			var success = tile_occupancy_system.register_entity(self)
+			if not success and tile_occupancy_system.has_method("register_entity_at_tile"):
+				var tile_pos = Vector2i(int(global_position.x / 32), int(global_position.y / 32))
+				tile_occupancy_system.register_entity_at_tile(self, tile_pos, current_z_level)
+		
+		var spatial_manager = world.get_node_or_null("SpatialManager")
+		if spatial_manager and spatial_manager.has_method("register_entity"):
+			spatial_manager.register_entity(self)
 
 func _physics_process(delta):
 	if not is_physically_simulated or landed:
@@ -201,7 +186,6 @@ func _process_physics_simulation(delta):
 	var old_position = global_position
 	var new_position = old_position + velocity * delta
 	
-	# Check for collisions using the tile occupancy system
 	var collision_result = _check_physics_collision(old_position, new_position)
 	
 	if angular_velocity != 0:
@@ -209,10 +193,8 @@ func _process_physics_simulation(delta):
 		angular_velocity = lerp(angular_velocity, 0.0, friction * delta * 2)
 	
 	if collision_result.has_collision:
-		# Bounce off collision
 		velocity = velocity.bounce(collision_result.normal) * bounce_factor
 		angular_velocity *= bounce_factor
-		# Don't move to the collision position
 		global_position = collision_result.safe_position
 	else:
 		global_position = new_position
@@ -224,37 +206,35 @@ func _check_physics_collision(old_pos: Vector2, new_pos: Vector2) -> Dictionary:
 		"safe_position": old_pos
 	}
 	
-	# Get world reference for collision checking
-	var world = get_parent()
+	var world = get_node_or_null("/root/World")
+	if not world:
+		world = get_tree().get_first_node_in_group("world")
+	
 	if not world:
 		return result
 	
-	# Convert to tile coordinates
 	var tile_size = 32
 	if "TILE_SIZE" in world:
 		tile_size = world.TILE_SIZE
 	
 	var new_tile = Vector2i(int(new_pos.x / tile_size), int(new_pos.y / tile_size))
-	var current_z = 0
-	if "layer_z" in self:
-		current_z = layer_z
 	
-	# Check for wall collision
-	if world.has_method("is_wall_at") and world.is_wall_at(new_tile, current_z):
+	if world.has_method("is_wall_at") and world.is_wall_at(new_tile, current_z_level):
 		result.has_collision = true
 		result.normal = (old_pos - new_pos).normalized()
 		result.safe_position = old_pos
 		return result
 	
-	# Check for dense entity collision using tile occupancy system
-	if "tile_occupancy_system" in world and world.tile_occupancy_system:
-		var tile_system = world.tile_occupancy_system
-		if tile_system.has_method("has_dense_entity_at"):
-			if tile_system.has_dense_entity_at(new_tile, current_z, self):
-				result.has_collision = true
-				result.normal = (old_pos - new_pos).normalized()
-				result.safe_position = old_pos
-				return result
+	var tile_occupancy_system = world.get_node_or_null("TileOccupancySystem")
+	if not tile_occupancy_system:
+		tile_occupancy_system = get_tree().get_first_node_in_group("tile_occupancy_system")
+	
+	if tile_occupancy_system and tile_occupancy_system.has_method("has_dense_entity_at"):
+		if tile_occupancy_system.has_dense_entity_at(new_tile, current_z_level, self):
+			result.has_collision = true
+			result.normal = (old_pos - new_pos).normalized()
+			result.safe_position = old_pos
+			return result
 	
 	return result
 
@@ -303,10 +283,6 @@ func setup_collision():
 	
 	collision_shape.shape = shape
 	add_child(collision_shape)
-
-# =============================================================================
-# DAMAGE AND HEALTH SYSTEM
-# =============================================================================
 
 func take_damage(damage_amount: float, damage_type: int, armor_type: String = "", effects: bool = true, armour_penetration: float = 0.0, attacker = null):
 	if damage_amount <= 0:
@@ -373,9 +349,12 @@ func deconstruct(disassembled: bool = true, disassembler = null) -> void:
 	emit_signal("destroyed", disassembled)
 	queue_free()
 
-# =============================================================================
-# INTERACTION SYSTEM
-# =============================================================================
+func on_bump(bumper, direction: Vector2i = Vector2i.ZERO) -> bool:
+	emit_signal("bumped", bumper, direction)
+	return blocks_movement()
+
+func blocks_movement() -> bool:
+	return can_block_movement and entity_dense
 
 func attackby(item, user, params = null) -> bool:
 	if not item or not user:
@@ -452,10 +431,6 @@ func _get_equipment_examination() -> String:
 			return " They are holding " + get_entity_name(active_item) + "."
 	
 	return ""
-
-# =============================================================================
-# INTERACTION HANDLERS
-# =============================================================================
 
 func handle_tool_interaction(tool, user) -> bool:
 	match tool.tool_behaviour:
@@ -604,10 +579,6 @@ func friendly_interact(user) -> bool:
 	emit_signal("interacted_with", user)
 	return true
 
-# =============================================================================
-# COLLISION AND DETECTION
-# =============================================================================
-
 func hitby(thrown_item, speed: float = 5) -> void:
 	var tforce = thrown_item.throwforce if "throwforce" in thrown_item else 0
 	take_damage(tforce, 1, "melee", true, 0.0)
@@ -635,20 +606,12 @@ func is_user_in_range(user, interaction_range: float = 1.5) -> bool:
 	var distance = global_position.distance_to(user.global_position)
 	return distance <= interaction_range * 32
 
-# =============================================================================
-# ANCHORING SYSTEM
-# =============================================================================
-
 func set_anchored(anchor_value: bool) -> void:
 	if anchored == anchor_value:
 		return
 	
 	anchored = anchor_value
 	emit_signal("anchored_changed", anchored)
-
-# =============================================================================
-# AUDIO AND VISUAL
-# =============================================================================
 
 func play_audio(stream: AudioStream, volume_db: float = 0.0) -> void:
 	if stream:
@@ -675,10 +638,6 @@ func set_opacity(new_opacity: float):
 
 func update_appearance() -> void:
 	pass
-
-# =============================================================================
-# UTILITY FUNCTIONS
-# =============================================================================
 
 func has_flag(flags: int, flag: int) -> bool:
 	return (flags & flag) != 0
@@ -729,10 +688,6 @@ func get_direction_to(other_node) -> Vector2:
 func get_network_id() -> String:
 	return network_id
 
-# =============================================================================
-# CHARACTER STUB METHODS
-# =============================================================================
-
 func get_active_item():
 	return null
 
@@ -748,10 +703,6 @@ func stun(duration: float):
 func die():
 	if entity_type in ["character", "mob"]:
 		print(get_entity_name(self), " has died!")
-
-# =============================================================================
-# STUB METHODS FOR EXTENSION
-# =============================================================================
 
 func _unfold_internal(user):
 	pass

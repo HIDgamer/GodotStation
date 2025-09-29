@@ -1,0 +1,54 @@
+[gd_scene load_steps=7 format=3 uid="uid://b5cgyjerodbma"]
+
+[ext_resource type="Script" uid="uid://cogtt8qcqymsc" path="res://Code/Items/Magazines/PistolMagazine.gd" id="1_xj430"]
+[ext_resource type="Texture2D" uid="uid://07uf27v3kqex" path="res://Assets/Icons/Items/Guns/Magazines/MSA-51_Magazine.png" id="2_ntllq"]
+[ext_resource type="AudioStream" uid="uid://bx4yrtl3s0lc" path="res://Sound/weapons/singlebullet.wav" id="3_4trhg"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ygnp"]
+atlas = ExtResource("2_ntllq")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aysqx"]
+atlas = ExtResource("2_ntllq")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_iym6p"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7ygnp")
+}],
+"loop": true,
+"name": &"Empty",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aysqx")
+}],
+"loop": true,
+"name": &"Full",
+"speed": 5.0
+}]
+
+[node name="STAMAG_6mm" type="Node2D"]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("1_xj430")
+max_rounds = 300
+current_rounds = 300
+compatible_ammo_type = 1
+bullet_type = "6.5 x 35mm"
+magazine_name = " 6.5mm_STAMAG"
+item_name = " 6.5mm_STAMAG"
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_iym6p")
+animation = &"Empty"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-6, -16, -6, -15, -7, -15, -7, -7, -6, -7, -6, -6, -5, -6, -5, 16, 4, 16, 4, 15, 5, 15, 5, -15, 4, -15, 4, -16)
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_4trhg")

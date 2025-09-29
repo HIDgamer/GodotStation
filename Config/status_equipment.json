@@ -1,0 +1,51 @@
+{
+  "councilor": {
+    "additional_items": [
+      {
+        "item_name": "Councilor_Badge",
+        "scene_path": "res://Objects/Items/Councilor_Badge.tscn",
+        "slot": "WEAR_ID"
+      },
+      {
+        "item_name": "Access_Card_Gold",
+        "scene_path": "res://Objects/Items/Access_Card_Gold.tscn",
+        "slot": "L_STORE"
+      }
+    ],
+    "equipment_modifiers": {
+      "access_permissions": [
+        "command",
+        "bridge",
+        "councilor_quarters"
+      ],
+      "clearance_level": 4
+    }
+  },
+  "senate": {
+    "additional_items": [
+      {
+        "item_name": "Senate_Badge",
+        "scene_path": "res://Objects/Items/Senate_Badge.tscn",
+        "slot": "WEAR_ID"
+      },
+      {
+        "item_name": "Master_Access_Card",
+        "scene_path": "res://Objects/Items/Master_Access_Card.tscn",
+        "slot": "L_STORE"
+      },
+      {
+        "item_name": "Senate_Communicator",
+        "scene_path": "res://Objects/Items/Senate_Communicator.tscn",
+        "slot": "R_STORE"
+      }
+    ],
+    "equipment_modifiers": {
+      "access_permissions": [
+        "all_areas",
+        "senate_chamber",
+        "classified_archives"
+      ],
+      "clearance_level": 6
+    }
+  }
+}

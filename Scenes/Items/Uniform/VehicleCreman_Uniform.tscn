@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://ckqyq1ed525vo"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_fe02k"]
+[ext_resource type="Texture2D" uid="uid://f3xxdd3p5jye" path="res://Assets/Icons/Items/Clothing/Uniforms/Marine_VC.png" id="2_tp57x"]
+[ext_resource type="Texture2D" uid="uid://bfp4s7msild7w" path="res://Assets/Icons/Clothing/Uniforms/Marine_VC.png" id="3_tjghq"]
+
+[node name="VehicleCreman_Uniform" type="Node2D"]
+script = ExtResource("1_fe02k")
+item_name = "VehicleCreman_Uniform"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_tp57x")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_tjghq")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -6, -5, -5, -6, -5, -6, -3, -7, -3, -7, 0, -6, 0, -6, 1, -5, 1, -5, 3, -6, 3, -6, 8, -5, 8, -5, 9, 4, 9, 4, 8, 5, 8, 5, 3, 4, 3, 4, 1, 5, 1, 5, 0, 6, 0, 6, -3, 5, -3, 5, -5, 4, -5, 4, -6, 1, -6, 1, -5, -2, -5, -2, -6)

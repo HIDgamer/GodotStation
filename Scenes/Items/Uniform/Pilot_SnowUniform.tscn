@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://dn1b7ld2tueej"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_8f60j"]
+[ext_resource type="Texture2D" uid="uid://cmsga8p4bskfl" path="res://Assets/Icons/Items/Clothing/Uniforms/Marine_Pilot_Snow.png" id="2_vvmgj"]
+[ext_resource type="Texture2D" uid="uid://cg7svj8nwty5l" path="res://Assets/Icons/Clothing/Uniforms/Marine_Pilot_Snow.png" id="3_2ye0g"]
+
+[node name="Pilot_SnowUniform" type="Node2D"]
+script = ExtResource("1_8f60j")
+item_name = "Pilot_SnowUniform"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_vvmgj")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_2ye0g")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -6, -5, -5, -6, -5, -6, -3, -7, -3, -7, 0, -5, 0, -5, 3, -6, 3, -6, 7, -5, 7, -5, 8, 4, 8, 4, 7, 5, 7, 5, 3, 4, 3, 4, 0, 6, 0, 6, -4, 5, -4, 5, -5, 4, -5, 4, -6, 1, -6, 1, -5, -2, -5, -2, -6)

@@ -15,18 +15,13 @@ func _init():
 	
 	accepted_ammo_types = [Gun.AmmoType.PISTOL]
 	fire_delay = 0.4
-	recoil_amount = 1.5
-	scatter_amount = 0.5
-	effective_range = 5.0
-	max_range = 30.0
+	max_range = 20.0
+	close_range_tiles = 2
+	optimal_range_tiles = 6
 	bullet_speed = 1000.0
-	accurate_range_tiles = 10
-	drift_chance = 0.03
 	
 	available_fire_modes = [Gun.FireMode.SEMIAUTO]
 	current_fire_mode = Gun.FireMode.SEMIAUTO
-	
-	max_heat = 80.0
 	
 	eject_casings = true
 	casing_eject_force = 120.0
@@ -60,31 +55,17 @@ func _ready():
 	attack_verb = ["shoots", "fires at", "blasts"]
 	attack_speed = 1.2
 
-func remove_magazine():
-	var ejected_mag = super.remove_magazine()
-	return ejected_mag
-
-func eject_magazine_raw():
-	var ejected_mag = super.eject_magazine_raw()
-	return ejected_mag
-
 func can_use_weapon(user) -> bool:
 	if not user:
 		return false
 	
-	var original_wielding_requirement = requires_wielding
-	requires_wielding = false
-	var result = super.can_use_weapon(user)
-	requires_wielding = original_wielding_requirement
-	
-	return result
+	return super.can_use_weapon(user)
 
 func create_and_fire_projectile(user, target, bullet) -> bool:
 	if not super.create_and_fire_projectile(user, target, bullet):
 		return false
 	
 	show_muzzle_flash(user)
-	add_recoil_effect(user)
 	
 	if multiplayer.has_multiplayer_peer():
 		var user_id = get_user_network_id(user)
@@ -102,7 +83,6 @@ func show_muzzle_flash(user):
 	var animated_sprite = icon_node as AnimatedSprite2D
 	
 	if not animated_sprite.sprite_frames or not animated_sprite.sprite_frames.has_animation("Flash"):
-		push_warning("Pistol: 'Flash' animation not found in Icon node")
 		return
 	
 	var user_direction = get_user_facing_direction(user)
@@ -157,21 +137,6 @@ func convert_direction_to_rotation(direction: int) -> float:
 			return 315.0
 		_:
 			return 180.0
-
-func add_recoil_effect(user):
-	if not user:
-		return
-	
-	var actual_recoil = recoil_amount
-	
-	if not is_wielded():
-		actual_recoil *= 1.1
-	else:
-		if is_wielded():
-			actual_recoil *= 0.7
-	
-	if user.has_method("add_screen_shake"):
-		user.add_screen_shake(actual_recoil * 0.5)
 
 func insert_magazine(magazine, user) -> bool:
 	if internal_magazine:
@@ -257,8 +222,6 @@ func attack(target, user):
 	if hit_sound:
 		play_audio(hit_sound, -5)
 	
-	apply_durability_loss(0.5)
-	
 	return true
 
 func afterattack(target, user, proximity: bool, params: Dictionary = {}):
@@ -266,7 +229,11 @@ func afterattack(target, user, proximity: bool, params: Dictionary = {}):
 		return use_weapon(user, target)
 	else:
 		if user:
-			show_message_to_user(user, "That's too far away for a pistol shot.")
+			var distance = user.global_position.distance_to(target.global_position)
+			if distance > max_range * 32:
+				show_message_to_user(user, "That target is too far away for a pistol shot.")
+			else:
+				return use_weapon(user, target)
 		return false
 
 func examine(user) -> String:
@@ -285,14 +252,6 @@ func examine(user) -> String:
 	else:
 		text += " The chamber is empty."
 	
-	var condition_percent = current_durability / max_durability
-	if condition_percent < 0.3:
-		text += "\nThe pistol looks worn and might jam soon."
-	elif condition_percent < 0.6:
-		text += "\nThe pistol shows some wear but seems functional."
-	else:
-		text += "\nThe pistol is in good condition."
-	
 	return text
 
 func use_on(target, user) -> bool:
@@ -300,7 +259,7 @@ func use_on(target, user) -> bool:
 		return false
 	
 	var distance = user.global_position.distance_to(target.global_position)
-	if distance > effective_range * 32:
+	if distance > max_range * 32:
 		show_message_to_user(user, "That target is too far for an effective pistol shot.")
 		return false
 	
@@ -338,42 +297,6 @@ func show_muzzle_flash_networked(direction: int):
 		timer.queue_free()
 	)
 	timer.start()
-
-func apply_one_handed_gun_effects(user):
-	add_heat(2.0)
-
-func perform_field_strip(user) -> bool:
-	if not user:
-		return false
-	
-	if current_magazine:
-		show_message_to_user(user, "You need to remove the magazine first!")
-		return false
-	
-	if chambered_bullet:
-		show_message_to_user(user, "You need to clear the chamber first!")
-		return false
-	
-	show_message_to_user(user, "You field strip the " + item_name + " and clean its components.")
-	repair_weapon(20.0)
-	
-	var maintenance_sound = preload("res://Sound/effects/toolbox.ogg") if ResourceLoader.exists("res://Sound/effects/toolbox.ogg") else null
-	if maintenance_sound:
-		play_audio(maintenance_sound, -10)
-	
-	return true
-
-func get_display_name() -> String:
-	var base_name = super.get_display_name()
-	
-	if maintenance_required:
-		base_name += " (needs maintenance)"
-	elif is_jammed:
-		base_name += " (jammed)"
-	elif current_safety_state == SafetyState.ON:
-		base_name += " (safety on)"
-	
-	return base_name
 
 func show_message_to_user(user, message: String):
 	if user and user.has_method("show_message"):

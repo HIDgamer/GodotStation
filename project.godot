@@ -10,24 +10,27 @@ config_version=5
 
 [application]
 
-config/name="A.R.E.S-1"
+config/name="GodotStation"
 run/main_scene="uid://bm6k8x40an2pq"
-config/features=PackedStringArray("4.4", "Forward Plus")
+config/features=PackedStringArray("4.5", "Forward Plus")
 
 [autoload]
 
 AssetRegistry="*res://AssetRegistry.gd"
 GameManager="*res://Code/Managers/Game_manager.gd"
 MultiplayerManager="*res://Code/Network/MultiplayerManager.gd"
-OptimizationManager="*res://Code/Managers/OptimizationManager.gd"
 TileDefinitions="*res://StationForge/TileDefinitions.gd"
-InputPriorityManager="*res://Code/Managers/InputPriorityManager.gd"
 CharacterAssetManager="*res://Code/Managers/Character_asset_Manager.gd"
 DoorManager="*res://Code/Managers/DoorManager.gd"
+HiveMind="*res://Code/Managers/Hive_Mind.gd"
 
 [display]
 
 window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray()
 
 [file_customization]
 
@@ -323,7 +326,7 @@ textures/vram_compression/import_etc2_astc=true
 2d/shadow_atlas/size=8192
 limits/opengl/max_renderable_lights=150
 limits/opengl/max_lights_per_object=300
-environment/defaults/default_clear_color=Color(0.05, 0.05, 0.05, 1)
+environment/defaults/default_clear_color=Color(0.140447, 0.140447, 0.140447, 1)
 lightmapping/bake_performance/region_size=2048
 2d/snap/snap_2d_transforms_to_pixel=true
 2d/snap/snap_2d_vertices_to_pixel=true

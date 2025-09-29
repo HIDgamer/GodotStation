@@ -170,7 +170,6 @@ func _print_input_setup_guide():
 	print("- target_*: Numpad 1-9 (body targeting)")
 	print("- cycle_intent: Tab (cycle intents)")
 	print("- esc: ESC (pause menu)")
-	print("- adminspawn: F1 (admin spawner)")
 	print("=================================\n")
 
 func _has_movement_component(node: Node) -> bool:

@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://b24ax12wfh2uw"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_afsgd"]
+[ext_resource type="Texture2D" uid="uid://ctaxi45xghohk" path="res://Assets/Icons/Items/Clothing/Uniforms/Inmate.png" id="2_qxqf0"]
+[ext_resource type="Texture2D" uid="uid://dr0yylohy6ev4" path="res://Assets/Icons/Clothing/Uniforms/Inmate_dj.png" id="3_qxqf0"]
+[ext_resource type="Texture2D" uid="uid://cj27dwitucg4m" path="res://Assets/Icons/Clothing/Uniforms/Inmate.png" id="3_r2vxn"]
+
+[node name="Inmate_Jumpsuit" type="Node2D"]
+script = ExtResource("1_afsgd")
+texture1 = ExtResource("3_r2vxn")
+texture2 = ExtResource("3_qxqf0")
+item_name = "Inmate_Jumpsuit"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_qxqf0")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_r2vxn")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -6, -5, -5, -6, -5, -6, -4, -7, -4, -7, -3, -8, -3, -8, -1, -9, -1, -9, 1, -8, 1, -8, 2, -6, 2, -6, 1, -5, 1, -5, 3, -6, 3, -6, 9, -5, 9, -5, 10, -1, 10, -1, 9, 0, 9, 0, 10, 4, 10, 4, 9, 5, 9, 5, 3, 4, 3, 4, 1, 5, 1, 5, 2, 7, 2, 7, 1, 8, 1, 8, -1, 7, -1, 7, -3, 6, -3, 6, -4, 5, -4, 5, -5, 4, -5, 4, -6, 1, -6, 1, -5, -2, -5, -2, -6)

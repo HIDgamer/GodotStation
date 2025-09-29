@@ -9,6 +9,7 @@ const WORLD_SCENE = "res://Scenes/Maps/Hub.tscn"
 const PLAYER_SCENE_PATH = "res://Scenes/Characters/human.tscn"
 const PAUSE_MENU_SCENE = "res://Scenes/UI/Player/pause_menu.tscn"
 const ADMIN_SPAWNER_SCENE = "res://Scenes/UI/Ingame/AdminSpawner.tscn"
+const ALIEN_SCENE_PATH = "res://Scenes/Characters/alien.tscn"
 const DEFAULT_PORT = 7777
 const MAX_PLAYERS = 16
 
@@ -26,6 +27,7 @@ var settings_caller_state = GameState.MAIN_MENU
 var players = {}
 var local_player_id = 1
 var local_player_instance = null
+var debug_spawn_as_alien: bool = false
 
 var current_map = "Station"
 var current_game_mode_setting = "Standard"
@@ -58,10 +60,13 @@ var threading_initialized = false
 var last_atmosphere_update = 0
 var atmosphere_update_interval = 5000
 
-# UI state tracking per player
 var player_ui_states = {}
 
 var npcs = {}
+
+var initialization_step = 0
+var initialization_complete = false
+var initialization_timer = 0.0
 
 signal game_state_changed(old_state, new_state)
 signal player_registered(player_id, player_name)
@@ -77,10 +82,8 @@ signal server_disconnected()
 signal systems_initialized()
 
 func _ready():
-	print("GameManager: Initializing...")
 	get_tree().paused = false
-	
-	initialize_threading_system()
+	set_process(true)
 	
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
@@ -88,31 +91,57 @@ func _ready():
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-	complete_initialization()
+	call_deferred("begin_staged_initialization")
+
+func begin_staged_initialization():
+	initialization_step = 0
+	initialization_timer = 0.0
+
+func _process(delta):
+	if not initialization_complete:
+		initialization_timer += delta
+		if initialization_timer >= 0.1:
+			process_initialization_step()
+			initialization_timer = 0.0
+		return
+	
+	if threading_initialized and is_in_game():
+		update_background_processing()
+
+func process_initialization_step():
+	match initialization_step:
+		0:
+			load_character_data()
+			initialization_step += 1
+		1:
+			change_state(GameState.MAIN_MENU)
+			initialization_step += 1
+		2:
+			if should_initialize_threading():
+				call_deferred("initialize_threading_system")
+			initialization_step += 1
+		3:
+			initialization_complete = true
+
+func should_initialize_threading() -> bool:
+	return current_state == GameState.PLAYING or current_state == GameState.LOBBY
 
 func initialize_threading_system():
-	"""Initialize the ThreadManager for background processing"""
-	print("GameManager: Setting up ThreadManager...")
+	if threading_initialized:
+		return
 	
 	thread_manager = preload("res://Code/Threading/ThreadManager.gd").new()
 	thread_manager.name = "ThreadManager"
 	add_child(thread_manager)
 	
+	await get_tree().process_frame
+	
 	thread_manager.task_completed.connect(_on_threading_task_completed)
 	thread_manager.performance_warning.connect(_on_threading_performance_warning)
 	
 	threading_initialized = true
-	print("GameManager: Threading system initialized")
 
-func complete_initialization():
-	"""Complete GameManager initialization"""
-	load_character_data()
-	change_state(GameState.MAIN_MENU)
-	print("GameManager: Initialization complete")
-
-# UI Management System
 func get_player_ui_state(player_id) -> Dictionary:
-	"""Get UI state for a specific player"""
 	if not player_id in player_ui_states:
 		player_ui_states[player_id] = {
 			"pause_menu_open": false,
@@ -123,11 +152,9 @@ func get_player_ui_state(player_id) -> Dictionary:
 	return player_ui_states[player_id]
 
 func toggle_pause_menu(player_id):
-	"""Toggle pause menu for specified player or local player"""
 	if current_state != GameState.PLAYING:
 		return
 	
-	# Only allow local player to toggle their own UI in multiplayer
 	if is_multiplayer() and player_id != get_local_peer_id():
 		return
 	
@@ -138,12 +165,10 @@ func toggle_pause_menu(player_id):
 	else:
 		show_pause_menu(player_id)
 	
-	# Sync UI state in multiplayer
 	if is_multiplayer():
 		sync_ui_state.rpc(player_id, "pause_menu", ui_state.pause_menu_open)
 
 func show_pause_menu(player):
-	"""Show pause menu for specified player"""
 	var ui_state = get_player_ui_state(player)
 	
 	if ui_state.pause_menu_instance != null and is_instance_valid(ui_state.pause_menu_instance):
@@ -153,26 +178,22 @@ func show_pause_menu(player):
 	
 	var pause_menu_scene = load(PAUSE_MENU_SCENE)
 	if not pause_menu_scene:
-		print("GameManager: Failed to load pause menu scene")
 		return
 		
 	ui_state.pause_menu_instance = pause_menu_scene.instantiate()
 	
-	# Get or create UI layer
 	var ui_layer = player.get_node_or_null("PlayerUI")
 	
 	ui_layer.add_child(ui_state.pause_menu_instance)
 	ui_state.pause_menu_instance.show_pause_menu()
 	ui_state.pause_menu_open = true
 	
-	# Connect cleanup signal
 	if ui_state.pause_menu_instance.has_signal("pause_menu_closed"):
 		ui_state.pause_menu_instance.pause_menu_closed.connect(
 			func(): _on_pause_menu_closed(player)
 		)
 
 func hide_pause_menu(player_id):
-	"""Hide pause menu for specified player"""
 	var ui_state = get_player_ui_state(player_id)
 	
 	if ui_state.pause_menu_instance and is_instance_valid(ui_state.pause_menu_instance):
@@ -180,7 +201,6 @@ func hide_pause_menu(player_id):
 		ui_state.pause_menu_open = false
 
 func _on_pause_menu_closed(player_id):
-	"""Handle pause menu being closed"""
 	var ui_state = get_player_ui_state(player_id)
 	ui_state.pause_menu_open = false
 	
@@ -189,11 +209,9 @@ func _on_pause_menu_closed(player_id):
 		ui_state.pause_menu_instance = null
 
 func toggle_admin_spawner(player_id):
-	"""Toggle admin spawner for specified player or local player"""
 	if current_state != GameState.PLAYING:
 		return
 	
-	# Only allow local player to toggle their own UI in multiplayer
 	if is_multiplayer() and player_id != get_local_peer_id():
 		return
 	
@@ -204,12 +222,10 @@ func toggle_admin_spawner(player_id):
 	else:
 		show_admin_spawner(player_id)
 	
-	# Sync UI state in multiplayer
 	if is_multiplayer():
 		sync_ui_state.rpc(player_id, "admin_spawner", ui_state.admin_spawner_open)
 
 func show_admin_spawner(player):
-	"""Show admin spawner for specified player"""
 	var ui_state = get_player_ui_state(player)
 	
 	if ui_state.admin_spawner_instance != null and is_instance_valid(ui_state.admin_spawner_instance):
@@ -219,26 +235,22 @@ func show_admin_spawner(player):
 	
 	var spawner_scene = load(ADMIN_SPAWNER_SCENE)
 	if not spawner_scene:
-		print("GameManager: Failed to load admin spawner scene")
 		return
 		
 	ui_state.admin_spawner_instance = spawner_scene.instantiate()
 	
-	# Get or create UI layer
-	var ui_layer = player.get_node_or_null("PlayerUI")
+	var ui_layer = player.get_tree().get_first_node_in_group("ui_elements")
 	
 	ui_layer.add_child(ui_state.admin_spawner_instance)
 	ui_state.admin_spawner_instance.show_spawner()
 	ui_state.admin_spawner_open = true
 	
-	# Connect cleanup signal
 	if ui_state.admin_spawner_instance.has_signal("spawner_closed"):
 		ui_state.admin_spawner_instance.spawner_closed.connect(
 			func(): _on_admin_spawner_closed(player)
 		)
 
-func hide_admin_spawner(player_id: int):
-	"""Hide admin spawner for specified player"""
+func hide_admin_spawner(player_id):
 	var ui_state = get_player_ui_state(player_id)
 	
 	if ui_state.admin_spawner_instance and is_instance_valid(ui_state.admin_spawner_instance):
@@ -246,7 +258,6 @@ func hide_admin_spawner(player_id: int):
 		ui_state.admin_spawner_open = false
 
 func _on_admin_spawner_closed(player_id):
-	"""Handle admin spawner being closed"""
 	var ui_state = get_player_ui_state(player_id)
 	ui_state.admin_spawner_open = false
 	
@@ -256,7 +267,6 @@ func _on_admin_spawner_closed(player_id):
 
 @rpc("any_peer", "call_local", "reliable")
 func sync_ui_state(player_id, ui_type: String, is_open: bool):
-	"""Synchronize UI state across multiplayer clients"""
 	var ui_state = get_player_ui_state(player_id)
 	
 	match ui_type:
@@ -265,9 +275,7 @@ func sync_ui_state(player_id, ui_type: String, is_open: bool):
 		"admin_spawner":
 			ui_state.admin_spawner_open = is_open
 
-# Scene Management
 func transition_to_scene(scene_path: String, new_state: GameState):
-	"""Transition to a new scene"""
 	if not ResourceLoader.exists(scene_path):
 		push_error("GameManager: Scene not found: " + scene_path)
 		return
@@ -280,10 +288,10 @@ func transition_to_scene(scene_path: String, new_state: GameState):
 	change_state(new_state)
 	setup_scene_connections()
 
-# World Loading
 func load_world(map_path = WORLD_SCENE):
-	"""Load the game world"""
-	print("GameManager: Loading world...")
+	if not threading_initialized:
+		call_deferred("initialize_threading_system")
+		await get_tree().create_timer(0.5).timeout
 	
 	get_tree().change_scene_to_file(map_path)
 	await get_tree().process_frame
@@ -314,24 +322,25 @@ func load_world(map_path = WORLD_SCENE):
 	
 	change_state(GameState.PLAYING)
 	
-	if threading_initialized:
-		start_background_world_processing()
+	if threading_initialized and thread_manager:
+		call_deferred("start_background_world_processing")
 	
 	emit_signal("world_loaded")
 
 func start_background_world_processing():
-	"""Start background world processing using ThreadManager"""
 	if not thread_manager or not world_ref:
 		return
 	
-	print("GameManager: Starting background world processing")
+	await get_tree().create_timer(1.0).timeout
 	
 	var atmosphere_coords = get_initial_atmosphere_coordinates()
-	if atmosphere_coords.size() > 0:
+	if atmosphere_coords.size() > 0 and atmosphere_coords.size() < 500:
 		thread_manager.queue_atmosphere_processing(
 			atmosphere_coords,
 			thread_manager.TaskPriority.LOW
 		)
+	
+	await get_tree().create_timer(0.5).timeout
 	
 	thread_manager.queue_room_detection(
 		0,
@@ -339,39 +348,33 @@ func start_background_world_processing():
 	)
 
 func get_initial_atmosphere_coordinates() -> Array:
-	"""Get coordinates around spawn points for atmosphere processing"""
 	var coords = []
 	
 	for spawn_point in spawn_points:
-		for x in range(int(spawn_point.x) - 10, int(spawn_point.x) + 11):
-			for y in range(int(spawn_point.y) - 10, int(spawn_point.y) + 11):
+		for x in range(int(spawn_point.x) - 5, int(spawn_point.x) + 6):
+			for y in range(int(spawn_point.y) - 5, int(spawn_point.y) + 6):
 				coords.append(Vector2i(x, y))
 	
 	if coords.is_empty():
-		for x in range(-10, 11):
-			for y in range(-10, 11):
+		for x in range(-5, 6):
+			for y in range(-5, 6):
 				coords.append(Vector2i(x, y))
 	
 	return coords
 
-# Player Setup
 func setup_singleplayer():
-	"""Initialize singleplayer game mode"""
-	print("GameManager: Setting up singleplayer...")
-	
 	current_game_mode = GameMode.SINGLE_PLAYER
 	setup_singleplayer_peer()
 	setup_local_player()
 
 func spawn_npc_at_tile(tile_pos: Vector2i, z_level: int = 0, npc_name: String = "") -> Node:
 	if not world_ref or not is_instance_valid(world_ref):
-		print("GameManager: Cannot spawn NPC - no valid world reference")
 		return null
 	
 	if player_scene == null:
-		player_scene = load(PLAYER_SCENE_PATH)
+		var scene_path = ALIEN_SCENE_PATH if debug_spawn_as_alien else PLAYER_SCENE_PATH
+		player_scene = load(scene_path)
 		if player_scene == null:
-			print("GameManager: Failed to load player scene for NPC spawning")
 			return null
 	
 	var npc_instance = player_scene.instantiate()
@@ -385,8 +388,10 @@ func spawn_npc_at_tile(tile_pos: Vector2i, z_level: int = 0, npc_name: String = 
 	npc_instance.set_meta("is_npc", true)
 	npc_instance.set_meta("peer_id", -1)
 	
-	npc_instance.is_npc = true
-	npc_instance.can_be_interacted_with = true
+	if "is_npc" in npc_instance:
+		npc_instance.is_npc = true
+	if "can_be_interacted_with" in npc_instance:
+		npc_instance.can_be_interacted_with = true
 	
 	var world_pos = Vector2(tile_pos.x * 32, tile_pos.y * 32)
 	npc_instance.position = world_pos
@@ -400,22 +405,17 @@ func spawn_npc_at_tile(tile_pos: Vector2i, z_level: int = 0, npc_name: String = 
 	
 	register_npc(npc_instance)
 	
-	print("GameManager: Successfully spawned NPC '", npc_name, "' at tile ", tile_pos)
 	return npc_instance
 
 func spawn_npc_from_scene(scene_path: String, tile_pos: Vector2i, z_level: int = 0, npc_name: String = "") -> Node:
-	"""Spawn an NPC from a specific scene file"""
 	if not world_ref or not is_instance_valid(world_ref):
-		print("GameManager: Cannot spawn NPC - no valid world reference")
 		return null
 	
 	if not ResourceLoader.exists(scene_path):
-		print("GameManager: NPC scene not found: ", scene_path)
 		return null
 	
 	var npc_scene = load(scene_path)
 	if not npc_scene:
-		print("GameManager: Failed to load NPC scene: ", scene_path)
 		return null
 	
 	var npc_instance = npc_scene.instantiate()
@@ -425,36 +425,28 @@ func spawn_npc_from_scene(scene_path: String, tile_pos: Vector2i, z_level: int =
 	
 	npc_instance.name = npc_name
 	
-	# Set NPC metadata
 	npc_instance.set_meta("is_player", false)
 	npc_instance.set_meta("is_npc", true)
 	npc_instance.set_meta("peer_id", -1)
 	
-	# Set position
 	var world_pos = Vector2(tile_pos.x * 32, tile_pos.y * 32)
 	npc_instance.position = world_pos
 	
-	# Add to world
 	world_ref.add_child(npc_instance)
 	
 	await get_tree().process_frame
 	
-	# Configure as NPC if it has the appropriate methods
 	if npc_instance.has_method("setup_npc"):
 		npc_instance.setup_npc()
 	
-	print("GameManager: Successfully spawned NPC '", npc_name, "' from scene at tile ", tile_pos)
 	return npc_instance
 
 func get_spawn_position_from_tile(tile_pos: Vector2i) -> Vector2:
-	"""Convert tile position to world position"""
-	return Vector2(tile_pos.x * 32, tile_pos.y * 32)  # Assuming 32px tiles
+	return Vector2(tile_pos.x * 32, tile_pos.y * 32)
 
 func register_npc(npc_instance: Node):
-	"""Register an NPC with the GameManager"""
 	var npc_id = "npc_" + str(npc_instance.get_instance_id())
 	
-	# Store NPC reference (separate from players)
 	if not "npcs" in self:
 		npcs = {}
 	
@@ -463,21 +455,16 @@ func register_npc(npc_instance: Node):
 		"name": npc_instance.name,
 		"spawn_time": Time.get_ticks_msec()
 	}
-	
-	print("GameManager: Registered NPC: ", npc_instance.name)
 
 func unregister_npc(npc_instance: Node):
-	"""Unregister an NPC from the GameManager"""
 	if not "npcs" in self:
 		return
 	
 	var npc_id = "npc_" + str(npc_instance.get_instance_id())
 	if npc_id in npcs:
 		npcs.erase(npc_id)
-		print("GameManager: Unregistered NPC: ", npc_instance.name)
 
 func get_all_npcs() -> Array:
-	"""Get all currently spawned NPCs"""
 	if not "npcs" in self:
 		return []
 	
@@ -489,7 +476,6 @@ func get_all_npcs() -> Array:
 	return npc_instances
 
 func spawn_player(peer_id: int):
-	"""Spawn a player"""
 	if is_multiplayer() and not is_multiplayer_host():
 		return
 		
@@ -505,16 +491,15 @@ func spawn_player(peer_id: int):
 			spawn_player_on_network.rpc(peer_id, get_spawn_position(peer_id))
 
 func setup_local_player():
-	"""Create and configure the local player character"""
 	if multiplayer.multiplayer_peer == null:
 		setup_singleplayer_peer()
 	
 	local_player_id = multiplayer.get_unique_id()
 	
 	if player_scene == null:
-		player_scene = load(PLAYER_SCENE_PATH)
+		var scene_path = ALIEN_SCENE_PATH if debug_spawn_as_alien else PLAYER_SCENE_PATH
+		player_scene = load(scene_path)
 		if player_scene == null:
-			print("GameManager: Failed to load player scene")
 			return
 	
 	var player_instance = player_scene.instantiate()
@@ -536,7 +521,6 @@ func setup_local_player():
 		"customization": character_data.duplicate()
 	}
 	
-	print("GameManager: Applying character customization for instant appearance")
 	apply_character_customization_to_player(player_instance, character_data)
 	
 	current_scene_instance.add_child(player_instance)
@@ -547,92 +531,68 @@ func setup_local_player():
 	
 	await get_tree().process_frame
 	
-	# Apply loadout after everything is set up
 	apply_player_loadout(player_instance, character_data)
 	
 	notify_systems_of_entity_spawn(player_instance, false)
 
 func apply_player_loadout(player_instance: Node, char_data: Dictionary):
-	print("GameManager: Starting loadout application for player")
-	
 	if not char_data.get("loadout_enabled", true):
-		print("GameManager: Loadout disabled for player")
 		return
 	
 	if not "occupation" in char_data:
-		print("GameManager: No occupation data found")
 		return
 	
 	var asset_manager = get_node_or_null("/root/CharacterAssetManager")
 	if not asset_manager:
-		print("GameManager: Asset manager not found")
 		return
 	
 	var occupation_index = char_data.occupation
 	if occupation_index >= asset_manager.occupations.size():
-		print("GameManager: Invalid occupation index: ", occupation_index)
 		return
 	
 	var occupation_name = asset_manager.occupations[occupation_index]
-	print("GameManager: Applying loadout for occupation: ", occupation_name)
 	
-	# Wait for player to be fully initialized
 	await get_tree().process_frame
 	await get_tree().process_frame
 	
 	var inventory_system = player_instance.get_node_or_null("InventorySystem")
 	if not inventory_system:
-		print("GameManager: No inventory system found on player")
 		return
 	
-	# Ensure inventory system is ready
 	if not inventory_system.entity:
 		inventory_system.entity = player_instance
 	
 	var loadout = asset_manager.get_occupation_loadout(occupation_name)
 	if loadout.is_empty():
-		print("GameManager: No loadout found for occupation: ", occupation_name)
 		return
-	
-	print("GameManager: Loadout data: ", loadout)
 	
 	var applied_items = {}
 	var failed_items = []
 	
-	# First, equip clothing items
 	var clothing = loadout.get("clothing", {})
-	print("GameManager: Processing clothing items: ", clothing.keys())
 	
 	for slot_name in clothing:
 		var item_name = clothing[slot_name]
 		if item_name and item_name != "":
-			print("GameManager: Equipping clothing item: ", item_name, " to slot: ", slot_name)
 			var success = _equip_loadout_item(asset_manager, inventory_system, item_name, slot_name, applied_items)
 			if not success:
 				failed_items.append({"item": item_name, "slot": slot_name, "type": "clothing"})
 	
-	# Then, equip inventory items (weapons, tools, etc.)
 	var inventory = loadout.get("inventory", {})
-	print("GameManager: Processing inventory items: ", inventory.keys())
 	
 	for slot_name in inventory:
 		var item_name = inventory[slot_name]
 		if item_name and item_name != "":
-			print("GameManager: Equipping inventory item: ", item_name, " to slot: ", slot_name)
 			var success = _equip_loadout_item(asset_manager, inventory_system, item_name, slot_name, applied_items)
 			if not success:
 				failed_items.append({"item": item_name, "slot": slot_name, "type": "inventory"})
 	
-	# Wait a moment for items to settle
 	await get_tree().process_frame
 	
-	# Finally, add items to storage containers
 	var storage_contents = loadout.get("storage_contents", {})
-	print("GameManager: Processing storage contents: ", storage_contents.keys())
 	
 	for storage_item_name in storage_contents:
 		var items_to_add = storage_contents[storage_item_name]
-		print("GameManager: Adding items to storage: ", storage_item_name, " -> ", items_to_add)
 		
 		var storage_item = _find_item_by_name(applied_items, storage_item_name)
 		
@@ -642,60 +602,39 @@ func apply_player_loadout(player_instance: Node, char_data: Dictionary):
 					var item = asset_manager.create_item_from_name(item_name)
 					if item:
 						if _add_item_to_storage(storage_item, item):
-							print("GameManager: Added ", item_name, " to storage ", storage_item_name)
+							pass
 						else:
-							print("GameManager: Failed to add ", item_name, " to storage ", storage_item_name)
 							failed_items.append({"item": item_name, "slot": storage_item_name, "type": "storage"})
 							item.queue_free()
 					else:
-						print("GameManager: Failed to create storage item: ", item_name)
 						failed_items.append({"item": item_name, "slot": storage_item_name, "type": "storage"})
 		else:
 			if not storage_item:
-				print("GameManager: Storage container not found: ", storage_item_name)
+				pass
 			if not (items_to_add is Array):
-				print("GameManager: Invalid storage contents format for: ", storage_item_name)
+				pass
 	
-	# Update sprite system to show equipped items
 	var sprite_system = get_sprite_system(player_instance)
 	if sprite_system and sprite_system.has_method("refresh_all_equipment"):
 		sprite_system.refresh_all_equipment()
-		print("GameManager: Refreshed sprite system")
 	
-	# Force inventory update
 	if inventory_system.has_signal("inventory_updated"):
 		inventory_system.emit_signal("inventory_updated")
-	
-	# Report results
-	var success_count = applied_items.size()
-	var total_attempted = success_count + failed_items.size()
-	
-	print("GameManager: Loadout application completed for ", occupation_name)
-	print("GameManager: Successfully equipped ", success_count, " items")
-	
-	if failed_items.size() > 0:
-		print("GameManager: Failed to equip ", failed_items.size(), " items:")
-		for failed in failed_items:
-			print("  - ", failed.item, " (", failed.type, " -> ", failed.slot, ")")
 
 func _equip_loadout_item(asset_manager: Node, inventory_system: Node, item_name: String, slot_name: String, applied_items: Dictionary) -> bool:
 	var item = asset_manager.create_item_from_name(item_name)
 	if not item:
-		print("GameManager: Failed to create item: ", item_name)
 		return false
 	
 	var slot_id = asset_manager._get_slot_id_from_loadout_name(slot_name)
 	if slot_id == -1:
-		print("GameManager: Invalid slot name: ", slot_name)
 		item.queue_free()
 		return false
 	
 	if inventory_system.equip_item(item, slot_id):
 		applied_items[slot_id] = item
-		print("GameManager: Successfully equipped ", item_name, " to slot ", slot_id)
 		return true
 	else:
-		print("GameManager: Failed to equip ", item_name, " to slot ", slot_id)
 		item.queue_free()
 		return false
 
@@ -717,7 +656,6 @@ func _add_item_to_storage(storage_item: Node, item: Node) -> bool:
 	if not storage_item or not item:
 		return false
 	
-	# Check if this is a storage item
 	var storage_type = 0
 	if "storage_type" in storage_item:
 		storage_type = storage_item.storage_type
@@ -725,14 +663,11 @@ func _add_item_to_storage(storage_item: Node, item: Node) -> bool:
 		storage_type = storage_item.get_meta("storage_type")
 	
 	if storage_type == 0:
-		print("GameManager: Item is not a storage container: ", storage_item.name)
 		return false
 	
-	# Try the storage item's built-in method first
 	if storage_item.has_method("add_item_to_storage"):
 		return storage_item.add_item_to_storage(item, storage_item.get_parent())
 	
-	# Fallback to manual storage management
 	var storage_items = []
 	if "storage_items" in storage_item:
 		storage_items = storage_item.storage_items
@@ -758,10 +693,8 @@ func _add_item_to_storage(storage_item: Node, item: Node) -> bool:
 		item_size = item.get_meta("w_class")
 	
 	if current_size + item_size > max_size:
-		print("GameManager: Storage container full: ", storage_item.name)
 		return false
 	
-	# Add item to storage
 	if item.get_parent():
 		item.get_parent().remove_child(item)
 	
@@ -772,7 +705,6 @@ func _add_item_to_storage(storage_item: Node, item: Node) -> bool:
 	storage_items.append(item)
 	current_size += item_size
 	
-	# Update storage properties
 	if "storage_items" in storage_item:
 		storage_item.storage_items = storage_items
 	else:
@@ -785,14 +717,7 @@ func _add_item_to_storage(storage_item: Node, item: Node) -> bool:
 	
 	return true
 
-# Background Processing
-func _process(delta):
-	"""Handle periodic background processing"""
-	if threading_initialized and is_in_game():
-		update_background_processing()
-
 func update_background_processing():
-	"""Update background processing periodically"""
 	var current_time = Time.get_ticks_msec()
 	
 	if current_time - last_atmosphere_update > atmosphere_update_interval:
@@ -801,7 +726,6 @@ func update_background_processing():
 		last_atmosphere_update = current_time
 
 func queue_atmosphere_update():
-	"""Queue atmosphere processing for areas around players"""
 	var coords = []
 	
 	for player_id in players.keys():
@@ -809,21 +733,19 @@ func queue_atmosphere_update():
 			var player_pos = players[player_id].instance.position
 			var center = Vector2i(int(player_pos.x), int(player_pos.y))
 			
-			for x in range(center.x - 5, center.x + 6):
-				for y in range(center.y - 5, center.y + 6):
+			for x in range(center.x - 3, center.x + 4):
+				for y in range(center.y - 3, center.y + 4):
 					var coord = Vector2i(x, y)
 					if not coords.has(coord):
 						coords.append(coord)
 	
-	if coords.size() > 0:
+	if coords.size() > 0 and coords.size() < 200:
 		thread_manager.queue_atmosphere_processing(
 			coords,
 			thread_manager.TaskPriority.BACKGROUND
 		)
 
-# Threading Callbacks
 func _on_threading_task_completed(task_id: String, result):
-	"""Handle threading task completion"""
 	if result is Dictionary:
 		if "atmosphere_updates" in result:
 			apply_atmosphere_updates(result.atmosphere_updates)
@@ -831,11 +753,9 @@ func _on_threading_task_completed(task_id: String, result):
 			apply_room_detection_results(result)
 
 func _on_threading_performance_warning(task_type, execution_time: float):
-	"""Handle threading performance warnings"""
-	print("GameManager: Threading performance warning - Task took ", execution_time, "ms")
+	pass
 
 func apply_atmosphere_updates(atmosphere_updates: Array):
-	"""Apply atmosphere calculation results to the atmosphere system"""
 	if not atmosphere_system:
 		return
 	
@@ -853,7 +773,6 @@ func apply_atmosphere_updates(atmosphere_updates: Array):
 			})
 
 func apply_room_detection_results(room_data: Dictionary):
-	"""Apply room detection results to world systems"""
 	if not world_ref:
 		return
 	
@@ -862,12 +781,8 @@ func apply_room_detection_results(room_data: Dictionary):
 	
 	if atmosphere_system and atmosphere_system.has_method("update_rooms"):
 		atmosphere_system.update_rooms(z_level, rooms)
-	
-	print("GameManager: Applied room detection results - ", rooms.size(), " rooms found on z-level ", z_level)
 
-# Threading API
 func queue_inventory_optimization():
-	"""Queue inventory optimization for all players"""
 	if not thread_manager:
 		return
 	
@@ -889,21 +804,16 @@ func queue_inventory_optimization():
 		)
 
 func get_pooled_scene(category: String) -> Node:
-	"""Get a pooled scene from ThreadManager"""
 	if thread_manager:
 		return thread_manager.get_pooled_scene(category)
 	return null
 
 func return_scene_to_pool(scene: Node, category: String):
-	"""Return a scene to the ThreadManager pool"""
 	if thread_manager:
 		thread_manager.return_scene_to_pool(scene, category)
 
-# Cleanup
 func cleanup_threading_system():
-	"""Clean up the threading system"""
 	if thread_manager:
-		print("GameManager: Shutting down threading system...")
 		thread_manager.shutdown_all_threads()
 		thread_manager.queue_free()
 		thread_manager = null
@@ -911,31 +821,24 @@ func cleanup_threading_system():
 	threading_initialized = false
 
 func _exit_tree():
-	"""Clean shutdown when GameManager is destroyed"""
 	cleanup_threading_system()
 
-# State Management
 func change_state(new_state: GameState):
-	"""Change the current game state"""
 	previous_state = current_state
 	current_state = new_state
 	emit_signal("game_state_changed", previous_state, new_state)
 
 func push_navigation_state(state: GameState):
-	"""Add a state to the navigation stack"""
 	navigation_stack.push_back(state)
 
 func pop_navigation_state() -> GameState:
-	"""Remove and return the last state from the navigation stack"""
 	if navigation_stack.size() > 0:
 		return navigation_stack.pop_back()
 	return GameState.MAIN_MENU
 
 func clear_navigation_stack():
-	"""Clear the entire navigation stack"""
 	navigation_stack.clear()
 
-# Game Mode Checks
 func is_single_player() -> bool:
 	return current_game_mode == GameMode.SINGLE_PLAYER
 
@@ -954,7 +857,6 @@ func is_in_game() -> bool:
 func is_in_menu() -> bool:
 	return current_state != GameState.PLAYING
 
-# Navigation Methods
 func show_main_menu():
 	clear_navigation_stack()
 	transition_to_scene(MAIN_MENU_SCENE, GameState.MAIN_MENU)
@@ -1012,9 +914,7 @@ func return_to_main_menu():
 	clear_navigation_stack()
 	show_main_menu()
 
-# System Setup
 func find_world_systems():
-	"""Locate and cache references to world system nodes"""
 	if current_scene_instance == null:
 		return
 	
@@ -1031,7 +931,6 @@ func find_world_systems():
 		interaction_system = current_scene_instance.get_node_or_null("InteractionSystem")
 
 func find_spawn_points():
-	"""Locate player spawn points in the current world"""
 	spawn_points = []
 	next_spawn_index = 0
 	
@@ -1050,7 +949,6 @@ func find_spawn_points():
 			spawn_points = [Vector2(100, 100), Vector2(200, 100), Vector2(100, 200), Vector2(200, 200)]
 
 func get_spawn_position(peer_id: int) -> Vector2:
-	"""Get a spawn position for a specific peer ID"""
 	if spawn_points.size() == 0:
 		find_spawn_points()
 	
@@ -1062,7 +960,6 @@ func get_spawn_position(peer_id: int) -> Vector2:
 	return pos
 
 func setup_scene_connections():
-	"""Connect signals for the current scene based on its type"""
 	if not current_scene_instance:
 		return
 	
@@ -1090,14 +987,12 @@ func setup_scene_connections():
 					current_scene_instance.settings_closed.connect(return_from_settings)
 
 func setup_singleplayer_peer():
-	"""Configure peer for singleplayer mode"""
 	var peer = OfflineMultiplayerPeer.new()
 	multiplayer.multiplayer_peer = peer
 	local_player_id = 1
 	connected_peers = [1]
 
 func setup_player_camera(player_instance: Node, peer_id: int):
-	"""Configure camera settings for a player"""
 	var camera = player_instance.get_node_or_null("Camera2D")
 	if not camera:
 		camera = player_instance.get_node_or_null("PlayerCamera")
@@ -1119,7 +1014,6 @@ func setup_player_camera(player_instance: Node, peer_id: int):
 			camera.make_current()
 
 func setup_player_controller(player_instance: Node, peer_id: int, is_local: bool):
-	"""Configure player movement and interaction controllers"""
 	var movement_controller = get_movement_controller(player_instance)
 	
 	if movement_controller:
@@ -1146,7 +1040,6 @@ func setup_player_controller(player_instance: Node, peer_id: int, is_local: bool
 		setup_interaction_components(player_instance, peer_id, is_local)
 
 func setup_interaction_components(player_instance: Node, peer_id: int, is_local: bool):
-	"""Configure player interaction and inventory components"""
 	var interaction_component = player_instance.get_node_or_null("ItemInteractionComponent")
 	if interaction_component:
 		interaction_component.set_multiplayer_authority(peer_id)
@@ -1160,7 +1053,6 @@ func setup_interaction_components(player_instance: Node, peer_id: int, is_local:
 		inventory_system.set_multiplayer_authority(peer_id)
 
 func get_movement_controller(player_instance: Node) -> Node:
-	"""Find the movement controller component on a player instance"""
 	var movement_controller = player_instance.get_node_or_null("MovementComponent")
 	if not movement_controller:
 		movement_controller = player_instance.get_node_or_null("GridMovementController")
@@ -1169,7 +1061,6 @@ func get_movement_controller(player_instance: Node) -> Node:
 	return movement_controller
 
 func create_init_data(player_instance: Node, peer_id: int, is_local: bool) -> Dictionary:
-	"""Create initialization data dictionary for player components"""
 	return {
 		"controller": player_instance,
 		"world": current_scene_instance,
@@ -1183,7 +1074,6 @@ func create_init_data(player_instance: Node, peer_id: int, is_local: bool) -> Di
 	}
 
 func notify_systems_of_entity_spawn(entity_controller, is_npc: bool = false):
-	"""Notify world systems that a new entity has been spawned"""
 	if tile_occupancy_system and tile_occupancy_system.has_method("register_entity_at_tile"):
 		var pos = entity_controller.get_current_tile_position() if entity_controller.has_method("get_current_tile_position") else Vector2i.ZERO
 		var z_level = entity_controller.current_z_level if "current_z_level" in entity_controller else 0
@@ -1209,7 +1099,6 @@ func notify_systems_of_entity_spawn(entity_controller, is_npc: bool = false):
 	emit_signal("systems_initialized")
 
 func get_sprite_system(player_instance: Node) -> Node:
-	"""Find the sprite system component on a player instance"""
 	var sprite_system = null
 	
 	var possible_paths = [
@@ -1229,7 +1118,6 @@ func get_sprite_system(player_instance: Node) -> Node:
 	return sprite_system
 
 func apply_character_customization_to_player(player_instance: Node, customization: Dictionary):
-	"""Apply character customization data to a player instance"""
 	if customization.size() == 0:
 		return
 	
@@ -1239,9 +1127,7 @@ func apply_character_customization_to_player(player_instance: Node, customizatio
 		if sprite_system.has_method("apply_character_data"):
 			sprite_system.apply_character_data(customization)
 
-# Character Data Management
 func set_character_data(data):
-	"""Set and save character customization data"""
 	character_data = data.duplicate()
 	save_character_data()
 	
@@ -1315,7 +1201,6 @@ func get_local_peer_id() -> int:
 		return 1
 	return multiplayer.get_unique_id()
 
-# Player Management
 func register_player(player_id, player_name):
 	if not player_id in players:
 		players[player_id] = {
@@ -1371,7 +1256,6 @@ func update_lobby_ui():
 		if current_scene_instance.has_method("update_player_list"):
 			current_scene_instance.update_player_list()
 
-# Networking
 @rpc("any_peer", "call_local", "reliable")
 func sync_character_data(peer_id: int, character_customization: Dictionary):
 	if peer_id in players:
@@ -1437,7 +1321,8 @@ func spawn_player_on_network(peer_id: int, spawn_position: Vector2):
 
 func spawn_player_legacy(peer_id: int, spawn_position: Vector2):
 	if player_scene == null:
-		player_scene = load(PLAYER_SCENE_PATH)
+		var scene_path = ALIEN_SCENE_PATH if debug_spawn_as_alien else PLAYER_SCENE_PATH
+		player_scene = load(scene_path)
 		if player_scene == null:
 			return
 	
@@ -1466,14 +1351,12 @@ func spawn_player_legacy(peer_id: int, spawn_position: Vector2):
 		if peer_id in players:
 			players[peer_id].instance = player_instance
 		
-		# Apply loadout for multiplayer players too
 		apply_player_loadout(player_instance, customization)
 		
 		notify_systems_of_entity_spawn(get_movement_controller(player_instance), false)
 	else:
 		player_instance.queue_free()
 
-# Multiplayer Host/Join
 func host_game(port: int = DEFAULT_PORT, use_upnp: bool = true) -> bool:
 	current_game_mode = GameMode.MULTIPLAYER_HOST
 	
@@ -1588,7 +1471,6 @@ func setup_upnp(port: int) -> bool:
 	
 	return false
 
-# Multiplayer Events
 func _on_peer_connected(peer_id: int):
 	connected_peers.append(peer_id)
 	
@@ -1669,7 +1551,6 @@ func remove_player_instance(peer_id: int):
 	if peer_id in players:
 		players[peer_id].instance = null
 
-# Game Starting
 func start_game(map_name = "", game_mode = ""):
 	if map_name == "":
 		map_name = current_map
@@ -1706,7 +1587,6 @@ func network_start_game(map_name):
 	var map_path = map_paths.get(map_name, WORLD_SCENE)
 	load_world(map_path)
 
-# Event Handlers
 func _on_lobby_back():
 	var return_state = pop_navigation_state()
 	match return_state:
@@ -1727,7 +1607,6 @@ func _on_network_back():
 		_:
 			show_main_menu()
 
-# Menu Handlers
 func handle_main_menu_play():
 	current_game_mode = GameMode.SINGLE_PLAYER
 	show_character_creation()
@@ -1756,7 +1635,6 @@ func handle_character_creation_cancel():
 		_:
 			show_main_menu()
 
-# Utility Functions
 func get_available_maps() -> Array:
 	return map_paths.keys()
 
@@ -1804,16 +1682,10 @@ func emergency_exit():
 	cleanup_threading_system()
 	get_tree().quit()
 
-# Debug Functions
 func debug_print_state():
-	print("GameManager Debug Info:")
-	print("  Current State: ", get_current_state_name())
-	print("  Game Mode: ", current_game_mode)
-	print("  Players Count: ", players.size())
-	print("  Connected Peers: ", connected_peers.size())
-	print("  Threading Initialized: ", threading_initialized)
-	if thread_manager:
-		print("  Task Queue Size: ", thread_manager.task_queue.size())
+	var info = get_debug_info()
+	for key in info:
+		pass
 
 func get_debug_info() -> Dictionary:
 	return {

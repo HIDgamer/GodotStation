@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3 uid="uid://r102lqcqkrhr"]
+
+[ext_resource type="Script" uid="uid://b30v47uc3dumj" path="res://Code/Items/Armor/Armor.gd" id="1_fyk28"]
+[ext_resource type="Texture2D" uid="uid://b4flqlq4w414u" path="res://Assets/Icons/Items/Clothing/Suits/Fire_Suit.png" id="2_qgyj0"]
+[ext_resource type="Texture2D" uid="uid://bgddhk264i50i" path="res://Assets/Icons/Clothing/Suit/Fire_suit.png" id="3_tpfef"]
+
+[node name="Fire_Suit" type="Node2D"]
+script = ExtResource("1_fyk28")
+fire_resist = 250.0
+armor_melee = 60
+armor_bomb = 40
+storage_type = 2
+storage_max_size = 2
+storage_slots = 2
+max_storage_space = 2
+item_name = "Fire_Suit"
+w_class = 4
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_qgyj0")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_tpfef")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4, -8, -4, -7, -5, -7, -5, -6, -6, -6, -6, -5, -7, -5, -7, -4, -8, -4, -8, -1, -7, -1, -7, 0, -5, 0, -5, 5, -6, 5, -6, 9, -4, 9, -4, 10, 3, 10, 3, 9, 5, 9, 5, 5, 4, 5, 4, 0, 6, 0, 6, -1, 7, -1, 7, -4, 6, -4, 6, -5, 5, -5, 5, -6, 4, -6, 4, -7, 3, -7, 3, -8, 1, -8, 1, -7, -2, -7, -2, -8)

@@ -1,19 +1,11 @@
 extends Node2D
 class_name TileOccupancySystem
 
-# =============================================================================
-# CONSTANTS
-# =============================================================================
-
 const TILE_SIZE = 32
 const MAX_Z_LEVELS = 10
 const ENTITY_CACHE_CLEANUP_INTERVAL = 30.0
 const MAX_CACHED_ENTITIES = 1000
 const RAYCAST_MAX_DISTANCE = 50
-
-# =============================================================================
-# ENUMS
-# =============================================================================
 
 enum CollisionType {
 	NONE,
@@ -46,10 +38,6 @@ enum SyncMode {
 	ANY_PEER
 }
 
-# =============================================================================
-# EXPORTS
-# =============================================================================
-
 @export_group("System Settings")
 @export var auto_initialize: bool = true
 @export var initialize_z_levels: int = 10
@@ -81,10 +69,6 @@ enum SyncMode {
 @export var debug_show_grid: bool = false
 @export var performance_monitoring: bool = false
 
-# =============================================================================
-# SIGNALS
-# =============================================================================
-
 signal entity_registered(entity, tile_pos, z_level)
 signal entity_unregistered(entity, tile_pos, z_level)
 signal entity_moved(entity, from_pos, to_pos, z_level)
@@ -93,11 +77,6 @@ signal push_attempted(pusher, target, direction, result, force)
 signal tile_contents_changed(tile_pos, z_level)
 signal network_sync_failed(operation, reason)
 
-# =============================================================================
-# PRIVATE VARIABLES
-# =============================================================================
-
-# Core data structures
 var _occupancy = {}
 var _entity_by_flag = {}
 var _entity_properties = {}
@@ -105,18 +84,12 @@ var _entity_positions = {}
 var _valid_tile_cache = {}
 var _network_authority_cache = {}
 
-# Performance tracking
 var _push_stats = {}
 var _operation_stats = {}
 
-# System references
 var _spatial_manager = null
 var _world = null
 var _cache_cleanup_timer: Timer
-
-# =============================================================================
-# LIFECYCLE
-# =============================================================================
 
 func _ready():
 	if auto_initialize:
@@ -137,10 +110,6 @@ func _process(_delta):
 func _draw():
 	if visual_debug and debug_show_grid:
 		_draw_debug_grid()
-
-# =============================================================================
-# INITIALIZATION
-# =============================================================================
 
 func initialize(z_levels: int = MAX_Z_LEVELS):
 	_log_message("Initializing with " + str(z_levels) + " z-levels", 3)
@@ -225,13 +194,9 @@ func _connect_to_world():
 		_world.connect("tile_changed", _on_world_tile_changed)
 		_log_message("Connected to World", 3)
 
-# =============================================================================
-# ENTITY REGISTRATION
-# =============================================================================
-
 func register_multi_tile_entity(entity, tile_positions: Array[Vector2i], z_level: int) -> bool:
 	if not _validate_entity(entity):
-		_log_message("Invalid entity provided for multi-tile registration", 1)
+		_log_message("Invalid entity provided for multi-tile registration: " + str(entity), 1)
 		return false
 	
 	if not _is_network_authority_for_entity(entity):
@@ -249,6 +214,7 @@ func register_multi_tile_entity(entity, tile_positions: Array[Vector2i], z_level
 		_cache_entity_properties(entity)
 	
 	if not _register_multi_tile_entity_in_grid(entity, tile_positions, z_level):
+		_log_message("Failed to register entity in grid", 1)
 		return false
 	
 	if _should_sync_operation():
@@ -264,9 +230,13 @@ func register_entity_at_tile(entity, tile_pos: Vector2i, z_level: int) -> bool:
 	return register_multi_tile_entity(entity, [tile_pos], z_level)
 
 func register_entity(entity) -> bool:
+	if not _validate_entity(entity):
+		_log_message("Cannot register invalid entity: " + str(entity), 1)
+		return false
+		
 	var position_data = _get_entity_position_data(entity)
 	if not position_data.valid:
-		_log_message("Entity has no valid position for registration", 1)
+		_log_message("Entity has no valid position for registration: " + str(entity), 1)
 		return false
 	
 	return register_entity_at_tile(entity, position_data.tile_pos, position_data.z_level)
@@ -296,10 +266,6 @@ func remove_multi_tile_entity(entity, tile_positions: Array[Vector2i], z_level: 
 	_log_message("Multi-tile entity removed from " + str(tile_positions) + ", z=" + str(z_level), 4)
 	return true
 
-# =============================================================================
-# ENTITY MOVEMENT
-# =============================================================================
-
 func move_entity(entity, from_pos: Vector2i, to_pos: Vector2i, z_level: int) -> bool:
 	if not _validate_entity(entity) or from_pos == to_pos:
 		return from_pos == to_pos
@@ -309,7 +275,7 @@ func move_entity(entity, from_pos: Vector2i, to_pos: Vector2i, z_level: int) -> 
 		return false
 	
 	if not _is_valid_tile(to_pos, z_level):
-		_log_message("Target tile is invalid", 2)
+		_log_message("Target tile is invalid: " + str(to_pos), 2)
 		return false
 	
 	var entity_positions = _get_entity_tile_positions(entity)
@@ -360,10 +326,6 @@ func try_move_entity(entity, direction: Vector2i, z_level: int) -> Dictionary:
 			emit_signal("entities_collided", entity, collision.entity, target_tile, z_level)
 	
 	return result
-
-# =============================================================================
-# PUSH SYSTEM
-# =============================================================================
 
 func try_push_entity(pusher, target, direction: Vector2i) -> Dictionary:
 	var result = {
@@ -424,10 +386,6 @@ func try_push_entity(pusher, target, direction: Vector2i) -> Dictionary:
 	_update_performance_stats("pushes")
 	return result
 
-# =============================================================================
-# COLLISION DETECTION
-# =============================================================================
-
 func check_collision(tile_pos: Vector2i, z_level: int, exclude_entity = null) -> Dictionary:
 	var result = {
 		"type": CollisionType.NONE,
@@ -473,15 +431,25 @@ func can_entity_move_to(entity, tile_pos: Vector2i, z_level: int) -> bool:
 		
 		return _can_multi_tile_entity_move_to(entity, new_positions, z_level)
 
-# =============================================================================
-# ENTITY QUERIES
-# =============================================================================
-
 func get_entities_at(tile_pos: Vector2i, z_level: int) -> Array:
-	if not z_level in _occupancy or not tile_pos in _occupancy[z_level]:
+	_ensure_z_level_exists(z_level)
+	
+	if not tile_pos in _occupancy[z_level]:
 		return []
 	
-	return _occupancy[z_level][tile_pos].duplicate()
+	var valid_entities = []
+	for entity in _occupancy[z_level][tile_pos]:
+		if is_instance_valid(entity):
+			valid_entities.append(entity)
+		else:
+			_log_message("Found invalid entity at tile " + str(tile_pos) + ", will clean up", 2)
+	
+	if valid_entities.size() != _occupancy[z_level][tile_pos].size():
+		_occupancy[z_level][tile_pos] = valid_entities
+		if valid_entities.size() == 0:
+			_occupancy[z_level].erase(tile_pos)
+	
+	return valid_entities
 
 func get_entity_at(tile_pos: Vector2i, z_level: int, type_name: String = ""):
 	var entities = get_entities_at(tile_pos, z_level)
@@ -499,10 +467,25 @@ func get_entity_at(tile_pos: Vector2i, z_level: int, type_name: String = ""):
 	return null
 
 func has_dense_entity_at(tile_pos: Vector2i, z_level: int, excluding_entity = null) -> bool:
+	_ensure_z_level_exists(z_level)
+	
 	if z_level in _entity_by_flag and EntityFlags.DENSE in _entity_by_flag[z_level] and tile_pos in _entity_by_flag[z_level][EntityFlags.DENSE]:
-		for entity in _entity_by_flag[z_level][EntityFlags.DENSE][tile_pos]:
-			if entity != excluding_entity and is_instance_valid(entity):
-				return true
+		var dense_entities = _entity_by_flag[z_level][EntityFlags.DENSE][tile_pos]
+		var valid_dense_entities = []
+		
+		for entity in dense_entities:
+			if not is_instance_valid(entity):
+				continue
+			
+			if entity != excluding_entity and _is_entity_dense(entity):
+				valid_dense_entities.append(entity)
+		
+		if valid_dense_entities.size() != dense_entities.size():
+			_entity_by_flag[z_level][EntityFlags.DENSE][tile_pos] = valid_dense_entities
+			if valid_dense_entities.size() == 0:
+				_entity_by_flag[z_level][EntityFlags.DENSE].erase(tile_pos)
+		
+		return valid_dense_entities.size() > 0
 	
 	return false
 
@@ -537,10 +520,6 @@ func get_entity_z_level(entity) -> int:
 	
 	return -1
 
-# =============================================================================
-# RAYCASTING
-# =============================================================================
-
 func raycast(start_tile: Vector2i, end_tile: Vector2i, z_level: int) -> Dictionary:
 	var result = {
 		"hit": false,
@@ -574,10 +553,6 @@ func raycast(start_tile: Vector2i, end_tile: Vector2i, z_level: int) -> Dictiona
 	
 	return result
 
-# =============================================================================
-# COORDINATE CONVERSION
-# =============================================================================
-
 func world_to_tile(world_pos: Vector2) -> Vector2i:
 	if _world and _world.has_method("get_tile_at"):
 		return _world.get_tile_at(world_pos)
@@ -592,10 +567,6 @@ func tile_to_world(tile_pos: Vector2i) -> Vector2:
 		(tile_pos.x * TILE_SIZE) + (TILE_SIZE / 2),
 		(tile_pos.y * TILE_SIZE) + (TILE_SIZE / 2)
 	)
-
-# =============================================================================
-# MAINTENANCE AND CLEANUP
-# =============================================================================
 
 func clean_invalid_entities() -> int:
 	var removed_count = 0
@@ -631,10 +602,6 @@ func update_entity_property(entity, property_name: String, new_value):
 			for tile_pos in positions:
 				_remove_entity_from_flag_collections(entity, tile_pos, old_position.z_level, flags)
 				_add_entity_to_flag_collections(entity, tile_pos, old_position.z_level, flags)
-
-# =============================================================================
-# DEBUG AND STATISTICS
-# =============================================================================
 
 func get_debug_stats() -> Dictionary:
 	return {
@@ -684,12 +651,11 @@ func get_push_stats() -> Dictionary:
 	stats.success_rate = success_rate
 	return stats
 
-# =============================================================================
-# PRIVATE HELPER METHODS
-# =============================================================================
-
 func _validate_entity(entity) -> bool:
-	return is_instance_valid(entity) and "position" in entity
+	if not is_instance_valid(entity):
+		return false
+	
+	return true
 
 func _get_entity_id(entity):
 	if not is_instance_valid(entity):
@@ -722,7 +688,7 @@ func _get_entity_position_data(entity) -> Dictionary:
 		"z_level": 0
 	}
 	
-	if entity.has_method("global_position"):
+	if "global_position" in entity:
 		result.position = entity.global_position
 	elif "position" in entity:
 		result.position = entity.position
@@ -754,12 +720,9 @@ func _is_entity_dense(entity) -> bool:
 	return _is_entity_dense_direct(entity)
 
 func _is_entity_dense_direct(entity) -> bool:
-	if _get_entity_property(entity, "entity_type") == "item":
-		var explicit_density = _get_entity_property(entity, "entity_dense", null)
-		if explicit_density != null:
-			return explicit_density
+	if not is_instance_valid(entity):
 		return false
-	
+		
 	return _get_entity_property(entity, "entity_dense", true)
 
 func _get_entity_flags(entity) -> int:
@@ -949,19 +912,21 @@ func _move_multi_tile_entity(entity, from_pos: Vector2i, to_pos: Vector2i, z_lev
 func _move_entity_in_grid(entity, from_pos: Vector2i, to_pos: Vector2i, z_level: int) -> bool:
 	var entity_id = _get_entity_id(entity)
 	
-	if not (z_level in _occupancy and from_pos in _occupancy[z_level] and entity in _occupancy[z_level][from_pos]):
-		return _register_multi_tile_entity_in_grid(entity, [to_pos], z_level)
+	_ensure_z_level_exists(z_level)
 	
-	_occupancy[z_level][from_pos].erase(entity)
-	if _occupancy[z_level][from_pos].size() == 0:
-		_occupancy[z_level].erase(from_pos)
+	if from_pos in _occupancy[z_level] and entity in _occupancy[z_level][from_pos]:
+		_occupancy[z_level][from_pos].erase(entity)
+		if _occupancy[z_level][from_pos].size() == 0:
+			_occupancy[z_level].erase(from_pos)
+		
+		var flags = _get_entity_flags(entity)
+		_remove_entity_from_flag_collections(entity, from_pos, z_level, flags)
 	
 	if not to_pos in _occupancy[z_level]:
 		_occupancy[z_level][to_pos] = []
 	_occupancy[z_level][to_pos].append(entity)
 	
 	var flags = _get_entity_flags(entity)
-	_remove_entity_from_flag_collections(entity, from_pos, z_level, flags)
 	_add_entity_to_flag_collections(entity, to_pos, z_level, flags)
 	
 	_entity_positions[entity_id] = {
@@ -1188,7 +1153,6 @@ func _draw_debug_grid():
 			draw_rect(Rect2(world_pos - Vector2(TILE_SIZE/2, TILE_SIZE/2), Vector2(TILE_SIZE, TILE_SIZE)), color, false, 2)
 			draw_string(ThemeDB.fallback_font, world_pos - Vector2(TILE_SIZE/4, 0), str(entity_count), HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color.WHITE)
 
-# Network and multiplayer helpers
 func _is_network_authority_for_entity(entity) -> bool:
 	if not enable_multiplayer_sync or not _is_multiplayer_active():
 		return true
@@ -1274,10 +1238,6 @@ func _log_message(message: String, level: int = 3):
 		if debug_mode:
 			print(prefix + "TileOccupancySystem: " + message)
 
-# =============================================================================
-# RPC METHODS
-# =============================================================================
-
 @rpc("any_peer", "call_local", "reliable")
 func _sync_multi_tile_entity_registration(entity_id: int, tile_positions: Array[Vector2i], z_level: int):
 	var entity = instance_from_id(entity_id)
@@ -1345,10 +1305,6 @@ func _remove_multi_tile_entity_from_grid_by_id(entity_id: int, tile_positions: A
 			_remove_entity_from_flag_collections(entity_to_remove, tile_pos, z_level, flags)
 	
 	_entity_positions.erase(entity_id)
-
-# =============================================================================
-# SIGNAL HANDLERS
-# =============================================================================
 
 func _on_world_tile_changed(tile_coords: Vector2i, z_level: int, old_data, new_data):
 	var cache_key = str(tile_coords) + "_" + str(z_level)

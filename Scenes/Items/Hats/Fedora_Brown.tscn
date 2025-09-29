@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://cfi1qgwopvlk8"]
+
+[ext_resource type="Script" uid="uid://dgp7v7lxba43" path="res://Code/Items/Uniform/Head.gd" id="1_dast2"]
+[ext_resource type="Texture2D" uid="uid://vg6pnwiaf2n0" path="res://Assets/Icons/Items/Clothing/Hats/Fedora_Brown.png" id="2_dr42u"]
+[ext_resource type="Texture2D" uid="uid://cdnh7ul5kdm86" path="res://Assets/Icons/Clothing/Hats/Fedora_Brown.png" id="3_lgt18"]
+
+[node name="Fedora_Brown" type="Node2D"]
+script = ExtResource("1_dast2")
+item_name = "Fedora_Brown"
+w_class = 2
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_dr42u")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 32)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_lgt18")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-4, -5, -4, -4, -5, -4, -5, -1, -6, -1, -6, 1, -9, 1, -9, 2, -8, 2, -8, 3, -5, 3, -5, 4, -2, 4, -2, 5, 4, 5, 4, 4, 7, 4, 7, 3, 8, 3, 8, 2, 9, 2, 9, 1, 6, 1, 6, 0, 5, 0, 5, -3, 4, -3, 4, -4, 3, -4, 3, -5, 1, -5, 1, -4, -1, -4, -1, -5)

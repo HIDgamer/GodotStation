@@ -1,0 +1,86 @@
+[gd_scene load_steps=14 format=3 uid="uid://bsmae3oli5s2n"]
+
+[ext_resource type="Script" uid="uid://dlduqaa74shfl" path="res://Code/Items/Weapons/Guns/AssaultRifle.gd" id="1_qt2j1"]
+[ext_resource type="PackedScene" uid="uid://c7xqv2iak3l6o" path="res://Scenes/Effects/Projectile.tscn" id="2_hwnuu"]
+[ext_resource type="AudioStream" uid="uid://bp2s8ymev2qsp" path="res://Sound/weapons/gun_lever_action_fire.ogg" id="3_6u7nc"]
+[ext_resource type="AudioStream" uid="uid://bd6viruvj7mbs" path="res://Sound/weapons/handling/gun_m16_unload.ogg" id="4_ighfa"]
+[ext_resource type="AudioStream" uid="uid://2nfb3ibi7ex1" path="res://Sound/weapons/handling/gun_m16_reload.ogg" id="5_3toul"]
+[ext_resource type="AudioStream" uid="uid://bntmca6q7q7jc" path="res://Sound/weapons/handling/gun_jam_rack_1.ogg" id="6_7msby"]
+[ext_resource type="Texture2D" uid="uid://duu3g3sx8fsur" path="res://Assets/Icons/Items/Guns/Marksman/M-36.png" id="7_8f8j4"]
+[ext_resource type="AudioStream" uid="uid://bfnvacxvc6kh5" path="res://Sound/weapons/Shot.wav" id="8_2hs5t"]
+[ext_resource type="AudioStream" uid="uid://dlsmqvnr6tmvt" path="res://Sound/weapons/Reload.wav" id="9_jcmsb"]
+[ext_resource type="AudioStream" uid="uid://ytreg77yt8oq" path="res://Sound/weapons/gun_pistol_cocked.ogg" id="10_acmke"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b1fv6"]
+atlas = ExtResource("7_8f8j4")
+region = Rect2(0, 0, 48, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xa1j1"]
+atlas = ExtResource("7_8f8j4")
+region = Rect2(48, 0, 48, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yy6ii"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b1fv6")
+}],
+"loop": true,
+"name": &"Empty",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xa1j1")
+}],
+"loop": true,
+"name": &"Full",
+"speed": 5.0
+}]
+
+[node name="M_36" type="Node2D"]
+script = ExtResource("1_qt2j1")
+accepted_ammo_types = Array[int]([1])
+fire_delay = 1.0
+recoil_amount = 0.01
+effective_range = 20.0
+projectile_scene = ExtResource("2_hwnuu")
+fire_sound = ExtResource("3_6u7nc")
+empty_sound = ExtResource("4_ighfa")
+reload_sound = ExtResource("5_3toul")
+cock_sound = ExtResource("6_7msby")
+weapon_type = 1
+weapon_damage = 35.0
+safety_enabled = false
+current_safety_state = 0
+item_name = "M_36"
+w_class = 4
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_yy6ii")
+animation = &"Full"
+autoplay = "Empty"
+
+[node name="MuzzlePoint" type="Marker2D" parent="."]
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("8_2hs5t")
+volume_db = -5.0
+max_distance = 1000.0
+
+[node name="ReloadAudioPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("9_jcmsb")
+volume_db = -10.0
+max_distance = 500.0
+
+[node name="EmptyAudioPlayer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("10_acmke")
+volume_db = -8.0
+max_distance = 300.0
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 2
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-2, -5, -5, -5, -5, -4, -12, -4, -12, -5, -23, -5, -23, -4, -24, -4, -24, -1, -23, -1, -23, 3, -22, 3, -22, 4, -21, 4, -21, 5, -17, 5, -17, 4, -15, 4, -15, 3, -13, 3, -13, 2, -11, 2, -11, 1, -10, 1, -10, 3, -11, 3, -11, 5, -12, 5, -12, 7, -11, 7, -11, 8, -9, 8, -9, 7, -8, 7, -8, 5, -7, 5, -7, 4, -4, 4, -4, 3, -3, 3, -3, 1, -2, 1, -2, 3, -1, 3, -1, 8, 3, 8, 3, 3, 4, 3, 4, 1, 5, 1, 5, 2, 6, 2, 6, 3, 14, 3, 14, 2, 15, 2, 15, 1, 16, 1, 16, 2, 18, 2, 18, 1, 21, 1, 21, 0, 20, 0, 20, -1, 18, -1, 18, -2, 23, -2, 23, -4, 18, -4, 18, -6, 16, -6, 16, -5, 14, -5, 14, -6, -2, -6)

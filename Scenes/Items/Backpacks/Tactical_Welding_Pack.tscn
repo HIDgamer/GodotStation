@@ -1,0 +1,68 @@
+[gd_scene load_steps=8 format=3 uid="uid://ctyg4sxve3bgj"]
+
+[ext_resource type="Script" uid="uid://bfj73ll6r08pv" path="res://Code/Items/Uniform/Back.gd" id="1_8vn4n"]
+[ext_resource type="Texture2D" uid="uid://b0cncjpo4f5ms" path="res://Assets/Icons/Items/Storage/Backpacks/Tactical_Welding_Satchel.png" id="2_ehnr3"]
+[ext_resource type="Texture2D" uid="uid://bbicbg2beas6t" path="res://Assets/Icons/Clothing/Backpacks/Tactical_Welding_Pack.png" id="3_n3st7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7057a"]
+atlas = ExtResource("2_ehnr3")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_numt2"]
+atlas = ExtResource("2_ehnr3")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6vjn1"]
+atlas = ExtResource("2_ehnr3")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vbcxq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7057a")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_numt2")
+}],
+"loop": true,
+"name": &"half",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6vjn1")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="Tactical_Welding_Pack" type="Node2D"]
+script = ExtResource("1_8vn4n")
+drag_unequip = true
+storage_type = 1
+storage_max_size = 10
+has_open_close_animation = true
+item_name = "Tactical_Welding_Pack"
+w_class = 4
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_vbcxq")
+animation = &"open"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_n3st7")
+hframes = 4
+frame = 1
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-9, -6, -10, -6, -10, -4, -11, -4, -11, 5, -10, 5, -10, 7, -9, 7, -9, 8, -6, 8, -6, 7, -5, 7, -5, 8, -4, 8, -4, 9, 4, 9, 4, 8, 5, 8, 5, 7, 6, 7, 6, 8, 9, 8, 9, 7, 10, 7, 10, 5, 11, 5, 11, -4, 10, -4, 10, -6, 9, -6, 9, -7, 6, -7, 6, -6, -6, -6, -6, -7, -9, -7)

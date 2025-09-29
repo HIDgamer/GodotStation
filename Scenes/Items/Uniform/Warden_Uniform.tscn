@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://bk2vh846e5h6"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_mqak2"]
+[ext_resource type="Texture2D" uid="uid://c6wuvw5al6sg1" path="res://Assets/Icons/Items/Clothing/Uniforms/Warden.png" id="2_shg0l"]
+[ext_resource type="Texture2D" uid="uid://c7i48bte7cprx" path="res://Assets/Icons/Clothing/Uniforms/Warden.png" id="3_u1l4h"]
+
+[node name="Warden_Uniform" type="Node2D"]
+script = ExtResource("1_mqak2")
+item_name = "Warden_Uniform"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_shg0l")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_u1l4h")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -8, -5, -7, -6, -7, -6, -5, -7, -5, -7, -2, -6, -2, -6, -1, -5, -1, -5, 1, -6, 1, -6, 5, -5, 5, -5, 6, 4, 6, 4, 5, 5, 5, 5, 1, 4, 1, 4, -1, 5, -1, 5, -2, 6, -2, 6, -5, 5, -5, 5, -7, 4, -7, 4, -8, 2, -8, 2, -7, 1, -7, 1, -6, -2, -6, -2, -7, -3, -7, -3, -8)

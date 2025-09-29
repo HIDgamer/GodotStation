@@ -1,0 +1,64 @@
+[gd_scene load_steps=7 format=3 uid="uid://b76heojii8fg3"]
+
+[ext_resource type="Script" uid="uid://d1pu0uinywh62" path="res://Code/Items/Uniform/Pouch.gd" id="1_s76qy"]
+[ext_resource type="Texture2D" uid="uid://d02f4yri8fmv5" path="res://Assets/Icons/Items/Storage/Pouches/Tools_Pouch.png" id="2_wrsfq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eakjf"]
+atlas = ExtResource("2_wrsfq")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2ssoy"]
+atlas = ExtResource("2_wrsfq")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2cp7d"]
+atlas = ExtResource("2_wrsfq")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kvsww"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eakjf")
+}],
+"loop": true,
+"name": &"close",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ssoy")
+}],
+"loop": true,
+"name": &"half",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2cp7d")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="Tools_Pouch" type="Node2D"]
+script = ExtResource("1_s76qy")
+storage_type = 2
+storage_max_size = 4
+storage_slots = 4
+max_storage_space = 4
+has_open_close_animation = true
+item_name = "Tools_pouch"
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_kvsww")
+animation = &"close"
+
+[node name="Sprite" type="Sprite2D" parent="."]
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-10, -3, -10, 9, -9, 9, -9, 10, -1, 10, -1, 9, 0, 9, 0, 10, 8, 10, 8, 9, 9, 9, 9, -3)

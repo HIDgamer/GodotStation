@@ -1,0 +1,67 @@
+[gd_scene load_steps=9 format=3 uid="uid://d1cgjxl72view"]
+
+[ext_resource type="Script" uid="uid://b87i11rjav37r" path="res://Code/Items/Uniform/Eyes.gd" id="1_u3ujt"]
+[ext_resource type="Texture2D" uid="uid://c3veqx1jq502a" path="res://Assets/Icons/Items/Clothing/Eyes/Security_Hud.png" id="2_u312w"]
+[ext_resource type="Texture2D" uid="uid://e3ye5frfhdva" path="res://Assets/Icons/Clothing/Eyes/Security_Hud.png" id="3_eii0h"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_espeo"]
+atlas = ExtResource("2_u312w")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_62ns3"]
+atlas = ExtResource("2_u312w")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kvbve"]
+atlas = ExtResource("2_u312w")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6h5rc"]
+atlas = ExtResource("2_u312w")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nwtkv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_espeo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_62ns3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kvbve")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6h5rc")
+}],
+"loop": true,
+"name": &"default",
+"speed": 10.0
+}]
+
+[node name="Security_Hud" type="Node2D"]
+script = ExtResource("1_u3ujt")
+item_name = "Security_Hud"
+
+[node name="Icon" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_nwtkv")
+autoplay = "default"
+frame = 2
+frame_progress = 0.875012
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_eii0h")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(9, -6, 9, -2, 8, -2, 8, -3, 7, -3, 7, -4, 6, -4, 6, -3, 5, -3, 5, -2, -3, -2, -3, -3, -5, -3, -5, -2, -6, -2, -6, -1, -5, -1, -5, 0, -3, 0, -3, 1, 0, 1, 0, 2, -1, 2, -1, 6, 0, 6, 0, 7, 2, 7, 2, 8, 4, 8, 4, 9, 5, 9, 5, 10, 6, 10, 6, 11, 8, 11, 8, 10, 9, 10, 9, 9, 10, 9, 10, 5, 11, 5, 11, -2, 10, -2, 10, -6)
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(13, -2, 13, -1, 14, -1, 14, -2)
+
+[node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(11, -3, 11, -2, 13, -2, 13, -3)

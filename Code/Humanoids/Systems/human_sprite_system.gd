@@ -74,7 +74,7 @@ var Entity = null
 var inventory_system: Node = null
 var asset_manager = null
 
-# State variables
+# State variablesz
 var current_direction: int = Direction.SOUTH
 var is_lying: bool = false
 var lying_direction: int = Direction.SOUTH
@@ -122,27 +122,27 @@ var limb_z_index_layers = {
 var equipment_z_index_layers = {
 	Direction.SOUTH: {
 		EquipSlot.UNIFORM: 4, EquipSlot.SUIT: 5, EquipSlot.OUTER: 6, EquipSlot.BELT: 6, 
-		EquipSlot.BACK: 4, EquipSlot.SHOES: 3, EquipSlot.GLOVES: 3, EquipSlot.MASK: 2, 
-		EquipSlot.EYES: 1, EquipSlot.HEAD: 3, EquipSlot.EARS: 2, EquipSlot.NECK: 2, 
-		EquipSlot.ID: 2, EquipSlot.LEFT_HAND: 3, EquipSlot.RIGHT_HAND: 3
+		EquipSlot.BACK: 7, EquipSlot.SHOES: 3, EquipSlot.GLOVES: 3, EquipSlot.MASK: 2, 
+		EquipSlot.EYES: 1, EquipSlot.HEAD: 8, EquipSlot.EARS: 2, EquipSlot.NECK: 2, 
+		EquipSlot.ID: 2, EquipSlot.LEFT_HAND: 10, EquipSlot.RIGHT_HAND: 10
 	},
 	Direction.NORTH: {
 		EquipSlot.UNIFORM: 4, EquipSlot.SUIT: 5, EquipSlot.OUTER: 6, EquipSlot.BELT: 6, 
-		EquipSlot.BACK: 4, EquipSlot.SHOES: 3, EquipSlot.GLOVES: 3, EquipSlot.MASK: 2, 
-		EquipSlot.EYES: 1, EquipSlot.HEAD: 3, EquipSlot.EARS: 2, EquipSlot.NECK: 2, 
-		EquipSlot.ID: 2, EquipSlot.LEFT_HAND: 2, EquipSlot.RIGHT_HAND: 2
+		EquipSlot.BACK: 7, EquipSlot.SHOES: 3, EquipSlot.GLOVES: 3, EquipSlot.MASK: 2, 
+		EquipSlot.EYES: 1, EquipSlot.HEAD: 8, EquipSlot.EARS: 2, EquipSlot.NECK: 2, 
+		EquipSlot.ID: 2, EquipSlot.LEFT_HAND: 10, EquipSlot.RIGHT_HAND: 10
 	},
 	Direction.EAST: {
 		EquipSlot.UNIFORM: 4, EquipSlot.SUIT: 5, EquipSlot.OUTER: 6, EquipSlot.BELT: 6,  
-		EquipSlot.BACK: 4, EquipSlot.SHOES: 3, EquipSlot.GLOVES: 7, EquipSlot.MASK: 2, 
-		EquipSlot.EYES: 1, EquipSlot.HEAD: 3, EquipSlot.EARS: 2, EquipSlot.NECK: 2, 
-		EquipSlot.ID: 2, EquipSlot.LEFT_HAND: 2, EquipSlot.RIGHT_HAND: 2
+		EquipSlot.BACK: 7, EquipSlot.SHOES: 3, EquipSlot.GLOVES: 7, EquipSlot.MASK: 2, 
+		EquipSlot.EYES: 1, EquipSlot.HEAD: 8, EquipSlot.EARS: 2, EquipSlot.NECK: 2, 
+		EquipSlot.ID: 2, EquipSlot.LEFT_HAND: 10, EquipSlot.RIGHT_HAND: 10
 	},
 	Direction.WEST: {
 		EquipSlot.UNIFORM: 4, EquipSlot.SUIT: 5, EquipSlot.OUTER: 6, EquipSlot.BELT: 6, 
-		EquipSlot.BACK: 4, EquipSlot.SHOES: 3, EquipSlot.GLOVES: 7, EquipSlot.MASK: 2, 
-		EquipSlot.EYES: 1, EquipSlot.HEAD: 3, EquipSlot.EARS: 2, EquipSlot.NECK: 2, 
-		EquipSlot.ID: 2, EquipSlot.LEFT_HAND: 2, EquipSlot.RIGHT_HAND: 2
+		EquipSlot.BACK: 7, EquipSlot.SHOES: 3, EquipSlot.GLOVES: 7, EquipSlot.MASK: 2, 
+		EquipSlot.EYES: 1, EquipSlot.HEAD: 8, EquipSlot.EARS: 2, EquipSlot.NECK: 2, 
+		EquipSlot.ID: 2, EquipSlot.LEFT_HAND: 10, EquipSlot.RIGHT_HAND: 10
 	}
 }
 
@@ -421,9 +421,6 @@ func set_direction(direction: int):
 	current_direction = direction
 	_update_all_sprite_elements()
 	
-	if multiplayer.has_multiplayer_peer() and multiplayer.is_server() and sync_direction_changes:
-		sync_direction.rpc(direction)
-	
 	emit_signal("sprite_direction_changed", direction)
 
 func _update_all_sprite_elements():
@@ -519,13 +516,13 @@ func _update_single_inhand_sprite(item, sprite: Sprite2D, hand_suffix: String):
 			print("No in-hand texture found for ", item_name, "_", hand_suffix)
 
 func _get_item_name_for_inhand(item) -> String:
-	if "obj_name" in item:
-		return item.obj_name
+	if "item_name" in item:
+		return item.item_name
 	elif "name" in item:
 		return item.name
 	else:
 		if debug_sprite_updates:
-			print("Item has no obj_name or name property")
+			print("Item has no item_name or name property")
 		return ""
 
 func _get_inhand_texture_from_asset_manager(item_name: String, hand_suffix: String) -> Texture2D:
@@ -535,18 +532,16 @@ func _get_inhand_texture_from_asset_manager(item_name: String, hand_suffix: Stri
 		return null
 	
 	if log_texture_loading:
-		print("Loading texture for: '", item_name, "', hand: '", hand_suffix, "'")
+		print("Loading in-hand texture for: '", item_name, "', hand: '", hand_suffix, "'")
 	
-	# Try asset manager's direct method first
-	if asset_manager.has_method("get_inhand_texture"):
-		var texture = asset_manager.get_inhand_texture(item_name, hand_suffix)
-		if texture:
-			if log_texture_loading:
-				print("Found texture via asset manager method")
-			return texture
+	var texture = asset_manager.get_inhand_texture(item_name, hand_suffix)
 	
-	# Try multiple naming variations
-	return _try_texture_variations(item_name, hand_suffix)
+	if texture and log_texture_loading:
+		print("Successfully loaded in-hand texture for ", item_name, "_", hand_suffix)
+	elif log_texture_loading:
+		print("Failed to load in-hand texture for ", item_name, "_", hand_suffix)
+	
+	return texture
 
 func _try_texture_variations(item_name: String, hand_suffix: String) -> Texture2D:
 	var naming_variations = [
@@ -558,8 +553,6 @@ func _try_texture_variations(item_name: String, hand_suffix: String) -> Texture2
 	for variation in naming_variations:
 		var possible_paths = [
 			"res://Assets/Icons/Items/In_hand/" + variation + ".png",
-			"res://Assets/Icons/Items/Inhand/" + variation + ".png",
-			"res://Assets/Icons/Items/in_hand/" + variation + ".png"
 		]
 		
 		for path in possible_paths:
@@ -639,7 +632,7 @@ func set_hair(hair_texture: Texture2D, hair_color: Color):
 		return
 	
 	if not hair_sprite:
-		hair_sprite = _create_customization_sprite("HairSprite", 2)
+		hair_sprite = _create_customization_sprite("HairSprite", 7)
 	
 	hair_sprite.texture = hair_texture
 	hair_sprite.modulate = hair_color
@@ -659,7 +652,7 @@ func set_facial_hair(facial_hair_texture: Texture2D, facial_hair_color: Color):
 		return
 	
 	if not facial_hair_sprite:
-		facial_hair_sprite = _create_customization_sprite("FacialHairSprite", 2)
+		facial_hair_sprite = _create_customization_sprite("FacialHairSprite", 7)
 	
 	facial_hair_sprite.texture = facial_hair_texture
 	facial_hair_sprite.modulate = facial_hair_color
@@ -910,7 +903,7 @@ func _equip_item_internal(item, slot: int) -> bool:
 		_unequip_item_internal(slot)
 	
 	if debug_sprite_updates:
-		print("Equipping item ", item.obj_name if "obj_name" in item else "Unknown", " to slot ", slot)
+		print("Equipping item ", item.item_name if "item_name" in item else "Unknown", " to slot ", slot)
 	
 	equipped_items[slot] = item
 	_create_equipment_visual(item, slot)
@@ -945,7 +938,7 @@ func _create_equipment_visual(item, slot: int):
 	
 	if not texture:
 		if debug_sprite_updates:
-			print("No texture found for item: ", item.obj_name if "obj_name" in item else "Unknown")
+			print("No texture found for item: ", item.item_name if "item_name" in item else "Unknown")
 		texture = _create_placeholder_texture()
 	
 	equipment_sprite.texture = texture
@@ -957,7 +950,7 @@ func _create_equipment_visual(item, slot: int):
 	equipment_sprite.visible = true
 	
 	if debug_sprite_updates:
-		print("Equipped ", item.obj_name if "obj_name" in item else "item", " in slot ", slot)
+		print("Equipped ", item.item_name if "item_name" in item else "item", " in slot ", slot)
 	
 	if is_lying:
 		_apply_lying_rotation()
@@ -994,7 +987,7 @@ func _get_item_texture(item) -> Texture2D:
 		if texture:
 			return texture
 	
-	if asset_manager and "obj_name" in item:
+	if asset_manager and "item_name" in item:
 		var texture = _try_load_from_asset_manager(item)
 		if texture:
 			return texture
@@ -1012,10 +1005,10 @@ func _load_texture_from_path(path: String) -> Texture2D:
 	return null
 
 func _try_load_from_asset_manager(item) -> Texture2D:
-	if not asset_manager or not "obj_name" in item:
+	if not asset_manager or not "item_name" in item:
 		return null
 	
-	var item_name = item.obj_name.to_lower().replace(" ", "_")
+	var item_name = item.item_name.to_lower().replace(" ", "_")
 	var possible_paths = [
 		"res://Assets/Icons/Items/In_hand/" + item_name + ".png"
 	]

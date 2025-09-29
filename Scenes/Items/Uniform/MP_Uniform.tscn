@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://d0hfqi2lpovuj"]
+
+[ext_resource type="Script" uid="uid://cw1x3jl7laq4l" path="res://Code/Items/Uniform/Uniform.gd" id="1_3irrr"]
+[ext_resource type="Texture2D" uid="uid://do55005m37twy" path="res://Assets/Icons/Items/Clothing/Uniforms/MilitaryPolice.png" id="2_uk43u"]
+[ext_resource type="Texture2D" uid="uid://cfm5vgd36n6cv" path="res://Assets/Icons/Clothing/Uniforms/MilitaryPolice.png" id="3_jkomg"]
+
+[node name="MP_Uniform" type="Node2D"]
+script = ExtResource("1_3irrr")
+item_name = "MP_Uniform"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_uk43u")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_jkomg")
+hframes = 4
+
+[node name="InteractionArea" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="InteractionArea"]
+polygon = PackedVector2Array(-5, -7, -5, -6, -6, -6, -6, -4, -7, -4, -7, -1, -6, -1, -6, 0, -5, 0, -5, 2, -6, 2, -6, 6, -5, 6, -5, 7, 4, 7, 4, 6, 5, 6, 5, 2, 4, 2, 4, 0, 5, 0, 5, -1, 6, -1, 6, -4, 5, -4, 5, -6, 4, -6, 4, -7, 2, -7, 2, -6, 1, -6, 1, -5, -2, -5, -2, -6, -3, -6, -3, -7)

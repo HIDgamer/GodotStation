@@ -496,7 +496,7 @@ func _route_tile_click(tile_coords: Vector2i, button_index: int, shift_pressed: 
 #region ENTITY DETECTION AND HOVER
 func _update_hover_entity():
 	"""Update hover entity tracking with drag awareness"""
-	var mouse_pos = controller.get_global_mouse_position()
+	var mouse_pos = get_viewport().get_mouse_position()
 	var entity = _get_entity_at_position(mouse_pos)
 	
 	if entity != hover_entity:
