@@ -47,7 +47,7 @@ If you add assets, please clearly state their source and license.
 
 ## 📜 License
 - All **code** is licensed under the [**Apache License Version 2.0**](http://www.apache.org/licenses/LICENSE-2.0).  
-- All **assets** (art, icons, sounds) are licensed under [**Creative Commons BY-SA 3.0**](https://creativecommons.org/licenses/by-sa/3.0/) unless otherwise noted.  
+- All **assets** (art, icons, sounds) are licensed under [**Creative Commons BY-SA 3.0**](https://creativecommons.org/licenses/by-sa/3.0/) unless otherwise indicated. Authorship for assets including art and sound under the CC BY-SA license is defined as the active development team of GodotStation unless stated otherwise (by author of the commit).  
 
 ---
 
