@@ -34,7 +34,7 @@ Contributions of all kinds are welcome:
 
 ## 📦 Assets & Attribution
 Most assets and sounds used in this project come from:  
-- [CM13](https://github.com/cmss13-devs/cmss13)  
+- [CMSS13](https://github.com/cmss13-devs/cmss13)  
 - [OpenGameArt](https://opengameart.org/)  
 - [Itch.io](https://itch.io/game-assets)  
 
