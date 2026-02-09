@@ -17,11 +17,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false # Finish both platforms even if one fails
+      fail-fast: false
       matrix:
-        platform: [windows, linux]
+        # Added macos to the list
+        platform: [windows, linux, macos]
     
-    # Use the mono-prefix tag which is the standard for the barichello image
     container:
       image: barichello/godot-ci:mono-4.6
 
@@ -36,24 +36,16 @@ jobs:
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
 
       - name: Dotnet Restore
         run: dotnet restore
 
       - name: Install Godot Mono Export Templates
         run: |
-          # Create folder structure for Godot 4.6 Mono
           mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
-          
-          # Download from GitHub Mirror (much more reliable than TuxFamily)
           wget --quiet --tries=3 --retry-connrefused https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
-          
-          # Unzip and move templates to the versioned folder
           unzip -q Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
           mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono/
-          
           rm Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
 
       - name: Build Godot Project
@@ -63,15 +55,22 @@ jobs:
           if [ "${{ matrix.platform }}" = "windows" ]; then
             PRESET_NAME="Windows Desktop"
             OUTPUT_FILE="build/windows/$EXPORT_NAME.exe"
-          else
+          elif [ "${{ matrix.platform }}" = "linux" ]; then
             PRESET_NAME="Linux/X11"
             OUTPUT_FILE="build/linux/$EXPORT_NAME.x86_64"
+          elif [ "${{ matrix.platform }}" = "macos" ]; then
+            PRESET_NAME="macOS"
+            OUTPUT_FILE="build/macos/$EXPORT_NAME.zip"
           fi
 
           echo "Building $PRESET_NAME -> $OUTPUT_FILE"
           godot --headless --verbose --export-release "$PRESET_NAME" "$OUTPUT_FILE"
           
-          # Create version file for the manifest/updater
+          # FIX FOR LINUX: Ensure the binary is executable
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            chmod +x "$OUTPUT_FILE"
+          fi
+          
           echo "${GITHUB_REF_NAME}" > $(dirname "$OUTPUT_FILE")/version.txt
 
       - name: Upload build artifact
@@ -92,18 +91,19 @@ jobs:
 
       - name: Zip builds and create manifest
         run: |
-          # Zip Windows files
+          # Zip each platform
           cd artifacts/windows-build && zip -r ../../GodotStation-Windows.zip . && cd ../..
-          # Zip Linux files
           cd artifacts/linux-build && zip -r ../../GodotStation-Linux.zip . && cd ../..
+          cd artifacts/macos-build && zip -r ../../GodotStation-macOS.zip . && cd ../..
 
-          # Get exact file sizes for the version-manifest.json
+          # Calculate sizes
           WIN_SIZE=$(stat -c%s GodotStation-Windows.zip)
           LIN_SIZE=$(stat -c%s GodotStation-Linux.zip)
+          MAC_SIZE=$(stat -c%s GodotStation-macOS.zip)
           VERSION="${GITHUB_REF_NAME}"
 
-          # Generate the manifest JSON
-          echo "{\"version\":\"$VERSION\",\"build_date\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"platforms\":{\"windows\":{\"url\":\"https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/GodotStation-Windows.zip\",\"size\":$WIN_SIZE},\"linux\":{\"url\":\"https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/GodotStation-Linux.zip\",\"size\":$LIN_SIZE}}}" > version-manifest.json
+          # Create JSON Manifest (Added macOS entries)
+          echo "{\"version\":\"$VERSION\",\"build_date\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"platforms\":{\"windows\":{\"url\":\"https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/GodotStation-Windows.zip\",\"size\":$WIN_SIZE},\"linux\":{\"url\":\"https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/GodotStation-Linux.zip\",\"size\":$LIN_SIZE},\"macos\":{\"url\":\"https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/GodotStation-macOS.zip\",\"size\":$MAC_SIZE}}}" > version-manifest.json
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -111,6 +111,7 @@ jobs:
           files: |
             GodotStation-Windows.zip
             GodotStation-Linux.zip
+            GodotStation-macOS.zip
             version-manifest.json
           body: "Release ${GITHUB_REF_NAME} built from ${GITHUB_SHA}"
         env:
