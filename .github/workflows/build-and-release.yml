@@ -22,15 +22,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
-      - name: Setup templates
+
+      - name: Download & Install Export Templates
         run: |
           mkdir -p ~/.local/share/godot/export_templates
-          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-      - name: Build
+          wget https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          mkdir templates
+          tar -xf Godot_v${GODOT_VERSION}-stable_export_templates.tpz -C templates
+          mv templates/templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          rm -rf templates Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+
+      - name: Build Windows
         run: |
           mkdir -p build/windows
           godot --headless --verbose --export-release "Windows Desktop" build/windows/$EXPORT_NAME.exe
           echo "${{ github.ref_name }}" > build/windows/version.txt
+
       - uses: actions/upload-artifact@v4
         with:
           name: windows-build
@@ -44,15 +51,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
-      - name: Setup templates
+
+      - name: Download & Install Export Templates
         run: |
           mkdir -p ~/.local/share/godot/export_templates
-          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-      - name: Build
+          wget https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          mkdir templates
+          tar -xf Godot_v${GODOT_VERSION}-stable_export_templates.tpz -C templates
+          mv templates/templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          rm -rf templates Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+
+      - name: Build Linux
         run: |
           mkdir -p build/linux
           godot --headless --verbose --export-release "Linux/X11" build/linux/$EXPORT_NAME.x86_64
           echo "${{ github.ref_name }}" > build/linux/version.txt
+
       - uses: actions/upload-artifact@v4
         with:
           name: linux-build
@@ -68,25 +82,22 @@ jobs:
         with:
           name: windows-build
           path: windows-files
-      
+
       - name: Download Linux
         uses: actions/download-artifact@v4
         with:
           name: linux-build
           path: linux-files
-      
-      - name: Zip and Prepare Manifest
+
+      - name: Zip and Create Manifest
         run: |
-          # 1. Create the Zips
           cd windows-files && zip -r ../GodotStation-Windows.zip . && cd ..
           cd linux-files && zip -r ../GodotStation-Linux.zip . && cd ..
-          
-          # 2. Get Sizes (The -b flag ensures bytes)
+
           WIN_SIZE=$(du -b GodotStation-Windows.zip | cut -f1)
           LIN_SIZE=$(du -b GodotStation-Linux.zip | cut -f1)
           VERSION="${{ github.ref_name }}"
-          
-          # 3. Generate Manifest
+
           cat > version-manifest.json << EOF
           {
             "version": "${VERSION}",
@@ -104,7 +115,7 @@ jobs:
           }
           EOF
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
@@ -120,7 +131,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Deploy to Oracle
+      - name: Deploy to Oracle Server
         uses: appleboy/scp-action@master
         with:
           host: 150.136.90.194
