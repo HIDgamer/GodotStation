@@ -17,10 +17,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: false # Finish both platforms even if one fails
       matrix:
         platform: [windows, linux]
     
+    # Use the mono-prefix tag which is the standard for the barichello image
     container:
       image: barichello/godot-ci:mono-4.6
 
@@ -43,13 +44,19 @@ jobs:
 
       - name: Install Godot Mono Export Templates
         run: |
+          # Create folder structure for Godot 4.6 Mono
           mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
-          wget https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/mono/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
-          unzip Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
+          
+          # Download from GitHub Mirror (much more reliable than TuxFamily)
+          wget --quiet --tries=3 --retry-connrefused https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
+          
+          # Unzip and move templates to the versioned folder
+          unzip -q Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
           mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono/
+          
           rm Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
 
-      - name: Build Godot
+      - name: Build Godot Project
         run: |
           mkdir -p build/${{ matrix.platform }}
           
@@ -64,7 +71,7 @@ jobs:
           echo "Building $PRESET_NAME -> $OUTPUT_FILE"
           godot --headless --verbose --export-release "$PRESET_NAME" "$OUTPUT_FILE"
           
-          # Save version.txt inside the build folder
+          # Create version file for the manifest/updater
           echo "${GITHUB_REF_NAME}" > $(dirname "$OUTPUT_FILE")/version.txt
 
       - name: Upload build artifact
@@ -85,17 +92,17 @@ jobs:
 
       - name: Zip builds and create manifest
         run: |
-          # Process Windows
+          # Zip Windows files
           cd artifacts/windows-build && zip -r ../../GodotStation-Windows.zip . && cd ../..
-          # Process Linux
+          # Zip Linux files
           cd artifacts/linux-build && zip -r ../../GodotStation-Linux.zip . && cd ../..
 
-          # Calculate sizes for manifest
+          # Get exact file sizes for the version-manifest.json
           WIN_SIZE=$(stat -c%s GodotStation-Windows.zip)
           LIN_SIZE=$(stat -c%s GodotStation-Linux.zip)
           VERSION="${GITHUB_REF_NAME}"
 
-          # Create JSON Manifest
+          # Generate the manifest JSON
           echo "{\"version\":\"$VERSION\",\"build_date\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"platforms\":{\"windows\":{\"url\":\"https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/GodotStation-Windows.zip\",\"size\":$WIN_SIZE},\"linux\":{\"url\":\"https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/GodotStation-Linux.zip\",\"size\":$LIN_SIZE}}}" > version-manifest.json
 
       - name: Create GitHub Release
