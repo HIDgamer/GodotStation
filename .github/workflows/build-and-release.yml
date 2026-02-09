@@ -44,7 +44,7 @@ jobs:
           echo "$(date -u +%Y-%m-%d_%H:%M:%S)" >> build/windows/version.txt
       
       - name: Upload Windows build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: build/windows/
@@ -76,7 +76,7 @@ jobs:
           echo "$(date -u +%Y-%m-%d_%H:%M:%S)" >> build/linux/version.txt
       
       - name: Upload Linux build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-build
           path: build/linux/
