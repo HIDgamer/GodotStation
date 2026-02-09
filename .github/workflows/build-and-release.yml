@@ -10,14 +10,14 @@ on:
   workflow_dispatch:
 
 env:
-  GODOT_VERSION: 4.6.1
+  GODOT_VERSION: 4.6
   EXPORT_NAME: GodotStation
 
 jobs:
   build-windows:
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.6.1
+      image: barichello/godot-ci:4.6
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,7 +39,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.6.1
+      image: barichello/godot-ci:4.6
     steps:
       - uses: actions/checkout@v4
         with:
