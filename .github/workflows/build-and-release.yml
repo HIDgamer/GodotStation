@@ -14,106 +14,70 @@ env:
   EXPORT_NAME: GodotStation
 
 jobs:
-  build-windows:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [windows, linux]
     container:
       image: barichello/godot-ci:4.6
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           lfs: true
 
-      - name: Download & Install Export Templates
+      - name: Build Godot
         run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          wget https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
-          mkdir templates
-          tar -xf Godot_v${GODOT_VERSION}-stable_export_templates.tpz -C templates
-          mv templates/templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-          rm -rf templates Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          mkdir -p build/${{ matrix.platform }}
 
-      - name: Build Windows
-        run: |
-          mkdir -p build/windows
-          godot --headless --verbose --export-release "Windows Desktop" build/windows/$EXPORT_NAME.exe
-          echo "${{ github.ref_name }}" > build/windows/version.txt
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            PRESET_NAME="Windows Desktop"
+            OUTPUT_FILE="build/windows/$EXPORT_NAME.exe"
+          else
+            PRESET_NAME="Linux/X11"
+            OUTPUT_FILE="build/linux/$EXPORT_NAME.x86_64"
+          fi
 
-      - uses: actions/upload-artifact@v4
+          echo "Building $PRESET_NAME -> $OUTPUT_FILE"
+          godot --headless --verbose --export-release "$PRESET_NAME" "$OUTPUT_FILE"
+
+          # Save version.txt
+          echo "${GITHUB_REF_NAME}" > $(dirname "$OUTPUT_FILE")/version.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: windows-build
-          path: build/windows/
-
-  build-linux:
-    runs-on: ubuntu-latest
-    container:
-      image: barichello/godot-ci:4.6
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Download & Install Export Templates
-        run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          wget https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
-          mkdir templates
-          tar -xf Godot_v${GODOT_VERSION}-stable_export_templates.tpz -C templates
-          mv templates/templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-          rm -rf templates Godot_v${GODOT_VERSION}-stable_export_templates.tpz
-
-      - name: Build Linux
-        run: |
-          mkdir -p build/linux
-          godot --headless --verbose --export-release "Linux/X11" build/linux/$EXPORT_NAME.x86_64
-          echo "${{ github.ref_name }}" > build/linux/version.txt
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: linux-build
-          path: build/linux/
+          name: ${{ matrix.platform }}-build
+          path: build/${{ matrix.platform }}/
 
   create-release:
-    needs: [build-windows, build-linux]
+    needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Download Windows
+      - name: Download Windows build
         uses: actions/download-artifact@v4
         with:
           name: windows-build
           path: windows-files
 
-      - name: Download Linux
+      - name: Download Linux build
         uses: actions/download-artifact@v4
         with:
           name: linux-build
           path: linux-files
 
-      - name: Zip and Create Manifest
+      - name: Zip builds and create manifest
         run: |
           cd windows-files && zip -r ../GodotStation-Windows.zip . && cd ..
           cd linux-files && zip -r ../GodotStation-Linux.zip . && cd ..
 
           WIN_SIZE=$(du -b GodotStation-Windows.zip | cut -f1)
           LIN_SIZE=$(du -b GodotStation-Linux.zip | cut -f1)
-          VERSION="${{ github.ref_name }}"
+          VERSION="${GITHUB_REF_NAME}"
 
-          cat > version-manifest.json << EOF
-          {
-            "version": "${VERSION}",
-            "build_date": "$(date -u +%Y-%m-%d_%H:%M:%S)",
-            "platforms": {
-              "windows": {
-                "url": "https://github.com/${{ github.repository }}/releases/download/${VERSION}/GodotStation-Windows.zip",
-                "size": ${WIN_SIZE}
-              },
-              "linux": {
-                "url": "https://github.com/${{ github.repository }}/releases/download/${VERSION}/GodotStation-Linux.zip",
-                "size": ${LIN_SIZE}
-              }
-            }
-          }
-          EOF
+          echo '{"version":"'"$VERSION"'","build_date":"'"$(date -u +%Y-%m-%d_%H:%M:%S)"'","platforms":{"windows":{"url":"https://github.com/'"$GITHUB_REPOSITORY"'/releases/download/'"$VERSION"'/GodotStation-Windows.zip","size":'"$WIN_SIZE"'},"linux":{"url":"https://github.com/'"$GITHUB_REPOSITORY"'/releases/download/'"$VERSION"'/GodotStation-Linux.zip","size":'"$LIN_SIZE"'}}}' > version-manifest.json
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -122,7 +86,7 @@ jobs:
             GodotStation-Windows.zip
             GodotStation-Linux.zip
             version-manifest.json
-          body: "Release ${{ github.ref_name }} built from ${{ github.sha }}"
+          body: "Release ${GITHUB_REF_NAME} built from ${GITHUB_SHA}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -131,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Deploy to Oracle Server
+      - name: Deploy manifest to server
         uses: appleboy/scp-action@master
         with:
           host: 150.136.90.194
