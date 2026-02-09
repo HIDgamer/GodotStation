@@ -15,55 +15,39 @@ Whether you want to contribute, get technical help, or just hang out, join our D
 
 ---
 
-## 🛠️ How to Contribute
+## 🛠️ Contribution Guide
+1. **Download GitHub Desktop** (or use CLI if you prefer).  
+2. **Fork this repository** on GitHub.  
+3. **Clone your fork** locally using GitHub Desktop.  
+4. **Download [Godot 4.5](https://godotengine.org/download)**.  
+5. **Import the project** (`project.godot`) into Godot.  
+6. Start developing and submit pull requests!  
 
-1. **Fork & Clone**  
-Fork the repo and clone it to your local machine.
-
-2. **Install Godot**  
-Download [Godot 4.5](https://godotengine.org/download) if you don’t have it already.
-
-3. **Import Project**  
-Open Godot Project Manager and import `project.godot`.
-
-4. **Make Changes**  
-Work on your feature, fix bugs, or improve assets.
-
-5. **Submit**  
-Push your changes to your fork and open a Pull Request.
+Contributions of all kinds are welcome:  
+- Code improvements  
+- Bug reports & fixes  
+- Art, sound, and UI/UX assets  
+- Documentation  
 
 ---
 
-## 📜 License & Attribution
+## 📦 Assets & Attribution
+Most assets and sounds used in this project come from:  
+- [CMSS13](https://github.com/cmss13-devs/cmss13)  
+- [OpenGameArt](https://opengameart.org/)  
+- [Itch.io](https://itch.io/game-assets)  
 
-### Code
-All original source code in this repository is released under the **Apache License 2.0**.  
-[Read the full license](http://www.apache.org/licenses/LICENSE-2.0)
+- **Code**: Licensed under **Apache License 2.0** (see below).  
+- **Assets** (icons, sounds, sprites): Licensed under **CC BY-SA 3.0** unless otherwise indicated.  
 
-### Assets (Art, Icons, Sounds, Sprites)
-Some assets in this repository come from community projects, including parts of the **CM-SS13 open-source repository**, and are used under the **Creative Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0)** license.  
-[Read the CC BY-SA 3.0 license](https://creativecommons.org/licenses/by-sa/3.0/)
-
-**Attribution Notes:**
-
-* **Original Artists**  
-We give credit to the creators of included assets. This includes **MattAtlas**, **nicboone**, **westhybrid**, **snypehunter**, **afridge**, and others as documented.
-
-* **Source Provenance**  
-Assets are sourced from publicly maintained repositories and used according to the CC BY-SA license.
-
-* **Non-Claim**  
-GodotStation does not claim ownership of third-party artwork or derivatives. All credit remains with the original creators.
-
-* **IP Notice**  
-Some assets depict designs inspired by the *Aliens* franchise (21th Century Fox/Disney). GodotStation does not claim rights to these intellectual properties.
+If you add assets, please clearly state their source and license.
 
 ---
 
-## 🤝 Contribution Terms
+## 📜 License
+- All **code** is licensed under the [**Apache License Version 2.0**](http://www.apache.org/licenses/LICENSE-2.0).  
+- All **assets** (art, icons, sounds) are licensed under [**Creative Commons BY-SA 3.0**](https://creativecommons.org/licenses/by-sa/3.0/) unless otherwise indicated. Authorship for assets including art and sound under the CC BY-SA license is defined as the active development team of GodotStation unless stated otherwise (by author of the commit).  
 
-By contributing:
+---
 
-* **Code contributions** are automatically licensed under **Apache 2.0**.  
-* **Asset contributions** are licensed under **CC BY-SA 3.0**.  
-* You must provide clear source and attribution for any third-party assets you add.
+_By contributing, you agree to follow the respective licenses for code and assets._
