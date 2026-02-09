@@ -98,10 +98,17 @@ jobs:
         with:
           name: linux-build
           path: ./linux
-      
+
+      - name: Zip builds
+        run: |
+          # Zip the contents of the folders into zip files in the root directory
+          cd windows && zip -r ../GodotStation-Windows.zip . && cd ..
+          cd linux && zip -r ../GodotStation-Linux.zip . && cd ..
+
       - name: Create version manifest
         run: |
           VERSION="${{ github.ref_name }}"
+          # Use the actual zip filenames created in the previous step
           cat > version-manifest.json << EOF
           {
             "version": "${VERSION}",
@@ -109,21 +116,16 @@ jobs:
             "platforms": {
               "windows": {
                 "url": "https://github.com/${{ github.repository }}/releases/download/${VERSION}/GodotStation-Windows.zip",
-                "size": $(du -b windows.zip | cut -f1)
+                "size": $(du -b GodotStation-Windows.zip | cut -f1)
               },
               "linux": {
                 "url": "https://github.com/${{ github.repository }}/releases/download/${VERSION}/GodotStation-Linux.zip",
-                "size": $(du -b linux.zip | cut -f1)
+                "size": $(du -b GodotStation-Linux.zip | cut -f1)
               }
             },
             "changelog": "See release notes for details"
           }
           EOF
-      
-      - name: Zip builds
-        run: |
-          cd windows && zip -r ../GodotStation-Windows.zip . && cd ..
-          cd linux && zip -r ../GodotStation-Linux.zip . && cd ..
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -134,20 +136,7 @@ jobs:
             version-manifest.json
           body: |
             ## GodotStation ${{ github.ref_name }}
-            
             Auto-built from commit ${{ github.sha }}
-            
-            ### Downloads
-            - Windows: GodotStation-Windows.zip
-            - Linux: GodotStation-Linux.zip
-            
-            ### Installation
-            1. Download the zip for your platform
-            2. Extract to a folder
-            3. Run GodotStation.exe (Windows) or GodotStation.x86_64 (Linux)
-            
-            ### Changes
-            See commit history for details.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
