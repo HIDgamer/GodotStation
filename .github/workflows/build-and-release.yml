@@ -1,114 +1,92 @@
 # GitHub Actions - Auto Build & Release for GodotStation
-# Automatically builds game when you push to main branch
-
 name: Build and Release GodotStation
 
 on:
   push:
     tags:
-      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v1.2.3
+      - 'v*.*.*'
     branches:
-      - main      # Also builds on main branch pushes
-  workflow_dispatch:  # Allows manual triggering
+      - main
+  workflow_dispatch:
 
 env:
   GODOT_VERSION: 4.6.1
   EXPORT_NAME: GodotStation
-  PROJECT_PATH: .
 
 jobs:
-  # Build for Windows
   build-windows:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.6.1
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           lfs: true
-      
-      - name: Setup export templates
+      - name: Setup templates
         run: |
-          mkdir -v -p ~/.local/share/godot/export_templates
+          mkdir -p ~/.local/share/godot/export_templates
           mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-      
-      - name: Build Windows version
+      - name: Build
         run: |
-          mkdir -v -p build/windows
+          mkdir -p build/windows
           godot --headless --verbose --export-release "Windows Desktop" build/windows/$EXPORT_NAME.exe
-      
-      - name: Create version file
-        run: |
           echo "${{ github.ref_name }}" > build/windows/version.txt
-          echo "$(date -u +%Y-%m-%d_%H:%M:%S)" >> build/windows/version.txt
-      
-      - name: Upload Windows build
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: build/windows/
 
-  # Build for Linux
   build-linux:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.6.1
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           lfs: true
-      
-      - name: Setup export templates
+      - name: Setup templates
         run: |
-          mkdir -v -p ~/.local/share/godot/export_templates
+          mkdir -p ~/.local/share/godot/export_templates
           mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-      
-      - name: Build Linux version
+      - name: Build
         run: |
-          mkdir -v -p build/linux
+          mkdir -p build/linux
           godot --headless --verbose --export-release "Linux/X11" build/linux/$EXPORT_NAME.x86_64
-      
-      - name: Create version file
-        run: |
           echo "${{ github.ref_name }}" > build/linux/version.txt
-          echo "$(date -u +%Y-%m-%d_%H:%M:%S)" >> build/linux/version.txt
-      
-      - name: Upload Linux build
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: linux-build
           path: build/linux/
 
-  # Create GitHub Release
   create-release:
     needs: [build-windows, build-linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Download Windows build
+      - name: Download Windows
         uses: actions/download-artifact@v4
         with:
           name: windows-build
-          path: ./windows
+          path: windows-files
       
-      - name: Download Linux build
+      - name: Download Linux
         uses: actions/download-artifact@v4
         with:
           name: linux-build
-          path: ./linux
-
-      - name: Zip builds
+          path: linux-files
+      
+      - name: Zip and Prepare Manifest
         run: |
-          # Zip the contents of the folders into zip files in the root directory
-          cd windows && zip -r ../GodotStation-Windows.zip . && cd ..
-          cd linux && zip -r ../GodotStation-Linux.zip . && cd ..
-
-      - name: Create version manifest
-        run: |
+          # 1. Create the Zips
+          cd windows-files && zip -r ../GodotStation-Windows.zip . && cd ..
+          cd linux-files && zip -r ../GodotStation-Linux.zip . && cd ..
+          
+          # 2. Get Sizes (The -b flag ensures bytes)
+          WIN_SIZE=$(du -b GodotStation-Windows.zip | cut -f1)
+          LIN_SIZE=$(du -b GodotStation-Linux.zip | cut -f1)
           VERSION="${{ github.ref_name }}"
-          # Use the actual zip filenames created in the previous step
+          
+          # 3. Generate Manifest
           cat > version-manifest.json << EOF
           {
             "version": "${VERSION}",
@@ -116,17 +94,16 @@ jobs:
             "platforms": {
               "windows": {
                 "url": "https://github.com/${{ github.repository }}/releases/download/${VERSION}/GodotStation-Windows.zip",
-                "size": $(du -b GodotStation-Windows.zip | cut -f1)
+                "size": ${WIN_SIZE}
               },
               "linux": {
                 "url": "https://github.com/${{ github.repository }}/releases/download/${VERSION}/GodotStation-Linux.zip",
-                "size": $(du -b GodotStation-Linux.zip | cut -f1)
+                "size": ${LIN_SIZE}
               }
-            },
-            "changelog": "See release notes for details"
+            }
           }
           EOF
-      
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -134,19 +111,16 @@ jobs:
             GodotStation-Windows.zip
             GodotStation-Linux.zip
             version-manifest.json
-          body: |
-            ## GodotStation ${{ github.ref_name }}
-            Auto-built from commit ${{ github.sha }}
+          body: "Release ${{ github.ref_name }} built from ${{ github.sha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Deploy version manifest to Oracle
   deploy-manifest:
     needs: create-release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Deploy to Oracle Cloud
+      - name: Deploy to Oracle
         uses: appleboy/scp-action@master
         with:
           host: 150.136.90.194
