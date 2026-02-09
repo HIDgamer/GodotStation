@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://chatbubble"]
+
+[ext_resource type="Script" uid="uid://c508tg6nrf62t" path="res://Code/UI/ChatBubble.gd" id="1"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_bubble"]
+font_size = 12
+font_color = Color(0.8, 0.8, 0.8, 0.8)
+outline_size = 1
+outline_color = Color(0, 0, 0, 1)
+
+[node name="ChatBubble" type="Node2D" unique_id=1728879906]
+z_index = 1000
+script = ExtResource("1")
+
+[node name="Label" type="Label" parent="." unique_id=1971903110]
+offset_left = -60.0
+offset_top = -20.0
+offset_right = 60.0
+grow_vertical = 0
+label_settings = SubResource("LabelSettings_bubble")
+horizontal_alignment = 1
+vertical_alignment = 2
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true

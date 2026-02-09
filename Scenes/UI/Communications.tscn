@@ -1,0 +1,763 @@
+[gd_scene format=3 uid="uid://bjnqqapnkk8uq"]
+
+[ext_resource type="Script" uid="uid://ciye5i2sfknc8" path="res://Code/UI/Communications.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://dible6m71p44g" path="res://Scenes/Maps/DDome.tscn" id="2_80s8t"]
+[ext_resource type="PackedScene" uid="uid://2oufqaxsmbt8" path="res://Scenes/UI/TextInput.tscn" id="2_cma0f"]
+[ext_resource type="PackedScene" uid="uid://cv8q6pw1npm8x" path="res://Scenes/UI/Lobby.tscn" id="3_f6lmg"]
+[ext_resource type="PackedScene" uid="uid://d7w0aj1ldenk" path="res://Scenes/UI/MediaPopup.tscn" id="4_new"]
+[ext_resource type="PackedScene" uid="uid://dx25f1c373c3" path="res://Scenes/UI/MusicOptionsPopup.tscn" id="5_new"]
+[ext_resource type="PackedScene" uid="uid://cqsisjme86v7t" path="res://Scenes/UI/AdminSpawnPopup.tscn" id="6_spawn"]
+[ext_resource type="Theme" uid="uid://c8ckvl2v7xge" path="res://Assets/Themes/SciFiTheme.tres" id="6_theme"]
+[ext_resource type="Texture2D" uid="uid://1gt86wrk828f" path="res://Assets/UI/Interface/Button04.png" id="8_yv6a1"]
+[ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="9_yv6a1"]
+[ext_resource type="Texture2D" uid="uid://b6wfcx5xv6w23" path="res://Assets/UI/Interface/Button06.png" id="10_ivc1v"]
+[ext_resource type="Texture2D" uid="uid://tkg0qlnfjywf" path="res://Assets/UI/Interface/MainPanel02.png" id="10_yv6a1"]
+[ext_resource type="Texture2D" uid="uid://dbm5kkv648tco" path="res://Assets/UI/Interface/Button03.png" id="11_3xh1n"]
+[ext_resource type="Texture2D" uid="uid://cpebkxb56vou3" path="res://Assets/UI/Interface/MainPanel03.png" id="11_qy7vs"]
+[ext_resource type="Texture2D" uid="uid://curg3eofqypke" path="res://Assets/UI/Interface/Button15.png" id="13_fbj37"]
+[ext_resource type="Texture2D" uid="uid://dv2008fw015d7" path="res://Assets/UI/Interface/Button16.png" id="14_jv02v"]
+[ext_resource type="Texture2D" uid="uid://bebbmsubri5t3" path="res://Assets/UI/Interface/Button13.png" id="15_v3ncd"]
+[ext_resource type="Texture2D" uid="uid://bxn51jnpxwjd1" path="res://Assets/UI/Interface/Button12.png" id="16_8c2vv"]
+[ext_resource type="Texture2D" uid="uid://v180jwj6y3xe" path="res://Assets/UI/Interface/Button14.png" id="17_ik75h"]
+[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="19_8c2vv"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v3ncd"]
+texture = ExtResource("8_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8c2vv"]
+texture = ExtResource("10_ivc1v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ik75h"]
+texture = ExtResource("11_3xh1n")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_yv6a1"]
+texture = ExtResource("11_qy7vs")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_knsi4"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fwy3i"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_q770r"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_jhcol"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_f3q6l"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_14sfb"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kenel"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5kjov"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_b8kjl"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xxjs6"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nfqiy"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0wt5e"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lktlc"]
+texture = ExtResource("15_v3ncd")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0nwrw"]
+texture = ExtResource("16_8c2vv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_dlr31"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_h5gb0"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_vnaef"]
+texture = ExtResource("17_ik75h")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cxxsb"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_us0h7"]
+texture = ExtResource("8_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qy7vs"]
+texture = ExtResource("10_ivc1v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fbj37"]
+texture = ExtResource("11_3xh1n")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_f12aw"]
+texture = ExtResource("8_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6qoqs"]
+texture = ExtResource("10_ivc1v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1u72c"]
+texture = ExtResource("11_3xh1n")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hyyyd"]
+texture = ExtResource("11_qy7vs")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ebytm"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0qxkj"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_7xyeh"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6tewb"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_vrsuc"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nugac"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5247p"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tbmpo"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_afhn1"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hsex4"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_7o0sd"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_dpr4m"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_18sca"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2wg10"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_07s7w"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3b1lc"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_c36lp"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6hj8u"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0ds5l"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hdwvo"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3shjy"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_43bbp"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xkm4v"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ywww2"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_56eda"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wmw6j"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wvt5l"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_avwd7"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hpvd4"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_a38ve"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0qxyq"]
+texture = ExtResource("8_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ertr5"]
+texture = ExtResource("10_ivc1v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lp5i0"]
+texture = ExtResource("11_3xh1n")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_olbo2"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rdc0c"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mn4e5"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lmo7d"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6gl2y"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2i7vj"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_uklcj"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_53ea2"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lkgbc"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xldgs"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3c8rn"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_d6enq"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4a5kk"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rgs7w"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tb06d"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8wbfc"]
+texture = ExtResource("19_8c2vv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_h5tv7"]
+texture = ExtResource("19_8c2vv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xe1jj"]
+texture = ExtResource("19_8c2vv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_twkfe"]
+texture = ExtResource("19_8c2vv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_eq8d1"]
+texture = ExtResource("19_8c2vv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wtl5r"]
+texture = ExtResource("19_8c2vv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wwrhx"]
+texture = ExtResource("19_8c2vv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_n8k6a"]
+texture = ExtResource("9_yv6a1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ictnk"]
+texture = ExtResource("13_fbj37")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_jsngy"]
+texture = ExtResource("14_jv02v")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3xh1n"]
+texture = ExtResource("10_yv6a1")
+
+[node name="Communications" type="Control" unique_id=2096636630]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+theme = ExtResource("6_theme")
+script = ExtResource("1")
+metadata/_edit_use_anchors_ = true
+
+[node name="LobbyTimer" type="Timer" parent="." unique_id=1036008654]
+wait_time = 300.0
+one_shot = true
+
+[node name="TextInput" parent="." unique_id=1312627650 instance=ExtResource("2_cma0f")]
+
+[node name="MediaPopup" parent="." unique_id=1543915549 instance=ExtResource("4_new")]
+visible = false
+
+[node name="MusicOptionsPopup" parent="." unique_id=1215126127 instance=ExtResource("5_new")]
+size = Vector2i(411, 200)
+visible = false
+
+[node name="AdminSpawnPopup" parent="." unique_id=1215126128 instance=ExtResource("6_spawn")]
+
+[node name="HSplitContainer" type="HSplitContainer" parent="." unique_id=601914485]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/touch_dragger_color = Color(0.26293245, 0.26293245, 0.26293245, 1)
+theme_override_colors/touch_dragger_pressed_color = Color(0.06053035, 0.06053035, 0.060530342, 1)
+theme_override_colors/touch_dragger_hover_color = Color(0.26293245, 0.26293245, 0.26293245, 1)
+split_offsets = PackedInt32Array(175)
+split_offset = 175
+metadata/_edit_use_anchors_ = true
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="HSplitContainer" unique_id=972693736]
+visible = false
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="HSplitContainer/SubViewportContainer" unique_id=70836326]
+disable_3d = true
+handle_input_locally = false
+canvas_item_default_texture_filter = 3
+positional_shadow_atlas_size = 4096
+size = Vector2i(400, 2)
+render_target_update_mode = 0
+
+[node name="DDome" parent="HSplitContainer/SubViewportContainer/SubViewport" unique_id=1284978852 instance=ExtResource("2_80s8t")]
+
+[node name="SubViewportContainer2" type="SubViewportContainer" parent="HSplitContainer" unique_id=228987148]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="HSplitContainer/SubViewportContainer2" unique_id=915426239]
+disable_3d = true
+handle_input_locally = false
+canvas_item_default_texture_filter = 0
+size = Vector2i(1129, 1080)
+size_2d_override_stretch = true
+render_target_update_mode = 4
+
+[node name="Lobby" parent="HSplitContainer/SubViewportContainer2/SubViewport" unique_id=1720103413 instance=ExtResource("3_f6lmg")]
+
+[node name="CommunicationsPanel" type="VBoxContainer" parent="HSplitContainer" unique_id=1859401179]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/CommunicationsPanel" unique_id=69273560]
+layout_mode = 2
+
+[node name="InfoContainer" type="HBoxContainer" parent="HSplitContainer/CommunicationsPanel/VBoxContainer" unique_id=909905602]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 9
+alignment = 1
+
+[node name="InfoLeftArrow" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer" unique_id=1600712895]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_v3ncd")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_8c2vv")
+theme_override_styles/hover = SubResource("StyleBoxTexture_ik75h")
+text = "◀"
+icon_alignment = 1
+
+[node name="InfoScroll" type="ScrollContainer" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer" unique_id=971725721]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_yv6a1")
+vertical_scroll_mode = 0
+
+[node name="InfoHBox" type="HBoxContainer" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer/InfoScroll" unique_id=1922244668]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Changelog" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer/InfoScroll/InfoHBox" unique_id=1978612474]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_knsi4")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fwy3i")
+theme_override_styles/hover = SubResource("StyleBoxTexture_q770r")
+text = "📝 Changelog"
+icon_alignment = 1
+expand_icon = true
+
+[node name="Rules" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer/InfoScroll/InfoHBox" unique_id=1214888775]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_jhcol")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_f3q6l")
+theme_override_styles/hover = SubResource("StyleBoxTexture_14sfb")
+text = "⚖️ Rules"
+icon_alignment = 1
+
+[node name="Wiki" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer/InfoScroll/InfoHBox" unique_id=646959738]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_kenel")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_5kjov")
+theme_override_styles/hover = SubResource("StyleBoxTexture_b8kjl")
+text = "📖 Wiki"
+icon_alignment = 1
+
+[node name="Forum" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer/InfoScroll/InfoHBox" unique_id=1025602475]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_xxjs6")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_nfqiy")
+theme_override_styles/hover = SubResource("StyleBoxTexture_0wt5e")
+text = "💬 Forum"
+icon_alignment = 1
+
+[node name="SubmitBug" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer/InfoScroll/InfoHBox" unique_id=691200246]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_lktlc")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_0nwrw")
+theme_override_styles/hover = SubResource("StyleBoxTexture_dlr31")
+text = "🐛 SubmitBug"
+icon_alignment = 1
+
+[node name="Discord" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer/InfoScroll/InfoHBox" unique_id=852215785]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_h5gb0")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_vnaef")
+theme_override_styles/hover = SubResource("StyleBoxTexture_cxxsb")
+text = "💻 Discord"
+icon_alignment = 1
+
+[node name="InfoRightArrow" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer" unique_id=623756174]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_us0h7")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_qy7vs")
+theme_override_styles/hover = SubResource("StyleBoxTexture_fbj37")
+text = "▶"
+icon_alignment = 1
+
+[node name="TabsContainer" type="HBoxContainer" parent="HSplitContainer/CommunicationsPanel/VBoxContainer" unique_id=723602743]
+layout_mode = 2
+size_flags_vertical = 8
+alignment = 1
+
+[node name="LeftArrow" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer" unique_id=208075694]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_f12aw")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_6qoqs")
+theme_override_styles/hover = SubResource("StyleBoxTexture_1u72c")
+text = "◀"
+icon_alignment = 1
+
+[node name="TabScroll" type="ScrollContainer" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer" unique_id=1493651011]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_hyyyd")
+vertical_scroll_mode = 0
+
+[node name="TabHBox" type="HBoxContainer" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll" unique_id=357880929]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Status" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=1683690737]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_ebytm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_0qxkj")
+theme_override_styles/hover = SubResource("StyleBoxTexture_7xyeh")
+text = "Status"
+icon_alignment = 1
+
+[node name="Admin" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=1310585697]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_6tewb")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_vrsuc")
+theme_override_styles/hover = SubResource("StyleBoxTexture_nugac")
+text = "Admin"
+icon_alignment = 1
+
+[node name="Debug" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=308268857]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_5247p")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_tbmpo")
+theme_override_styles/hover = SubResource("StyleBoxTexture_afhn1")
+text = "Debug"
+icon_alignment = 1
+
+[node name="IC" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=238393925]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_hsex4")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_7o0sd")
+theme_override_styles/hover = SubResource("StyleBoxTexture_dpr4m")
+text = "IC"
+icon_alignment = 1
+
+[node name="OOC" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=1657124262]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_18sca")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_2wg10")
+theme_override_styles/hover = SubResource("StyleBoxTexture_07s7w")
+text = "OOC"
+icon_alignment = 1
+
+[node name="Object" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=1477381790]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_3b1lc")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_c36lp")
+theme_override_styles/hover = SubResource("StyleBoxTexture_6hj8u")
+text = "Object"
+icon_alignment = 1
+
+[node name="Preferences" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=816181108]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_0ds5l")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_hdwvo")
+theme_override_styles/hover = SubResource("StyleBoxTexture_3shjy")
+text = "Preferences"
+icon_alignment = 1
+
+[node name="Server" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=75110855]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_43bbp")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_xkm4v")
+theme_override_styles/hover = SubResource("StyleBoxTexture_ywww2")
+text = "Server"
+icon_alignment = 1
+
+[node name="Tickets" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=146411843]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_56eda")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_wmw6j")
+theme_override_styles/hover = SubResource("StyleBoxTexture_wvt5l")
+text = "Tickets"
+icon_alignment = 1
+
+[node name="Options" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox" unique_id=2131967108]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_avwd7")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_hpvd4")
+theme_override_styles/hover = SubResource("StyleBoxTexture_a38ve")
+text = "Options"
+icon_alignment = 1
+
+[node name="RightArrow" type="Button" parent="HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer" unique_id=1308261974]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_0qxyq")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_ertr5")
+theme_override_styles/hover = SubResource("StyleBoxTexture_lp5i0")
+text = "▶"
+icon_alignment = 1
+
+[node name="VSplitContainer" type="VSplitContainer" parent="HSplitContainer/CommunicationsPanel" unique_id=1709080361]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/touch_dragger_color = Color(0.26293245, 0.26293245, 0.26293245, 1)
+theme_override_colors/touch_dragger_pressed_color = Color(0.06053035, 0.06053035, 0.060530342, 1)
+theme_override_colors/touch_dragger_hover_color = Color(0.26293245, 0.26293245, 0.26293245, 1)
+theme_override_constants/separation = 8
+theme_override_constants/autohide = 1
+split_offsets = PackedInt32Array(400)
+split_offset = 400
+
+[node name="Tabview" type="TextureRect" parent="HSplitContainer/CommunicationsPanel/VSplitContainer" unique_id=453202227]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+texture = ExtResource("10_yv6a1")
+expand_mode = 1
+
+[node name="WorkInProgressLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview" unique_id=927720497]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -20.0
+offset_right = 100.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Work in progress"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AdminButtons" type="VBoxContainer" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview" unique_id=1383372088]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.054347824
+anchor_top = 0.07
+anchor_right = 0.30869564
+anchor_bottom = 0.42333335
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="AdminMusic" type="Button" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/AdminButtons" unique_id=80611263]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_olbo2")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_rdc0c")
+theme_override_styles/hover = SubResource("StyleBoxTexture_mn4e5")
+text = "Admin Music"
+icon_alignment = 1
+
+[node name="AdminVideo" type="Button" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/AdminButtons" unique_id=968300557]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_lmo7d")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_6gl2y")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2i7vj")
+text = "Admin Video"
+icon_alignment = 1
+
+[node name="AdminArt" type="Button" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/AdminButtons" unique_id=982399415]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_uklcj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_53ea2")
+theme_override_styles/hover = SubResource("StyleBoxTexture_lkgbc")
+text = "Admin Art"
+icon_alignment = 1
+
+[node name="ServerButtons" type="VBoxContainer" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview" unique_id=650385611]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.055555504
+anchor_top = 0.06999999
+anchor_right = 0.31111103
+anchor_bottom = 0.27
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="DelayButton" type="Button" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons" unique_id=270769418]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_xldgs")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_3c8rn")
+theme_override_styles/hover = SubResource("StyleBoxTexture_d6enq")
+text = "Delay"
+icon_alignment = 1
+
+[node name="StartButton" type="Button" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons" unique_id=1362857354]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_4a5kk")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_rgs7w")
+theme_override_styles/hover = SubResource("StyleBoxTexture_tb06d")
+text = "Start"
+icon_alignment = 1
+
+[node name="StatusInfo" type="VBoxContainer" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview" unique_id=235484461]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 34.0
+offset_bottom = -36.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MapLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo" unique_id=444093862]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_8wbfc")
+text = "Map: "
+horizontal_alignment = 1
+
+[node name="GamemodeLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo" unique_id=993579691]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_h5tv7")
+text = "Gamemode: "
+horizontal_alignment = 1
+
+[node name="PlayersLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo" unique_id=57344774]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_xe1jj")
+text = "Players: "
+horizontal_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo" unique_id=236606060]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_twkfe")
+text = "Time remaining: "
+horizontal_alignment = 1
+
+[node name="MusicLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo" unique_id=655103285]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_eq8d1")
+text = "Now playing: "
+horizontal_alignment = 1
+
+[node name="RealTimeLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo" unique_id=1434260657]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_wtl5r")
+text = "Real time: "
+horizontal_alignment = 1
+
+[node name="IngameTimeLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo" unique_id=1676265285]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_wwrhx")
+text = "In-game time: "
+horizontal_alignment = 1
+
+[node name="PreferencesButtons" type="VBoxContainer" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview" unique_id=2089245440]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05434782
+anchor_top = 0.07
+anchor_right = 0.95
+anchor_bottom = 0.93
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+metadata/_edit_use_anchors_ = true
+
+[node name="Preference" type="Button" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons" unique_id=574205256]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_n8k6a")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_ictnk")
+theme_override_styles/hover = SubResource("StyleBoxTexture_jsngy")
+text = "Preference"
+icon_alignment = 1
+
+[node name="DayNightToggle" type="CheckButton" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons" unique_id=292668568]
+layout_mode = 2
+button_pressed = true
+text = "Day/Night Cycle"
+
+[node name="ShadowQualityLabel" type="Label" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons" unique_id=934316278]
+layout_mode = 2
+text = "Shadow Quality: High (Smooth)"
+horizontal_alignment = 1
+
+[node name="ShadowQualitySlider" type="HSlider" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons" unique_id=1469355240]
+layout_mode = 2
+max_value = 2.0
+value = 2.0
+tick_count = 3
+ticks_on_borders = true
+
+[node name="Chat" type="ScrollContainer" parent="HSplitContainer/CommunicationsPanel/VSplitContainer" unique_id=708936453]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_3xh1n")
+vertical_scroll_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Chat" unique_id=338239976]
+layout_mode = 2

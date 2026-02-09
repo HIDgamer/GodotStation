@@ -1,159 +1,211 @@
 using Godot;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 [GlobalClass]
 public partial class VisibilitySystem : Node2D
 {
-	[Export] public int ViewRange = 15;
-	[Export] public float UpdateInterval = 0.1f;
+	[Export] public int ViewRange = 20;
+	[Export] public float FogIntensity = 0.3f;
+	[Export] public float FogSpeed = 0.5f;
 	
-	private Dictionary<int, Vector2> _playerPositions = new();
 	private GridSystem _gridSystem;
-	private Sprite2D _fogSprite;
-	private Image _visibilityMap;
-	private ImageTexture _visibilityTexture;
+	private ColorRect _fogRect;
 	private ShaderMaterial _fogMaterial;
-	
-	private const int TileSize = 32;
-	private float _timeSinceUpdate = 0f;
+	private ImageTexture _wallImageTexture;
 	private Vector2I _mapMin;
-	private Vector2I _mapMax;
 	private readonly HashSet<string> _blockingMaterials = new() { "wall" };
+	private const int TileSize = 32;
+	private const int TextureScale = 4;
+	private Mob _cachedPlayer;
+	private bool _isProcessingGrid;
 
 	public override void _Ready()
 	{
 		_gridSystem = GetNode<GridSystem>("../GridSystem");
-
 		_gridSystem.ScanCompleted += OnGridScanCompleted;
+		
+		// Process existing grid if available
 		if (_gridSystem.Grid?.Count > 0)
 			OnGridScanCompleted(_gridSystem.Grid);
 	}
-	
+
 	public void RefreshGrid()
 	{
-		if (_gridSystem != null)
-			OnGridScanCompleted(_gridSystem.Grid);
+		if (_gridSystem?.Grid != null && !_isProcessingGrid)
+		{
+			ProcessGridAsync(_gridSystem.Grid);
+		}
 	}
 
 	private void OnGridScanCompleted(Godot.Collections.Dictionary<Vector2I, string> grid)
 	{
-		_mapMin = new Vector2I(int.MaxValue, int.MaxValue);
-		_mapMax = new Vector2I(int.MinValue, int.MinValue);
+		if (grid.Count == 0 || _isProcessingGrid) return;
+		ProcessGridAsync(grid);
+	}
+
+	// Simplified async processing - no manual thread management needed
+	private async void ProcessGridAsync(Godot.Collections.Dictionary<Vector2I, string> grid)
+	{
+		if (_isProcessingGrid) return;
+		_isProcessingGrid = true;
+
+		try
+		{
+			// Process grid on background thread
+			var result = await Task.Run(() => ProcessGrid(grid));
+			
+			// Apply result on main thread
+			if (IsInstanceValid(this))
+			{
+				ApplyGridResult(result.mapMin, result.width, result.height, result.wallTexture);
+			}
+		}
+		catch (System.Exception e)
+		{
+			GD.PrintErr($"Error processing grid: {e.Message}");
+		}
+		finally
+		{
+			_isProcessingGrid = false;
+		}
+	}
+
+	private (Vector2I mapMin, int width, int height, Image wallTexture) ProcessGrid(
+		Godot.Collections.Dictionary<Vector2I, string> grid)
+	{
+		// Calculate map bounds
+		var mapMin = new Vector2I(int.MaxValue, int.MaxValue);
+		var mapMax = new Vector2I(int.MinValue, int.MinValue);
 		
 		foreach (var cell in grid.Keys)
 		{
-			if (cell.X < _mapMin.X) _mapMin.X = cell.X;
-			if (cell.Y < _mapMin.Y) _mapMin.Y = cell.Y;
-			if (cell.X > _mapMax.X) _mapMax.X = cell.X;
-			if (cell.Y > _mapMax.Y) _mapMax.Y = cell.Y;
+			mapMin.X = Mathf.Min(mapMin.X, cell.X);
+			mapMin.Y = Mathf.Min(mapMin.Y, cell.Y);
+			mapMax.X = Mathf.Max(mapMax.X, cell.X);
+			mapMax.Y = Mathf.Max(mapMax.Y, cell.Y);
+		}
+
+		int width = mapMax.X - mapMin.X + 1;
+		int height = mapMax.Y - mapMin.Y + 1;
+
+		// Extract wall positions
+		var wallData = new List<Vector2I>(grid.Count / 4);
+		foreach (var kvp in grid)
+		{
+			if (_blockingMaterials.Contains(kvp.Value.ToLower()))
+				wallData.Add(kvp.Key);
+		}
+
+		// Generate wall texture
+		var wallTexture = GenerateWallTexture(wallData, mapMin, width, height, TextureScale);
+		return (mapMin, width, height, wallTexture);
+	}
+
+	private void ApplyGridResult(Vector2I mapMin, int width, int height, Image wallTexture)
+	{
+		_mapMin = mapMin;
+		
+		// Update or create wall texture
+		if (_wallImageTexture != null)
+		{
+			_wallImageTexture.Update(wallTexture);
+		}
+		else
+		{
+			_wallImageTexture = ImageTexture.CreateFromImage(wallTexture);
+		}
+
+		// Initialize fog material and rect if needed
+		if (_fogMaterial == null)
+		{
+			InitializeFogSystem(width, height);
 		}
 		
-		int width = _mapMax.X - _mapMin.X + 1;
-		int height = _mapMax.Y - _mapMin.Y + 1;
-		
-		_visibilityMap = Image.Create(width, height, false, Image.Format.Rf);
-		_visibilityTexture = ImageTexture.CreateFromImage(_visibilityMap);
-		
-		var shader = GD.Load<Shader>("res://Assets/Shaders/FogTileShader.gdshader");
+		// Update shader parameters
+		_fogMaterial.SetShaderParameter("wall_texture", _wallImageTexture);
+		_fogMaterial.SetShaderParameter("map_min", _mapMin);
+		_fogMaterial.SetShaderParameter("map_size", new Vector2I(width * TextureScale, height * TextureScale));
+		_fogMaterial.SetShaderParameter("map_offset", new Vector2(_mapMin.X * TileSize, _mapMin.Y * TileSize));
+	}
+
+	private void InitializeFogSystem(int width, int height)
+	{
+		// Clean up old rect if exists
+		if (_fogRect != null)
+			_fogRect.QueueFree();
+
+		// Load shader
+		var shader = GD.Load<Shader>("uid://uyl8otyabpn6");
 		_fogMaterial = new ShaderMaterial { Shader = shader };
-		_fogMaterial.SetShaderParameter("visibility_map", _visibilityTexture);
-		_fogMaterial.SetShaderParameter("tile_size", TileSize);
 		
-		var fogTexture = new PlaceholderTexture2D { Size = new Vector2I(width * TileSize, height * TileSize) };
-		_fogSprite = new Sprite2D
+		// Set shader parameters
+		_fogMaterial.SetShaderParameter("view_range", ViewRange);
+		_fogMaterial.SetShaderParameter("tile_scale", TextureScale);
+		_fogMaterial.SetShaderParameter("fog_intensity", FogIntensity);
+		_fogMaterial.SetShaderParameter("fog_speed", FogSpeed);
+
+		// Create fog rect overlay
+		_fogRect = new ColorRect
 		{
-			Texture = fogTexture,
 			Material = _fogMaterial,
-			Position = new Vector2((_mapMin.X + _mapMax.X) * TileSize / 2 + TileSize / 2, (_mapMin.Y + _mapMax.Y) * TileSize / 2 + TileSize / 2)
+			MouseFilter = Control.MouseFilterEnum.Ignore,
+			Position = new Vector2(_mapMin.X * TileSize, _mapMin.Y * TileSize),
+			Size = new Vector2(width * TileSize, height * TileSize)
 		};
-		
-		AddChild(_fogSprite);
+		AddChild(_fogRect);
 	}
-	
-	public override void _Process(double delta)
-	{
-		if (_fogSprite == null) return;
-		
-		_timeSinceUpdate += (float)delta;
-		if (_timeSinceUpdate >= UpdateInterval)
-		{
-			UpdateVisibility();
-			_timeSinceUpdate = 0f;
-		}
-	}
-	
-	public void ForceUpdate() => UpdateVisibility();
 
-	public void AddPlayer(int playerId, Vector2 position) => _playerPositions[playerId] = position;
-	public void UpdatePlayerPosition(int playerId, Vector2 position) => _playerPositions[playerId] = position;
-	public void RemovePlayer(int playerId) => _playerPositions.Remove(playerId);
-	
-	private void UpdateVisibility()
+	private static Image GenerateWallTexture(List<Vector2I> wallData, Vector2I mapMin, 
+		int width, int height, int scale)
 	{
-		if (_playerPositions.Count == 0) return;
+		var texture = Image.CreateEmpty(width * scale, height * scale, false, Image.Format.R8);
+		texture.Fill(Colors.Black);
 
-		for (int y = 0; y < _visibilityMap.GetHeight(); y++)
+		// Mark wall pixels
+		foreach (var cell in wallData)
 		{
-			for (int x = 0; x < _visibilityMap.GetWidth(); x++)
+			int baseX = (cell.X - mapMin.X) * scale;
+			int baseY = (cell.Y - mapMin.Y) * scale;
+
+			for (int dy = 0; dy < scale; dy++)
 			{
-				Vector2I cellPos = new(x + _mapMin.X, y + _mapMin.Y);
-				float visibility = CalculateCellVisibility(cellPos);
-				_visibilityMap.SetPixel(x, y, new Color(visibility, 0, 0, 1));
-			}
-		}
-		
-		_visibilityTexture.Update(_visibilityMap);
-	}
-	
-	private float CalculateCellVisibility(Vector2I cellPos)
-	{
-		Vector2 cellWorldPos = new(cellPos.X * TileSize + TileSize / 2, cellPos.Y * TileSize + TileSize / 2);
-		
-		foreach (var playerPos in _playerPositions.Values)
-		{
-			float distance = cellWorldPos.DistanceTo(playerPos);
-			float maxDistance = ViewRange * TileSize;
-			
-			if (distance <= maxDistance)
-			{
-				if (!HasWallBetween(playerPos, cellWorldPos))
+				for (int dx = 0; dx < scale; dx++)
 				{
-					float falloff = 1.0f - (distance / maxDistance);
-					return Mathf.Clamp(falloff, 0, 1);
+					texture.SetPixel(baseX + dx, baseY + dy, new Color(1.0f, 0, 0, 1));
 				}
 			}
 		}
-		
-		return 0f;
+
+		return texture;
 	}
-	
-	private bool HasWallBetween(Vector2 start, Vector2 end)
+
+	public override void _Process(double delta)
 	{
-		Vector2I startCell = new((int)(start.X / TileSize), (int)(start.Y / TileSize));
-		Vector2I endCell = new((int)(end.X / TileSize), (int)(end.Y / TileSize));
-		
-		int x = startCell.X, y = startCell.Y;
-		int dx = Mathf.Abs(endCell.X - x), dy = Mathf.Abs(endCell.Y - y);
-		int sx = x < endCell.X ? 1 : -1, sy = y < endCell.Y ? 1 : -1;
-		int err = dx - dy;
-		
-		while (x != endCell.X || y != endCell.Y)
+		if (_fogMaterial == null) return;
+
+		// Cache player reference
+		if (_cachedPlayer == null || !IsInstanceValid(_cachedPlayer))
 		{
-			Vector2I currentCell = new(x, y);
-			if (currentCell != startCell && IsCellBlocking(currentCell))
-				return true;
-			
-			int e2 = 2 * err;
-			if (e2 > -dy) { err -= dy; x += sx; }
-			if (e2 < dx) { err += dx; y += sy; }
+			_cachedPlayer = FindPlayerMob();
 		}
-		
-		return false;
+
+		// Update player position in shader
+		if (_cachedPlayer != null)
+		{
+			_fogMaterial.SetShaderParameter("player_position", _cachedPlayer.GlobalPosition);
+		}
 	}
-	
-	private bool IsCellBlocking(Vector2I cell)
+
+	private Mob FindPlayerMob()
 	{
-		string type = _gridSystem?.GetTileTypeAtCell(cell);
-		return !string.IsNullOrEmpty(type) && _blockingMaterials.Contains(type.ToLower());
+		foreach (var node in GetTree().GetNodesInGroup("Mob"))
+		{
+			if (node is Mob mob && mob.IsMultiplayerAuthority())
+			{
+				return mob;
+			}
+		}
+		return null;
 	}
 }

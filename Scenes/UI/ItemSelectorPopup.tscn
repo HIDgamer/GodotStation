@@ -1,0 +1,63 @@
+[gd_scene format=3 uid="uid://c0hf2y7li5hu4"]
+
+[ext_resource type="Script" uid="uid://cobgdvr2twqln" path="res://Code/UI/ItemSelectorPopup.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://tkg0qlnfjywf" path="res://Assets/UI/Interface/MainPanel02.png" id="2_f3l2o"]
+[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="3_r2hjh"]
+[ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="4_b3xe1"]
+[ext_resource type="Texture2D" uid="uid://dv2008fw015d7" path="res://Assets/UI/Interface/Button16.png" id="5_b3xe1"]
+[ext_resource type="Texture2D" uid="uid://curg3eofqypke" path="res://Assets/UI/Interface/Button15.png" id="6_u1jgg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b3xe1"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_yfp2c"]
+texture = ExtResource("3_r2hjh")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2unwo"]
+texture = ExtResource("2_f3l2o")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_43daf"]
+texture = ExtResource("4_b3xe1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8s65j"]
+texture = ExtResource("5_b3xe1")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btcuw"]
+texture = ExtResource("6_u1jgg")
+
+[node name="ItemSelectorPopup" type="PopupPanel" unique_id=1830342699]
+disable_3d = true
+canvas_item_default_texture_filter = 0
+oversampling_override = 1.0
+size = Vector2i(400, 400)
+visible = true
+theme_override_styles/panel = SubResource("StyleBoxEmpty_b3xe1")
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=2142515936]
+offset_right = 400.0
+offset_bottom = 400.0
+
+[node name="Title" type="Label" parent="VBoxContainer" unique_id=1327492776]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_yfp2c")
+text = "Select Item"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer" unique_id=1117059074]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_2unwo")
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/ScrollContainer" unique_id=447821478]
+layout_mode = 2
+columns = 4
+
+[node name="CloseButton" type="Button" parent="VBoxContainer" unique_id=1632092978]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_styles/normal = SubResource("StyleBoxTexture_43daf")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_8s65j")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btcuw")
+text = "Close"
+
+[connection signal="pressed" from="VBoxContainer/CloseButton" to="." method="_on_close_pressed"]

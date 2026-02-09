@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://d5qqddm1cxen"]
+
+[ext_resource type="Script" uid="uid://bsxg5qsovj1ly" path="res://Code/UI/BuildMode.gd" id="1_b2qlh"]
+[ext_resource type="Texture2D" uid="uid://b8ayddrd1mn61" path="res://Assets/UI/Interface/Button08.png" id="2_lkbs7"]
+[ext_resource type="Texture2D" uid="uid://bt8h80kx8gan3" path="res://Assets/UI/Interface/Button05.png" id="3_tyqx3"]
+[ext_resource type="Texture2D" uid="uid://c0wcjh0xku1f" path="res://Assets/UI/Interface/Button02.png" id="4_rvrkw"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lkbs7"]
+texture = ExtResource("2_lkbs7")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tyqx3"]
+texture = ExtResource("3_tyqx3")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rvrkw"]
+texture = ExtResource("4_rvrkw")
+
+[node name="BuildMode" type="Control" unique_id=1947768626]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_b2qlh")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=2055748555]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.100595236
+anchor_bottom = 0.04761905
+mouse_filter = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="Build" type="Button" parent="HBoxContainer" unique_id=1675824444]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_lkbs7")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Destroy" type="Button" parent="HBoxContainer" unique_id=928714057]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_tyqx3")
+text = "Destroy"
+icon_alignment = 1
+expand_icon = true
+
+[node name="Back" type="Button" parent="HBoxContainer" unique_id=316281345]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_rvrkw")
+text = "Back"
+icon_alignment = 1

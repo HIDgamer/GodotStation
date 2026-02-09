@@ -1,0 +1,90 @@
+[gd_scene format=3 uid="uid://cvifbltmvjsn"]
+
+[ext_resource type="Script" uid="uid://k0w017xnwfah" path="res://Code/UI/PlayerInterface.gd" id="1_33e1j"]
+
+[node name="InventoryWindow" type="Window" unique_id=504336204]
+oversampling_override = 1.0
+script = ExtResource("1_33e1j")
+
+[node name="Container" type="TabContainer" parent="." unique_id=1789157780]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+current_tab = 0
+tabs_visible = false
+
+[node name="InventoryTab" type="VBoxContainer" parent="Container" unique_id=452552693]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 0
+
+[node name="StatusLabel" type="Label" parent="Container/InventoryTab" unique_id=1837232410]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+text = "Inventory Status"
+metadata/_edit_use_anchors_ = true
+
+[node name="InventoryGrid" type="GridContainer" parent="Container/InventoryTab" unique_id=565820675]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+columns = 5
+metadata/_edit_use_anchors_ = true
+
+[node name="EquipmentTab" type="VBoxContainer" parent="Container" unique_id=1453713822]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 1
+
+[node name="EquipmentGrid" type="GridContainer" parent="Container/EquipmentTab" unique_id=151638825]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="ContainerTab" type="VBoxContainer" parent="Container" unique_id=1886761538]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 2
+
+[node name="ContainerGrid" type="GridContainer" parent="Container/ContainerTab" unique_id=1147196349]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+columns = 5
+metadata/_edit_use_anchors_ = true
+
+[node name="QuickSlots" type="VBoxContainer" parent="Container" unique_id=39214654]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 5
+metadata/_tab_index = 3
+
+[node name="QuickSlotsContainer" type="HBoxContainer" parent="Container/QuickSlots" unique_id=248876445]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 10
+metadata/_edit_use_anchors_ = true

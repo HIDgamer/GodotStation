@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://cfdlfe58u2v0g"]
+
+[ext_resource type="Texture2D" uid="uid://tkg0qlnfjywf" path="res://Assets/UI/Interface/MainPanel02.png" id="1_obex4"]
+[ext_resource type="Script" uid="uid://dvb2ajjrllin2" path="res://Code/UI/RolePreferencesPopup.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="3_lf121"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cb5uu"]
+texture = ExtResource("3_lf121")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_obex4"]
+texture = ExtResource("1_obex4")
+
+[node name="RolePreferencesPopup" type="PopupPanel" unique_id=798066921]
+disable_3d = true
+canvas_item_default_texture_filter = 0
+oversampling_override = 1.0
+size = Vector2i(400, 400)
+visible = true
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1089113297]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 396.0
+offset_bottom = 396.0
+theme_override_constants/separation = -340
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=227539662]
+layout_mode = 2
+size_flags_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_cb5uu")
+text = "Role Preferences"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer" unique_id=2055164432]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_obex4")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/ScrollContainer" unique_id=1609241468]
+layout_mode = 2

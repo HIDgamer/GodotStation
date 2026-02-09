@@ -1,0 +1,121 @@
+/datum/chem_property
+	var/name
+	var/code = "ZZZ" //should be unique to all properties
+	var/description = "You shouldn't be seeing this."
+	var/datum/reagent/holder
+	var/rarity = PROPERTY_DISABLED
+	var/category = PROPERTY_TYPE_MEDICINE
+	var/level = 1 //used to calculate potency
+	var/max_level = 999 //if there a point where it makes no logical sense to increase the level? Remember potency is level / 2
+	var/value //how much value per level? Negative properties should have a high negative value, neutral should have a value near zero, and positive ones should have a high value
+	var/starter = FALSE //whether or not this is a starter property and should be added to the property database on startup
+	var/updates_stats = FALSE //should the property change other variables in the reagent when added or removed?
+	/// Should reagent with this property explode/start fire when mixed more than overdose threshold at once?
+	var/volatile = FALSE
+	/// a cost penalty is added at each level above 5 (+1 at 6, +2 at 7, +4 at 8, +5 at 9, +7 at 10)
+	var/cost_penalty = TRUE
+
+/datum/chem_property/Destroy()
+	holder = null
+	. = ..()
+	return QDEL_HINT_IWILLGC
+
+/datum/chem_property/proc/reagent_added(atom/A, datum/reagent/R, amount)
+	return
+
+/datum/chem_property/proc/pre_process(mob/living/M) //used for properties that need special checks before processing starts, such as cryometabolization
+	return
+
+/datum/chem_property/proc/on_delete(mob/living/M) //used for properties that do something on delete
+	qdel(src)
+	return
+
+/datum/chem_property/process(mob/living/M, potency = 1, delta_time)
+	if(QDELETED(src))
+		CRASH("Attempted to process a deleted chemical property: [name], type=[type]")
+
+	return TRUE
+
+/datum/chem_property/proc/process_overdose(mob/living/M, potency = 1, delta_time)
+	if(QDELETED(src))
+		CRASH("Attempted to process_overdose a deleted chemical property: [name], type=[type]")
+
+	return TRUE
+
+/datum/chem_property/proc/process_critical(mob/living/M, potency = 1, delta_time)
+	if(QDELETED(src))
+		CRASH("Attempted to process_critical a deleted chemical property: [name], type=[type]")
+
+	return TRUE
+
+///what does this property do to a hydrotray and its plant
+/datum/chem_property/proc/reaction_hydro_tray(/obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency = 1, volume = 1)
+	return
+
+/datum/chem_property/proc/process_dead(mob/living/M, potency = 1, delta_time)
+	return FALSE // By default, chemicals don't process in dead personnel.
+
+//used for properties that needs something to trigger outside of where process is usually called
+/datum/chem_property/proc/trigger(A)
+	return
+
+/datum/chem_property/proc/reset_reagent()
+	return
+
+///used for changing other variables in the reagent, set update to FALSE to remove the update
+/datum/chem_property/proc/update_reagent()
+	return
+
+///What will this property do to mob when its sprayed/smoked/etc on
+/datum/chem_property/proc/reaction_mob(mob/M, method=TOUCH, volume, potency)
+	return
+
+///What will this property do to object when its sprayed/smoked/etc on
+/datum/chem_property/proc/reaction_obj(obj/O, volume, potency)
+	return
+///What will this property do to turf when its sprayed/smoked/etc on
+/datum/chem_property/proc/reaction_turf(turf/T, volume, potency)
+	return
+
+///Late update the reagent the property is in. "late" means the reagent is already ready.
+/datum/chem_property/proc/post_update_reagent()
+	return
+
+/datum/chem_property/proc/categories_to_string()
+	var/text = ""
+	switch(rarity)
+		if(PROPERTY_DISABLED)
+			text += "Unique "
+		if(PROPERTY_COMMON)
+			text += "Common "
+		if(PROPERTY_UNCOMMON)
+			text += "Uncommon "
+		if(PROPERTY_RARE)
+			text += "Rare "
+		if(PROPERTY_LEGENDARY)
+			text += "Legendary "
+		if(PROPERTY_ADMIN)
+			text += "Special "
+	if(isNegativeProperty(src))
+		text += "Harmful "
+	else if(isPositiveProperty(src))
+		text += "Helpful "
+	if(category & PROPERTY_TYPE_MEDICINE)
+		text += "Medicine "
+	if(category & PROPERTY_TYPE_TOXICANT)
+		text += "Toxicant "
+	if(category & PROPERTY_TYPE_STIMULANT)
+		text += "Stimulant "
+	if(category & PROPERTY_TYPE_REACTANT)
+		text += "Reactant "
+	if(category & PROPERTY_TYPE_IRRITANT)
+		text += "Irritant "
+	if(category & PROPERTY_TYPE_METABOLITE)
+		text += "Metabolite "
+	if(category & PROPERTY_TYPE_ANOMALOUS)
+		text += "Anomalous "
+	return text
+
+/// If this property can cause harm, generally
+/datum/chem_property/proc/can_cause_harm()
+	return FALSE

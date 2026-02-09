@@ -1,0 +1,10 @@
+[gd_resource type="CanvasTexture" format=3 uid="uid://dlspsugyye44u"]
+
+[ext_resource type="Texture2D" uid="uid://dktw7lq3c7inm" path="res://Assets/Tilesets/Enviroment/Stairs.png" id="1_phg4g"]
+[ext_resource type="Texture2D" uid="uid://bh83wlvktlmrh" path="res://Assets/Tilesets/Enviroment/Stairs_n.png" id="2_8s2ah"]
+[ext_resource type="Texture2D" uid="uid://sax1oshpprn7" path="res://Assets/Tilesets/Enviroment/Stairs_s.png" id="3_8bn3t"]
+
+[resource]
+diffuse_texture = ExtResource("1_phg4g")
+normal_texture = ExtResource("2_8s2ah")
+specular_texture = ExtResource("3_8bn3t")

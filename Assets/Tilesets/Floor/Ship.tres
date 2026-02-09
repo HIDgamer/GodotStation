@@ -1,0 +1,8 @@
+[gd_resource type="CanvasTexture" format=3 uid="uid://ckll0cji08ik7"]
+
+[ext_resource type="Texture2D" uid="uid://b4fbjsddihyy" path="res://Assets/Tilesets/Floor/Ship.png" id="1_2ifdh"]
+[ext_resource type="Texture2D" uid="uid://ceiw2uotaapru" path="res://Assets/Tilesets/Floor/Ship_n.png" id="2_d2l3g"]
+
+[resource]
+diffuse_texture = ExtResource("1_2ifdh")
+normal_texture = ExtResource("2_d2l3g")

@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://1ab6tkrbm5u"]
+
+[ext_resource type="Script" uid="uid://fvepcpnrtp2a" path="res://Code/UI/SlotMenuPopup.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://tkg0qlnfjywf" path="res://Assets/UI/Interface/MainPanel02.png" id="1_xm5ms"]
+[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="2_yqn5q"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_yqn5q"]
+texture = ExtResource("2_yqn5q")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wr00q"]
+texture = ExtResource("1_xm5ms")
+
+[node name="SlotMenuPopup" type="PopupPanel" unique_id=1193365744]
+disable_3d = true
+canvas_item_default_texture_filter = 0
+oversampling_override = 1.0
+size = Vector2i(300, 400)
+visible = true
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1533440783]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 296.0
+offset_bottom = 396.0
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=738892830]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_yqn5q")
+text = "Select Slot"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer" unique_id=1372607079]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_wr00q")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/ScrollContainer" unique_id=1998319939]
+layout_mode = 2

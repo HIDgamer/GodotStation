@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Code/Effects/BulletProjectile.cs" id="1_bullet_script"]
+[ext_resource type="Texture2D" uid="uid://5n1wad71wywp" path="res://Assets/Icons/Items/Guns/Particals/Bullet.png" id="2_bullet_tex"]
+
+[node name="BulletProjectile" type="Node2D"]
+script = ExtResource("1_bullet_script")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_bullet_tex")

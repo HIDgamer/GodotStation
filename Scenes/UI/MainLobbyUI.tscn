@@ -1,0 +1,839 @@
+[gd_scene format=3 uid="uid://pbtou10mrc42"]
+
+[ext_resource type="Theme" uid="uid://c8ckvl2v7xge" path="res://Assets/Themes/SciFiTheme.tres" id="1_theme"]
+[ext_resource type="Script" uid="uid://dypi8pniee12u" path="res://Code/UI/MainLobbyUI.cs" id="2_lts4t"]
+[ext_resource type="Texture2D" uid="uid://tkg0qlnfjywf" path="res://Assets/UI/Interface/MainPanel02.png" id="2_main_panel"]
+[ext_resource type="Texture2D" uid="uid://cpebkxb56vou3" path="res://Assets/UI/Interface/MainPanel03.png" id="3_main_panel2"]
+[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="4_title_panel"]
+[ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="5_button_normal"]
+[ext_resource type="Texture2D" uid="uid://curg3eofqypke" path="res://Assets/UI/Interface/Button15.png" id="6_button_pressed"]
+[ext_resource type="Texture2D" uid="uid://dv2008fw015d7" path="res://Assets/UI/Interface/Button16.png" id="7_button_hover"]
+[ext_resource type="Texture2D" uid="uid://1gt86wrk828f" path="res://Assets/UI/Interface/Button04.png" id="8_button_alt"]
+[ext_resource type="Texture2D" uid="uid://b6wfcx5xv6w23" path="res://Assets/UI/Interface/Button06.png" id="9_button_alt_hover"]
+[ext_resource type="Texture2D" uid="uid://dbm5kkv648tco" path="res://Assets/UI/Interface/Button03.png" id="10_button_alt_pressed"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_main_panel"]
+texture = ExtResource("2_main_panel")
+
+[sub_resource type="Animation" id="Animation_idle"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_pulse"]
+resource_name = "pulse"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(0.6, 0.8, 1, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_title"]
+_data = {
+&"RESET": SubResource("Animation_idle"),
+&"pulse": SubResource("Animation_pulse")
+}
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_normal"]
+texture = ExtResource("5_button_normal")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_pressed"]
+texture = ExtResource("6_button_pressed")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_hover"]
+texture = ExtResource("7_button_hover")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_alt_normal"]
+texture = ExtResource("8_button_alt")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_alt_pressed"]
+texture = ExtResource("10_button_alt_pressed")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_alt_hover"]
+texture = ExtResource("9_button_alt_hover")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_main_panel2"]
+texture = ExtResource("3_main_panel2")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_server_item"]
+bg_color = Color(0.1, 0.12, 0.15, 0.5)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.5, 0.7, 0.3)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_server_item_selected"]
+bg_color = Color(0.2, 0.3, 0.45, 0.7)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.7, 1, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_chat_bg"]
+bg_color = Color(0.08, 0.08, 0.1, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.5, 0.7, 0.5)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="MainLobbyUI" type="Control" unique_id=1146486742]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("2_lts4t")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1728095304]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.08, 1)
+
+[node name="LoginPanel" type="Panel" parent="." unique_id=429984134]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="TitlePanel" type="TextureRect" parent="LoginPanel" unique_id=1695353249]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+texture = ExtResource("4_title_panel")
+expand_mode = 1
+
+[node name="TitleLabel" type="Label" parent="LoginPanel/TitlePanel" unique_id=1878806483]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 28
+text = "GODOTSTATION LOBBY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="LoginPanel/TitlePanel/TitleLabel" unique_id=1473254159]
+libraries/ = SubResource("AnimationLibrary_title")
+autoplay = &"pulse"
+
+[node name="MarginContainer" type="MarginContainer" parent="LoginPanel" unique_id=733182284]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 80
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LoginPanel/MarginContainer" unique_id=2025733511]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="SubtitleLabel" type="Label" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=1794904211]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Sign in to continue"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=1923036377]
+layout_mode = 2
+
+[node name="UsernameLabel" type="Label" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=1906224199]
+layout_mode = 2
+text = "Username:"
+
+[node name="LoginUsernameInput" type="LineEdit" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=818524214]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+placeholder_text = "Enter your username"
+
+[node name="PasswordLabel" type="Label" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=1043822227]
+layout_mode = 2
+text = "Password:"
+
+[node name="LoginPasswordInput" type="LineEdit" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=1984201525]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+placeholder_text = "Enter your password"
+secret = true
+
+[node name="LoginErrorLabel" type="Label" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=559535399]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=1998897619]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LoginButton" type="Button" parent="LoginPanel/MarginContainer/VBoxContainer/ButtonsContainer" unique_id=1234175430]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+text = "LOGIN"
+
+[node name="ShowRegisterButton" type="Button" parent="LoginPanel/MarginContainer/VBoxContainer/ButtonsContainer" unique_id=753046845]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_alt_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_alt_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_alt_hover")
+text = "REGISTER"
+
+[node name="TOS" type="Label" parent="LoginPanel/MarginContainer/VBoxContainer" unique_id=422429576]
+layout_mode = 2
+text = "By signing in you agree to GodotStations Terms of Service"
+horizontal_alignment = 1
+
+[node name="RegisterPanel" type="Panel" parent="." unique_id=1641251606]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -280.0
+offset_right = 300.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="TitlePanel" type="TextureRect" parent="RegisterPanel" unique_id=2065342312]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+texture = ExtResource("4_title_panel")
+expand_mode = 1
+
+[node name="TitleLabel" type="Label" parent="RegisterPanel/TitlePanel" unique_id=565225166]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 28
+text = "CREATE ACCOUNT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="RegisterPanel" unique_id=1594097766]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 80
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RegisterPanel/MarginContainer" unique_id=2137056053]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SubtitleLabel" type="Label" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=522074635]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Join the GodotStation community"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=813202175]
+layout_mode = 2
+
+[node name="UsernameLabel" type="Label" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=793026109]
+layout_mode = 2
+text = "Username (3-20 characters):"
+
+[node name="RegisterUsernameInput" type="LineEdit" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=2063501123]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+placeholder_text = "Choose a unique username"
+
+[node name="EmailLabel" type="Label" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=2023250895]
+layout_mode = 2
+text = "Email:"
+
+[node name="RegisterEmailInput" type="LineEdit" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=1928465236]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+placeholder_text = "your.email@example.com"
+
+[node name="PasswordLabel" type="Label" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=321075792]
+layout_mode = 2
+text = "Password (min 6 characters):"
+
+[node name="RegisterPasswordInput" type="LineEdit" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=92795723]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+placeholder_text = "Choose a secure password"
+secret = true
+
+[node name="RegisterErrorLabel" type="Label" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=249690457]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="RegisterPanel/MarginContainer/VBoxContainer" unique_id=1511798882]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RegisterButton" type="Button" parent="RegisterPanel/MarginContainer/VBoxContainer/ButtonsContainer" unique_id=1219119735]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+text = "CREATE ACCOUNT"
+
+[node name="ShowLoginButton" type="Button" parent="RegisterPanel/MarginContainer/VBoxContainer/ButtonsContainer" unique_id=1663763641]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_alt_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_alt_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_alt_hover")
+text = "BACK TO LOGIN"
+
+[node name="MainLobbyPanel" type="Panel" parent="." unique_id=2018190756]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = 50.0
+offset_right = -50.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel2")
+
+[node name="HeaderPanel" type="TextureRect" parent="MainLobbyPanel" unique_id=1647551055]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 80.0
+grow_horizontal = 2
+texture = ExtResource("4_title_panel")
+expand_mode = 1
+
+[node name="WelcomeLabel" type="Label" parent="MainLobbyPanel/HeaderPanel" unique_id=283450165]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 30.0
+offset_top = -20.0
+offset_right = 400.0
+offset_bottom = 20.0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+text = "Welcome, Player!"
+vertical_alignment = 1
+
+[node name="LogoutButton" type="Button" parent="MainLobbyPanel/HeaderPanel" unique_id=66800625]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -25.0
+offset_right = -30.0
+offset_bottom = 25.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_alt_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_alt_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_alt_hover")
+text = "LOGOUT"
+
+[node name="TabContainer" type="TabContainer" parent="MainLobbyPanel" unique_id=1765332155]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 100.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 0
+
+[node name="Server Browser" type="MarginContainer" parent="MainLobbyPanel/TabContainer" unique_id=1535779788]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+metadata/_tab_index = 0
+
+[node name="HSplitContainer" type="HSplitContainer" parent="MainLobbyPanel/TabContainer/Server Browser" unique_id=327779032]
+layout_mode = 2
+split_offsets = PackedInt32Array(600)
+split_offset = 600
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer" unique_id=1163156419]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="TopBar" type="HBoxContainer" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/LeftPanel" unique_id=1384845394]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/LeftPanel/TopBar" unique_id=38600020]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "Available Servers"
+vertical_alignment = 1
+
+[node name="RefreshServersButton" type="Button" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/LeftPanel/TopBar" unique_id=1760487767]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+text = "🔄 REFRESH"
+
+[node name="ServerListContainer" type="Panel" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/LeftPanel" unique_id=1865232825]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/LeftPanel/ServerListContainer" unique_id=1071903113]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ServerList" type="ItemList" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/LeftPanel/ServerListContainer/ScrollContainer" unique_id=623743328]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_server_item")
+theme_override_styles/selected = SubResource("StyleBoxFlat_server_item_selected")
+allow_reselect = true
+
+[node name="ButtonBar" type="HBoxContainer" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/LeftPanel" unique_id=1588524182]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="JoinServerButton" type="Button" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/LeftPanel/ButtonBar" unique_id=98376474]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+text = "▶ JOIN SERVER"
+
+[node name="RightPanel" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer" unique_id=1822531679]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HostServerLabel" type="Label" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel" unique_id=1525896702]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Host New Server"
+
+[node name="HostPanel" type="Panel" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel" unique_id=1355610601]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel" unique_id=1691151407]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer" unique_id=1676062588]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ServerNameLabel" type="Label" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=1408974893]
+layout_mode = 2
+text = "Server Name:"
+
+[node name="ServerNameInput" type="LineEdit" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=521912760]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+placeholder_text = "My Awesome Server"
+max_length = 50
+
+[node name="DescriptionLabel" type="Label" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=129697292]
+layout_mode = 2
+text = "Description:"
+
+[node name="ServerDescInput" type="TextEdit" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=1189910816]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+placeholder_text = "Optional server description..."
+
+[node name="PasswordProtectedCheck" type="CheckBox" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=26813135]
+layout_mode = 2
+text = "Password Protected"
+
+[node name="HSeparator" type="HSeparator" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=1670337383]
+layout_mode = 2
+
+[node name="InfoLabel" type="Label" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=304645670]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "Your server will appear in the lobby
+for other players to join."
+autowrap_mode = 2
+
+[node name="Spacer" type="Control" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=1776008644]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HostServerButton" type="Button" parent="MainLobbyPanel/TabContainer/Server Browser/HSplitContainer/RightPanel/HostPanel/MarginContainer/VBoxContainer" unique_id=11111713]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+text = "🚀 HOST SERVER"
+
+[node name="Friends" type="MarginContainer" parent="MainLobbyPanel/TabContainer" unique_id=1799863926]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+metadata/_tab_index = 1
+
+[node name="HSplitContainer" type="HSplitContainer" parent="MainLobbyPanel/TabContainer/Friends" unique_id=704496973]
+layout_mode = 2
+split_offsets = PackedInt32Array(500)
+split_offset = 500
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer" unique_id=156897244]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FriendsLabel" type="Label" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/LeftPanel" unique_id=2082099432]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Friends List"
+
+[node name="FriendsListPanel" type="Panel" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/LeftPanel" unique_id=1572307080]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/LeftPanel/FriendsListPanel" unique_id=51705240]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FriendsList" type="ItemList" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/LeftPanel/FriendsListPanel/ScrollContainer" unique_id=547338828]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_server_item")
+theme_override_styles/selected = SubResource("StyleBoxFlat_server_item_selected")
+
+[node name="ButtonBar" type="HBoxContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/LeftPanel" unique_id=1449029941]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RemoveFriendButton" type="Button" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/LeftPanel/ButtonBar" unique_id=1791951236]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_alt_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_alt_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_alt_hover")
+text = "❌ Remove Friend"
+
+[node name="RightPanel" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer" unique_id=570836663]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="AddFriendSection" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel" unique_id=1446097898]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AddFriendLabel" type="Label" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/AddFriendSection" unique_id=738145675]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Add Friend"
+
+[node name="AddFriendPanel" type="Panel" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/AddFriendSection" unique_id=1788072907]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/AddFriendSection/AddFriendPanel" unique_id=620931004]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/AddFriendSection/AddFriendPanel/MarginContainer" unique_id=1651909727]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AddFriendInput" type="LineEdit" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/AddFriendSection/AddFriendPanel/MarginContainer/VBoxContainer" unique_id=1328310388]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+placeholder_text = "Enter username..."
+
+[node name="AddFriendButton" type="Button" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/AddFriendSection/AddFriendPanel/MarginContainer/VBoxContainer" unique_id=1838236884]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+text = "➕ Send Friend Request"
+
+[node name="RequestsSection" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel" unique_id=1730094346]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="RequestsLabel" type="Label" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/RequestsSection" unique_id=70123643]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Friend Requests"
+
+[node name="RequestsPanel" type="Panel" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/RequestsSection" unique_id=1507184455]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/RequestsSection/RequestsPanel" unique_id=2089325666]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FriendRequestsList" type="ItemList" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/RequestsSection/RequestsPanel/ScrollContainer" unique_id=1547104896]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_server_item")
+theme_override_styles/selected = SubResource("StyleBoxFlat_server_item_selected")
+
+[node name="FriendsStatusLabel" type="Label" parent="MainLobbyPanel/TabContainer/Friends/HSplitContainer/RightPanel/RequestsSection" unique_id=1505214801]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 1, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "Click friend requests to accept"
+horizontal_alignment = 1
+
+[node name="Chat" type="MarginContainer" parent="MainLobbyPanel/TabContainer" unique_id=2074851087]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+metadata/_tab_index = 2
+
+[node name="HSplitContainer" type="HSplitContainer" parent="MainLobbyPanel/TabContainer/Chat" unique_id=896491890]
+layout_mode = 2
+split_offsets = PackedInt32Array(300)
+split_offset = 300
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer" unique_id=1916774451]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/LeftPanel" unique_id=780636667]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Friends"
+
+[node name="FriendsPanel" type="Panel" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/LeftPanel" unique_id=1532960465]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/LeftPanel/FriendsPanel" unique_id=1337499853]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ChatFriendsList" type="ItemList" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/LeftPanel/FriendsPanel/ScrollContainer" unique_id=168405620]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_server_item")
+theme_override_styles/selected = SubResource("StyleBoxFlat_server_item_selected")
+
+[node name="RightPanel" type="VBoxContainer" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer" unique_id=441280932]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="ChatWithLabel" type="Label" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/RightPanel" unique_id=1132046791]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Select a friend to chat"
+horizontal_alignment = 1
+
+[node name="ChatPanel" type="Panel" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/RightPanel" unique_id=187144003]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_main_panel")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/RightPanel/ChatPanel" unique_id=674992569]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+follow_focus = true
+
+[node name="ChatHistory" type="RichTextLabel" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/RightPanel/ChatPanel/ScrollContainer" unique_id=1325677166]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_chat_bg")
+bbcode_enabled = true
+scroll_following = true
+
+[node name="InputBar" type="HBoxContainer" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/RightPanel" unique_id=277935943]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ChatMessageInput" type="LineEdit" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/RightPanel/InputBar" unique_id=1496304402]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Type your message..."
+max_length = 500
+
+[node name="SendMessageButton" type="Button" parent="MainLobbyPanel/TabContainer/Chat/HSplitContainer/RightPanel/InputBar" unique_id=109651787]
+custom_minimum_size = Vector2(120, 45)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+text = "📤 SEND"
+
+[connection signal="pressed" from="LoginPanel/MarginContainer/VBoxContainer/ButtonsContainer/LoginButton" to="." method="OnLoginButtonPressed"]
+[connection signal="pressed" from="RegisterPanel/MarginContainer/VBoxContainer/ButtonsContainer/RegisterButton" to="." method="OnRegisterButtonPressed"]

@@ -1,0 +1,191 @@
+[gd_scene format=3 uid="uid://bdsmamrkk7h1i"]
+
+[ext_resource type="Texture2D" uid="uid://cbhh2sgwixjaa" path="res://Assets/Background/parallax-space-backgound.png" id="1_gbdng"]
+[ext_resource type="Texture2D" uid="uid://dkm20t8bq7qia" path="res://Assets/Background/parallax-space-big-planet.png" id="2_slhbx"]
+[ext_resource type="Texture2D" uid="uid://b3ltu2alc581j" path="res://Assets/Background/parallax-space-far-planets.png" id="3_0xpi4"]
+[ext_resource type="Texture2D" uid="uid://bome2cjq51a8r" path="res://Assets/Background/parallax-space-ring-planet.png" id="4_kh5et"]
+[ext_resource type="Texture2D" uid="uid://6n6lovad0118" path="res://Assets/Background/parallax-space-stars.png" id="5_fixio"]
+[ext_resource type="Script" uid="uid://flxx2lim8ohh" path="res://Code/UI/JoinInterface.gd" id="7"]
+[ext_resource type="AudioStream" uid="uid://dpdoov6qef48i" path="res://Sound/Ambiance/Lobby_Music/loading.ogg" id="7_0xpi4"]
+[ext_resource type="Texture2D" uid="uid://vjhfnimvket0" path="res://Assets/UI/Interface/MainPanel01.png" id="8_316bx"]
+[ext_resource type="Theme" uid="uid://c8ckvl2v7xge" path="res://Assets/Themes/SciFiTheme.tres" id="8_theme"]
+[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="9_5mku6"]
+[ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="10_5mku6"]
+[ext_resource type="Texture2D" uid="uid://dbm5kkv648tco" path="res://Assets/UI/Interface/Button03.png" id="10_tcyfn"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nhtkr"]
+texture = ExtResource("9_5mku6")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5bxp6"]
+texture = ExtResource("9_5mku6")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_paigv"]
+texture = ExtResource("10_tcyfn")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tcyfn"]
+texture = ExtResource("10_5mku6")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3u1th"]
+texture = ExtResource("10_tcyfn")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_gkcod"]
+texture = ExtResource("10_5mku6")
+
+[node name="JoinInterface" type="Control" unique_id=1678382324]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("8_theme")
+script = ExtResource("7")
+
+[node name="Background" type="Control" parent="." unique_id=504212286]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Parallax2D" type="ParallaxBackground" parent="Background" unique_id=1829906783]
+
+[node name="Parallax_1" type="TextureRect" parent="Background/Parallax2D" unique_id=1557382586]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+texture = ExtResource("1_gbdng")
+stretch_mode = 6
+
+[node name="Parallax_2" type="TextureRect" parent="Background/Parallax2D" unique_id=1346637590]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("2_slhbx")
+stretch_mode = 4
+
+[node name="Parallax_3" type="TextureRect" parent="Background/Parallax2D" unique_id=1618102704]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("3_0xpi4")
+stretch_mode = 4
+
+[node name="Parallax_4" type="TextureRect" parent="Background/Parallax2D" unique_id=635272697]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("4_kh5et")
+stretch_mode = 4
+
+[node name="Parallax_5" type="TextureRect" parent="Background/Parallax2D" unique_id=526740611]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("5_fixio")
+stretch_mode = 4
+
+[node name="JoinBackground" type="TextureRect" parent="." unique_id=1713602934]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3904762
+anchor_top = 0.38857144
+anchor_right = 0.6142857
+anchor_bottom = 0.60190475
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_316bx")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="JoinUI" type="VBoxContainer" parent="." unique_id=1882955774]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.4047619
+anchor_top = 0.41761905
+anchor_right = 0.6
+anchor_bottom = 0.58238095
+offset_right = -6.1035156e-05
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+metadata/_edit_use_anchors_ = true
+
+[node name="Lobby" type="Label" parent="JoinUI" unique_id=1489439650]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_nhtkr")
+text = "Lobby"
+horizontal_alignment = 1
+
+[node name="Instructions" type="Label" parent="JoinUI" unique_id=1195228739]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_5bxp6")
+text = "Enter IP and Port below"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="JoinUI" unique_id=967643704]
+layout_mode = 2
+
+[node name="IPLabel" type="Label" parent="JoinUI/HBoxContainer" unique_id=1090447024]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_paigv")
+text = "IP:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IPLineEdit" type="LineEdit" parent="JoinUI/HBoxContainer" unique_id=1659232105]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_tcyfn")
+alignment = 1
+
+[node name="PortLabel" type="Label" parent="JoinUI/HBoxContainer" unique_id=953259617]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_3u1th")
+text = "Port:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PortLineEdit" type="LineEdit" parent="JoinUI/HBoxContainer" unique_id=2023246931]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxTexture_gkcod")
+text = "7777"
+alignment = 1
+
+[node name="JoinButton" type="Button" parent="JoinUI" unique_id=2133592177]
+layout_mode = 2
+text = "Join"
+icon = ExtResource("10_5mku6")
+flat = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer2D" parent="." unique_id=1703526425]
+stream = ExtResource("7_0xpi4")
+autoplay = true
+max_distance = 10000.0
+parameters/looping = true

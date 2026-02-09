@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://btvg3h66wlekl"]
+
+[ext_resource type="Script" uid="uid://ckwi8k8gijdah" path="res://Code/Items/Generic/WorldItem.cs" id="1_dahuw"]
+[ext_resource type="Texture2D" uid="uid://ddo685l40bkjc" path="res://Assets/UI/Inventory/Grabitem.png" id="2_kyhp1"]
+[ext_resource type="Script" uid="uid://47y56k0lbvhw" path="res://Code/Items/Generic/Item.cs" id="3_hdrkh"]
+[ext_resource type="Script" uid="uid://ekv8cu6056mq" path="res://Code/Sprites/ItemSpriteSystem.cs" id="4_ky5d0"]
+
+[sub_resource type="Resource" id="Resource_i2bll"]
+script = ExtResource("3_hdrkh")
+Icon = ExtResource("2_kyhp1")
+metadata/_custom_type_script = "uid://47y56k0lbvhw"
+
+[node name="Active Grab" type="RigidBody2D" unique_id=260766312]
+script = ExtResource("1_dahuw")
+ItemId = "Grabitem"
+ItemData = SubResource("Resource_i2bll")
+metadata/_custom_type_script = "uid://unwhnooi7g2c"
+
+[node name="Icon" type="Node2D" parent="." unique_id=184626611]
+script = ExtResource("4_ky5d0")
+IconTexture = ExtResource("2_kyhp1")
+InHandHframes = 1

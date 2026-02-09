@@ -1,0 +1,167 @@
+# GitHub Actions - Auto Build & Release for GodotStation
+# Automatically builds game when you push to main branch
+
+name: Build and Release GodotStation
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v1.2.3
+    branches:
+      - main      # Also builds on main branch pushes
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  GODOT_VERSION: 4.6.1
+  EXPORT_NAME: GodotStation
+  PROJECT_PATH: .
+
+jobs:
+  # Build for Windows
+  build-windows:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.6.1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      
+      - name: Setup export templates
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      
+      - name: Build Windows version
+        run: |
+          mkdir -v -p build/windows
+          godot --headless --verbose --export-release "Windows Desktop" build/windows/$EXPORT_NAME.exe
+      
+      - name: Create version file
+        run: |
+          echo "${{ github.ref_name }}" > build/windows/version.txt
+          echo "$(date -u +%Y-%m-%d_%H:%M:%S)" >> build/windows/version.txt
+      
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: build/windows/
+
+  # Build for Linux
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.6.1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      
+      - name: Setup export templates
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      
+      - name: Build Linux version
+        run: |
+          mkdir -v -p build/linux
+          godot --headless --verbose --export-release "Linux/X11" build/linux/$EXPORT_NAME.x86_64
+      
+      - name: Create version file
+        run: |
+          echo "${{ github.ref_name }}" > build/linux/version.txt
+          echo "$(date -u +%Y-%m-%d_%H:%M:%S)" >> build/linux/version.txt
+      
+      - name: Upload Linux build
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-build
+          path: build/linux/
+
+  # Create GitHub Release
+  create-release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download Windows build
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-build
+          path: ./windows
+      
+      - name: Download Linux build
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-build
+          path: ./linux
+      
+      - name: Create version manifest
+        run: |
+          VERSION="${{ github.ref_name }}"
+          cat > version-manifest.json << EOF
+          {
+            "version": "${VERSION}",
+            "build_date": "$(date -u +%Y-%m-%d_%H:%M:%S)",
+            "platforms": {
+              "windows": {
+                "url": "https://github.com/${{ github.repository }}/releases/download/${VERSION}/GodotStation-Windows.zip",
+                "size": $(du -b windows.zip | cut -f1)
+              },
+              "linux": {
+                "url": "https://github.com/${{ github.repository }}/releases/download/${VERSION}/GodotStation-Linux.zip",
+                "size": $(du -b linux.zip | cut -f1)
+              }
+            },
+            "changelog": "See release notes for details"
+          }
+          EOF
+      
+      - name: Zip builds
+        run: |
+          cd windows && zip -r ../GodotStation-Windows.zip . && cd ..
+          cd linux && zip -r ../GodotStation-Linux.zip . && cd ..
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            GodotStation-Windows.zip
+            GodotStation-Linux.zip
+            version-manifest.json
+          body: |
+            ## GodotStation ${{ github.ref_name }}
+            
+            Auto-built from commit ${{ github.sha }}
+            
+            ### Downloads
+            - Windows: GodotStation-Windows.zip
+            - Linux: GodotStation-Linux.zip
+            
+            ### Installation
+            1. Download the zip for your platform
+            2. Extract to a folder
+            3. Run GodotStation.exe (Windows) or GodotStation.x86_64 (Linux)
+            
+            ### Changes
+            See commit history for details.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Deploy version manifest to Oracle
+  deploy-manifest:
+    needs: create-release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Deploy to Oracle Cloud
+        uses: appleboy/scp-action@master
+        with:
+          host: 150.136.90.194
+          username: ubuntu
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          source: "version-manifest.json"
+          target: "/var/www/godotstation/updates/"

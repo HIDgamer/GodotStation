@@ -1,0 +1,74 @@
+/obj/structure/machinery/chem_storage
+	name = "Chemical Storage System"
+	desc = "Storage system for a large supply of chemicals, which slowly recharges."
+	icon = 'icons/obj/structures/machinery/science_machines_64x32.dmi'
+	icon_state = "chemstorage"
+	active_power_usage = 1000
+	layer = BELOW_OBJ_LAYER
+	density = TRUE
+	bound_x = 32
+
+	var/network = "Ground"
+	var/recharge_cooldown = 15
+	var/recharge_rate = 10
+	var/energy = 50
+	var/max_energy = 100
+	// dynamic chemical supply variables
+	var/base_recharge_rate = 10
+	var/base_max_energy = 100
+	var/dynamic_storage = FALSE
+
+	unslashable = TRUE
+	unacidable = TRUE
+
+/obj/structure/machinery/chem_storage/medbay
+	name = "Chemical Storage System (Medbay)"
+	network = "Medbay"
+	dynamic_storage = TRUE
+
+/obj/structure/machinery/chem_storage/research
+	name = "Chemical Storage System (Research)"
+	network = "Research"
+
+/obj/structure/machinery/chem_storage/misc
+	name = "Chemical Storage System (Misc)"
+	network = "Misc"
+
+/obj/structure/machinery/chem_storage/Initialize()
+	. = ..()
+	GLOB.chemical_data.add_chem_storage(src)
+	start_processing()
+
+/obj/structure/machinery/chem_storage/Destroy()
+	GLOB.chemical_data.remove_chem_storage(src)
+	return ..()
+
+/// Scales the energy capacity and charge rates for chemical dispensers using the dynamic_storage var
+/// multiplier works by dividing total marine pop by 50
+/obj/structure/machinery/chem_storage/proc/calculate_dynamic_storage(multiplier)
+	if(!dynamic_storage)
+		return
+	recharge_rate |= floor(base_recharge_rate * multiplier)
+	max_energy |= floor(base_max_energy * multiplier)
+	energy = max_energy
+
+/obj/structure/machinery/chem_storage/get_examine_text(mob/user)
+	. = ..()
+	if(in_range(user, src) || istype(user, /mob/dead/observer))
+		var/charge = floor((energy / max_energy) * 100)
+		. += SPAN_NOTICE("The charge meter reads [charge]%")
+
+/obj/structure/machinery/chem_storage/process()
+	if(recharge_cooldown <= 0)
+		recharge()
+		recharge_cooldown = initial(recharge_cooldown)
+	else
+		recharge_cooldown--
+
+/obj/structure/machinery/chem_storage/proc/recharge()
+	if(inoperable())
+		return
+	if(energy >= max_energy)
+		return
+	energy = min(energy + recharge_rate, max_energy)
+	use_power(1500) // This thing uses up a lot of power (this is still low as shit for creating reagents from thin air)
