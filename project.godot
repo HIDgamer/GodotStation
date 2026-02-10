@@ -20,6 +20,7 @@ config/windows_native_icon="res://Assets/Icons/Ico/UACMGS_64x64.ico"
 
 [autoload]
 
+DiscordRpc="*uid://cnp3wqsieuvec"
 GameManager="*res://Code/Managers/GameManager.cs"
 NetworkManager="*res://Code/Managers/NetworkManager.cs"
 PreferenceManager="*uid://d3g3w1dnurm7d"
@@ -29,7 +30,6 @@ AccountManager="*uid://cofns7fxjsw7w"
 ChatManager="*uid://b84aodt84aoa6"
 FriendsManager="*uid://ccrh0k7heyjtg"
 LobbyManager="*uid://re6e2r8pxsqb"
-DiscordRpc="*uid://cnp3wqsieuvec"
 
 [display]
 

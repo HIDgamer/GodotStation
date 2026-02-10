@@ -67,12 +67,6 @@ public partial class DiscordRPC : Node
 			return;
 		}
 		
-		if (ApplicationId == "1470420296040189995" || string.IsNullOrEmpty(ApplicationId))
-		{
-			GD.PrintErr("[DiscordRPC] No Application ID set! Get one from https://discord.com/developers/applications");
-			return;
-		}
-		
 		Initialize();
 	}
 	

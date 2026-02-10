@@ -13,7 +13,7 @@ using Array = Godot.Collections.Array;
 
 public partial class LobbyManager : Node
 {
-	[Export] public string ApiUrl = "http://150.136.90.194:3000";
+	[Export] public string ApiUrl = "http://132.145.130.83:8085";
 	[Export] public float HeartbeatInterval = 10.0f;
 	
 	[Signal] public delegate void ServerListUpdatedEventHandler(Array servers);
@@ -151,6 +151,39 @@ public partial class LobbyManager : Node
 	}
 	
 	// Register server in lobby
+	public async void RegisterDedicatedServer(string serverName, int port, string map)
+	{
+		GD.Print("[LobbyManager] Registering as Dedicated Server...");
+
+		var data = new Dictionary
+		{
+			{ "name", serverName },
+			{ "map", map },
+			{ "port", port },
+			{ "is_dedicated", true },
+			{ "max_players", 32 },
+			{ "current_players", 0 },
+			{ "ip_address", "132.145.130.83" },
+			{ "description", "Official Dedicated Server" }
+		};
+		string serverApiKey = OS.GetEnvironment("SERVER_API_KEY");
+		_httpClient.DefaultRequestHeaders.Clear();
+		_httpClient.DefaultRequestHeaders.Add("X-Server-Key", serverApiKey);
+
+		var json = Json.Stringify(data);
+		var content = new StringContent(json, Encoding.UTF8, "application/json");
+		
+		var response = await _httpClient.PostAsync($"{ApiUrl}/api/servers/register-dedicated", content);
+		if (response.IsSuccessStatusCode)
+		{
+			var responseText = await response.Content.ReadAsStringAsync();
+			var result = Json.ParseString(responseText).AsGodotDictionary();
+			_currentServerId = result["server_id"].ToString();
+			_isHosting = true;
+			_heartbeatTimer.Start();
+			GD.Print($"[LobbyManager] Dedicated Server Registered: {_currentServerId}");
+		}
+	}
 	public async void RegisterServer(Dictionary serverInfo)
 	{
 		if (!_accountManager.IsLoggedIn())
@@ -164,24 +197,82 @@ public partial class LobbyManager : Node
 			_httpClient.DefaultRequestHeaders.Clear();
 			_httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_accountManager.GetAuthToken()}");
 			
-			// Get server info from GameManager if not provided
-			var gameManager = GetNode<GameManager>("/root/GameManager");
+			var gameManager = GetNodeOrNull<GameManager>("/root/GameManager");
+			
+			string serverName = "GodotStation Server";
+			string map = "Station";
+			string gamemode = "Sandbox";
+			int maxPlayers = 8;
+			int currentPlayers = 1;
+			int port = 7777;
+			if (serverInfo.ContainsKey("port")) 
+				port = (int)serverInfo["port"];
+			else if (gameManager != null)
+				port = gameManager.DefaultPort;
+			string ipAddress = GetPublicIP();
+			bool passwordProtected = false;
+			string description = "";
+			
+			if (serverInfo.ContainsKey("name") && !string.IsNullOrEmpty(serverInfo["name"].ToString()))
+				serverName = serverInfo["name"].ToString();
+			if (serverInfo.ContainsKey("map") && !string.IsNullOrEmpty(serverInfo["map"].ToString()))
+				map = serverInfo["map"].ToString();
+			if (serverInfo.ContainsKey("gamemode") && !string.IsNullOrEmpty(serverInfo["gamemode"].ToString()))
+				gamemode = serverInfo["gamemode"].ToString();
+			if (serverInfo.ContainsKey("max_players")) 
+				maxPlayers = (int)serverInfo["max_players"];
+			if (serverInfo.ContainsKey("current_players")) 
+				currentPlayers = (int)serverInfo["current_players"];
+			if (serverInfo.ContainsKey("port")) 
+				port = (int)serverInfo["port"];
+			if (serverInfo.ContainsKey("ip_address") && !string.IsNullOrEmpty(serverInfo["ip_address"].ToString()))
+				ipAddress = serverInfo["ip_address"].ToString();
+			if (serverInfo.ContainsKey("password_protected")) 
+				passwordProtected = (bool)serverInfo["password_protected"];
+			if (serverInfo.ContainsKey("description")) 
+				description = serverInfo["description"].ToString();
+			
+			if (gameManager != null)
+			{
+				try
+				{
+					var gmMap = gameManager.CurrentMap;
+					var gmGamemode = gameManager.Gamemode;
+					
+					if (!serverInfo.ContainsKey("map") && !string.IsNullOrEmpty(gmMap))
+						map = gmMap;
+					if (!serverInfo.ContainsKey("gamemode") && !string.IsNullOrEmpty(gmGamemode))
+						gamemode = gmGamemode;
+					if (!serverInfo.ContainsKey("max_players"))
+						maxPlayers = gameManager.MaxPlayers;
+					if (!serverInfo.ContainsKey("current_players"))
+						currentPlayers = gameManager.PlayerCount;
+					if (!serverInfo.ContainsKey("port"))
+						port = gameManager.DefaultPort;
+				}
+				catch (Exception e)
+				{
+					GD.PrintErr($"[LobbyManager] Warning: Could not read GameManager properties: {e.Message}");
+				}
+			}
 			
 			var data = new Dictionary
 			{
-				{ "name", serverInfo.ContainsKey("name") ? serverInfo["name"].ToString() : "GodotStation Server" },
-				{ "map", serverInfo.ContainsKey("map") ? serverInfo["map"].ToString() : gameManager.CurrentMap },
-				{ "gamemode", serverInfo.ContainsKey("gamemode") ? serverInfo["gamemode"].ToString() : gameManager.Gamemode },
-				{ "max_players", serverInfo.ContainsKey("max_players") ? (int)serverInfo["max_players"] : gameManager.MaxPlayers },
-				{ "current_players", serverInfo.ContainsKey("current_players") ? (int)serverInfo["current_players"] : gameManager.PlayerCount },
-				{ "port", serverInfo.ContainsKey("port") ? (int)serverInfo["port"] : gameManager.DefaultPort },
-				{ "ip_address", serverInfo.ContainsKey("ip_address") ? serverInfo["ip_address"].ToString() : GetPublicIP() },
-				{ "password_protected", serverInfo.ContainsKey("password_protected") && (bool)serverInfo["password_protected"] },
-				{ "description", serverInfo.ContainsKey("description") ? serverInfo["description"].ToString() : "" }
+				{ "name", serverName },
+				{ "map", map },
+				{ "gamemode", gamemode },
+				{ "max_players", maxPlayers },
+				{ "current_players", currentPlayers },
+				{ "port", port },
+				{ "ip_address", ipAddress },
+				{ "password_protected", passwordProtected },
+				{ "description", description }
 			};
 			
 			var json = Json.Stringify(data);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
+			
+			GD.Print($"[LobbyManager] Registering server: {serverName} at {ipAddress}:{port} | Map: {map} | Mode: {gamemode}");
 			
 			var response = await _httpClient.PostAsync($"{ApiUrl}/api/servers/register", content);
 			var responseText = await response.Content.ReadAsStringAsync();
@@ -209,6 +300,7 @@ public partial class LobbyManager : Node
 				var error = ParseError(responseText);
 				EmitSignal(SignalName.ServerRegistrationFailed, error);
 				GD.PrintErr($"[LobbyManager] Server registration failed: {error}");
+				GD.PrintErr($"[LobbyManager] Response: {responseText}");
 			}
 		}
 		catch (System.Exception e)
@@ -227,7 +319,20 @@ public partial class LobbyManager : Node
 		
 		try
 		{
-			var gameManager = GetNode<GameManager>("/root/GameManager");
+			var gameManager = GetNodeOrNull<GameManager>("/root/GameManager");
+			int playerCount = 1;
+			
+			if (gameManager != null)
+			{
+				try
+				{
+					playerCount = gameManager.PlayerCount;
+				}
+				catch
+				{
+					// Use default
+				}
+			}
 			
 			_httpClient.DefaultRequestHeaders.Clear();
 			_httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_accountManager.GetAuthToken()}");
@@ -235,7 +340,7 @@ public partial class LobbyManager : Node
 			var data = new Dictionary
 			{
 				{ "server_id", _currentServerId },
-				{ "current_players", gameManager.PlayerCount }
+				{ "current_players", playerCount }
 			};
 			
 			var json = Json.Stringify(data);
@@ -278,7 +383,6 @@ public partial class LobbyManager : Node
 		}
 	}
 	
-	// Get server list from API
 	public async void GetServerList()
 	{
 		try
@@ -307,14 +411,21 @@ public partial class LobbyManager : Node
 		}
 	}
 	
-	// Get public IP (simplified - you may want to use a service like ipify.org)
 	private string GetPublicIP()
 	{
-		// For local testing, return localhost
-		// In production, you should get the actual public IP
-		return "127.0.0.1";
+		try
+		{
+			using (var client = new System.Net.Http.HttpClient())
+			{
+				return client.GetStringAsync("https://api.ipify.org").Result;
+			}
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr($"[LobbyManager] Failed to get Public IP: {e.Message}");
+			return "127.0.0.1";
+		}
 	}
-	
 	private string ParseError(string responseText)
 	{
 		try

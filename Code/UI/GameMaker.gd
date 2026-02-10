@@ -60,15 +60,15 @@ func _on_create_pressed() -> void:
 	if game_manager == null:
 		push_error("GameManager not found!")
 		return
-	
-	var selected_map: String = map_option.get_item_text(map_option.selected)
+	var selected_map_name: String = map_option.get_item_text(map_option.selected)
 	var player_limit: int = int(player_limit_spin.value)
 	var port: int = int(port_spin.value)
 	var selected_gamemode: String = gamemode_option.get_item_text(gamemode_option.selected)
 
 	game_manager.MaxPlayers = player_limit
 	game_manager.Gamemode = selected_gamemode
-	game_manager.CurrentMap = map_uids[selected_map]
+	
+	game_manager.CurrentMap = selected_map_name
 	
 	if server_name_input != null:
 		game_manager.ServerName = server_name_input.text if server_name_input.text != "" else "GodotStation Server"
@@ -76,6 +76,12 @@ func _on_create_pressed() -> void:
 		game_manager.ServerDescription = server_desc_input.text
 	if password_check != null:
 		game_manager.PasswordProtected = password_check.button_pressed
+
+	print("[GameMakerUI] Creating server: ", game_manager.ServerName)
+	print("[GameMakerUI] Map: ", selected_map_name)
+	print("[GameMakerUI] Gamemode: ", selected_gamemode)
+	print("[GameMakerUI] Players: ", player_limit)
+	print("[GameMakerUI] Port: ", port)
 
 	game_manager.HostGame(port)
 	get_tree().change_scene_to_file("uid://bjnqqapnkk8uq")

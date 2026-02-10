@@ -1,39 +1,24 @@
 using Godot;
 using Godot.Collections;
-using System.Linq;
 
 public partial class MainLobbyUI : Control
 {
-	// Managers
 	private AccountManager _accountManager;
 	private LobbyManager _lobbyManager;
 	private FriendsManager _friendsManager;
 	private ChatManager _chatManager;
 	private GameManager _gameManager;
-	
-	// UI Nodes - Login/Register Panel
+	private DiscordRPC _discordRPC;
+	[Export] public LineEdit ServerPortInput;
 	[Export] public Control LoginPanel;
-	[Export] public LineEdit LoginUsernameInput;
-	[Export] public LineEdit LoginPasswordInput;
-	[Export] public Button LoginButton;
-	[Export] public Button ShowRegisterButton;
-	[Export] public Label LoginErrorLabel;
+	[Export] public Button DiscordLoginButton;
+	[Export] public Label LoginStatusLabel;
 	
-	[Export] public Control RegisterPanel;
-	[Export] public LineEdit RegisterUsernameInput;
-	[Export] public LineEdit RegisterEmailInput;
-	[Export] public LineEdit RegisterPasswordInput;
-	[Export] public Button RegisterButton;
-	[Export] public Button ShowLoginButton;
-	[Export] public Label RegisterErrorLabel;
-	
-	// UI Nodes - Main Lobby
 	[Export] public Control MainLobbyPanel;
 	[Export] public Label WelcomeLabel;
 	[Export] public Button LogoutButton;
 	[Export] public TabContainer TabContainer;
 	
-	// UI Nodes - Server Browser Tab
 	[Export] public ItemList ServerList;
 	[Export] public Button RefreshServersButton;
 	[Export] public Button JoinServerButton;
@@ -42,7 +27,6 @@ public partial class MainLobbyUI : Control
 	[Export] public LineEdit ServerDescInput;
 	[Export] public CheckBox PasswordProtectedCheck;
 	
-	// UI Nodes - Friends Tab
 	[Export] public ItemList FriendsList;
 	[Export] public ItemList FriendRequestsList;
 	[Export] public LineEdit AddFriendInput;
@@ -50,7 +34,6 @@ public partial class MainLobbyUI : Control
 	[Export] public Button RemoveFriendButton;
 	[Export] public Label FriendsStatusLabel;
 	
-	// UI Nodes - Chat Tab
 	[Export] public ItemList ChatFriendsList;
 	[Export] public RichTextLabel ChatHistory;
 	[Export] public LineEdit ChatMessageInput;
@@ -64,20 +47,15 @@ public partial class MainLobbyUI : Control
 	
 	public override void _Ready()
 	{
-		// Get managers
 		_accountManager = GetNode<AccountManager>("/root/AccountManager");
 		_lobbyManager = GetNode<LobbyManager>("/root/LobbyManager");
 		_friendsManager = GetNode<FriendsManager>("/root/FriendsManager");
 		_chatManager = GetNode<ChatManager>("/root/ChatManager");
 		_gameManager = GetNode<GameManager>("/root/GameManager");
+		_discordRPC = GetNode<DiscordRPC>("/root/DiscordRpc");
 		
-		// Connect signals
 		ConnectSignals();
 		
-		// Setup UI
-		SetupUI();
-		
-		// Check if already logged in
 		if (_accountManager.IsLoggedIn())
 		{
 			ShowMainLobby();
@@ -90,36 +68,25 @@ public partial class MainLobbyUI : Control
 	
 	private void ConnectSignals()
 	{
-		// Account Manager - autoloads are guaranteed to exist
 		_accountManager.LoginSuccess += OnLoginSuccess;
 		_accountManager.LoginFailed += OnLoginFailed;
-		_accountManager.RegisterSuccess += OnRegisterSuccess;
-		_accountManager.RegisterFailed += OnRegisterFailed;
+		_accountManager.LoggedOutSuccess += OnLogout;
 		
-		// Lobby Manager
 		_lobbyManager.ServerListUpdated += OnServerListUpdated;
 		_lobbyManager.ServerRegistered += OnServerRegistered;
-		_lobbyManager.ServerRegistrationFailed += OnServerRegistrationFailed;
 		
-		// Friends Manager
 		_friendsManager.FriendsListUpdated += OnFriendsListUpdated;
 		_friendsManager.FriendRequestsUpdated += OnFriendRequestsUpdated;
 		_friendsManager.FriendRequestSent += OnFriendRequestSent;
 		_friendsManager.FriendRequestFailed += OnFriendRequestFailed;
 		_friendsManager.FriendStatusChanged += OnFriendStatusChanged;
 		
-		// Chat Manager
 		_chatManager.MessageReceived += OnMessageReceived;
 		_chatManager.MessageSent += OnMessageSent;
-		_chatManager.MessageFailed += OnMessageFailed;
 		_chatManager.ChatHistoryLoaded += OnChatHistoryLoaded;
 		
-		// UI Buttons - null checks to prevent NullReferenceException if nodes not assigned
-		if (LoginButton != null) LoginButton.Pressed += OnLoginButtonPressed;
-		if (RegisterButton != null) RegisterButton.Pressed += OnRegisterButtonPressed;
-		if (ShowRegisterButton != null) ShowRegisterButton.Pressed += ShowRegister;
-		if (ShowLoginButton != null) ShowLoginButton.Pressed += ShowLogin;
-		if (LogoutButton != null) LogoutButton.Pressed += OnLogoutButtonPressed;
+		if (DiscordLoginButton != null) DiscordLoginButton.Pressed += OnDiscordLoginPressed;
+		if (LogoutButton != null) LogoutButton.Pressed += OnLogoutPressed;
 		
 		if (RefreshServersButton != null) RefreshServersButton.Pressed += OnRefreshServersPressed;
 		if (JoinServerButton != null) JoinServerButton.Pressed += OnJoinServerPressed;
@@ -137,111 +104,56 @@ public partial class MainLobbyUI : Control
 		if (ChatFriendsList != null) ChatFriendsList.ItemSelected += OnChatFriendSelected;
 	}
 	
-	private void SetupUI()
-	{
-		// Hide all panels initially
-		if (LoginPanel != null) LoginPanel.Hide();
-		if (RegisterPanel != null) RegisterPanel.Hide();
-		if (MainLobbyPanel != null) MainLobbyPanel.Hide();
-	}
-	
-	// ============ LOGIN/REGISTER ============
-	
 	private void ShowLogin()
 	{
 		if (LoginPanel != null) LoginPanel.Show();
-		if (RegisterPanel != null) RegisterPanel.Hide();
 		if (MainLobbyPanel != null) MainLobbyPanel.Hide();
-		if (LoginErrorLabel != null) LoginErrorLabel.Text = "";
-	}
-	
-	private void ShowRegister()
-	{
-		if (LoginPanel != null) LoginPanel.Hide();
-		if (RegisterPanel != null) RegisterPanel.Show();
-		if (MainLobbyPanel != null) MainLobbyPanel.Hide();
-		if (RegisterErrorLabel != null) RegisterErrorLabel.Text = "";
+		if (LoginStatusLabel != null) LoginStatusLabel.Text = "";
 	}
 	
 	private void ShowMainLobby()
 	{
 		if (LoginPanel != null) LoginPanel.Hide();
-		if (RegisterPanel != null) RegisterPanel.Hide();
 		if (MainLobbyPanel != null) MainLobbyPanel.Show();
 		
-		var username = _accountManager.GetUsername();
 		if (WelcomeLabel != null)
-			WelcomeLabel.Text = $"Welcome, {username}!";
+			WelcomeLabel.Text = $"Welcome, {_accountManager.GetUsername()}!";
 		
-		// Load initial data
+		_discordRPC?.SetInLobby();
+		
 		_lobbyManager.GetServerList();
 		_friendsManager.RefreshFriendsList();
 		_friendsManager.RefreshPendingRequests();
 	}
 	
-	private void OnLoginButtonPressed()
+	private void OnDiscordLoginPressed()
 	{
-		var username = LoginUsernameInput?.Text ?? "";
-		var password = LoginPasswordInput?.Text ?? "";
+		if (LoginStatusLabel != null)
+			LoginStatusLabel.Text = "Opening Discord in browser...";
 		
-		if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-		{
-			if (LoginErrorLabel != null)
-				LoginErrorLabel.Text = "Please enter username and password";
-			return;
-		}
-		
-		_accountManager.Login(username, password);
-	}
-	
-	private void OnRegisterButtonPressed()
-	{
-		var username = RegisterUsernameInput?.Text ?? "";
-		var email = RegisterEmailInput?.Text ?? "";
-		var password = RegisterPasswordInput?.Text ?? "";
-		
-		if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-		{
-			if (RegisterErrorLabel != null)
-				RegisterErrorLabel.Text = "All fields are required";
-			return;
-		}
-		
-		_accountManager.Register(username, email, password);
+		_accountManager.StartDiscordLogin();
 	}
 	
 	private void OnLoginSuccess(Dictionary userData, string token)
 	{
-		GD.Print("[MainLobbyUI] Login successful");
 		ShowMainLobby();
 	}
 	
 	private void OnLoginFailed(string error)
 	{
-		if (LoginErrorLabel != null)
-			LoginErrorLabel.Text = error;
+		if (LoginStatusLabel != null)
+			LoginStatusLabel.Text = $"Login failed: {error}";
 	}
 	
-	private void OnRegisterSuccess(Dictionary userData, string token)
+	private void OnLogout()
 	{
-		GD.Print("[MainLobbyUI] Registration successful");
-		ShowMainLobby();
-	}
-	
-	private void OnRegisterFailed(string error)
-	{
-		if (RegisterErrorLabel != null)
-			RegisterErrorLabel.Text = error;
-	}
-	
-	private void OnLogoutButtonPressed()
-	{
-		_accountManager.Logout();
 		ShowLogin();
 	}
 	
-	// ============ SERVER BROWSER ============
-	
+private void OnLogoutPressed()
+{
+	_accountManager.RequestLogout(); 
+}
 	private void OnRefreshServersPressed()
 	{
 		_lobbyManager.GetServerList();
@@ -250,23 +162,27 @@ public partial class MainLobbyUI : Control
 	private void OnServerListUpdated(Array servers)
 	{
 		_servers = servers;
-		
 		if (ServerList == null) return;
 		
 		ServerList.Clear();
 		
 		foreach (Dictionary server in servers)
 		{
-			var name = server["name"].ToString();
-			var players = $"{server["current_players"]}/{server["max_players"]}";
-			var map = server["map"].ToString();
-			var host = server["host_username"].ToString();
-			var locked = (bool)server["password_protected"] ? "🔒 " : "";
+			string name = GetVal(server, "name", "Unknown Server");
+			string players = $"{GetVal(server, "current_players", "0")}/{GetVal(server, "max_players", "0")}";
+			string map = GetVal(server, "map", "Unknown Map");
+			string host = GetVal(server, "host_username", "Unknown Host");
 			
-			ServerList.AddItem($"{locked}{name} - {players} - {map} - Host: {host}");
+			bool isLocked = server.ContainsKey("password_protected") && (bool)server["password_protected"];
+			string lockedPrefix = isLocked ? "🔒 " : "";
+			
+			ServerList.AddItem($"{lockedPrefix}{name} - {players} - {map} - Host: {host}");
 		}
 	}
-	
+	private string GetVal(Dictionary dict, string key, string defaultVal)
+	{
+		return dict.ContainsKey(key) ? dict[key].ToString() : defaultVal;
+	}
 	private void OnServerSelected(long index)
 	{
 		_selectedServerId = (int)index;
@@ -275,52 +191,47 @@ public partial class MainLobbyUI : Control
 	private void OnJoinServerPressed()
 	{
 		if (_selectedServerId < 0 || _selectedServerId >= _servers.Count)
-		{
-			GD.PrintErr("[MainLobbyUI] No server selected");
 			return;
-		}
 		
 		var server = (Dictionary)_servers[_selectedServerId];
 		var ip = server["ip_address"].ToString();
 		var port = VariantToInt(server["port"]);
+		var name = server["name"].ToString();
+		var currentPlayers = VariantToInt(server["current_players"]);
+		var maxPlayers = VariantToInt(server["max_players"]);
 		
-		GD.Print($"[MainLobbyUI] Joining server at {ip}:{port}");
-		
-		// Hide lobby and join game
 		Hide();
 		_gameManager.JoinGame(ip, port);
+		_discordRPC?.SetInGame(name, currentPlayers, maxPlayers);
 	}
 	
 	private void OnHostServerPressed()
 	{
+		var name = ServerNameInput?.Text ?? "GodotStation Server";
+		
+		if (!int.TryParse(ServerPortInput?.Text, out int port))
+		{
+			port = 7777;
+		}
+
 		var serverInfo = new Dictionary
 		{
-			{ "name", ServerNameInput?.Text ?? "GodotStation Server" },
-			{ "description", ServerDescInput?.Text ?? "" },
-			{ "password_protected", PasswordProtectedCheck?.ButtonPressed ?? false }
+			{ "name", name },
+			{ "map", "Station" },
+			{ "port", port },
+			{ "password_protected", PasswordProtectedCheck?.ButtonPressed ?? false },
+			{ "description", ServerDescInput?.Text ?? "" }
 		};
 		
-		// Start hosting
-		_gameManager.HostGame();
+		_gameManager.HostGame(port); 
 		
-		// Register in lobby
 		_lobbyManager.RegisterServer(serverInfo);
-		
-		// Hide lobby
 		Hide();
-	}
-	
-	private void OnServerRegistered(string serverId)
+	}	
+private void OnServerRegistered(string serverId)
 	{
 		GD.Print($"[MainLobbyUI] Server registered: {serverId}");
 	}
-	
-	private void OnServerRegistrationFailed(string error)
-	{
-		GD.PrintErr($"[MainLobbyUI] Server registration failed: {error}");
-	}
-	
-	// ============ FRIENDS ============
 	
 	private void OnFriendsListUpdated(Array friends)
 	{
@@ -335,7 +246,6 @@ public partial class MainLobbyUI : Control
 			FriendsList.AddItem($"{online} {username}");
 		}
 		
-		// Update chat friends list
 		if (ChatFriendsList != null)
 		{
 			ChatFriendsList.Clear();
@@ -419,11 +329,8 @@ public partial class MainLobbyUI : Control
 	
 	private void OnFriendStatusChanged(int userId, bool online)
 	{
-		// Refresh friends list to show online status
 		_friendsManager.RefreshFriendsList();
 	}
-	
-	// ============ CHAT ============
 	
 	private void OnChatFriendSelected(long index)
 	{
@@ -437,7 +344,6 @@ public partial class MainLobbyUI : Control
 			if (ChatWithLabel != null)
 				ChatWithLabel.Text = $"Chat with {username}";
 			
-			// Load chat history
 			_chatManager.LoadChatHistory(_currentChatFriendId);
 		}
 	}
@@ -475,10 +381,7 @@ public partial class MainLobbyUI : Control
 	private void SendChatMessage()
 	{
 		if (_currentChatFriendId <= 0)
-		{
-			GD.PrintErr("[MainLobbyUI] No chat friend selected");
 			return;
-		}
 		
 		var message = ChatMessageInput?.Text ?? "";
 		if (string.IsNullOrEmpty(message))
@@ -504,20 +407,12 @@ public partial class MainLobbyUI : Control
 	{
 		var senderId = VariantToInt(message["sender_id"]);
 		
-		// If chatting with this person, update chat
 		if (senderId == _currentChatFriendId && ChatHistory != null)
 		{
 			var text = message["message"].ToString();
 			var senderName = GetFriendUsername(senderId);
 			ChatHistory.AppendText($"[Now] {senderName}: {text}\n");
 		}
-		
-		// TODO: Show notification
-	}
-	
-	private void OnMessageFailed(string error)
-	{
-		GD.PrintErr($"[MainLobbyUI] Message failed: {error}");
 	}
 	
 	private string GetFriendUsername(int friendId)
@@ -533,7 +428,6 @@ public partial class MainLobbyUI : Control
 		return $"User {friendId}";
 	}
 	
-	// Helper to safely convert Variant to int
 	private int VariantToInt(Variant value)
 	{
 		if (value.VariantType == Variant.Type.Int)

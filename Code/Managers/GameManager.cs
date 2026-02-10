@@ -90,7 +90,7 @@ public partial class GameManager : Node
 		_lobbyManager = GetNodeOrNull<LobbyManager>("/root/LobbyManager");
 		
 		// Discord RPC integration
-		var discord = GetNode<DiscordRPC>("/root/DiscordRPC");
+		var discord = GetNode<DiscordRPC>("/root/DiscordRpc");
 		
 		// Connect to game state signals
 		GameStateChanged += (stateInt) => {
@@ -185,11 +185,13 @@ public partial class GameManager : Node
 				playerData["peer_id"] = 1;
 			_peerCharacters[1] = playerData;
 			prefManager.Call("set_peer_character_data", 1, playerData);
-			GD.Print($"[GameManager] Host character data stored - Name: {hostName}, Race: {(playerData.ContainsKey("race") ? (string)playerData["race"] : "none")}");
 			
 			SetupLobbyTimer();
 			RegisterWithLobby(port);
 			EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
+
+			SetGameState(GameState.Lobby);
+			GetTree().ChangeSceneToFile("uid://bjnqqapnkk8uq");
 		}
 		else
 		{
@@ -470,6 +472,10 @@ public partial class GameManager : Node
 	{
 		GD.Print("[GameManager] Successfully connected to server");
 		_isConnected = true;
+		
+		GetTree().ChangeSceneToFile("uid://bjnqqapnkk8uq");
+		SetGameState(GameState.Lobby);
+		
 		UpdatePlayerCount();
 		
 		var prefManager = GetNode("/root/PreferenceManager");
@@ -486,7 +492,6 @@ public partial class GameManager : Node
 		prefManager.Call("set_peer_character_data", myId, playerData);
 		
 		RpcId(1, MethodName.ReceivePlayerAppearance, myId, playerData);
-		GD.Print($"[GameManager] Sent character data to server - Name: {playerName}, Race: {(playerData.ContainsKey("race") ? (string)playerData["race"] : "none")}");
 	}
 
 	private void OnConnectionFailed()
