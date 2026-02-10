@@ -3,7 +3,8 @@ name: Build and Release GodotStation
 on:
   push:
     tags:
-      - '0.9.1'
+      - 'v*'
+      - '[0-9]*'
     branches:
       - main
   workflow_dispatch:
@@ -66,7 +67,6 @@ jobs:
             chmod +x "$OUTPUT_FILE"
           fi
           
-          # Add version.txt to the build
           echo "${GITHUB_REF_NAME}" > $(dirname "$OUTPUT_FILE")/version.txt
 
       - name: Upload build artifact
@@ -87,16 +87,13 @@ jobs:
 
       - name: Zip builds and create manifest
         run: |
-          # Create zip files
           cd artifacts/windows-build && zip -r ../../GodotStation-Windows.zip . && cd ../..
           cd artifacts/linux-build && zip -r ../../GodotStation-Linux.zip . && cd ../..
 
-          # Get file sizes
           WIN_SIZE=$(stat -c%s GodotStation-Windows.zip)
           LIN_SIZE=$(stat -c%s GodotStation-Linux.zip)
-          VERSION="${GITHUB_REF_NAME#v}"  # Remove 'v' prefix
+          VERSION="${GITHUB_REF_NAME#v}" 
 
-          # Create version manifest JSON
           cat > version-manifest.json << EOF
           {
             "version": "$VERSION",
@@ -114,9 +111,6 @@ jobs:
           }
           EOF
 
-          echo "Created version-manifest.json:"
-          cat version-manifest.json
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -126,14 +120,7 @@ jobs:
             version-manifest.json
           body: |
             ## GodotStation ${GITHUB_REF_NAME}
-            
             **Release Date:** $(date -u +%Y-%m-%d)
-            
-            ### Downloads
-            - Windows: [GodotStation-Windows.zip](https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/GodotStation-Windows.zip)
-            - Linux: [GodotStation-Linux.zip](https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/GodotStation-Linux.zip)
-            
-            ### Changes
             Built from commit ${GITHUB_SHA}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -147,7 +134,6 @@ jobs:
   deploy-manifest:
     needs: create-release
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download manifest artifact
         uses: actions/download-artifact@v4
@@ -161,6 +147,7 @@ jobs:
           host: ${{ secrets.ORACLE_IP }}
           username: ubuntu
           key: ${{ secrets.ORACLE_SSH_KEY }}
+          port: 22
           source: "version-manifest.json"
           target: "/var/www/godotstation/updates/"
           strip_components: 0
@@ -172,6 +159,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.ORACLE_SSH_KEY }}
           script: |
-            echo "Verifying deployment..."
-            ls -lh /var/www/godotstation/updates/
+            echo "Verifying deployment at /var/www/godotstation/updates/"
+            ls -lh /var/www/godotstation/updates/version-manifest.json
             cat /var/www/godotstation/updates/version-manifest.json
