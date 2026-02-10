@@ -11,8 +11,7 @@ on:
 env:
   GODOT_VERSION: 4.6
   EXPORT_NAME: GodotStation
-  # IMPORTANT: Match this to your AutoUpdater.cs UpdateServerUrl
-  UPDATE_SERVER: "132.145.130.83"  # Your API server IP
+  UPDATE_SERVER: "132.145.130.83"
 
 jobs:
   build:
