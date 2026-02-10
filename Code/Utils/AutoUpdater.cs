@@ -11,13 +11,12 @@ public partial class AutoUpdater : Node
 	[Export] public string UpdateServerUrl = "http://132.145.130.83:8086/updates/version-manifest.json";
 	[Export] public string GitHubRepo = "HIDgamer/GodotStation";
 	[Export] public bool CheckOnStartup = true;
-	[Export] public string CurrentVersion = "0.9.0";
-	
-	[Signal] public delegate void UpdateAvailableEventHandler(string newVersion);
+	[Export] public string CurrentVersion = "0.8.0";
+	[Export] public string UpdateUISceneUid = "uid://cdux206csw0ra";
+	[Signal] public delegate void UpdateAvailableEventHandler(string version);
 	[Signal] public delegate void UpdateDownloadProgressEventHandler(float progress);
 	[Signal] public delegate void UpdateReadyToInstallEventHandler();
-	[Signal] public delegate void UpdateErrorEventHandler(string error);
-	
+	[Signal] public delegate void UpdateErrorEventHandler(string message);
 	private HttpClient _httpClient;
 	private string _updatePath;
 	private string _pendingUpdatePath;
@@ -30,15 +29,13 @@ public partial class AutoUpdater : Node
 		_pendingUpdatePath = _updatePath + "/pending";
 		
 		if (!DirAccess.DirExistsAbsolute(_updatePath))
-		{
 			DirAccess.MakeDirRecursiveAbsolute(_updatePath);
-		}
 		
 		ApplyPendingUpdateIfExists();
 		
 		if (CheckOnStartup)
 		{
-			CallDeferred(MethodName.CheckForUpdates);
+			GetTree().CreateTimer(1.5f).Timeout += () => CheckForUpdates();
 		}
 	}
 	
@@ -53,7 +50,7 @@ public partial class AutoUpdater : Node
 		{
 			CopyDirectory(_pendingUpdatePath, execDir);
 			DeleteDirectory(_pendingUpdatePath);
-			GD.Print($"[AutoUpdater] Update applied successfully!");
+			GD.Print("[AutoUpdater] Update applied successfully!");
 		}
 		catch (Exception e)
 		{
@@ -61,39 +58,79 @@ public partial class AutoUpdater : Node
 		}
 	}
 	
-	public async void CheckForUpdates()
+	private void ShowUpdateUI(string version)
 	{
-		if (_isDownloading)
+		GD.Print("[AutoUpdater] ShowUpdateUI called.");
+
+		if (GetTree().Root.HasNode("UpdateNotificationUI"))
+		{
+			GD.Print("[AutoUpdater] UI already exists, skipping.");
 			return;
-		
-		try
-		{
-			var manifest = await GetUpdateManifest();
-			
-			if (manifest == null)
-			{
-				EmitSignal(SignalName.UpdateError, "Could not fetch update info");
-				return;
-			}
-			
-			var latestVersion = manifest["version"].ToString();
-			
-			if (IsNewerVersion(latestVersion, CurrentVersion))
-			{
-				EmitSignal(SignalName.UpdateAvailable, latestVersion);
-			}
 		}
-		catch (Exception e)
+
+		var res = ResourceLoader.Load(UpdateUISceneUid);
+
+		if (res == null)
 		{
-			EmitSignal(SignalName.UpdateError, e.Message);
+			GD.PrintErr($"[AutoUpdater] FAILED: ResourceLoader returned NULL for UID: {UpdateUISceneUid}");
+			return;
+		}
+
+		if (res is not PackedScene uiScene)
+		{
+			GD.PrintErr($"[AutoUpdater] FAILED: Resource at {UpdateUISceneUid} is NOT a PackedScene. Type = {res.GetType()}");
+			return;
+		}
+
+		var uiInstance = uiScene.Instantiate();
+		uiInstance.Name = "UpdateNotificationUI";
+
+		GD.Print("[AutoUpdater] Instanced UI successfully. Adding to root.");
+
+		GetTree().Root.AddChild(uiInstance);
+
+		if (uiInstance.HasMethod("initialize_with_data"))
+		{
+			uiInstance.Call("initialize_with_data", version);
+		}
+		else
+		{
+			GD.PrintErr("[AutoUpdater] UI scene has NO initialize_with_data method!");
 		}
 	}
-	
+	public async void CheckForUpdates()
+	{
+		if (_isDownloading) return;
+		
+		var manifest = await GetUpdateManifest();
+		if (manifest == null) return;
+		
+		var latestVersion = manifest["version"].ToString();
+		if (IsNewerVersion(latestVersion, CurrentVersion))
+		{
+			GD.Print($"[AutoUpdater] Update found: {latestVersion}. Instancing UI...");
+			CallDeferred(MethodName.ShowUpdateUI, latestVersion);
+		}
+	}
 	public async void DownloadUpdate()
 	{
-		if (_isDownloading)
-			return;
-		
+		if (_isDownloading) return;
+
+		string execDir = OS.GetExecutablePath().GetBaseDir();
+		if (!HasWriteAccess(execDir))
+		{
+			if (OS.GetName() == "Windows")
+			{
+				GetTree().Root.GetNode("UpdateNotificationUI").Call("show_permission_warning");
+				return;
+			}
+			else
+			{
+				EmitSignal(SignalName.UpdateError, "Insufficient permissions to update game files.");
+				return;
+			}
+		}
+
 		_isDownloading = true;
 		
 		try
@@ -105,23 +142,23 @@ public partial class AutoUpdater : Node
 			if (!platforms.ContainsKey(platform))
 			{
 				EmitSignal(SignalName.UpdateError, $"No update for {platform}");
-				_isDownloading = false;
 				return;
 			}
 			
 			var platformData = platforms[platform].AsGodotDictionary();
 			var downloadUrl = platformData["url"].ToString();
-			var zipPath = $"{_updatePath}/update.zip";
+			var zipPath = Path.Combine(ProjectSettings.GlobalizePath(_updatePath), "update.zip");
 			
 			await DownloadFileWithProgress(downloadUrl, zipPath);
 			
-			if (DirAccess.DirExistsAbsolute(_pendingUpdatePath))
+			string pendingAbsolute = ProjectSettings.GlobalizePath(_pendingUpdatePath);
+			if (Directory.Exists(pendingAbsolute))
 			{
-				DeleteDirectory(_pendingUpdatePath);
+				Directory.Delete(pendingAbsolute, true);
 			}
 			
-			DirAccess.MakeDirRecursiveAbsolute(_pendingUpdatePath);
-			ExtractZip(zipPath, _pendingUpdatePath);
+			Directory.CreateDirectory(pendingAbsolute);
+			ExtractZip(zipPath, pendingAbsolute);
 			
 			EmitSignal(SignalName.UpdateReadyToInstall);
 		}
@@ -134,7 +171,49 @@ public partial class AutoUpdater : Node
 			_isDownloading = false;
 		}
 	}
-	
+	public void RequestAdminPrivileges()
+	{
+		string exePath = OS.GetExecutablePath();
+		string[] args = OS.GetCmdlineArgs();
+		
+		System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo
+		{
+			FileName = exePath,
+			UseShellExecute = true,
+			Verb = "runas",
+			Arguments = string.Join(" ", args)
+		};
+
+		try
+		{
+			System.Diagnostics.Process.Start(startInfo);
+			GetTree().Quit();
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr("Elevation failed: " + e.Message);
+		}
+	}
+	private bool HasWriteAccess(string directoryPath)
+	{
+		try
+		{
+			string absolutePath = ProjectSettings.GlobalizePath(directoryPath);
+			if (!Directory.Exists(absolutePath))
+			{
+				Directory.CreateDirectory(absolutePath);
+			}
+
+			string testFile = Path.Combine(absolutePath, ".write_test");
+			File.WriteAllText(testFile, "test");
+			File.Delete(testFile);
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
 	public void RestartToApplyUpdate()
 	{
 		OS.CreateInstance(new string[] { });
@@ -143,21 +222,26 @@ public partial class AutoUpdater : Node
 	
 	private async Task<Dictionary> GetUpdateManifest()
 	{
+		GD.Print("[AutoUpdater] Fetching manifest...");
 		try
 		{
-			var response = await _httpClient.GetAsync(UpdateServerUrl);
+			using var response = await _httpClient.GetAsync(UpdateServerUrl + "?t=" + DateTime.Now.Ticks);
 			if (response.IsSuccessStatusCode)
 			{
-				var json = await response.Content.ReadAsStringAsync();
+				var jsonText = await response.Content.ReadAsStringAsync();
 				var parser = new Json();
-				if (parser.Parse(json) == Error.Ok)
+				if (parser.Parse(jsonText) == Error.Ok)
 				{
+					GD.Print("[AutoUpdater] Manifest source: Oracle");
 					return parser.Data.AsGodotDictionary();
 				}
 			}
 		}
-		catch { }
-		
+		catch (Exception e) 
+		{ 
+			GD.Print($"[AutoUpdater] Oracle failed: {e.Message}"); 
+		}
+
 		try
 		{
 			var url = $"https://api.github.com/repos/{GitHubRepo}/releases/latest";
@@ -165,51 +249,48 @@ public partial class AutoUpdater : Node
 			_httpClient.DefaultRequestHeaders.Add("User-Agent", "GodotStation");
 			
 			var response = await _httpClient.GetAsync(url);
-			var json = await response.Content.ReadAsStringAsync();
-			var parser = new Json();
-			
-			if (parser.Parse(json) == Error.Ok)
+			if (response.IsSuccessStatusCode)
 			{
-				var release = parser.Data.AsGodotDictionary();
-				var manifest = new Dictionary
+				var jsonText = await response.Content.ReadAsStringAsync();
+				var parser = new Json();
+				if (parser.Parse(jsonText) == Error.Ok)
 				{
-					{ "version", release["tag_name"].ToString().TrimPrefix("v") },
-					{ "platforms", new Dictionary() }
-				};
-				
-				var assets = release["assets"].AsGodotArray();
-				var platforms = manifest["platforms"].AsGodotDictionary();
-				
-				foreach (Dictionary asset in assets)
-				{
-					var name = asset["name"].ToString().ToLower();
+					var release = parser.Data.AsGodotDictionary();
+					var manifest = new Dictionary
+					{
+						{ "version", release["tag_name"].ToString().TrimPrefix("v") },
+						{ "platforms", new Dictionary() }
+					};
 					
-					if (name.Contains("windows"))
+					var assets = release["assets"].AsGodotArray();
+					var platforms = manifest["platforms"].AsGodotDictionary();
+					
+					foreach (Dictionary asset in assets)
 					{
-						platforms["windows"] = new Dictionary
+						var name = asset["name"].ToString().ToLower();
+						string platformKey = name.Contains("windows") ? "windows" : name.Contains("linux") ? "linux" : "";
+						
+						if (!string.IsNullOrEmpty(platformKey))
 						{
-							{ "url", asset["browser_download_url"].ToString() },
-							{ "size", asset["size"] }
-						};
+							platforms[platformKey] = new Dictionary
+							{
+								{ "url", asset["browser_download_url"].ToString() },
+								{ "size", asset["size"] }
+							};
+						}
 					}
-					else if (name.Contains("linux"))
-					{
-						platforms["linux"] = new Dictionary
-						{
-							{ "url", asset["browser_download_url"].ToString() },
-							{ "size", asset["size"] }
-						};
-					}
+					GD.Print("[AutoUpdater] Manifest source: GitHub API");
+					return manifest;
 				}
-				
-				return manifest;
 			}
 		}
-		catch { }
-		
+		catch (Exception e) 
+		{ 
+			GD.Print($"[AutoUpdater] GitHub failed: {e.Message}"); 
+		}
+
 		return null;
 	}
-	
 	private async Task DownloadFileWithProgress(string url, string destination)
 	{
 		using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);

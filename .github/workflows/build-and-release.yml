@@ -3,7 +3,7 @@ name: Build and Release GodotStation
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '0.9.1'
     branches:
       - main
   workflow_dispatch:
