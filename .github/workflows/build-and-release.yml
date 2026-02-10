@@ -79,11 +79,19 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Prepare Release Info
+        id: release_info
+        run: |
+          echo "REL_DATE=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          echo "SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - name: Zip builds and create manifest
         run: |
@@ -119,9 +127,9 @@ jobs:
             GodotStation-Linux.zip
             version-manifest.json
           body: |
-            ## GodotStation ${GITHUB_REF_NAME}
-            **Release Date:** $(date -u +%Y-%m-%d)
-            Built from commit ${GITHUB_SHA}
+            ## GodotStation ${{ github.ref_name }}
+            **Release Date:** ${{ steps.release_info.outputs.REL_DATE }}
+            Built from commit ${{ steps.release_info.outputs.SHORT_SHA }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
