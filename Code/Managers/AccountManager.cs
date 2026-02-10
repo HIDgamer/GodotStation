@@ -22,28 +22,17 @@ public partial class AccountManager : Node
 	private Dictionary _userData = new();
 	private string _authToken = "";
 	private HttpServer _callbackServer;
-	private bool _attemptedAutoLogin = false;
 	
 	public override void _Ready()
 	{
 		_httpClient = new HttpClient();
 		
-		// Wait a frame before trying auto-login to ensure filesystem is ready
-		CallDeferred(MethodName.TryAutoLoginDeferred);
-	}
-	
-	private async void TryAutoLoginDeferred()
-	{
-		// Small delay to ensure everything is initialized
-		await Task.Delay(100);
-		TryAutoLogin();
+		// Try to auto-login with saved token
+		CallDeferred(MethodName.TryAutoLogin);
 	}
 	
 	private async void TryAutoLogin()
 	{
-		if (_attemptedAutoLogin) return;
-		_attemptedAutoLogin = true;
-		
 		var savedToken = LoadToken();
 		
 		if (!string.IsNullOrEmpty(savedToken))
@@ -56,7 +45,7 @@ public partial class AccountManager : Node
 			if (isValid)
 			{
 				_authToken = savedToken;
-				GD.Print($"[AccountManager] Auto-login successful! User: {GetUsername()}");
+				GD.Print("[AccountManager] Auto-login successful!");
 				EmitSignal(SignalName.LoginSuccess, _userData, _authToken);
 			}
 			else
@@ -64,10 +53,6 @@ public partial class AccountManager : Node
 				GD.Print("[AccountManager] Saved token expired or invalid");
 				DeleteToken();
 			}
-		}
-		else
-		{
-			GD.Print("[AccountManager] No saved token found");
 		}
 	}
 	
@@ -95,14 +80,10 @@ public partial class AccountManager : Node
 					}
 				}
 			}
-			else
-			{
-				GD.Print($"[AccountManager] Token verification failed: {response.StatusCode}");
-			}
 		}
 		catch (Exception e)
 		{
-			GD.PrintErr($"[AccountManager] Token verification error: {e.Message}");
+			GD.PrintErr($"[AccountManager] Token verification failed: {e.Message}");
 		}
 		
 		return false;
@@ -112,25 +93,12 @@ public partial class AccountManager : Node
 	{
 		try
 		{
-			// Ensure directory exists
-			var dir = TOKEN_SAVE_PATH.GetBaseDir();
-			if (!DirAccess.DirExistsAbsolute(dir))
-			{
-				DirAccess.MakeDirRecursiveAbsolute(dir);
-			}
-			
 			using var file = FileAccess.Open(TOKEN_SAVE_PATH, FileAccess.ModeFlags.Write);
 			if (file != null)
 			{
-				// Simple encryption - XOR with a key
 				var encrypted = EncryptToken(token);
 				file.StoreString(encrypted);
-				file.Close();
-				GD.Print($"[AccountManager] Token saved to: {TOKEN_SAVE_PATH}");
-			}
-			else
-			{
-				GD.PrintErr($"[AccountManager] Failed to open file for writing: {TOKEN_SAVE_PATH}");
+				GD.Print("[AccountManager] Token saved");
 			}
 		}
 		catch (Exception e)
@@ -143,41 +111,19 @@ public partial class AccountManager : Node
 	{
 		try
 		{
-			GD.Print($"[AccountManager] Checking for token at: {TOKEN_SAVE_PATH}");
-			
 			if (FileAccess.FileExists(TOKEN_SAVE_PATH))
 			{
-				GD.Print("[AccountManager] Token file found, loading...");
 				using var file = FileAccess.Open(TOKEN_SAVE_PATH, FileAccess.ModeFlags.Read);
 				if (file != null)
 				{
 					var encrypted = file.GetAsText();
-					file.Close();
-					
-					if (string.IsNullOrEmpty(encrypted))
-					{
-						GD.Print("[AccountManager] Token file is empty");
-						return "";
-					}
-					
-					var decrypted = DecryptToken(encrypted);
-					GD.Print($"[AccountManager] Token loaded successfully (length: {decrypted.Length})");
-					return decrypted;
+					return DecryptToken(encrypted);
 				}
-				else
-				{
-					GD.PrintErr("[AccountManager] Failed to open token file");
-				}
-			}
-			else
-			{
-				GD.Print("[AccountManager] No token file exists");
 			}
 		}
 		catch (Exception e)
 		{
 			GD.PrintErr($"[AccountManager] Failed to load token: {e.Message}");
-			GD.PrintErr($"[AccountManager] Stack trace: {e.StackTrace}");
 		}
 		
 		return "";
@@ -228,9 +174,8 @@ public partial class AccountManager : Node
 			
 			return result.ToString();
 		}
-		catch (Exception e)
+		catch
 		{
-			GD.PrintErr($"[AccountManager] Failed to decrypt token: {e.Message}");
 			return "";
 		}
 	}
@@ -291,26 +236,16 @@ public partial class AccountManager : Node
 		if (query.ContainsKey("val"))
 		{
 			_authToken = query["val"].ToString();
+			_userData = new Dictionary { { "username", "Player" } };
 			
-			// Verify the token and get user data
-			bool isValid = await VerifyToken(_authToken);
+			// Save token for auto-login next time
+			SaveToken(_authToken);
 			
-			if (isValid)
-			{
-				// Save token for auto-login next time
-				SaveToken(_authToken);
-				
-				GD.Print($"[AccountManager] SUCCESS: Logged in as {GetUsername()}");
-				EmitSignal(SignalName.LoginSuccess, _userData, _authToken);
-				
-				await Task.Delay(500);
-				_callbackServer?.Stop();
-			}
-			else
-			{
-				GD.PrintErr("[AccountManager] Token received but validation failed");
-				EmitSignal(SignalName.LoginFailed, "Token validation failed");
-			}
+			GD.Print($"[AccountManager] SUCCESS: Token received! Token: {_authToken.Substring(0, Math.Min(20, _authToken.Length))}...");
+			EmitSignal(SignalName.LoginSuccess, _userData, _authToken);
+			
+			await Task.Delay(500);
+			_callbackServer?.Stop();
 		}
 		else
 		{
