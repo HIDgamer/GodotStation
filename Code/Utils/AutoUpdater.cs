@@ -11,7 +11,7 @@ public partial class AutoUpdater : Node
 	[Export] public string UpdateServerUrl = "http://132.145.130.83:8086/updates/version-manifest.json";
 	[Export] public string GitHubRepo = "HIDgamer/GodotStation";
 	[Export] public bool CheckOnStartup = true;
-	[Export] public string CurrentVersion = "0.9.1";
+	[Export] public string CurrentVersion = "0.9.0";
 	[Export] public string UpdateUISceneUid = "uid://cdux206csw0ra";
 	[Signal] public delegate void UpdateAvailableEventHandler(string version);
 	[Signal] public delegate void UpdateDownloadProgressEventHandler(float progress);
@@ -297,7 +297,7 @@ public partial class AutoUpdater : Node
 		response.EnsureSuccessStatusCode();
 		
 		var totalBytes = response.Content.Headers.ContentLength ?? 0;
-		var buffer = new byte[8192];
+		var buffer = new byte[131072];
 		var bytesRead = 0L;
 		
 		using var contentStream = await response.Content.ReadAsStreamAsync();
