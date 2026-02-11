@@ -150,21 +150,21 @@ public bool Equip(Item item, string slot)
 		{
 			return item.ItemName switch
 			{
-				"Marine_CM_Uniform" => "res://Scenes/Items/Clothing/Uniforms/Marine_CM_Uniform.tscn",
-				"Medical_Scrubs" => "res://Scenes/Items/Clothing/Uniforms/Medical_Scrubs.tscn",
-				"MA_Light_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Light_Armor.tscn",
-				"MA_Medium_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Medium_Armor.tscn",
-				"MA_Heavy_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Heavy_Armor.tscn",
-				"Marine_Boots" => "res://Scenes/Items/Clothing/Boots/Marine_Boots.tscn",
-				"Combat_Boots" => "res://Scenes/Items/Clothing/Boots/Combat_Boots.tscn",
-				"Marine_Gloves" => "res://Scenes/Items/Clothing/Gloves/Marine_Gloves.tscn",
-				"Armored_Gloves" => "res://Scenes/Items/Clothing/Gloves/Armored_Gloves.tscn",
-				_ => $"res://Scenes/Items/{item.ItemName}.tscn"
+				"Marine_CM_Uniform" => "uid://<UID_OF_MARINE_CM_UNIFORM>",
+				"Medical_Scrubs" => "uid://<UID_OF_MEDICAL_SCRUBS>",
+				"MA_Light_Armor" => "uid://<UID_OF_MA_LIGHT_ARMOR>",
+				"MA_Medium_Armor" => "uid://<UID_OF_MA_MEDIUM_ARMOR>",
+				"MA_Heavy_Armor" => "uid://<UID_OF_MA_HEAVY_ARMOR>",
+				"Marine_Boots" => "uid://<UID_OF_MARINE_BOOTS>",
+				"Combat_Boots" => "uid://<UID_OF_COMBAT_BOOTS>",
+				"Marine_Gloves" => "uid://<UID_OF_MARINE_GLOVES>",
+				"Armored_Gloves" => "uid://<UID_OF_ARMORED_GLOVES>",
+				_ => $"uid://<UID_OF_{item.ItemName.ToUpper()}>"
 			};
 		}
 		
 		// Default fallback
-		return $"res://Scenes/Items/{item.ItemName}.tscn";
+		return $"uid://<UID_OF_{item.ItemName.ToUpper()}>";
 	}
 	
 	private bool IsValidClothingSlot(ClothingItem clothing, string slot)
@@ -292,21 +292,21 @@ public bool Equip(Item item, string slot)
 			{
 				scenePath = item.ItemName switch
 				{
-					"Marine_CM_Uniform" => "res://Scenes/Items/Clothing/Uniforms/Marine_CM_Uniform.tscn",
-					"Medical_Scrubs" => "res://Scenes/Items/Clothing/Uniforms/Medical_Scrubs.tscn",
-					"MA_Light_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Light_Armor.tscn",
-					"MA_Medium_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Medium_Armor.tscn",
-					"MA_Heavy_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Heavy_Armor.tscn",
-					"Marine_Boots" => "res://Scenes/Items/Clothing/Boots/Marine_Boots.tscn",
-					"Combat_Boots" => "res://Scenes/Items/Clothing/Boots/Combat_Boots.tscn",
-					"Marine_Gloves" => "res://Scenes/Items/Clothing/Gloves/Marine_Gloves.tscn",
-					"Armored_Gloves" => "res://Scenes/Items/Clothing/Gloves/Armored_Gloves.tscn",
+					"Marine_CM_Uniform" => "uid://<UID_OF_MARINE_CM_UNIFORM>",
+					"Medical_Scrubs" => "uid://<UID_OF_MEDICAL_SCRUBS>",
+					"MA_Light_Armor" => "uid://<UID_OF_MA_LIGHT_ARMOR>",
+					"MA_Medium_Armor" => "uid://<UID_OF_MA_MEDIUM_ARMOR>",
+					"MA_Heavy_Armor" => "uid://<UID_OF_MA_HEAVY_ARMOR>",
+					"Marine_Boots" => "uid://<UID_OF_MARINE_BOOTS>",
+					"Combat_Boots" => "uid://<UID_OF_COMBAT_BOOTS>",
+					"Marine_Gloves" => "uid://<UID_OF_MARINE_GLOVES>",
+					"Armored_Gloves" => "uid://<UID_OF_ARMORED_GLOVES>",
 					_ => null
 				};
 			}
 			else
 			{
-			scenePath = string.IsNullOrEmpty(item.ScenePath) ? $"res://Scenes/Items/{item.ItemName}.tscn" : item.ScenePath;
+			scenePath = string.IsNullOrEmpty(item.ScenePath) ? $"uid://<UID_OF_{item.ItemName.ToUpper()}>" : item.ScenePath;
 			if (scenePath != null)
 			{
 				var itemScene = GD.Load<PackedScene>(scenePath);

@@ -25,7 +25,7 @@ public partial class WorldItem : RigidBody2D
 	public override void _Ready()
 	{
 		AddToGroup("WorldItems");
-		_spriteSystem = GetNodeOrNull<ItemSpriteSystem>("Icon");
+	_spriteSystem = GetNodeOrNull<ItemSpriteSystem>("Icon");
 		
 		FreezeMode = FreezeModeEnum.Kinematic;
 		Freeze = true;

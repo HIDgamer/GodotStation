@@ -58,6 +58,7 @@ public partial class GameManager : Node
 	[Signal] public delegate void RequestVideoSyncEventHandler(string videoUid, int requesterId);
 	[Signal] public delegate void PlayerCountChangedEventHandler(int count);
 	[Signal] public delegate void GameStateChangedEventHandler(int state);
+	[Signal] public delegate void LobbyStateSyncedEventHandler(float timeLeft, bool paused, string videoUid);
 
 	private const string CharactersDir = "user://characters/";
 	private string _charactersDirOverride = null;
@@ -89,10 +90,8 @@ public partial class GameManager : Node
 		
 		_lobbyManager = GetNodeOrNull<LobbyManager>("/root/LobbyManager");
 		
-		// Discord RPC integration
 		var discord = GetNode<DiscordRPC>("/root/DiscordRpc");
 		
-		// Connect to game state signals
 		GameStateChanged += (stateInt) => {
 			var state = (GameState)stateInt;
 			switch (state)
@@ -175,7 +174,9 @@ public partial class GameManager : Node
 			_connectedPeers.Add(1);
 			_isHosting = true;
 			
-			var prefManager = GetNode("/root/PreferenceManager");
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		if (prefManager != null)
+		{
 			var playerData = (Dictionary)prefManager.Call("get_character_data");
 			var hostName = playerData.ContainsKey("name") ? (string)playerData["name"] : "Host";
 			if (string.IsNullOrEmpty(hostName)) hostName = "Host";
@@ -185,6 +186,13 @@ public partial class GameManager : Node
 				playerData["peer_id"] = 1;
 			_peerCharacters[1] = playerData;
 			prefManager.Call("set_peer_character_data", 1, playerData);
+		}
+		else
+		{
+			GD.PrintErr("[GameManager] PreferenceManager not found, using default player data");
+			_playerNames[1] = "Host";
+			_peerCharacters[1] = new Dictionary { { "name", "Host" }, { "peer_id", 1 } };
+		}
 			
 			SetupLobbyTimer();
 			RegisterWithLobby(port);
@@ -297,7 +305,7 @@ public partial class GameManager : Node
 		AddChild(updateTimer);
 
 		if (Multiplayer.IsServer() && !string.IsNullOrEmpty(CurrentVideoUid))
-			EmitSignal(SignalName.MediaSyncReceived, "video", CurrentVideoUid, 0, 0.5f);
+			Rpc(MethodName.BroadcastMediaSync, "video", CurrentVideoUid, 0, 0.5f);
 	}
 
 	private void UpdateLobbyTime()
@@ -478,18 +486,29 @@ public partial class GameManager : Node
 		
 		UpdatePlayerCount();
 		
-		var prefManager = GetNode("/root/PreferenceManager");
-		var playerData = (Dictionary)prefManager.Call("get_character_data");
 		var myId = Multiplayer.GetUniqueId();
-		playerData["peer_id"] = myId;
+		var playerData = new Dictionary();
 		
-		var playerName = playerData.ContainsKey("name") ? (string)playerData["name"] : $"Player {myId}";
-		if (string.IsNullOrEmpty(playerName))
-			playerName = $"Player {myId}";
-		_playerNames[myId] = playerName;
-		
-		_peerCharacters[myId] = playerData;
-		prefManager.Call("set_peer_character_data", myId, playerData);
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		if (prefManager != null)
+		{
+			playerData = (Dictionary)prefManager.Call("get_character_data");
+			playerData["peer_id"] = myId;
+			
+			var playerName = playerData.ContainsKey("name") ? (string)playerData["name"] : $"Player {myId}";
+			if (string.IsNullOrEmpty(playerName))
+				playerName = $"Player {myId}";
+			_playerNames[myId] = playerName;
+			
+			_peerCharacters[myId] = playerData;
+			prefManager.Call("set_peer_character_data", myId, playerData);
+		}
+		else
+		{
+			GD.PrintErr("[GameManager] PreferenceManager not found during connection");
+			_playerNames[myId] = $"Player {myId}";
+			_peerCharacters[myId] = new Dictionary { { "name", $"Player {myId}" }, { "peer_id", myId } };
+		}
 		
 		RpcId(1, MethodName.ReceivePlayerAppearance, myId, playerData);
 	}
@@ -522,8 +541,15 @@ public partial class GameManager : Node
 				_playerNames[peerId] = playerName;
 		}
 		
-		var prefManager = GetNode("/root/PreferenceManager");
-		prefManager.Call("set_peer_character_data", peerId, playerData);
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		if (prefManager != null)
+		{
+			prefManager.Call("set_peer_character_data", peerId, playerData);
+		}
+		else
+		{
+			GD.PrintErr("[GameManager] PreferenceManager not found in ReceivePlayerAppearance");
+		}
 		
 		Rpc(MethodName.SyncPlayerAppearance, peerId, playerData);
 		
@@ -552,8 +578,15 @@ public partial class GameManager : Node
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void SyncPlayerAppearance(int peerId, Dictionary playerData)
 	{
-		var prefManager = GetNode("/root/PreferenceManager");
-		prefManager.Call("set_peer_character_data", peerId, playerData);
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		if (prefManager != null)
+		{
+			prefManager.Call("set_peer_character_data", peerId, playerData);
+		}
+		else
+		{
+			GD.PrintErr("[GameManager] PreferenceManager not found in SyncPlayerAppearance");
+		}
 		
 		if (playerData.ContainsKey("name"))
 		{
@@ -626,6 +659,9 @@ public partial class GameManager : Node
 		LobbyTimeLeft = timeLeft;
 		LobbyTimerPaused = paused;
 		CurrentVideoUid = videoUid;
+		
+		// Emit signal to notify lobby scenes of state changes
+		EmitSignal(SignalName.LobbyStateSynced, timeLeft, paused, videoUid);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -651,8 +687,12 @@ public partial class GameManager : Node
 	private string GetRandomVideo()
 	{
 		var videos = new string[] {
-			"uid://chnqslhqxbscu",
-			"uid://c5p0bxp7i8rcp"
+			"uid://m44b5scm3sf2",
+			"uid://baddbapvxhyjw",
+			"uid://s331mwi01abw",
+			"uid://bttyceok81cxh",
+			"uid://cs4b47j652yok",
+			"uid://c2kq5gljee3h0"
 		};
 		return videos[GD.RandRange(0, videos.Length - 1)];
 	}

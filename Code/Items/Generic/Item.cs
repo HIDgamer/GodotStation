@@ -7,7 +7,7 @@ public partial class Item : Resource
 	[Export] public string ItemName = "Item";
 	[Export] public string Description = "";
 	[Export] public Texture2D Icon;
-	[Export] public string ScenePath = ""; // Path to world item scene. Can be file path (res://...) or UID (uid://...)
+	[Export] public string ScenePath = ""; // Path to world item scene. Must use UID format (uid://...) for export compatibility
 	[Export] public float Weight = 1.0f;
 	[Export] public int MaxStack = 1;
 	[Export] public bool IsRuntimeUnique = false;

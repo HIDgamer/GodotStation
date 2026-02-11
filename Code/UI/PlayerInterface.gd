@@ -295,7 +295,7 @@ func _cleanup_signals() -> void:
 		interaction.HandSwitched.disconnect(_on_hand_switched)
 
 func _spawn_item(item: Resource, pos: Vector2) -> void:
-	var scene = load("res://Scenes/Items/" + item.ItemName + ".tscn")
+	var scene = load("uid://item_scene_uid")
 	if scene:
 		var world_item = scene.instantiate()
 		world_item.position = pos

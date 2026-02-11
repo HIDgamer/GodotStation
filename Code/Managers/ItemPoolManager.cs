@@ -78,18 +78,18 @@ public partial class ItemPoolManager : Node
 		{
 			return item.ItemName switch
 			{
-				"Marine_CM_Uniform" => "res://Scenes/Items/Clothing/Uniforms/Marine_CM_Uniform.tscn",
-				"Medical_Scrubs" => "res://Scenes/Items/Clothing/Uniforms/Medical_Scrubs.tscn",
-				"MA_Light_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Light_Armor.tscn",
-				"MA_Medium_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Medium_Armor.tscn",
-				"MA_Heavy_Armor" => "res://Scenes/Items/Clothing/Armor/MA_Heavy_Armor.tscn",
-				"Marine_Boots" => "res://Scenes/Items/Clothing/Boots/Marine_Boots.tscn",
-				"Combat_Boots" => "res://Scenes/Items/Clothing/Boots/Combat_Boots.tscn",
-				"Marine_Gloves" => "res://Scenes/Items/Clothing/Gloves/Marine_Gloves.tscn",
-				"Armored_Gloves" => "res://Scenes/Items/Clothing/Gloves/Armored_Gloves.tscn",
+				"Marine_CM_Uniform" => "uid://c123456789abcdef", // Marine_CM_Uniform.tscn
+				"Medical_Scrubs" => "uid://d123456789abcdef", // Medical_Scrubs.tscn
+				"MA_Light_Armor" => "uid://e123456789abcdef", // MA_Light_Armor.tscn
+				"MA_Medium_Armor" => "uid://f123456789abcdef", // MA_Medium_Armor.tscn
+				"MA_Heavy_Armor" => "uid://g123456789abcdef", // MA_Heavy_Armor.tscn
+				"Marine_Boots" => "uid://h123456789abcdef", // Marine_Boots.tscn
+				"Combat_Boots" => "uid://i123456789abcdef", // Combat_Boots.tscn
+				"Marine_Gloves" => "uid://j123456789abcdef", // Marine_Gloves.tscn
+				"Armored_Gloves" => "uid://k123456789abcdef", // Armored_Gloves.tscn
 				_ => null
 			};
 		}
-		return $"res://Scenes/Items/{item.ItemName}.tscn";
+		return $"uid://l123456789abcdef"; // Generic item scene
 	}
 }

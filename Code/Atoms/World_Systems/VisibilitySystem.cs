@@ -22,12 +22,15 @@ public partial class VisibilitySystem : Node2D
 
 	public override void _Ready()
 	{
-		_gridSystem = GetNode<GridSystem>("../GridSystem");
-		_gridSystem.ScanCompleted += OnGridScanCompleted;
-		
-		// Process existing grid if available
-		if (_gridSystem.Grid?.Count > 0)
-			OnGridScanCompleted(_gridSystem.Grid);
+		_gridSystem = GetNodeOrNull<GridSystem>("../GridSystem");
+		if (_gridSystem != null)
+		{
+			_gridSystem.ScanCompleted += OnGridScanCompleted;
+			
+			// Process existing grid if available
+			if (_gridSystem.Grid?.Count > 0)
+				OnGridScanCompleted(_gridSystem.Grid);
+		}
 	}
 
 	public void RefreshGrid()

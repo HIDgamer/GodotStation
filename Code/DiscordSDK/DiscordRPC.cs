@@ -116,7 +116,18 @@ public partial class DiscordRPC : Node
 		}
 	}
 	
-	public void UpdatePresence(string state, string details, string largeImage = "logo", string largeText = "GodotStation")
+	public void UpdatePresence(
+		string state = null,
+		string details = null,
+		string largeImage = "godotstation",
+		string largeText = "GodotStation",
+		string smallImage = null,
+		string smallText = null,
+		int partySize = 0,
+		int partyMax = 0,
+		string partyId = null,
+		string joinSecret = null,
+		long? endTimestamp = null)
 	{
 		if (!_initialized) return;
 		
@@ -124,19 +135,19 @@ public partial class DiscordRPC : Node
 		{
 			var presence = new DiscordRichPresence
 			{
-				state = Marshal.StringToHGlobalAnsi(state ?? ""),
-				details = Marshal.StringToHGlobalAnsi(details ?? ""),
+				state = state != null ? Marshal.StringToHGlobalAnsi(state) : IntPtr.Zero,
+				details = details != null ? Marshal.StringToHGlobalAnsi(details) : IntPtr.Zero,
 				startTimestamp = _startTime,
-				endTimestamp = 0,
-				largeImageKey = Marshal.StringToHGlobalAnsi(largeImage ?? ""),
-				largeImageText = Marshal.StringToHGlobalAnsi(largeText ?? ""),
-				smallImageKey = IntPtr.Zero,
-				smallImageText = IntPtr.Zero,
-				partyId = IntPtr.Zero,
-				partySize = 0,
-				partyMax = 0,
+				endTimestamp = endTimestamp ?? 0,
+				largeImageKey = largeImage != null ? Marshal.StringToHGlobalAnsi(largeImage) : IntPtr.Zero,
+				largeImageText = largeText != null ? Marshal.StringToHGlobalAnsi(largeText) : IntPtr.Zero,
+				smallImageKey = smallImage != null ? Marshal.StringToHGlobalAnsi(smallImage) : IntPtr.Zero,
+				smallImageText = smallText != null ? Marshal.StringToHGlobalAnsi(smallText) : IntPtr.Zero,
+				partyId = partyId != null ? Marshal.StringToHGlobalAnsi(partyId) : IntPtr.Zero,
+				partySize = partySize,
+				partyMax = partyMax,
 				matchSecret = IntPtr.Zero,
-				joinSecret = IntPtr.Zero,
+				joinSecret = joinSecret != null ? Marshal.StringToHGlobalAnsi(joinSecret) : IntPtr.Zero,
 				spectateSecret = IntPtr.Zero,
 				instance = 0
 			};
@@ -144,12 +155,16 @@ public partial class DiscordRPC : Node
 			Discord_UpdatePresence(ref presence);
 			
 			// Free allocated memory
-			Marshal.FreeHGlobal(presence.state);
-			Marshal.FreeHGlobal(presence.details);
-			Marshal.FreeHGlobal(presence.largeImageKey);
-			Marshal.FreeHGlobal(presence.largeImageText);
+			if (presence.state != IntPtr.Zero) Marshal.FreeHGlobal(presence.state);
+			if (presence.details != IntPtr.Zero) Marshal.FreeHGlobal(presence.details);
+			if (presence.largeImageKey != IntPtr.Zero) Marshal.FreeHGlobal(presence.largeImageKey);
+			if (presence.largeImageText != IntPtr.Zero) Marshal.FreeHGlobal(presence.largeImageText);
+			if (presence.smallImageKey != IntPtr.Zero) Marshal.FreeHGlobal(presence.smallImageKey);
+			if (presence.smallImageText != IntPtr.Zero) Marshal.FreeHGlobal(presence.smallImageText);
+			if (presence.partyId != IntPtr.Zero) Marshal.FreeHGlobal(presence.partyId);
+			if (presence.joinSecret != IntPtr.Zero) Marshal.FreeHGlobal(presence.joinSecret);
 			
-			GD.Print($"[DiscordRPC] Updated: {state} | {details}");
+			GD.Print($"[DiscordRPC] Updated: {state ?? "null"} | {details ?? "null"}");
 		}
 		catch (System.Exception e)
 		{
@@ -157,66 +172,69 @@ public partial class DiscordRPC : Node
 		}
 	}
 	
-	/// <summary>
-	/// Set presence to "In Lobby" state
-	/// </summary>
 	public void SetInLobby()
 	{
-		UpdatePresence("In Lobby", "Browsing servers", "logo", "GodotStation");
+		UpdatePresence(
+			state: "In Lobby",
+			details: "Browsing servers",
+			largeImage: "godotstation",
+			largeText: "GodotStation"
+		);
 	}
 	
-	public void SetInGame(string serverName, int currentPlayers, int maxPlayers)
+	public void SetInGame(string serverName, int currentPlayers, int maxPlayers, string mapName = null, string characterClass = null, int characterLevel = 0)
 	{
-		var state = $"{currentPlayers}/{maxPlayers} players";
-		var details = $"Playing: {serverName}";
-		UpdatePresence(state, details, "ingame", "In Game");
+		UpdatePresence(
+			state: $"Playing Solo ({currentPlayers} of {maxPlayers})",
+			details: serverName,
+			largeImage: "godotstation",
+			largeText: mapName ?? "GodotStation",
+			smallImage: characterClass != null ? "godotstation512" : null,
+			smallText: characterClass != null ? $"{characterClass} - Level {characterLevel}" : null
+		);
 	}
+	
 	public void SetHosting(string serverName, int currentPlayers, int maxPlayers)
 	{
-		var state = $"Hosting: {currentPlayers}/{maxPlayers}";
-		var details = serverName;
-		UpdatePresence(state, details, "host", "Hosting Server");
+		UpdatePresence(
+			state: $"Hosting: {currentPlayers}/{maxPlayers}",
+			details: serverName,
+			largeImage: "godotstation",
+			largeText: "Hosting Server"
+		);
 	}
 	
-	public void SetWithParty(string state, string details, int partySize, int partyMax, string partyId)
+	public void SetWithParty(string state, string details, int partySize, int partyMax, string partyId, string joinSecret = null)
 	{
-		if (!_initialized) return;
-		
-		try
-		{
-			var presence = new DiscordRichPresence
-			{
-				state = Marshal.StringToHGlobalAnsi(state ?? ""),
-				details = Marshal.StringToHGlobalAnsi(details ?? ""),
-				startTimestamp = _startTime,
-				endTimestamp = 0,
-				largeImageKey = Marshal.StringToHGlobalAnsi("logo"),
-				largeImageText = Marshal.StringToHGlobalAnsi("GodotStation"),
-				smallImageKey = IntPtr.Zero,
-				smallImageText = IntPtr.Zero,
-				partyId = Marshal.StringToHGlobalAnsi(partyId ?? ""),
-				partySize = partySize,
-				partyMax = partyMax,
-				matchSecret = IntPtr.Zero,
-				joinSecret = IntPtr.Zero,
-				spectateSecret = IntPtr.Zero,
-				instance = 0
-			};
-			
-			Discord_UpdatePresence(ref presence);
-			
-			// Free allocated memory
-			Marshal.FreeHGlobal(presence.state);
-			Marshal.FreeHGlobal(presence.details);
-			Marshal.FreeHGlobal(presence.largeImageKey);
-			Marshal.FreeHGlobal(presence.largeImageText);
-			Marshal.FreeHGlobal(presence.partyId);
-		}
-		catch (System.Exception e)
-		{
-			GD.PrintErr($"[DiscordRPC] Failed to update presence with party: {e.Message}");
-		}
+		UpdatePresence(
+			state: state,
+			details: details,
+			largeImage: "godotstation",
+			largeText: "GodotStation",
+			partySize: partySize,
+			partyMax: partyMax,
+			partyId: partyId,
+			joinSecret: joinSecret
+		);
 	}
+	
+	public void SetCompetitive(string mode, string map, int partySize, int partyMax, string characterClass = null, int characterLevel = 0)
+	{
+		UpdatePresence(
+			state: $"Playing Solo ({partySize} of {partyMax})",
+			details: mode,
+			largeImage: "godotstation",
+			largeText: map,
+			smallImage: characterClass != null ? "godotstation512" : null,
+			smallText: characterClass != null ? $"{characterClass} - Level {characterLevel}" : null,
+			partySize: partySize,
+			partyMax: partyMax
+		);
+	}
+	
+	/// <summary>
+	/// Clear Discord presence
+	/// </summary>
 	public void ClearPresence()
 	{
 		if (!_initialized) return;

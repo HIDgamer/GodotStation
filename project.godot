@@ -10,10 +10,10 @@ config_version=5
 
 [application]
 
-config/name="UACMGS"
+config/name="GodotStation"
 config/version="8.0"
 run/main_scene="res://Scenes/UI/MainLobbyUI.tscn"
-config/custom_user_dir_name="UACMGS"
+config/custom_user_dir_name="GodotStation"
 config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 config/icon="res://Assets/Icons/Ico/UACMGS_64x64.ico"
 config/windows_native_icon="res://Assets/Icons/Ico/UACMGS_64x64.ico"
@@ -43,11 +43,25 @@ window/vsync/vsync_mode=0
 
 [dotnet]
 
-project/assembly_name="UACMGS"
+project/assembly_name="GodotStation"
 
 [editor_plugins]
 
 enabled=PackedStringArray()
+
+[export]
+
+customized=true
+include_filter="*.png,*.jpg,*.jpeg,*.tga,*.svg,*.bmp,*.hdr,*.exr,*.webp,*.ogg,*.wav,*.mp3,*.s3m,*.xm,*.it,*.mod,*.json,*.tres,*.res,*.gd,*.cs,*.gdshader,*.gdshaderinc,*.gdextension,*.dll,*.so,*.dylib,*.ttf,*.otf,*.woff,*.woff2,*.ogv,*.mp4,*.webm"
+exclude_filter="*.import,*.tmp,*.bak,*.cache"
+export_filter="all_resources"
+script_export_mode=2
+script_encryption_key=""
+
+[export_filter]
+
+include_filter="*.png,*.jpg,*.jpeg,*.tga,*.svg,*.bmp,*.hdr,*.exr,*.webp,*.ogg,*.wav,*.mp3,*.s3m,*.xm,*.it,*.mod,*.json,*.tres,*.res,*.gd,*.cs,*.gdshader,*.gdshaderinc,*.gdextension,*.dll,*.so,*.dylib,*.ttf,*.otf,*.woff,*.woff2,*.ogv,*.mp4,*.webm"
+exclude_filter="*.import,*.tmp,*.bak,*.cache"
 
 [file_customization]
 

@@ -49,8 +49,6 @@ public partial class Mob : CharacterBody2D
 			if (camera != null)
 				camera.Enabled = false;
 		}
-
-		// Find GridSystem and CollisionManager
 		_gridSystem = FindGridSystem();
 		_collisionManager = FindCollisionManager();
 		
@@ -62,7 +60,6 @@ public partial class Mob : CharacterBody2D
 			GlobalPosition = _gridSystem.GridToWorld(_currentTile);
 		}
 		
-		// Find WorldManager for grid access
 		var wm = FindWorldManager();
 		if (wm != null && _gridSystem != null)
 		{
@@ -104,7 +101,6 @@ public partial class Mob : CharacterBody2D
 		
 		if (prefManager != null && int.TryParse(Name, out int peerId))
 		{
-			// Try GameManager first for peer-specific data
 			if (gameManager != null)
 			{
 				var charData = (Godot.Collections.Dictionary)gameManager.Call("GetPeerCharacterData", peerId);
@@ -116,7 +112,6 @@ public partial class Mob : CharacterBody2D
 				}
 			}
 			
-			// Fallback to PreferenceManager
 			var charData2 = (Godot.Collections.Dictionary)prefManager.Call("get_peer_character_data", peerId);
 			if (charData2 != null && charData2.Count > 0)
 			{
@@ -176,8 +171,6 @@ public partial class Mob : CharacterBody2D
 
 		Rpc(MethodName.ShowChatBubbleRpc, message, mode);
 	}
-
-	/// Shows a private thought bubble only to the owning player (no chat log, no RPC to others)
 	public void ShowPrivateThought(string message)
 	{
 		if (IsMultiplayerAuthority())
@@ -185,14 +178,11 @@ public partial class Mob : CharacterBody2D
 			_show_chat_bubble_local(message, "THOUGHT");
 		}
 	}
-
-	/// Shows a private 3rd person message only to the target player (no chat log)
 	public void ShowPrivateMessageTo(int targetPeerId, string message)
 	{
 		RpcId(targetPeerId, nameof(ShowPrivateMessageRpc), targetPeerId, message);
 	}
 
-	/// RPC to show a private message to a specific peer
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void ShowPrivateMessageRpc(int targetPeerId, string message)
 	{
@@ -226,7 +216,7 @@ public partial class Mob : CharacterBody2D
 		}
 		else
 		{
-			var bubbleScene = GD.Load<PackedScene>("res://Scenes/UI/ChatBubble.tscn");
+			var bubbleScene = GD.Load<PackedScene>("uid://<UID_OF_CHATBUBBLE_SCENE>");
 			if (bubbleScene != null)
 			{
 				var bubble = bubbleScene.Instantiate<Node2D>();
@@ -260,9 +250,9 @@ public partial class Mob : CharacterBody2D
 	public void ApplyAppearance(Godot.Collections.Dictionary playerData)
 	{
 		var spriteSystem = GetNodeOrNull<SpriteSystem>("SpriteSystem");
-		if (spriteSystem != null)
+		if (spriteSystem != null && playerData != null && playerData.Count > 0)
 		{
-			spriteSystem.apply_textures();
+			spriteSystem.ApplyAppearanceWithData(playerData);
 		}
 	}
 	
@@ -273,7 +263,6 @@ public partial class Mob : CharacterBody2D
 	
 	private WorldManager FindWorldManager()
 	{
-		// Traverse up the scene tree to find WorldManager
 		Node current = this;
 		while (current != null)
 		{
@@ -287,7 +276,6 @@ public partial class Mob : CharacterBody2D
 	
 	private GridSystem FindGridSystem()
 	{
-		// Find GridSystem as sibling of WorldManager
 		var wm = FindWorldManager();
 		if (wm != null)
 		{
@@ -296,7 +284,6 @@ public partial class Mob : CharacterBody2D
 				return grid;
 		}
 		
-		// Fallback: traverse up to find GridSystem directly
 		Node current = this;
 		while (current != null)
 		{
@@ -310,7 +297,6 @@ public partial class Mob : CharacterBody2D
 	
 	private CollisionManager FindCollisionManager()
 	{
-		// Find CollisionManager as sibling of WorldManager
 		var wm = FindWorldManager();
 		if (wm != null)
 		{
@@ -319,7 +305,6 @@ public partial class Mob : CharacterBody2D
 				return collision;
 		}
 		
-		// Fallback: traverse up to find CollisionManager directly
 		Node current = this;
 		while (current != null)
 		{

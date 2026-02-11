@@ -32,7 +32,10 @@ public partial class SpriteSystem : Node2D
 	private readonly string[] _bodyParts = {
 		"Left_foot", "Right_foot", "Left_leg", "Right_leg",
 		"Body", "Left_arm", "Right_arm", "Head",
-		"Left_hand", "Right_hand", "Eyes", "Hair", "Facial_Hair", "Underwear", "Undershirt",
+		"Left_hand", "Right_hand", "Eyes", "Hair", "Facial_Hair", "Underwear", "Undershirt"
+	};
+	
+	private readonly string[] _gearParts = {
 		"Uniform", "Shoes", "Gloves", "Armor", "Belt", "Back", "Mask", "Eyes_Gear", "Head_Gear"
 	};
 
@@ -58,9 +61,16 @@ public partial class SpriteSystem : Node2D
 							(GetTree().GetNodesInGroup("PreferenceManager").Count > 0 ? 
 							 GetTree().GetNodesInGroup("PreferenceManager")[0] : null);
 
+		if (_preferenceManager != null)
+		{
+			_preferenceManager.Connect("character_data_changed", Callable.From(ReloadAppearance));
+		}
+
+		InitializeGearSprites();
 		ApplyTextures();
 		_headFrame = Direction;
 		_targetHeadFrame = Direction;
+		ReloadAppearance();
 		
 		var parent2 = GetParent();
 		if (parent2 is Mob mob)
@@ -68,6 +78,20 @@ public partial class SpriteSystem : Node2D
 			var inventory = mob.GetNodeOrNull<Inventory>("Inventory");
 			if (inventory != null)
 				inventory.InventoryChanged += UpdateClothingSprites;
+		}
+	}
+
+	private void InitializeGearSprites()
+	{
+		foreach (var part in _gearParts)
+		{
+			var sprite = GetNodeOrNull<Sprite2D>(part);
+			if (sprite == null)
+			{
+				sprite = new Sprite2D { Name = part };
+				AddChild(sprite);
+			}
+			sprite.Visible = false;
 		}
 	}
 
@@ -81,7 +105,6 @@ public partial class SpriteSystem : Node2D
 			Gender = (string)data.GetValueOrDefault("gender", "Male");
 			EyeColor = (string)data.GetValueOrDefault("eye_color", "#000000");
 			HairBaseColor = (string)data.GetValueOrDefault("hair_base_color", "#000000");
-			GD.Print($"[SpriteSystem] Applying {GetParent()?.Name}: {Ethnicity}/{Gender}");
 		}
 
 		foreach (var part in _bodyParts)
@@ -147,14 +170,19 @@ public partial class SpriteSystem : Node2D
 			_textureCache.Clear();
 
 		string resPath = BuildTexturePath(partName, type);
-		string uidPath = GetUidPath(resPath);
 		
-		Texture2D texture = !string.IsNullOrEmpty(uidPath) 
-			? ResourceLoader.Load<Texture2D>(uidPath) 
-			: (ResourceLoader.Exists(resPath) ? ResourceLoader.Load<Texture2D>(resPath) : null);
+		Texture2D texture = null;
+		
+		if (ResourceLoader.Exists(resPath))
+		{
+			texture = ResourceLoader.Load<Texture2D>(resPath);
+		}
 
 		if (texture != null)
+		{
 			_textureCache[cacheKey] = texture;
+		}
+		
 		return texture;
 	}
 
@@ -176,30 +204,15 @@ public partial class SpriteSystem : Node2D
 		if (partName.StartsWith("UnderShirt")) return $"{BaseClothingPath}UnderShirt/";
 		if (partName.StartsWith("Facial")) return $"{BaseBodyHairPath}FacialHair/";
 		if (partName.StartsWith("Hair") && partName.Length > 4) return $"{BaseBodyHairPath}Hair/";
+		
 		return $"{BaseRacePath}{Ethnicity}/";
-	}
-
-	private string GetUidPath(string resPath)
-	{
-		string uidFilePath = resPath + ".uid";
-		if (FileAccess.FileExists(uidFilePath))
-		{
-			using var file = FileAccess.Open(uidFilePath, FileAccess.ModeFlags.Read);
-			if (file != null)
-			{
-				string uid = file.GetAsText().Trim();
-				if (!string.IsNullOrEmpty(uid))
-					return $"uid://{uid}";
-			}
-		}
-		return null;
 	}
 
 	private string GetPartName(string part, Godot.Collections.Dictionary data)
 	{
 		string gender = (string)data.GetValueOrDefault("gender", "Male");
 
-		return part switch
+		string partName = part switch
 		{
 			"Hair" => GetHairPartName(data),
 			"Facial_Hair" => GetFacialHairPartName(data, gender),
@@ -210,24 +223,50 @@ public partial class SpriteSystem : Node2D
 				=> gender == "Female" ? $"{part}_Female" : part,
 			_ => part
 		};
+		
+		return partName;
 	}
 
 	private string GetHairPartName(Godot.Collections.Dictionary data)
 	{
-		string hairStyle = (string)data.GetValueOrDefault("hair_style", " (11)");
-		return !string.IsNullOrEmpty(hairStyle) && hairStyle != "Default" ? $"Hair{hairStyle}" : "Hair";
+		string hairStyle = (string)data.GetValueOrDefault("hair_style", "");
+		if (string.IsNullOrEmpty(hairStyle) || hairStyle == "Default")
+			return "";
+		
+		string hairPath = $"{BaseBodyHairPath}Hair/Hair{hairStyle}.png";
+		if (!ResourceLoader.Exists(hairPath))
+			return "";
+		
+		return $"Hair{hairStyle}";
 	}
 
 	private string GetFacialHairPartName(Godot.Collections.Dictionary data, string gender)
 	{
+		if (gender == "Female")
+			return "";
+		
 		string facialStyle = (string)data.GetValueOrDefault("facial_hair_style", "");
-		return !string.IsNullOrEmpty(facialStyle) && gender != "Female" ? $"Facial{facialStyle}" : "";
+		if (string.IsNullOrEmpty(facialStyle))
+			return "";
+		
+		string facialPath = $"{BaseBodyHairPath}FacialHair/Facial{facialStyle}.png";
+		if (!ResourceLoader.Exists(facialPath))
+			return "";
+		
+		return $"Facial{facialStyle}";
 	}
 
 	private string GetUnderwearPartName(Godot.Collections.Dictionary data)
 	{
 		string underwearStyle = (string)data.GetValueOrDefault("underwear_style", "1");
-		return !string.IsNullOrEmpty(underwearStyle) ? $"Underwear_{underwearStyle}" : "";
+		if (string.IsNullOrEmpty(underwearStyle))
+			return "";
+		
+		string underwearPath = $"{BaseClothingPath}UnderWear/Underwear_{underwearStyle}.png";
+		if (!ResourceLoader.Exists(underwearPath))
+			return "";
+		
+		return $"Underwear_{underwearStyle}";
 	}
 
 	private string GetUndershirtPartName(Godot.Collections.Dictionary data, string gender)
@@ -235,7 +274,15 @@ public partial class SpriteSystem : Node2D
 		string undershirtStyle = (string)data.GetValueOrDefault("undershirt_style", "");
 		if (string.IsNullOrEmpty(undershirtStyle))
 			undershirtStyle = gender == "Female" ? "1" : "";
-		return !string.IsNullOrEmpty(undershirtStyle) ? $"UnderShirt_{undershirtStyle}" : "";
+		
+		if (string.IsNullOrEmpty(undershirtStyle))
+			return "";
+		
+		string undershirtPath = $"{BaseClothingPath}UnderShirt/UnderShirt_{undershirtStyle}.png";
+		if (!ResourceLoader.Exists(undershirtPath))
+			return "";
+		
+		return $"UnderShirt_{undershirtStyle}";
 	}
 
 	private Godot.Collections.Dictionary GetCharacterData()
@@ -245,7 +292,6 @@ public partial class SpriteSystem : Node2D
 			if (_preferenceManager != null)
 			{
 				var data = (Godot.Collections.Dictionary)_preferenceManager.Call("get_character_data");
-				GD.Print($"[SpriteSystem] Preview mode - got data with race: {data.GetValueOrDefault("race", "none")}");
 				return data;
 			}
 			return new Godot.Collections.Dictionary();
@@ -259,7 +305,6 @@ public partial class SpriteSystem : Node2D
 				_preferenceManager = GetNodeOrNull("/root/PreferenceManager");
 				if (_preferenceManager == null)
 				{
-					GD.PrintErr($"[SpriteSystem] PreferenceManager not found for peer {peerId}!");
 					return new Godot.Collections.Dictionary();
 				}
 			}
@@ -279,6 +324,19 @@ public partial class SpriteSystem : Node2D
 		ApplyTextures();
 	}
 
+	public void ApplyAppearanceWithData(Godot.Collections.Dictionary data)
+	{
+		if (data.Count > 0)
+		{
+			Ethnicity = (string)data.GetValueOrDefault("race", "Western");
+			Gender = (string)data.GetValueOrDefault("gender", "Male");
+			EyeColor = (string)data.GetValueOrDefault("eye_color", "#000000");
+			HairBaseColor = (string)data.GetValueOrDefault("hair_base_color", "#000000");
+		}
+		_textureCache.Clear();
+		ApplyTextures();
+	}
+
 	public void SetDirection(int direction)
 	{
 		if (Direction != direction)
@@ -291,14 +349,12 @@ public partial class SpriteSystem : Node2D
 	
 	private void SyncInHandSpriteFrames()
 	{
-		// Sync the ItemSpriteSystem in-hand sprites with the direction frame
 		var leftHandNode = GetNodeOrNull<Node2D>("Left_hand");
 		if (leftHandNode != null)
 		{
 			var itemSpriteSystem = leftHandNode.GetNodeOrNull<ItemSpriteSystem>("Icon");
 			if (itemSpriteSystem != null)
 			{
-				// Sync to the current direction frame
 				itemSpriteSystem.SyncInHandFrame(_frameMap[Direction]);
 			}
 		}
@@ -442,9 +498,9 @@ public partial class SpriteSystem : Node2D
 		
 		int desiredFrame;
 		if (Mathf.Abs(dx) > Mathf.Abs(dy))
-			desiredFrame = dx > 0 ? 2 : 3; // Fixed: was inverted
+			desiredFrame = dx > 0 ? 2 : 3;
 		else
-			desiredFrame = dy > 0 ? 0 : 1; // Fixed: was inverted
+			desiredFrame = dy > 0 ? 0 : 1;
 		
 		int[] opposites = { 1, 0, 3, 2 };
 		if (desiredFrame == opposites[Direction])
@@ -673,7 +729,6 @@ public partial class SpriteSystem : Node2D
 	
 	private void UpdateProneRotation()
 	{
-		// Rotate ALL body part sprites for prone state
 		foreach (var part in _bodyParts)
 		{
 			var sprite = GetNodeOrNull<Sprite2D>(part);
@@ -681,12 +736,26 @@ public partial class SpriteSystem : Node2D
 			{
 				if (_isProne)
 				{
-					// Rotate sprites 90 degrees for prone state
 					sprite.Rotation = Mathf.Pi / 2;
 				}
 				else
 				{
-					// Reset rotation for standing state
+					sprite.Rotation = 0;
+				}
+			}
+		}
+		
+		foreach (var part in _gearParts)
+		{
+			var sprite = GetNodeOrNull<Sprite2D>(part);
+			if (sprite != null && sprite.Visible)
+			{
+				if (_isProne)
+				{
+					sprite.Rotation = Mathf.Pi / 2;
+				}
+				else
+				{
 					sprite.Rotation = 0;
 				}
 			}
@@ -698,17 +767,15 @@ public partial class SpriteSystem : Node2D
 		_doAfterTween?.Kill();
 		_doAfterTween = CreateTween();
 		
-		// Create a doafter indicator above the player's head
 		var doAfterIndicator = new Sprite2D();
-		doAfterIndicator.Texture = ResourceLoader.Load<Texture2D>("uid://cqglc2mfqbup1"); // 20-frame animation
+		doAfterIndicator.Texture = ResourceLoader.Load<Texture2D>("uid://cqglc2mfqbup1");
 		doAfterIndicator.Hframes = 20;
 		doAfterIndicator.Vframes = 1;
 		doAfterIndicator.Frame = 0;
-		doAfterIndicator.Position = new Vector2(0, -40); // Above head
-		doAfterIndicator.ZIndex = 1000; // Always on top
+		doAfterIndicator.Position = new Vector2(0, -40);
+		doAfterIndicator.ZIndex = 1000;
 		AddChild(doAfterIndicator);
 		
-		// Animate through all 20 frames
 		_doAfterTween.TweenProperty(doAfterIndicator, "frame", 19, duration);
 		_doAfterTween.TweenCallback(Callable.From(() => doAfterIndicator.QueueFree()));
 	}
@@ -760,5 +827,6 @@ public partial class SpriteSystem : Node2D
 			if (facialHairSprite != null && facialHairSprite.Visible) facialHairSprite.ZIndex = bodySprite.ZIndex + 1;
 		}
 	}
+	
 	
 }

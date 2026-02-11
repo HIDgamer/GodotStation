@@ -1,5 +1,7 @@
 extends Node
 
+signal character_data_changed
+
 var game_manager: Node = null
 var current_character: Dictionary = {}
 var peer_characters: Dictionary = {}
@@ -59,7 +61,7 @@ func save_to_slot(slot: int) -> void:
 		return
 	game_manager.SaveSlot(slot, current_character)
 	_save_last_slot(slot)
-	print("Saved character to slot ", slot, " and marked as last used slot")
+	load_from_slot(slot)
 
 func load_from_slot(slot: int) -> void:
 	if game_manager == null:
@@ -72,6 +74,9 @@ func load_from_slot(slot: int) -> void:
 		current_character = _get_default_character()
 	else:
 		print("Loaded character from slot ", slot, ": ", current_character.get("name", "Unnamed"))
+	
+	peer_characters[1] = current_character.duplicate()
+	character_data_changed.emit()
 	current_slot = slot
 	_save_last_slot(slot)
 
@@ -132,6 +137,7 @@ func set_character_data(data: Dictionary) -> void:
 
 func update_character_field(field: String, value) -> void:
 	current_character[field] = value
+	character_data_changed.emit()
 
 func get_role_priorities() -> Dictionary:
 	return current_character.get("role_priorities", {})

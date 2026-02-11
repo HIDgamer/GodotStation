@@ -29,7 +29,6 @@ disable_3d = true
 canvas_item_default_texture_filter = 0
 oversampling_override = 1.0
 size = Vector2i(400, 400)
-visible = true
 theme_override_styles/panel = SubResource("StyleBoxEmpty_b3xe1")
 script = ExtResource("1_script")
 
@@ -48,7 +47,12 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxTexture_2unwo")
 
-[node name="GridContainer" type="GridContainer" parent="VBoxContainer/ScrollContainer" unique_id=447821478]
+[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/ScrollContainer/CenterContainer" unique_id=447821478]
 layout_mode = 2
 columns = 4
 

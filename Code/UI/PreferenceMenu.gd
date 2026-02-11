@@ -106,22 +106,30 @@ func load_character_data() -> void:
 	var gender: String = data.get("gender", "Male")
 	gender_option.selected = 0 if gender == "Female" else 1
 	var race: String = data.get("race", "Western")
+	
+	var race_found = false
 	for i in range(race_option.get_item_count()):
 		if race_option.get_item_text(i) == race:
 			race_option.selected = i
+			race_found = true
 			break
+	
+	if not race_found and race_option.get_item_count() > 0:
+		race = race_option.get_item_text(0)
+		preference_manager.update_character_field("race", race)
+		race_option.selected = 0
+		print("Warning: Race '", data.get("race", "Unknown"), "' not found, using: ", race)
+	
 	religion_menu.text = data.get("religion", "")
 	origin_menu.text = data.get("origin", "")
 	relations_menu.text = data.get("relations", "")
 	pref_squad_menu.text = data.get("pref_squad", "")
 	if hair_button:
 		var hair_style = data.get("hair_style", "")
-		if hair_style == "":
-			hair_style = " (11)"
-			preference_manager.update_character_field("hair_style", hair_style)
-		hair_button.text = hair_style
+		hair_button.text = hair_style if hair_style != "" else "None"
 	if facial_hair_button:
-		facial_hair_button.text = data.get("facial_hair_style", "")
+		var facial_style = data.get("facial_hair_style", "")
+		facial_hair_button.text = facial_style if facial_style != "" else "None"
 	if underwear_button:
 		var underwear_style = data.get("underwear_style", "")
 		if underwear_style == "":
@@ -165,7 +173,7 @@ func update_button_states(gender: String) -> void:
 	if facial_hair_button:
 		facial_hair_button.disabled = (gender == "Female")
 	if undershirt_button:
-		undershirt_button.disabled = (gender == "Male")
+		undershirt_button.disabled = false
 
 func _on_name_changed(new_text: String) -> void:
 	preference_manager.update_character_field("name", new_text)
@@ -220,6 +228,7 @@ func _on_assign_role_button_pressed() -> void:
 	print("Assigned current character to Assistant")
 
 func _on_hair_button_pressed() -> void:
+	print("PreferenceMenu._on_hair_button_pressed called")
 	item_popup.set_type("hair", hair_button)
 	item_popup.populate_items()
 	item_popup.popup_centered()
@@ -270,9 +279,7 @@ func load_backgrounds() -> void:
 		var file: String = dir.get_next()
 		while file:
 			if not dir.current_is_dir() and file.ends_with(".png"):
-				var res_path = "res://Assets/Background/PreferenceMenu/" + file
-				var uid = ResourceLoader.get_resource_uid(res_path)
-				backgrounds.append(ResourceUID.id_to_text(uid) if uid != ResourceUID.INVALID_ID else res_path)
+				backgrounds.append("res://Assets/Background/PreferenceMenu/" + file)
 			file = dir.get_next()
 		dir.list_dir_end()
 	if backgrounds.size() > 0:

@@ -19,13 +19,16 @@ public partial class WorldManager : Node
 	
 	public override void _Ready()
 	{
-		_baseLayer = GetNode<TileMap>("../BaseLayer");
-		_gridSystem = GetNode<GridSystem>("../GridSystem");
-		_collisionManager = GetNode<CollisionManager>("../CollisionManager");
+		_baseLayer = GetNodeOrNull<TileMap>("../BaseLayer");
+		_gridSystem = GetNodeOrNull<GridSystem>("../GridSystem");
+		_collisionManager = GetNodeOrNull<CollisionManager>("../CollisionManager");
 		_visibilitySystem = GetNodeOrNull<VisibilitySystem>("../VisibilitySystem");
 
-		var placedCells = CollectPlacedCells();
-		GenerateBases(placedCells);
+		if (_gridSystem != null)
+		{
+			var placedCells = CollectPlacedCells();
+			GenerateBases(placedCells);
+		}
 
 		_batchTimer = new Timer { WaitTime = BatchInterval, Autostart = true };
 		_batchTimer.Timeout += ProcessBatchedUpdates;
