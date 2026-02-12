@@ -163,7 +163,7 @@ public partial class LobbyManager : Node
 			{ "is_dedicated", true },
 			{ "max_players", 32 },
 			{ "current_players", 0 },
-			{ "ip_address", "132.145.130.83" },
+			{ "ip_address", "129.213.29.53" },
 			{ "description", "Official Dedicated Server" }
 		};
 		string serverApiKey = OS.GetEnvironment("SERVER_API_KEY");
