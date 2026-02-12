@@ -5,7 +5,6 @@ var current_tween: Tween = null
 var chat_mode: String = "IC"
 
 func _ready() -> void:
-	print("[ChatBubble] Ready called")
 	label.text = ""
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(120, 0)
@@ -28,10 +27,8 @@ func _exit_tree() -> void:
 		current_tween.kill()
 
 func set_message(message: String, mode: String = "IC") -> void:
-	print("[ChatBubble] set_message called: ", message, " mode: ", mode)
 	chat_mode = mode
-	
-	# Don't show chat bubbles for system messages (only player text)
+
 	if message.begins_with("hugs ") or message.begins_with("pats ") or message.begins_with("shoves ") or \
 	   message.begins_with("tries to shove ") or message.begins_with("punches ") or message.begins_with("misses ") or \
 	   message.begins_with("grabs ") or message.begins_with("aggressively grabs ") or message.begins_with("starts choking ") or \
@@ -40,7 +37,6 @@ func set_message(message: String, mode: String = "IC") -> void:
 	   message.begins_with("Already being pulled") or message.begins_with("Hand is occupied") or \
 	   message.begins_with("Too far for fireman carry") or message.begins_with("Stopped carrying") or \
 	   message.begins_with("swapped places with") or message.begins_with("pushed") or message.begins_with("pulled"):
-		# Don't show chat bubble for system messages
 		queue_free()
 		return
 	
@@ -66,7 +62,6 @@ func update_message(message: String, mode: String = "IC") -> void:
 func adjust_position() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
-	# Position bubble above player's head with fixed offset
 	position = Vector2(0, -15)
 
 func animate_in() -> void:

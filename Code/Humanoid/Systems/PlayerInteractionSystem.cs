@@ -213,7 +213,8 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 			GD.Print($"[PlayerInteraction] Harm successful: dealt {damage} damage to {target.GetPlayerName()}");
 			_owner.ShowPrivateThought("I punch them");
 			target.ShowPrivateMessageTo(target.GetMultiplayerAuthority(), $"{_owner.GetPlayerName()} punches you!");
-			Rpc(nameof(PlayThrustAndHitRpc), target.GlobalPosition, target.GlobalPosition);
+			Rpc(nameof(PlayThrustAnimationRpc), target.GlobalPosition);
+			target.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem")?.Rpc(nameof(PlayHitEffectRpc), target.GlobalPosition);
 		}
 		else
 		{

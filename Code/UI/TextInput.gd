@@ -1,4 +1,3 @@
-# TextInput - Chat input window for sending messages during gameplay.
 extends Window
 
 signal message_sent(text: String, mode: String)
@@ -11,6 +10,8 @@ enum ChatMode { IC, OOC, LOOC, ME }
 var current_mode: ChatMode = ChatMode.IC
 var selected: bool = false
 var mob: Node = null
+var _pending_send_lock: bool = false
+var _post_send_lock_seconds: float = 0.15
 
 func _ready() -> void:
 	add_to_group("TextInput")
@@ -27,10 +28,15 @@ func _on_send(new_text: String = "") -> void:
 	if text == "" or text.length() > 200:
 		line_edit.text = ""
 		return
-	
+
 	var mode_str: String = _get_mode_string()
+	if _is_lobby_phase() and (mode_str == "IC" or mode_str == "LOOC"):
+		line_edit.text = ""
+		return
+
 	message_sent.emit(text, mode_str)
 	line_edit.text = ""
+	_pending_send_lock = true
 	hide()
 
 func _get_mode_string() -> String:
@@ -84,7 +90,11 @@ func deselect() -> void:
 	line_edit.editable = false
 	send_button.disabled = true
 	line_edit.release_focus()
-	_restore_player_movement()
+	if _pending_send_lock:
+		_pending_send_lock = false
+		_restore_player_movement_delayed()
+	else:
+		_restore_player_movement()
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
 		gm.call("SetChatInputActive", false)
@@ -100,8 +110,23 @@ func _restore_player_movement() -> void:
 	if mob and "DisableMovement" in mob:
 		mob.DisableMovement = false
 
+func _restore_player_movement_delayed() -> void:
+	await get_tree().create_timer(_post_send_lock_seconds).timeout
+	_restore_player_movement()
+
+func _is_lobby_phase() -> bool:
+	var gm = get_node_or_null("/root/GameManager")
+	if gm == null:
+		return false
+	if gm.has_method("IsGameRunning"):
+		return not gm.call("IsGameRunning")
+	if gm.has_method("GetCurrentGameState"):
+		return int(gm.call("GetCurrentGameState")) == 1
+	if "CurrentGameState" in gm:
+		return int(gm.CurrentGameState) == 1
+	return false
+
 func _get_player_node() -> Node:
-	# Try multiple approaches to find the player node
 	var player_id = str(multiplayer.get_unique_id())
 
 	var world = get_tree().get_first_node_in_group("World")
@@ -110,7 +135,6 @@ func _get_player_node() -> Node:
 		if world_player:
 			return world_player
 	
-	# Method 1: Check direct children of the current scene
 	var current_scene = get_tree().current_scene
 	if current_scene:
 		for child in current_scene.get_children():
@@ -121,7 +145,6 @@ func _get_player_node() -> Node:
 					if grandchild is CharacterBody2D and grandchild.name == player_id:
 						return grandchild
 	
-	# Method 2: Check subviewport
 	var subviewport = get_node_or_null("../HSplitContainer/SubViewportContainer/SubViewport")
 	if subviewport:
 		for child in subviewport.get_children():
@@ -132,7 +155,6 @@ func _get_player_node() -> Node:
 					if grandchild is CharacterBody2D and grandchild.name == player_id:
 						return grandchild
 	
-	# Method 3: Check all mobs in the scene
 	var mobs = get_tree().get_nodes_in_group("Mob")
 	for mob in mobs:
 		if mob.name == player_id:

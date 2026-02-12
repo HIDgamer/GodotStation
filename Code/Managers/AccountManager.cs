@@ -203,6 +203,33 @@ public partial class AccountManager : Node
 	{
 		return _userData.ContainsKey("username") ? _userData["username"].ToString() : "";
 	}
+
+	public string GetDiscordTag()
+	{
+		if (_userData.ContainsKey("discord_tag"))
+			return _userData["discord_tag"].ToString();
+
+		if (_userData.ContainsKey("global_name"))
+		{
+			var globalName = _userData["global_name"].ToString();
+			if (!string.IsNullOrWhiteSpace(globalName))
+				return globalName;
+		}
+
+		if (_userData.ContainsKey("username"))
+		{
+			var username = _userData["username"].ToString();
+			if (_userData.ContainsKey("discriminator"))
+			{
+				var discriminator = _userData["discriminator"].ToString();
+				if (!string.IsNullOrWhiteSpace(discriminator) && discriminator != "0")
+					return $"{username}#{discriminator}";
+			}
+			return username;
+		}
+
+		return "";
+	}
 	
 	public void StartDiscordLogin()
 	{

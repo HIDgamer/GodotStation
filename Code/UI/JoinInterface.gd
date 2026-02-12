@@ -24,23 +24,27 @@ var servers: Array = []
 func _ready() -> void:
 	join_button.pressed.connect(_on_join_pressed)
 	UIAnimationHelperScript.setup_button_animations(join_button)
-	
+
 	lobby_manager = get_node_or_null("/root/LobbyManager")
 	server_list = get_node_or_null("JoinUI/ServerList")
 	refresh_button = get_node_or_null("JoinUI/RefreshButton")
 	direct_connect_button = get_node_or_null("JoinUI/DirectConnectButton")
-	
+
 	if lobby_manager != null:
-		lobby_manager.server_list_updated.connect(_on_server_list_updated)
+		if lobby_manager.has_signal("server_list_updated"):
+			lobby_manager.server_list_updated.connect(_on_server_list_updated)
+		elif lobby_manager.has_signal("ServerListUpdated"):
+			lobby_manager.ServerListUpdated.connect(_on_server_list_updated)
 		lobby_manager.GetServerList()
-		
+
 	if server_list != null:
 		server_list.item_selected.connect(_on_server_selected)
-		
+		server_list.item_activated.connect(_on_server_activated)
+
 	if refresh_button != null:
 		refresh_button.pressed.connect(_on_refresh_pressed)
 		UIAnimationHelperScript.setup_button_animations(refresh_button)
-		
+
 	if direct_connect_button != null:
 		direct_connect_button.pressed.connect(_on_direct_connect_pressed)
 		UIAnimationHelperScript.setup_button_animations(direct_connect_button)
@@ -63,7 +67,8 @@ func _on_join_pressed() -> void:
 		var selected_idx: int = server_list.get_selected_items()[0]
 		if selected_idx >= 0 and selected_idx < servers.size():
 			var server = servers[selected_idx]
-			_join_server(server["ip_address"], int(server["port"]))
+			var ip = str(server.get("connect_ip", server.get("ip_address", server.get("public_ip", "127.0.0.1"))))
+			_join_server(ip, int(server.get("port", GameManager.DefaultPort)))
 	else:
 		_on_direct_connect_pressed()
 
@@ -71,18 +76,20 @@ func _on_direct_connect_pressed() -> void:
 	var ip: String = ip_line_edit.text
 	if ip == "":
 		ip = "127.0.0.1"
-	
+
 	var port_text: String = port_line_edit.text
 	var port: int = port_text.to_int() if port_text != "" else GameManager.DefaultPort
-	
+
 	_join_server(ip, port)
 
 func _join_server(ip: String, port: int) -> void:
 	join_button.disabled = true
 	join_button.text = "Connecting..."
-	
-	multiplayer.connected_to_server.connect(_on_successfully_connected)
-	multiplayer.connection_failed.connect(_on_connection_failed)
+
+	if not multiplayer.connected_to_server.is_connected(_on_successfully_connected):
+		multiplayer.connected_to_server.connect(_on_successfully_connected)
+	if not multiplayer.connection_failed.is_connected(_on_connection_failed):
+		multiplayer.connection_failed.connect(_on_connection_failed)
 	GameManager.JoinGame(ip, port)
 
 func _on_successfully_connected() -> void:
@@ -110,20 +117,23 @@ func _on_server_list_updated(server_array: Array) -> void:
 	servers = server_array
 	if server_list == null:
 		return
-		
+
 	server_list.clear()
 	for server in servers:
-		var name: String = server["name"]
-		var players: String = "%s/%s" % [server["current_players"], server["max_players"]]
-		var map: String = server.get("map", "Unknown")
-		var host: String = server["host_username"]
-		var locked: String = "🔒 " if server["password_protected"] else ""
-		
+		var name: String = str(server.get("name", "Unknown"))
+		var players: String = "%s/%s" % [server.get("current_players", 0), server.get("max_players", 0)]
+		var map: String = str(server.get("map", "Unknown"))
+		var host: String = str(server.get("host_username", "Unknown"))
+		var locked: String = "LOCK " if server.get("password_protected", false) else ""
 		server_list.add_item("%s%s - %s - %s - Host: %s" % [locked, name, players, map, host])
 
 func _on_server_selected(index: int) -> void:
 	if ip_line_edit != null and index >= 0 and index < servers.size():
 		var server = servers[index]
-		ip_line_edit.text = server["ip_address"]
+		ip_line_edit.text = str(server.get("connect_ip", server.get("ip_address", server.get("public_ip", "127.0.0.1"))))
 		if port_line_edit != null:
-			port_line_edit.text = str(server["port"])
+			port_line_edit.text = str(server.get("port", GameManager.DefaultPort))
+
+func _on_server_activated(index: int) -> void:
+	_on_server_selected(index)
+	_on_join_pressed()

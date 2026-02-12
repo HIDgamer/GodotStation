@@ -27,7 +27,6 @@ public partial class FriendsManager : Node
 		_httpClient = new HttpClient();
 		_accountManager = GetNode<AccountManager>("/root/AccountManager");
 		
-		// Refresh friends list periodically
 		var refreshTimer = new Godot.Timer();
 		refreshTimer.WaitTime = 30.0f;
 		refreshTimer.Timeout += RefreshFriendsList;
@@ -45,7 +44,6 @@ public partial class FriendsManager : Node
 		return _pendingRequests;
 	}
 	
-	// Get friends list
 	public async void RefreshFriendsList()
 	{
 		if (!_accountManager.IsLoggedIn())
@@ -80,7 +78,6 @@ public partial class FriendsManager : Node
 		}
 	}
 	
-	// Get pending friend requests
 	public async void RefreshPendingRequests()
 	{
 		if (!_accountManager.IsLoggedIn())
@@ -115,12 +112,18 @@ public partial class FriendsManager : Node
 		}
 	}
 	
-	// Send friend request
 	public async void SendFriendRequest(string username)
 	{
 		if (!_accountManager.IsLoggedIn())
 		{
 			EmitSignal(SignalName.FriendRequestFailed, "Not logged in");
+			return;
+		}
+
+		var identifier = NormalizeFriendIdentifier(username);
+		if (string.IsNullOrEmpty(identifier))
+		{
+			EmitSignal(SignalName.FriendRequestFailed, "Enter a username or Discord tag");
 			return;
 		}
 		
@@ -129,7 +132,12 @@ public partial class FriendsManager : Node
 			_httpClient.DefaultRequestHeaders.Clear();
 			_httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_accountManager.GetAuthToken()}");
 			
-			var data = new Dictionary { { "username", username } };
+			var data = new Dictionary
+			{
+				{ "identifier", identifier },
+				{ "username", identifier },
+				{ "discord_tag", identifier }
+			};
 			var json = Json.Stringify(data);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			
@@ -139,7 +147,9 @@ public partial class FriendsManager : Node
 			if (response.IsSuccessStatusCode)
 			{
 				EmitSignal(SignalName.FriendRequestSent);
-				GD.Print($"[FriendsManager] Friend request sent to {username}");
+				RefreshFriendsList();
+				RefreshPendingRequests();
+				GD.Print($"[FriendsManager] Friend request sent to {identifier}");
 			}
 			else
 			{
@@ -156,7 +166,6 @@ public partial class FriendsManager : Node
 		}
 	}
 	
-	// Accept friend request
 	public async void AcceptFriendRequest(int userId)
 	{
 		if (!_accountManager.IsLoggedIn())
@@ -190,7 +199,6 @@ public partial class FriendsManager : Node
 		}
 	}
 	
-	// Reject friend request
 	public async void RejectFriendRequest(int userId)
 	{
 		if (!_accountManager.IsLoggedIn())
@@ -223,7 +231,6 @@ public partial class FriendsManager : Node
 		}
 	}
 	
-	// Remove friend
 	public async void RemoveFriend(int friendId)
 	{
 		if (!_accountManager.IsLoggedIn())
@@ -248,12 +255,10 @@ public partial class FriendsManager : Node
 		}
 	}
 	
-	// Handle friend status updates from WebSocket
 	public void OnFriendStatusUpdate(int userId, bool online)
 	{
 		EmitSignal(SignalName.FriendStatusChanged, userId, online);
 		
-		// Update friend in list
 		foreach (Dictionary friend in _friendsList)
 		{
 			Variant v = friend["id"];
@@ -290,9 +295,18 @@ public partial class FriendsManager : Node
 		}
 		catch
 		{
-			// Ignore
 		}
 		return "Unknown error occurred";
+	}
+
+	private static string NormalizeFriendIdentifier(string raw)
+	{
+		if (string.IsNullOrWhiteSpace(raw))
+			return "";
+		var value = raw.Trim();
+		if (value.StartsWith("@"))
+			value = value.Substring(1);
+		return value;
 	}
 	
 	public override void _ExitTree()

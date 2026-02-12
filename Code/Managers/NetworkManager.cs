@@ -60,9 +60,10 @@ public partial class NetworkManager : Node
 		_states.Remove(peerId);
 		_lastSync.Remove(peerId);
 		
-		// Update Discord presence when a player joins
-		var discord = GetNode<DiscordRPC>("/root/DiscordRPC");
-		var gameManager = GetNode<GameManager>("/root/GameManager");
+		var discord = GetNodeOrNull<DiscordRPC>("/root/DiscordRpc");
+		var gameManager = GetNodeOrNull<GameManager>("/root/GameManager");
+		if (discord == null || gameManager == null)
+			return;
 		
 		if (gameManager.IsHost)
 		{
@@ -77,7 +78,9 @@ public partial class NetworkManager : Node
 			discord.SetInGame(
 				gameManager.ServerName,
 				gameManager.PlayerCount,
-				gameManager.MaxPlayers
+				gameManager.MaxPlayers,
+				gameManager.CurrentMap,
+				gameManager.Gamemode
 			);
 		}
 	}

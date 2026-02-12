@@ -344,6 +344,7 @@ public partial class SpriteSystem : Node2D
 			Direction = direction;
 			ApplyTextures();
 			SyncInHandSpriteFrames();
+			UpdateClothingSprites();
 		}
 	}
 	

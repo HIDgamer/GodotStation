@@ -14,6 +14,14 @@ public partial class Mob : CharacterBody2D
 	private Vector2I _currentTile;
 	private string _playerName = "";
 
+	public override void _EnterTree()
+	{
+		if (int.TryParse(Name, out int peerId))
+			SetMultiplayerAuthority(peerId);
+		else
+			SetMultiplayerAuthority((int)GetInstanceId());
+	}
+
 	public override void _Ready()
 	{
 		if (GetNodeOrNull<WeaponHandlingComponent>("WeaponHandlingComponent") == null)
@@ -25,11 +33,6 @@ public partial class Mob : CharacterBody2D
 		RegisterSystemsRecursive(this);
 		ChildEnteredTree += OnChildEnteredTree;
 
-		if (int.TryParse(Name, out int peerId))
-			SetMultiplayerAuthority(peerId);
-		else
-			SetMultiplayerAuthority((int)GetInstanceId());
-		
 		LoadCharacterData();
 		
 		if (IsMultiplayerAuthority())
@@ -166,6 +169,8 @@ public partial class Mob : CharacterBody2D
 		if (addToChat)
 		{
 			var communications = GetNodeOrNull("/root/Communications");
+			if (communications == null && GetTree().CurrentScene?.Name == "Communications")
+				communications = GetTree().CurrentScene;
 			communications?.Call("AddChatMessage", message, mode, _playerName);
 		}
 
@@ -216,7 +221,7 @@ public partial class Mob : CharacterBody2D
 		}
 		else
 		{
-			var bubbleScene = GD.Load<PackedScene>("uid://<UID_OF_CHATBUBBLE_SCENE>");
+			var bubbleScene = GD.Load<PackedScene>("res://Scenes/UI/ChatBubble.tscn");
 			if (bubbleScene != null)
 			{
 				var bubble = bubbleScene.Instantiate<Node2D>();

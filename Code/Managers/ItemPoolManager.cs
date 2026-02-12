@@ -16,6 +16,8 @@ public partial class ItemPoolManager : Node
 	{
 		string scenePath = GetScenePath(item);
 		if (scenePath == null) return null;
+		if (_world == null || !IsInstanceValid(_world))
+			_world = GetTree().GetFirstNodeInGroup("World");
 		
 		if (!_pools.ContainsKey(scenePath))
 			_pools[scenePath] = new Queue<WorldItem>();
@@ -74,22 +76,25 @@ public partial class ItemPoolManager : Node
 	
 	private string GetScenePath(Item item)
 	{
+		if (!string.IsNullOrEmpty(item?.ScenePath))
+			return item.ScenePath;
+
 		if (item is ClothingItem)
 		{
 			return item.ItemName switch
 			{
-				"Marine_CM_Uniform" => "uid://c123456789abcdef", // Marine_CM_Uniform.tscn
-				"Medical_Scrubs" => "uid://d123456789abcdef", // Medical_Scrubs.tscn
-				"MA_Light_Armor" => "uid://e123456789abcdef", // MA_Light_Armor.tscn
-				"MA_Medium_Armor" => "uid://f123456789abcdef", // MA_Medium_Armor.tscn
-				"MA_Heavy_Armor" => "uid://g123456789abcdef", // MA_Heavy_Armor.tscn
-				"Marine_Boots" => "uid://h123456789abcdef", // Marine_Boots.tscn
-				"Combat_Boots" => "uid://i123456789abcdef", // Combat_Boots.tscn
-				"Marine_Gloves" => "uid://j123456789abcdef", // Marine_Gloves.tscn
-				"Armored_Gloves" => "uid://k123456789abcdef", // Armored_Gloves.tscn
+				"Marine_CM_Uniform" => "uid://bafal7piiq62r",
+				"Medical_Scrubs" => "uid://cmekjlejs76dx",
+				"MA_Light_Armor" => "uid://dokjyi8xbqq3f",
+				"MA_Medium_Armor" => "uid://vcq5pgy5hx6q",
+				"MA_Heavy_Armor" => "uid://bivuy3j7hqmiy",
+				"Marine_Boots" => "uid://cm766a6sb2g85",
+				"Combat_Boots" => "uid://3u2w8gvxgm1l",
+				"Marine_Gloves" => "uid://eafyncq222qn",
+				"Armored_Gloves" => "uid://bcijgf8bgu24c",
 				_ => null
 			};
 		}
-		return $"uid://l123456789abcdef"; // Generic item scene
+		return null;
 	}
 }

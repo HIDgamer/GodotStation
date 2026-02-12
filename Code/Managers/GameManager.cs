@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using System;
 using System.Linq;
 
 public partial class GameManager : Node
@@ -26,6 +27,11 @@ public partial class GameManager : Node
 	[Export] public string ServerName = "";
 	[Export] public string ServerDescription = "";
 	[Export] public bool PasswordProtected = false;
+	[Export] public string CurrentMusicName = "";
+	[Export] public string CurrentMediaType = "";
+	[Export] public string CurrentMediaPath = "";
+	[Export] public int CurrentMediaLoops = 0;
+	[Export] public float CurrentMediaVolume = 0.5f;
 	
 	private GameState _currentGameState = GameState.Menu;
 
@@ -65,6 +71,8 @@ public partial class GameManager : Node
 
 	public bool IsHost => _isHosting;
 	public GameState CurrentGameState => _currentGameState;
+	public bool IsGameRunning() => _gameStarted;
+	public int GetCurrentGameState() => (int)_currentGameState;
 
 	public override void _Ready()
 	{
@@ -295,7 +303,7 @@ public partial class GameManager : Node
 		CurrentVideoUid = GetRandomVideo();
 		LobbyTimeLeft = 300.0f;
 		
-		_lobbyTimer = new Timer { WaitTime = LobbyTimeLeft, OneShot = true };
+		_lobbyTimer = new Timer { Name = "LobbyTimer", WaitTime = LobbyTimeLeft, OneShot = true, Paused = LobbyTimerPaused };
 		_lobbyTimer.Timeout += OnLobbyTimeout;
 		AddChild(_lobbyTimer);
 		_lobbyTimer.Start();
@@ -322,6 +330,7 @@ public partial class GameManager : Node
 	{
 		if (Multiplayer.IsServer())
 		{
+			LobbyTimeLeft = 0.0f;
 			EmitSignal(SignalName.LobbyTimeout);
 			Rpc(MethodName.SyncLobbyStateToAll, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
 		}
@@ -339,6 +348,9 @@ public partial class GameManager : Node
 		{
 			GD.Print($"[GameManager] StartGame called on server");
 			_gameStarted = true;
+			LobbyTimerPaused = false;
+			_lobbyTimer?.Stop();
+			SetGameState(GameState.Playing);
 			EmitSignal(SignalName.GameStarted);
 			
 			var world = GetWorld();
@@ -412,6 +424,8 @@ public partial class GameManager : Node
 	private void ClientStartGame()
 	{
 		_gameStarted = true;
+		LobbyTimerPaused = false;
+		SetGameState(GameState.Playing);
 		EmitSignal(SignalName.GameStarted);
 	}
 
@@ -438,6 +452,10 @@ public partial class GameManager : Node
 		{
 			Rpc(MethodName.SyncLobbyStateToAll, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
 			RpcId(peerId, MethodName.SyncIngameTime, IngameTime);
+			if (!string.IsNullOrEmpty(CurrentMediaType) && !string.IsNullOrEmpty(CurrentMediaPath))
+			{
+				RpcId(peerId, MethodName.BroadcastMediaSync, CurrentMediaType, CurrentMediaPath, CurrentMediaLoops, CurrentMediaVolume);
+			}
 			
 			foreach (var kvp in _peerCharacters)
 			{
@@ -659,14 +677,20 @@ public partial class GameManager : Node
 		LobbyTimeLeft = timeLeft;
 		LobbyTimerPaused = paused;
 		CurrentVideoUid = videoUid;
-		
-		// Emit signal to notify lobby scenes of state changes
 		EmitSignal(SignalName.LobbyStateSynced, timeLeft, paused, videoUid);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void BroadcastMediaSync(string type, string path, int loops, float volume)
 	{
+		CurrentMediaType = type;
+		CurrentMediaPath = path;
+		CurrentMediaLoops = loops;
+		CurrentMediaVolume = volume;
+		if (string.Equals(type, "music", StringComparison.OrdinalIgnoreCase))
+		{
+			CurrentMusicName = System.IO.Path.GetFileName(path);
+		}
 		EmitSignal(SignalName.MediaSyncReceived, type, path, loops, volume);
 	}
 
@@ -676,6 +700,73 @@ public partial class GameManager : Node
 		{
 			Rpc(MethodName.BroadcastMediaSync, type, path, loops, volume);
 		}
+	}
+
+	public void ToggleLobbyPause()
+	{
+		if (!Multiplayer.IsServer()) return;
+		if (_lobbyTimer == null) return;
+		LobbyTimerPaused = !LobbyTimerPaused;
+		_lobbyTimer.Paused = LobbyTimerPaused;
+		Rpc(MethodName.SyncLobbyStateToAll, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
+	}
+
+	public void ForceStartFromLobby()
+	{
+		if (!Multiplayer.IsServer()) return;
+		if (_gameStarted) return;
+		StartGame();
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void RequestCurrentVideo()
+	{
+		if (!Multiplayer.IsServer()) return;
+		var requesterId = Multiplayer.GetRemoteSenderId();
+		if (requesterId <= 0) return;
+		if (!string.IsNullOrEmpty(CurrentVideoUid))
+		{
+			RpcId(requesterId, MethodName.ReceiveVideoSync, CurrentVideoUid, 0.0f);
+		}
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void ReceiveVideoSync(string videoUid, float positionSeconds)
+	{
+		CurrentVideoUid = videoUid;
+		if (!string.IsNullOrEmpty(videoUid))
+			EmitSignal(SignalName.MediaSyncReceived, "video", videoUid, 0, 0.5f);
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SyncStatusInfo(string mapName, string gamemode, int currentPlayers, string musicName = "", float timeLeft = -1.0f, bool paused = false)
+	{
+		if (!string.IsNullOrEmpty(mapName))
+			CurrentMap = mapName;
+		if (!string.IsNullOrEmpty(gamemode))
+			Gamemode = gamemode;
+		PlayerCount = currentPlayers;
+		if (!string.IsNullOrEmpty(musicName))
+			CurrentMusicName = musicName;
+		if (timeLeft >= 0.0f)
+			LobbyTimeLeft = timeLeft;
+		LobbyTimerPaused = paused;
+		EmitSignal(SignalName.PlayersUpdated);
+		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Unreliable)]
+	private void SyncPlayerTransform(int playerId, Vector2 position, float rotation)
+	{
+		if (playerId == Multiplayer.GetUniqueId())
+			return;
+
+		var world = GetWorld();
+		if (world == null) return;
+		var player = world.GetNodeOrNull<Node2D>(playerId.ToString());
+		if (player == null) return;
+		player.GlobalPosition = position;
+		player.Rotation = rotation;
 	}
 
 	public void SendChatFromPlayer(int senderPeerId, string message, string mode = "IC")

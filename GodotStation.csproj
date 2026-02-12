@@ -4,4 +4,10 @@
     <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Code/DiscordSDK/discord-rpc.dll" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Code/DiscordSDK/discord-rpc.dll')" />
+    <None Include="Code/DiscordSDK/libdiscord-rpc.so" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Code/DiscordSDK/libdiscord-rpc.so')" />
+    <None Include="Code/DiscordSDK/libdiscord-rpc.dylib" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Code/DiscordSDK/libdiscord-rpc.dylib')" />
+  </ItemGroup>
 </Project>

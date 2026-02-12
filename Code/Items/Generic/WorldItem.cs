@@ -7,7 +7,6 @@ public partial class WorldItem : RigidBody2D
 	[Export] public int Quantity = 1;
 	[Export] public Item ItemData;
 	
-	// Frame and region settings for custom sprite display
 	[Export] public int IconFrame = 0;
 	[Export] public int InHandLeftFrame = 0;
 	[Export] public int InHandRightFrame = 0;
@@ -31,11 +30,9 @@ public partial class WorldItem : RigidBody2D
 		Freeze = true;
 		Visible = false;
 		
-		// Ensure this RigidBody2D has a collision shape for click detection
 		var collisionShape = GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
 		if (collisionShape == null)
 		{
-			// Create a default collision shape if none exists
 			collisionShape = new CollisionShape2D();
 			collisionShape.Name = "CollisionShape2D";
 			collisionShape.Shape = new RectangleShape2D() { Size = new Vector2(32, 32) };
@@ -43,7 +40,6 @@ public partial class WorldItem : RigidBody2D
 			GD.Print($"[WorldItem] Added default collision shape to {ItemData?.ItemName ?? "unknown item"}");
 		}
 		
-		// Connect mouse events for clicking
 		MouseEntered += () => _isMouseOver = true;
 		MouseExited += () => _isMouseOver = false;
 		
@@ -59,18 +55,15 @@ public partial class WorldItem : RigidBody2D
 			_hasBeenSynced = true;
 		}
 		
-		// Initialize sprite state for UI display
 		UpdateSpriteState();
 	}
 	
 	public void HandleWorldItemClick()
 	{
-		// Ranged weapons removed - click handling simplified
 	}
 	
 	public void HandleWorldItemDoubleClick()
 	{
-		// Double click tries to pick up the item
 		var mob = GetTree().GetFirstNodeInGroup("Player") as Mob;
 		if (mob != null)
 		{
@@ -161,6 +154,9 @@ public partial class WorldItem : RigidBody2D
 			GD.PrintErr($"[WorldItem] No ItemData");
 			return false;
 		}
+
+		if (string.IsNullOrEmpty(ItemData.ScenePath) && !string.IsNullOrEmpty(SceneFilePath))
+			ItemData.ScenePath = SceneFilePath;
 		
 		GD.Print($"[WorldItem] Server attempting pickup: {ItemData.ItemName} by {mob.Name}");
 		
@@ -210,7 +206,6 @@ public partial class WorldItem : RigidBody2D
 		}
 		else
 		{
-			// Client requests throw from server
 			var itemPath = GetPath();
 			GD.Print($"[WorldItem] Client requesting throw: {itemPath} to {targetPos}");
 			RpcId(1, nameof(RequestThrowRpc), itemPath, targetPos);
@@ -372,12 +367,8 @@ public partial class WorldItem : RigidBody2D
 		UpdateSpriteState();
 	}
 	
-	/// <summary>
-	/// Handle interaction with this item when clicked
-	/// </summary>
 	public bool Interact(Mob user, WorldItem heldItem = null)
 	{
-		// Ranged weapons removed - no interaction logic for now
 		return false;
 	}
 }

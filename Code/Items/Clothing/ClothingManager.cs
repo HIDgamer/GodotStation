@@ -6,6 +6,7 @@ public partial class ClothingManager : Node2D, IMobSystem
 	private Mob _owner;
 	private Inventory _inventory;
 	private Dictionary<string, Sprite2D> _clothingSprites = new();
+	private int _lastDirection = -1;
 	
 	public void Init(Mob mob)
 	{
@@ -62,6 +63,8 @@ public partial class ClothingManager : Node2D, IMobSystem
 		{
 			Name = name,
 			ZIndex = zIndex,
+			Hframes = 4,
+			Vframes = 1,
 			Visible = false,
 			Centered = true
 		};
@@ -139,6 +142,7 @@ public partial class ClothingManager : Node2D, IMobSystem
 		if (item is ClothingItem clothing && clothing.WornTexture != null)
 		{
 			sprite.Texture = clothing.WornTexture;
+			sprite.Frame = GetDirectionFrame();
 			sprite.Visible = true;
 		}
 		else
@@ -195,7 +199,48 @@ public partial class ClothingManager : Node2D, IMobSystem
 		return modifier;
 	}
 	
-	public void Process(double delta) { }
+	public void Process(double delta)
+	{
+		SyncOrientation();
+	}
+
+	private void SyncOrientation()
+	{
+		var spriteSystem = _owner?.GetNodeOrNull<SpriteSystem>("SpriteSystem");
+		if (spriteSystem == null) return;
+
+		var direction = spriteSystem.Direction;
+		var bodyRotation = spriteSystem.GetNodeOrNull<Sprite2D>("Body")?.Rotation ?? 0.0f;
+		if (_lastDirection == direction)
+		{
+			foreach (var sprite in _clothingSprites.Values)
+			{
+				if (sprite.Visible)
+					sprite.Rotation = bodyRotation;
+			}
+			return;
+		}
+
+		_lastDirection = direction;
+		var frame = DirectionToFrame(direction);
+		foreach (var sprite in _clothingSprites.Values)
+		{
+			if (!sprite.Visible) continue;
+			sprite.Frame = frame;
+			sprite.Rotation = bodyRotation;
+		}
+	}
+
+	private int GetDirectionFrame()
+	{
+		var spriteSystem = _owner?.GetNodeOrNull<SpriteSystem>("SpriteSystem");
+		return DirectionToFrame(spriteSystem?.Direction ?? 0);
+	}
+
+	private static int DirectionToFrame(int direction)
+	{
+		return Mathf.Clamp(direction, 0, 3);
+	}
 	
 	public void Cleanup()
 	{

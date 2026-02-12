@@ -141,30 +141,27 @@ public bool Equip(Item item, string slot)
 		if (item is GrabItem)
 			return GrabItemToken;
 		
-		// Use ScenePath if explicitly set
 		if (!string.IsNullOrEmpty(item.ScenePath))
 			return item.ScenePath;
 		
-		// Fallback for ClothingItems with hardcoded paths
 		if (item is ClothingItem)
 		{
 			return item.ItemName switch
 			{
-				"Marine_CM_Uniform" => "uid://<UID_OF_MARINE_CM_UNIFORM>",
-				"Medical_Scrubs" => "uid://<UID_OF_MEDICAL_SCRUBS>",
-				"MA_Light_Armor" => "uid://<UID_OF_MA_LIGHT_ARMOR>",
-				"MA_Medium_Armor" => "uid://<UID_OF_MA_MEDIUM_ARMOR>",
-				"MA_Heavy_Armor" => "uid://<UID_OF_MA_HEAVY_ARMOR>",
-				"Marine_Boots" => "uid://<UID_OF_MARINE_BOOTS>",
-				"Combat_Boots" => "uid://<UID_OF_COMBAT_BOOTS>",
-				"Marine_Gloves" => "uid://<UID_OF_MARINE_GLOVES>",
-				"Armored_Gloves" => "uid://<UID_OF_ARMORED_GLOVES>",
-				_ => $"uid://<UID_OF_{item.ItemName.ToUpper()}>"
+				"Marine_CM_Uniform" => "uid://bafal7piiq62r",
+				"Medical_Scrubs" => "uid://cmekjlejs76dx",
+				"MA_Light_Armor" => "uid://dokjyi8xbqq3f",
+				"MA_Medium_Armor" => "uid://vcq5pgy5hx6q",
+				"MA_Heavy_Armor" => "uid://bivuy3j7hqmiy",
+				"Marine_Boots" => "uid://cm766a6sb2g85",
+				"Combat_Boots" => "uid://3u2w8gvxgm1l",
+				"Marine_Gloves" => "uid://eafyncq222qn",
+				"Armored_Gloves" => "uid://bcijgf8bgu24c",
+				_ => null
 			};
 		}
 		
-		// Default fallback
-		return $"uid://<UID_OF_{item.ItemName.ToUpper()}>";
+		return null;
 	}
 	
 	private bool IsValidClothingSlot(ClothingItem clothing, string slot)
@@ -282,31 +279,10 @@ public bool Equip(Item item, string slot)
 			if (item is GrabItem)
 				return;
 			
-			// Get the current direction from the sprite system
 			var spriteSystemNode = _owner.GetNodeOrNull<SpriteSystem>("SpriteSystem");
 			int currentDirection = spriteSystemNode?.Direction ?? 0;
 			
-			string scenePath = null;
-			
-			if (item is ClothingItem)
-			{
-				scenePath = item.ItemName switch
-				{
-					"Marine_CM_Uniform" => "uid://<UID_OF_MARINE_CM_UNIFORM>",
-					"Medical_Scrubs" => "uid://<UID_OF_MEDICAL_SCRUBS>",
-					"MA_Light_Armor" => "uid://<UID_OF_MA_LIGHT_ARMOR>",
-					"MA_Medium_Armor" => "uid://<UID_OF_MA_MEDIUM_ARMOR>",
-					"MA_Heavy_Armor" => "uid://<UID_OF_MA_HEAVY_ARMOR>",
-					"Marine_Boots" => "uid://<UID_OF_MARINE_BOOTS>",
-					"Combat_Boots" => "uid://<UID_OF_COMBAT_BOOTS>",
-					"Marine_Gloves" => "uid://<UID_OF_MARINE_GLOVES>",
-					"Armored_Gloves" => "uid://<UID_OF_ARMORED_GLOVES>",
-					_ => null
-				};
-			}
-			else
-			{
-			scenePath = string.IsNullOrEmpty(item.ScenePath) ? $"uid://<UID_OF_{item.ItemName.ToUpper()}>" : item.ScenePath;
+			string scenePath = GetScenePathForItem(item);
 			if (scenePath != null)
 			{
 				var itemScene = GD.Load<PackedScene>(scenePath);
@@ -316,42 +292,31 @@ public bool Equip(Item item, string slot)
 					var spriteSystem = instance.GetNodeOrNull<ItemSpriteSystem>("Icon");
 					if (spriteSystem != null)
 					{
-						// Unset owner before moving to prevent "inconsistent owner" warning
 						spriteSystem.Owner = null;
 						instance.RemoveChild(spriteSystem);
 						handSprite.AddChild(spriteSystem);
 						spriteSystem.ShowInHand(currentDirection, slot == "left_hand");
-						
-						// Apply frame settings from item
 						ApplyItemFrameSettings(spriteSystem, item);
 					}
 					instance.QueueFree();
 				}
 				else
 				{
-					// Log warning for missing scene file but don't crash
 					GD.PrintErr($"[Inventory] Warning: Could not load scene file '{scenePath}' for item '{item.ItemName}'. Using fallback icon.");
-					
-					// Create a fallback sprite system with just the icon
 					var fallbackSpriteSystem = new ItemSpriteSystem();
 					fallbackSpriteSystem.IconTexture = item.Icon;
 					fallbackSpriteSystem.IconHframes = 1;
 					fallbackSpriteSystem.IconVframes = 1;
 					fallbackSpriteSystem.DefaultStateId = "default";
-					
-					// Initialize the fallback sprite system
 					fallbackSpriteSystem._Ready();
-					
-					// Apply frame settings from item
 					ApplyItemFrameSettings(fallbackSpriteSystem, item);
-					
 					handSprite.AddChild(fallbackSpriteSystem);
 					fallbackSpriteSystem.ShowIcon();
 				}
 			}
 		}
 	}
-	}
+
 	private void ApplyItemFrameSettings(ItemSpriteSystem spriteSystem, Item item)
 	{
 		if (spriteSystem == null || item == null) return;
@@ -359,7 +324,6 @@ public bool Equip(Item item, string slot)
 		var iconSprite = spriteSystem.GetIconSprite();
 		if (iconSprite != null)
 		{
-			// Apply frame setting if valid
 			if (item.IconFrame >= 0)
 			{
 				int totalFrames = iconSprite.Hframes * iconSprite.Vframes;
@@ -500,12 +464,6 @@ public bool Equip(Item item, string slot)
 		inventory?.DropEquipped(slot);
 	}
 	
-	/// <summary>
-	/// Swaps items between two equipment slots
-	/// </summary>
-	/// <param name="slot1">First slot name</param>
-	/// <param name="slot2">Second slot name</param>
-	/// <returns>True if swap was successful</returns>
 	public bool SwapItems(string slot1, string slot2)
 	{
 		if (!Multiplayer.IsServer()) return false;
@@ -516,15 +474,12 @@ public bool Equip(Item item, string slot)
 		var item1 = _equipped[slot1];
 		var item2 = _equipped[slot2];
 		
-		// Unequip both items
 		_equipped[slot1] = null;
 		_equipped[slot2] = null;
 		
-		// Update sprites for both slots
 		UpdateHandSprite(slot1);
 		UpdateHandSprite(slot2);
 		
-		// Equip items in swapped positions
 		if (item1 != null)
 			Equip(item1, slot2);
 		if (item2 != null)
@@ -532,7 +487,6 @@ public bool Equip(Item item, string slot)
 		
 		EmitSignal(SignalName.InventoryChanged);
 		
-		// Sync with all peers
 		foreach (var peerId in Multiplayer.GetPeers())
 		{
 			RpcId(peerId, nameof(SyncInventoryChangeRpc));

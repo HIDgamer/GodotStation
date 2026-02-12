@@ -1,7 +1,3 @@
-# Communications.gd
-# Handles UI panels, tabs, chat, viewport switching, and lobby/game coordination.
-# Manages the transition from lobby (video/music display) to active gameplay.
-
 extends Control
 
 @onready var tabview: TextureRect = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview
@@ -51,22 +47,11 @@ func _ready() -> void:
 		add_child(text_input_instance)
 		text_input_instance.message_sent.connect(_on_message_sent)
 
-	print("[Communications] Connecting to GameManager signals")
-	if GameManager.has_signal("lobby_timeout"):
-		GameManager.lobby_timeout.connect(_on_lobby_timer_timeout)
-		print("[Communications] Connected to lobby_timeout")
-	if GameManager.has_signal("GameStarted"):
-		GameManager.GameStarted.connect(_on_game_started)
-		print("[Communications] Connected to GameStarted")
-	if GameManager.has_signal("ChatMessageReceived"):
-		GameManager.ChatMessageReceived.connect(_on_chat_message_received)
-		print("[Communications] Connected to ChatMessageReceived")
-	else:
-		print("[Communications] ERROR: ChatMessageReceived signal not found!")
-	
-	if GameManager.has_signal("MediaSyncReceived"):
-		GameManager.MediaSyncReceived.connect(_on_media_sync_received)
-		print("[Communications] Connected to MediaSyncReceived")
+	_connect_gm_signal(["LobbyTimeout", "lobby_timeout"], Callable(self, "_on_lobby_timer_timeout"))
+	_connect_gm_signal(["GameStarted", "game_started"], Callable(self, "_on_game_started"))
+	_connect_gm_signal(["ChatMessageReceived", "chat_message_received"], Callable(self, "_on_chat_message_received"))
+	_connect_gm_signal(["MediaSyncReceived", "media_sync_received"], Callable(self, "_on_media_sync_received"))
+	_connect_gm_signal(["LobbyStateSynced", "lobby_state_synced"], Callable(self, "_on_lobby_state_synced"))
 
 	var status_timer = Timer.new()
 	status_timer.wait_time = 1.0
@@ -92,6 +77,14 @@ func _ready() -> void:
 	if GameManager.has_signal("players_updated"):
 		GameManager.players_updated.connect(update_status_info)
 	_on_tab_pressed("Status")
+	update_lobby_timer()
+
+func _connect_gm_signal(signal_names: Array, target_callable: Callable) -> bool:
+	for signal_name in signal_names:
+		if GameManager.has_signal(signal_name):
+			GameManager.connect(signal_name, target_callable)
+			return true
+	return false
 
 func _setup_tab_buttons() -> void:
 	var tab_container: HBoxContainer = $HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox
@@ -221,10 +214,12 @@ func _load_world_map() -> void:
 func _on_status_timer_timeout() -> void:
 	if current_tab == "Status" and status_info.visible:
 		update_status_info()
+	if multiplayer.is_server():
+		broadcast_status_to_peers()
 
 func update_lobby_timer() -> void:
 	if lobby_timer:
-		lobby_timer.wait_time = GameManager.LobbyTimeLeft
+		lobby_timer.start(GameManager.LobbyTimeLeft)
 		lobby_timer.paused = GameManager.LobbyTimerPaused
 
 func _on_ingame_timer_timeout() -> void:
@@ -260,6 +255,11 @@ func update_status_info() -> void:
 		timer_label.text = ""
 
 	music_label.text = "Now playing: " + current_music_name
+	if GameManager.has_method("get"):
+		var gm_music: String = str(GameManager.CurrentMusicName)
+		if gm_music != "":
+			current_music_name = gm_music
+			music_label.text = "Now playing: " + current_music_name
 
 	var real_time = Time.get_datetime_string_from_system()
 	real_time_label.text = "Real time: " + real_time
@@ -292,18 +292,15 @@ func _on_info_right_arrow_pressed() -> void:
 
 func _on_lobby_timer_timeout() -> void:
 	if multiplayer.is_server():
-		GameManager.StartGame()
-		_transition_to_game()
+		GameManager.ForceStartFromLobby()
 
 func _transition_to_game() -> void:
-	print("[Communications] _transition_to_game called")
 	lobby_subviewport.visible = false
 	lobby_subviewport.set_process(false)
 	
 	game_subviewport.visible = true
 	game_subviewport.set_process(true)
 	game_subviewport.set_physics_process(true)
-	print("[Communications] Game viewport set to visible")
 	
 	var subviewport: SubViewport = game_subviewport.get_node_or_null("SubViewport") as SubViewport
 	if subviewport and subviewport.get_child_count() > 0:
@@ -315,6 +312,7 @@ func _transition_to_game() -> void:
 	
 	game_started = true
 	timer_label.text = ""
+	_hide_server_round_controls()
 	var ingame_timer: Timer = get_node_or_null("IngameTimer") as Timer
 	if ingame_timer:
 		ingame_timer.start()
@@ -339,14 +337,11 @@ func _on_admin_art_pressed() -> void:
 
 func _on_delay_pressed() -> void:
 	if multiplayer.is_server():
-		GameManager.LobbyTimerPaused = !GameManager.LobbyTimerPaused
-		var timer = GameManager.get_node_or_null("LobbyTimer")
-		if timer:
-			timer.paused = GameManager.LobbyTimerPaused
-		GameManager.rpc("SyncLobbyStateToAll", GameManager.LobbyTimeLeft, GameManager.LobbyTimerPaused, GameManager.CurrentVideoUid)
+		GameManager.ToggleLobbyPause()
 
 func _on_start_pressed() -> void:
-	_on_lobby_timer_timeout()
+	if multiplayer.is_server():
+		GameManager.ForceStartFromLobby()
 
 func _on_preference_pressed() -> void:
 	var pref_scene = preload("uid://cqwq1gi0y8mph")
@@ -370,12 +365,8 @@ func _on_media_selected(type: String, path: String) -> void:
 			if type == "music":
 				var path_parts = path.split("/")
 				current_music_name = path_parts[-1] if path_parts.size() > 0 else "Unknown"
-	
-	if GameManager.has_signal("media_sync_received"):
-		GameManager.emit_signal("media_sync_received", type, path, music_loops if type == "music" else 0, music_volume if type == "music" else 0.5)
-	
-	if type == "video":
-		_sync_video_to_all_peers.rpc(path)
+
+	GameManager.SyncMedia(type, path, music_loops if type == "music" else 0, music_volume if type == "music" else 0.5)
 
 func _input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed("text") and text_input_instance:
@@ -409,9 +400,6 @@ func _input(event: InputEvent) -> void:
 						get_viewport().set_input_as_handled()
 
 func _get_player_name(peer_id: int) -> String:
-	# Try to get the name from PreferenceManager
-	
-	# Fallback to PreferenceManager
 	var game_manager = get_node_or_null("/root/GameManager")
 	if game_manager:
 		var char_data = game_manager.call("GetPeerCharacterData", peer_id)
@@ -423,26 +411,16 @@ func _get_player_name(peer_id: int) -> String:
 		var char_data2 = pref_manager.get_peer_character_data(peer_id)
 		if char_data2 and char_data2.has("name"):
 			return char_data2["name"]
-	
-	# Fallback to default name
 	return "Player " + str(peer_id)
 
 func _on_message_sent(message: String, mode: String) -> void:
-	print("[Communications] _on_message_sent called: ", message, " mode: ", mode)
 	var peer_id: int = multiplayer.get_unique_id()
-	var peer_name: String = _get_player_name(peer_id)
-	print("[Communications] Sending as peer ", peer_id, " name: ", peer_name)
-	if multiplayer.is_server():
-		GameManager.call("SendChatMessage", peer_id, peer_name, message, mode)
-	else:
-		GameManager.rpc_id(1, "SendChatMessage", peer_id, peer_name, message, mode)
+	GameManager.SendChatFromPlayer(peer_id, message, mode)
 
 func _on_chat_message_received(sender_peer_id: int, sender_name: String, message: String, mode: String = "IC") -> void:
-	print("[Communications] _on_chat_message_received: ", sender_name, " said: ", message, " mode: ", mode)
 	_add_chat_message(sender_name, message, mode)
 
 func _add_chat_message(sender: String, message: String, mode: String = "IC") -> void:
-	print("[Communications] _add_chat_message: ", sender, " - ", message, " mode: ", mode)
 	if not chat_vbox:
 		push_error("Communications: Chat VBoxContainer not found")
 		return
@@ -471,7 +449,6 @@ func _add_chat_message(sender: String, message: String, mode: String = "IC") -> 
 			formatted_text = "[%s]: %s" % [sender, message]
 	
 	label.text = formatted_text
-	print("[Communications] Adding label with text: ", formatted_text)
 	chat_vbox.add_child(label)
 
 	var scroll_container: ScrollContainer = chat_vbox.get_parent() as ScrollContainer
@@ -479,9 +456,7 @@ func _add_chat_message(sender: String, message: String, mode: String = "IC") -> 
 		await get_tree().process_frame
 		scroll_container.scroll_vertical = int(scroll_container.get_v_scroll_bar().max_value)
 
-# Public method for other systems to add chat messages
 func AddChatMessage(message: String, mode: String = "IC", sender: String = "") -> void:
-	print("[Communications] AddChatMessage called: ", message, " mode: ", mode, " sender: ", sender)
 	_add_chat_message(sender, message, mode)
 
 func _show_chat_bubble_for_player(peer_id: int, message: String) -> void:
@@ -500,7 +475,7 @@ func _show_chat_bubble_for_player(peer_id: int, message: String) -> void:
 
 func broadcast_status_to_peers() -> void:
 	if multiplayer.is_server():
-		GameManager.rpc("SyncStatusInfo", GameManager.CurrentMap, GameManager.Gamemode, GameManager.PlayerCount)
+		GameManager.rpc("SyncStatusInfo", GameManager.CurrentMap, GameManager.Gamemode, GameManager.PlayerCount, current_music_name, GameManager.LobbyTimeLeft, GameManager.LobbyTimerPaused)
 
 func sync_player_position_and_rotation(player_id: int, pos: Vector2, rot: float) -> void:
 	if not multiplayer.is_server():
@@ -509,10 +484,25 @@ func sync_player_position_and_rotation(player_id: int, pos: Vector2, rot: float)
 		GameManager.rpc("SyncPlayerTransform", player_id, pos, rot)
 
 func _on_game_started() -> void:
-	print("[Communications] _on_game_started called on peer ", multiplayer.get_unique_id())
 	_transition_to_game()
 
-func _on_media_sync_received(type: String, path: String, _loops: int, _volume: float) -> void:
+func _on_lobby_state_synced(time_left: float, paused: bool, _video_uid: String) -> void:
+	if lobby_timer:
+		lobby_timer.start(time_left)
+		lobby_timer.paused = paused
+	update_status_info()
+
+func _hide_server_round_controls() -> void:
+	var start_btn: Button = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/StartButton
+	var delay_btn: Button = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/DelayButton
+	if start_btn:
+		start_btn.visible = false
+		start_btn.disabled = true
+	if delay_btn:
+		delay_btn.visible = false
+		delay_btn.disabled = true
+
+func _on_media_sync_received(type: String, path: String, loops: int, volume: float) -> void:
 	var lobby_viewport: SubViewport = lobby_subviewport.get_node_or_null("SubViewport") as SubViewport
 	if not lobby_viewport:
 		return
@@ -525,7 +515,10 @@ func _on_media_sync_received(type: String, path: String, _loops: int, _volume: f
 		return
 	
 	if "load_media" in lobby:
-		lobby.load_media(type, path)
+		if type == "music":
+			lobby.load_media(type, path, loops, volume)
+		else:
+			lobby.load_media(type, path)
 		if type == "music":
 			var path_parts = path.split("/")
 			current_music_name = path_parts[-1] if path_parts.size() > 0 else "Unknown"

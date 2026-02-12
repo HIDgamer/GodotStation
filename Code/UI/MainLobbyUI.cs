@@ -39,6 +39,9 @@ public partial class MainLobbyUI : Control
 	[Export] public LineEdit ChatMessageInput;
 	[Export] public Button SendMessageButton;
 	[Export] public Label ChatWithLabel;
+
+	private Label _welcomeGlow;
+	private AnimationPlayer _welcomeGlowAnimation;
 	
 	private int _selectedServerId = -1;
 	private int _selectedFriendId = -1;
@@ -83,6 +86,7 @@ public partial class MainLobbyUI : Control
 		
 		_chatManager.MessageReceived += OnMessageReceived;
 		_chatManager.MessageSent += OnMessageSent;
+		_chatManager.MessageFailed += OnChatMessageFailed;
 		_chatManager.ChatHistoryLoaded += OnChatHistoryLoaded;
 		
 		if (DiscordLoginButton != null) DiscordLoginButton.Pressed += OnDiscordLoginPressed;
@@ -93,12 +97,14 @@ public partial class MainLobbyUI : Control
 		if (HostServerButton != null) HostServerButton.Pressed += OnHostServerPressed;
 		
 		if (AddFriendButton != null) AddFriendButton.Pressed += OnAddFriendPressed;
+		if (AddFriendInput != null) AddFriendInput.TextSubmitted += OnAddFriendTextSubmitted;
 		if (RemoveFriendButton != null) RemoveFriendButton.Pressed += OnRemoveFriendPressed;
 		
 		if (SendMessageButton != null) SendMessageButton.Pressed += OnSendMessagePressed;
 		if (ChatMessageInput != null) ChatMessageInput.TextSubmitted += OnChatTextSubmitted;
 		
 		if (ServerList != null) ServerList.ItemSelected += OnServerSelected;
+		if (ServerList != null) ServerList.ItemActivated += OnServerActivated;
 		if (FriendsList != null) FriendsList.ItemSelected += OnFriendSelected;
 		if (FriendRequestsList != null) FriendRequestsList.ItemActivated += OnFriendRequestActivated;
 		if (ChatFriendsList != null) ChatFriendsList.ItemSelected += OnChatFriendSelected;
@@ -115,15 +121,82 @@ public partial class MainLobbyUI : Control
 	{
 		if (LoginPanel != null) LoginPanel.Hide();
 		if (MainLobbyPanel != null) MainLobbyPanel.Show();
-		
-		if (WelcomeLabel != null)
-			WelcomeLabel.Text = $"Welcome, {_accountManager.GetUsername()}!";
+		UpdateWelcomeHeader();
 		
 		_discordRPC?.SetInLobby();
 		
 		_lobbyManager.GetServerList();
 		_friendsManager.RefreshFriendsList();
 		_friendsManager.RefreshPendingRequests();
+	}
+
+	private void UpdateWelcomeHeader()
+	{
+		var tag = _accountManager?.GetDiscordTag();
+		if (string.IsNullOrWhiteSpace(tag))
+			tag = _accountManager?.GetUsername();
+		if (string.IsNullOrWhiteSpace(tag))
+			tag = "Player";
+
+		var welcomeText = $"Welcome, {tag}!";
+		if (WelcomeLabel != null)
+			WelcomeLabel.Text = welcomeText;
+
+		ResolveWelcomeGlowNodes();
+		if (_welcomeGlow == null)
+			return;
+
+		_welcomeGlow.Text = welcomeText;
+		var glowColor = BuildGlowColorFromTag(tag);
+		_welcomeGlow.Modulate = new Color(glowColor.R, glowColor.G, glowColor.B, 0.35f);
+		ApplyGlowAnimationColor(glowColor);
+	}
+
+	private void ResolveWelcomeGlowNodes()
+	{
+		if (WelcomeLabel == null)
+			return;
+		_welcomeGlow ??= WelcomeLabel.GetNodeOrNull<Label>("WelcomeGlow");
+		_welcomeGlowAnimation ??= _welcomeGlow?.GetNodeOrNull<AnimationPlayer>("AnimationPlayer");
+	}
+
+	private static Color BuildGlowColorFromTag(string tag)
+	{
+		unchecked
+		{
+			uint hash = 2166136261;
+			foreach (char c in tag)
+			{
+				hash ^= char.ToLowerInvariant(c);
+				hash *= 16777619;
+			}
+
+			float hue = (hash % 360) / 360.0f;
+			float saturation = 0.55f + (((hash >> 8) & 0xFF) / 255.0f) * 0.30f;
+			float value = 0.85f + (((hash >> 16) & 0xFF) / 255.0f) * 0.15f;
+			return Color.FromHsv(hue, Mathf.Clamp(saturation, 0.55f, 0.85f), Mathf.Clamp(value, 0.85f, 1.0f));
+		}
+	}
+
+	private void ApplyGlowAnimationColor(Color baseColor)
+	{
+		if (_welcomeGlowAnimation == null)
+			return;
+
+		var anim = _welcomeGlowAnimation.GetAnimation("glow");
+		if (anim != null && anim.GetTrackCount() > 0)
+		{
+			int track = 0;
+			int keyCount = anim.TrackGetKeyCount(track);
+			for (int i = 0; i < keyCount; i++)
+			{
+				var keyValue = anim.TrackGetKeyValue(track, i);
+				var alpha = keyValue.VariantType == Variant.Type.Color ? keyValue.AsColor().A : 0.5f;
+				anim.TrackSetKeyValue(track, i, new Color(baseColor.R, baseColor.G, baseColor.B, alpha));
+			}
+		}
+
+		_welcomeGlowAnimation.Play("glow");
 	}
 	
 	private void OnDiscordLoginPressed()
@@ -161,8 +234,12 @@ private void OnLogoutPressed()
 	
 	private void OnServerListUpdated(Array servers)
 	{
+		if (!GodotObject.IsInstanceValid(this) || !IsInsideTree())
+			return;
+		if (!GodotObject.IsInstanceValid(ServerList))
+			return;
+
 		_servers = servers;
-		if (ServerList == null) return;
 		
 		ServerList.Clear();
 		
@@ -174,7 +251,7 @@ private void OnLogoutPressed()
 			string host = GetVal(server, "host_username", "Unknown Host");
 			
 			bool isLocked = server.ContainsKey("password_protected") && (bool)server["password_protected"];
-			string lockedPrefix = isLocked ? "🔒 " : "";
+			string lockedPrefix = isLocked ? "LOCK " : "";
 			
 			ServerList.AddItem($"{lockedPrefix}{name} - {players} - {map} - Host: {host}");
 		}
@@ -187,6 +264,12 @@ private void OnLogoutPressed()
 	{
 		_selectedServerId = (int)index;
 	}
+
+	private void OnServerActivated(long index)
+	{
+		_selectedServerId = (int)index;
+		OnJoinServerPressed();
+	}
 	
 	private void OnJoinServerPressed()
 	{
@@ -194,8 +277,8 @@ private void OnLogoutPressed()
 			return;
 		
 		var server = (Dictionary)_servers[_selectedServerId];
-		var ip = server["ip_address"].ToString();
-		var port = VariantToInt(server["port"]);
+		var ip = GetServerAddress(server);
+		var port = VariantToInt(server.ContainsKey("port") ? server["port"] : 7777);
 		var name = server["name"].ToString();
 		var currentPlayers = VariantToInt(server["current_players"]);
 		var maxPlayers = VariantToInt(server["max_players"]);
@@ -235,18 +318,21 @@ private void OnServerRegistered(string serverId)
 	
 	private void OnFriendsListUpdated(Array friends)
 	{
-		if (FriendsList == null) return;
+		if (!GodotObject.IsInstanceValid(this) || !IsInsideTree())
+			return;
+		if (!GodotObject.IsInstanceValid(FriendsList))
+			return;
 		
 		FriendsList.Clear();
 		
 		foreach (Dictionary friend in friends)
 		{
 			var username = friend["username"].ToString();
-			var online = friend.ContainsKey("online") && (bool)friend["online"] ? "🟢" : "⚫";
+			var online = friend.ContainsKey("online") && (bool)friend["online"] ? "ONLINE" : "OFFLINE";
 			FriendsList.AddItem($"{online} {username}");
 		}
 		
-		if (ChatFriendsList != null)
+		if (GodotObject.IsInstanceValid(ChatFriendsList))
 		{
 			ChatFriendsList.Clear();
 			foreach (Dictionary friend in friends)
@@ -259,7 +345,10 @@ private void OnServerRegistered(string serverId)
 	
 	private void OnFriendRequestsUpdated(Array requests)
 	{
-		if (FriendRequestsList == null) return;
+		if (!GodotObject.IsInstanceValid(this) || !IsInsideTree())
+			return;
+		if (!GodotObject.IsInstanceValid(FriendRequestsList))
+			return;
 		
 		FriendRequestsList.Clear();
 		
@@ -276,7 +365,7 @@ private void OnServerRegistered(string serverId)
 		if (index >= 0 && index < friends.Count)
 		{
 			var friend = (Dictionary)friends[(int)index];
-			_selectedFriendId = VariantToInt(friend["id"]);
+			_selectedFriendId = GetUserIdFromDictionary(friend);
 		}
 	}
 	
@@ -286,20 +375,25 @@ private void OnServerRegistered(string serverId)
 		if (index >= 0 && index < requests.Count)
 		{
 			var request = (Dictionary)requests[(int)index];
-			var userId = VariantToInt(request["id"]);
+			var userId = GetUserIdFromDictionary(request);
 			_friendsManager.AcceptFriendRequest(userId);
 		}
 	}
 	
 	private void OnAddFriendPressed()
 	{
-		var username = AddFriendInput?.Text ?? "";
+		var username = (AddFriendInput?.Text ?? "").Trim();
 		if (string.IsNullOrEmpty(username))
 			return;
 		
 		_friendsManager.SendFriendRequest(username);
 		if (AddFriendInput != null)
 			AddFriendInput.Text = "";
+	}
+
+	private void OnAddFriendTextSubmitted(string text)
+	{
+		OnAddFriendPressed();
 	}
 	
 	private void OnRemoveFriendPressed()
@@ -338,7 +432,7 @@ private void OnServerRegistered(string serverId)
 		if (index >= 0 && index < friends.Count)
 		{
 			var friend = (Dictionary)friends[(int)index];
-			_currentChatFriendId = VariantToInt(friend["id"]);
+			_currentChatFriendId = GetUserIdFromDictionary(friend);
 			var username = friend["username"].ToString();
 			
 			if (ChatWithLabel != null)
@@ -350,7 +444,9 @@ private void OnServerRegistered(string serverId)
 	
 	private void OnChatHistoryLoaded(int friendId, Array messages)
 	{
-		if (friendId != _currentChatFriendId || ChatHistory == null)
+		if (!GodotObject.IsInstanceValid(this) || !IsInsideTree())
+			return;
+		if (friendId != _currentChatFriendId || !GodotObject.IsInstanceValid(ChatHistory))
 			return;
 		
 		ChatHistory.Clear();
@@ -381,9 +477,13 @@ private void OnServerRegistered(string serverId)
 	private void SendChatMessage()
 	{
 		if (_currentChatFriendId <= 0)
+		{
+			if (FriendsStatusLabel != null)
+				FriendsStatusLabel.Text = "Select a friend in the Chat tab before sending.";
 			return;
+		}
 		
-		var message = ChatMessageInput?.Text ?? "";
+		var message = (ChatMessageInput?.Text ?? "").Trim();
 		if (string.IsNullOrEmpty(message))
 			return;
 		
@@ -395,8 +495,10 @@ private void OnServerRegistered(string serverId)
 	
 	private void OnMessageSent(Dictionary message)
 	{
+		if (!GodotObject.IsInstanceValid(this) || !IsInsideTree())
+			return;
 		var receiverId = VariantToInt(message["receiver_id"]);
-		if (receiverId == _currentChatFriendId && ChatHistory != null)
+		if (receiverId == _currentChatFriendId && GodotObject.IsInstanceValid(ChatHistory))
 		{
 			var text = message["message"].ToString();
 			ChatHistory.AppendText($"[Now] You: {text}\n");
@@ -405,9 +507,11 @@ private void OnServerRegistered(string serverId)
 	
 	private void OnMessageReceived(Dictionary message)
 	{
+		if (!GodotObject.IsInstanceValid(this) || !IsInsideTree())
+			return;
 		var senderId = VariantToInt(message["sender_id"]);
 		
-		if (senderId == _currentChatFriendId && ChatHistory != null)
+		if (senderId == _currentChatFriendId && GodotObject.IsInstanceValid(ChatHistory))
 		{
 			var text = message["message"].ToString();
 			var senderName = GetFriendUsername(senderId);
@@ -420,12 +524,42 @@ private void OnServerRegistered(string serverId)
 		var friends = _friendsManager.GetFriendsList();
 		foreach (Dictionary friend in friends)
 		{
-			if (VariantToInt(friend["id"]) == friendId)
+			if (GetUserIdFromDictionary(friend) == friendId)
 			{
 				return friend["username"].ToString();
 			}
 		}
 		return $"User {friendId}";
+	}
+
+	private void OnChatMessageFailed(string error)
+	{
+		if (FriendsStatusLabel != null)
+			FriendsStatusLabel.Text = $"Chat error: {error}";
+	}
+
+	private int GetUserIdFromDictionary(Dictionary data)
+	{
+		if (data.ContainsKey("id"))
+			return VariantToInt(data["id"]);
+		if (data.ContainsKey("user_id"))
+			return VariantToInt(data["user_id"]);
+		if (data.ContainsKey("friend_id"))
+			return VariantToInt(data["friend_id"]);
+		return 0;
+	}
+
+	private string GetServerAddress(Dictionary server)
+	{
+		if (server.ContainsKey("connect_ip") && !string.IsNullOrWhiteSpace(server["connect_ip"].ToString()))
+			return server["connect_ip"].ToString();
+		if (server.ContainsKey("ip_address") && !string.IsNullOrWhiteSpace(server["ip_address"].ToString()))
+			return server["ip_address"].ToString();
+		if (server.ContainsKey("public_ip") && !string.IsNullOrWhiteSpace(server["public_ip"].ToString()))
+			return server["public_ip"].ToString();
+		if (server.ContainsKey("host_ip") && !string.IsNullOrWhiteSpace(server["host_ip"].ToString()))
+			return server["host_ip"].ToString();
+		return "127.0.0.1";
 	}
 	
 	private int VariantToInt(Variant value)
@@ -437,5 +571,38 @@ private void OnServerRegistered(string serverId)
 		if (int.TryParse(value.ToString(), out var result))
 			return result;
 		return 0;
+	}
+
+	public override void _ExitTree()
+	{
+		if (_accountManager != null)
+		{
+			_accountManager.LoginSuccess -= OnLoginSuccess;
+			_accountManager.LoginFailed -= OnLoginFailed;
+			_accountManager.LoggedOutSuccess -= OnLogout;
+		}
+
+		if (_lobbyManager != null)
+		{
+			_lobbyManager.ServerListUpdated -= OnServerListUpdated;
+			_lobbyManager.ServerRegistered -= OnServerRegistered;
+		}
+
+		if (_friendsManager != null)
+		{
+			_friendsManager.FriendsListUpdated -= OnFriendsListUpdated;
+			_friendsManager.FriendRequestsUpdated -= OnFriendRequestsUpdated;
+			_friendsManager.FriendRequestSent -= OnFriendRequestSent;
+			_friendsManager.FriendRequestFailed -= OnFriendRequestFailed;
+			_friendsManager.FriendStatusChanged -= OnFriendStatusChanged;
+		}
+
+		if (_chatManager != null)
+		{
+			_chatManager.MessageReceived -= OnMessageReceived;
+			_chatManager.MessageSent -= OnMessageSent;
+			_chatManager.MessageFailed -= OnChatMessageFailed;
+			_chatManager.ChatHistoryLoaded -= OnChatHistoryLoaded;
+		}
 	}
 }

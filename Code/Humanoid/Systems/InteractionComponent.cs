@@ -250,17 +250,22 @@ public partial class InteractionComponent : Node, IMobSystem
 		
 		var pool = _owner.GetTree().Root.GetNodeOrNull<ItemPoolManager>("ItemPoolManager");
 		WorldItem worldItem = pool?.Get(item, position);
+		var world = _owner.GetTree().GetFirstNodeInGroup("World");
+		if (world == null) return null;
 		
 		if (worldItem == null)
 		{
 			var scene = LoadItemScene(item);
-			if (scene == null) return null;
-			
-			worldItem = scene.Instantiate<WorldItem>();
-			
-			var world = _owner.GetTree().GetFirstNodeInGroup("World");
-			if (world == null) return null;
-			
+			if (scene != null)
+			{
+				worldItem = scene.Instantiate<WorldItem>();
+			}
+			else
+			{
+				worldItem = CreateRuntimeWorldItem(item);
+			}
+
+			if (worldItem == null) return null;
 			worldItem.PrepareSpawn(position);
 			world.AddChild(worldItem, true);
 		}
@@ -272,27 +277,51 @@ public partial class InteractionComponent : Node, IMobSystem
 	
 	private PackedScene LoadItemScene(Item item)
 	{
+		if (!string.IsNullOrEmpty(item.ScenePath))
+			return GD.Load<PackedScene>(item.ScenePath);
+
 		if (item is ClothingItem)
 		{
 			string path = item.ItemName switch
 			{
-				"Marine_CM_Uniform" => "uid://<UID_OF_MARINE_CM_UNIFORM>",
-				"Medical_Scrubs" => "uid://<UID_OF_MEDICAL_SCRUBS>",
-				"MA_Light_Armor" => "uid://<UID_OF_MA_LIGHT_ARMOR>",
-				"MA_Medium_Armor" => "uid://<UID_OF_MA_MEDIUM_ARMOR>",
-				"MA_Heavy_Armor" => "uid://<UID_OF_MA_HEAVY_ARMOR>",
-				"Marine_Boots" => "uid://<UID_OF_MARINE_BOOTS>",
-				"Combat_Boots" => "uid://<UID_OF_COMBAT_BOOTS>",
-				"Marine_Gloves" => "uid://<UID_OF_MARINE_GLOVES>",
-				"Armored_Gloves" => "uid://<UID_OF_ARMORED_GLOVES>",
+				"Marine_CM_Uniform" => "uid://bafal7piiq62r",
+				"Medical_Scrubs" => "uid://cmekjlejs76dx",
+				"MA_Light_Armor" => "uid://dokjyi8xbqq3f",
+				"MA_Medium_Armor" => "uid://vcq5pgy5hx6q",
+				"MA_Heavy_Armor" => "uid://bivuy3j7hqmiy",
+				"Marine_Boots" => "uid://cm766a6sb2g85",
+				"Combat_Boots" => "uid://3u2w8gvxgm1l",
+				"Marine_Gloves" => "uid://eafyncq222qn",
+				"Armored_Gloves" => "uid://bcijgf8bgu24c",
 				_ => null
 			};
 			return path != null ? GD.Load<PackedScene>(path) : null;
 		}
-		
-		// Use ScenePath if set, fallback to ItemName
-		string scenePath = string.IsNullOrEmpty(item.ScenePath) ? $"uid://<UID_OF_{item.ItemName.ToUpper()}>" : item.ScenePath;
-		return GD.Load<PackedScene>(scenePath);
+
+		return null;
+	}
+
+	private WorldItem CreateRuntimeWorldItem(Item item)
+	{
+		if (item == null) return null;
+
+		var runtimeItem = new WorldItem
+		{
+			Name = string.IsNullOrEmpty(item.ItemName) ? "RuntimeItem" : item.ItemName,
+			ItemId = item.ItemName,
+			ItemData = item
+		};
+
+		var icon = new ItemSpriteSystem
+		{
+			Name = "Icon",
+			IconTexture = item.Icon,
+			IconHframes = Mathf.Max(1, item.IconHframes),
+			IconVframes = Mathf.Max(1, item.IconVframes),
+			DefaultStateId = "default"
+		};
+		runtimeItem.AddChild(icon);
+		return runtimeItem;
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]

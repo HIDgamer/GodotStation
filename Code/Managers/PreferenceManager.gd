@@ -74,8 +74,11 @@ func load_from_slot(slot: int) -> void:
 		current_character = _get_default_character()
 	else:
 		print("Loaded character from slot ", slot, ": ", current_character.get("name", "Unnamed"))
-	
-	peer_characters[1] = current_character.duplicate()
+
+	var local_peer_id := multiplayer.get_unique_id()
+	if local_peer_id <= 0:
+		local_peer_id = 1
+	peer_characters[local_peer_id] = current_character.duplicate()
 	character_data_changed.emit()
 	current_slot = slot
 	_save_last_slot(slot)
@@ -134,9 +137,12 @@ func set_peer_character_data(peer_id: int, data: Dictionary) -> void:
 
 func set_character_data(data: Dictionary) -> void:
 	current_character = data.duplicate()
+	_persist_current_character()
+	character_data_changed.emit()
 
 func update_character_field(field: String, value) -> void:
 	current_character[field] = value
+	_persist_current_character()
 	character_data_changed.emit()
 
 func get_role_priorities() -> Dictionary:
@@ -151,18 +157,24 @@ func set_role_priority(role: String, priority: String) -> bool:
 		return false
 	priorities[role] = priority
 	current_character["role_priorities"] = priorities
+	_persist_current_character()
+	character_data_changed.emit()
 	return true
 
 func remove_role_priority(role: String) -> void:
 	var priorities: Dictionary = get_role_priorities()
 	priorities.erase(role)
 	current_character["role_priorities"] = priorities
+	_persist_current_character()
+	character_data_changed.emit()
 
 func get_priority_count() -> int:
 	return get_role_priorities().size()
 
 func assign_character_to_role(role: String) -> void:
 	current_character["assigned_roles"][role] = current_character.duplicate()
+	_persist_current_character()
+	character_data_changed.emit()
 
 func get_assigned_character_for_role(role: String) -> Dictionary:
 	return current_character.get("assigned_roles", {}).get(role, {})
@@ -306,3 +318,12 @@ func delete_character(letter: String, slot: int) -> bool:
 				file_name = dir.get_next()
 			dir.list_dir_end()
 	return false
+
+func _persist_current_character() -> void:
+	if game_manager == null:
+		return
+	var local_peer_id := multiplayer.get_unique_id()
+	if local_peer_id <= 0:
+		local_peer_id = 1
+	peer_characters[local_peer_id] = current_character.duplicate()
+	game_manager.SaveSlot(current_slot, current_character.duplicate())

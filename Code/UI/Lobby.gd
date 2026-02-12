@@ -38,7 +38,7 @@ func _ready() -> void:
 
 			load_video(random_screensaver)
 
-			GameManager.rpc("SyncMedia", "video", random_screensaver, 0, 0.5)
+			GameManager.SyncMedia("video", random_screensaver, 0, 0.5)
 		else:
 			GameManager.rpc_id(1, "RequestCurrentVideo")
 
@@ -146,3 +146,6 @@ func _on_lobby_state_synced(time_left: float, paused: bool, video_uid: String) -
 	if lobby_timer:
 		lobby_timer.paused = paused
 		lobby_timer.wait_time = time_left
+	if video_uid != "" and GameManager.CurrentVideoUid != video_uid:
+		GameManager.CurrentVideoUid = video_uid
+		load_video(video_uid)
