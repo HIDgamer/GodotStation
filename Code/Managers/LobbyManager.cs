@@ -13,7 +13,7 @@ using Array = Godot.Collections.Array;
 
 public partial class LobbyManager : Node
 {
-	[Export] public string ApiUrl = "http://129.213.29.53:8085";
+	[Export] public string ApiUrl = "https://godotstation.duckdns.org";
 	[Export] public float HeartbeatInterval = 10.0f;
 	
 	[Signal] public delegate void ServerListUpdatedEventHandler(Array servers);
