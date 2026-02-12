@@ -12,7 +12,7 @@ on:
 env:
   GODOT_VERSION: 4.6
   EXPORT_NAME: GodotStation
-  UPDATE_SERVER: "129.213.29.53"
+  UPDATE_SERVER: "godotstation.duckdns.org"
 
 jobs:
   build:
