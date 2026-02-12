@@ -128,8 +128,21 @@ jobs:
             version-manifest.json
           body: |
             ## GodotStation ${{ github.ref_name }}
+            
             **Release Date:** ${{ steps.release_info.outputs.REL_DATE }}
-            Built from commit ${{ steps.release_info.outputs.SHORT_SHA }}
+            
+            **Commit:** ${{ steps.release_info.outputs.SHORT_SHA }}
+            
+            ---
+            
+            ### Downloads
+            - 🪟 **Windows:** GodotStation-Windows.zip
+            - 🐧 **Linux:** GodotStation-Linux.zip
+            
+            ### Installation
+            1. Download the appropriate file for your platform
+            2. Extract the archive
+            3. Run the executable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
