@@ -8,7 +8,7 @@ using HttpClient = System.Net.Http.HttpClient;
 
 public partial class AutoUpdater : Node
 {
-	[Export] public string UpdateServerUrl = "http://132.145.130.83:8086/updates/version-manifest.json";
+	[Export] public string UpdateServerUrl = "http://129.213.29.53:8086/updates/version-manifest.json";
 	[Export] public string GitHubRepo = "HIDgamer/GodotStation";
 	[Export] public bool CheckOnStartup = true;
 	[Export] public string CurrentVersion = "0.9.0";

@@ -9,7 +9,7 @@ using Array = Godot.Collections.Array;
 
 public partial class FriendsManager : Node
 {
-	[Export] public string ApiUrl = "http://132.145.130.83:8085";
+	[Export] public string ApiUrl = "http://129.213.29.53:8085";
 	
 	[Signal] public delegate void FriendsListUpdatedEventHandler(Array friends);
 	[Signal] public delegate void FriendRequestsUpdatedEventHandler(Array requests);

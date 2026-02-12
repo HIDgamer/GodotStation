@@ -8,7 +8,7 @@ using StringContent = System.Net.Http.StringContent;
 
 public partial class AccountManager : Node
 {
-	[Export] public string ApiUrl = "http://132.145.130.83:8085";
+	[Export] public string ApiUrl = "http://129.213.29.53:8085";
 	[Export] public string DiscordClientId = "1470420296040189995";
 	[Export] public string DiscordRedirectUri = "http://127.0.0.1:8080";
 	
