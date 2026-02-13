@@ -494,6 +494,7 @@ public partial class MovementController : Node2D, IMobSystem
 	public void SetSpeedMultiplier(float multiplier) => _speedMod = Mathf.Max(0.0f, multiplier);
 	public float GetSpeedMultiplier() => _speedMod;
 	public void SetInteractionSpeedMultiplier(float multiplier) => _interactionSpeedMod = Mathf.Max(0.0f, multiplier);
+	public bool IsMoving() => _isMoving || _targetPos.HasValue;
 	
 	private float GetCurrentSpeedMultiplier()
 	{

@@ -63,10 +63,13 @@ func _on_download_progress(progress: float) -> void:
 	message_label.text = "Downloading... %d%%" % (progress * 100)
 
 func _on_ready_to_install() -> void:
-	message_label.text = "Download complete. Restart to install."
+	message_label.text = "Download complete. Restarting to install..."
 	progress_bar.visible = false
 	download_button.visible = false
 	install_button.visible = true
+	install_button.disabled = true
+	await get_tree().create_timer(0.75).timeout
+	auto_updater.RestartToApplyUpdate()
 
 func _on_update_error(error: String) -> void:
 	message_label.text = "Error: " + error

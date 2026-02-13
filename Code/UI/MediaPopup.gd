@@ -11,6 +11,8 @@ signal media_selected(type: String, path: String)
 var media_type: String = ""
 
 func _ready() -> void:
+	file_dialog.access = FileDialog.ACCESS_RESOURCES
+	file_dialog.current_dir = "res://"
 	file_dialog.file_selected.connect(_on_file_selected)
 	load_button.pressed.connect(_on_load_pressed)
 	cancel_button.pressed.connect(hide)

@@ -306,6 +306,14 @@ public partial class FriendsManager : Node
 		var value = raw.Trim();
 		if (value.StartsWith("@"))
 			value = value.Substring(1);
+
+		var hashIndex = value.IndexOf('#');
+		if (hashIndex > 0)
+		{
+			// Backward-compatible support for Discord-style tags like username#1234.
+			value = value.Substring(0, hashIndex);
+		}
+
 		return value;
 	}
 	

@@ -20,6 +20,8 @@ var time: float = 0.0
 var mouse_influence: float = 0.5
 var lobby_manager = null
 var servers: Array = []
+const MIN_PORT: int = 1024
+const MAX_PORT: int = 65535
 
 func _ready() -> void:
 	join_button.pressed.connect(_on_join_pressed)
@@ -68,7 +70,11 @@ func _on_join_pressed() -> void:
 		if selected_idx >= 0 and selected_idx < servers.size():
 			var server = servers[selected_idx]
 			var ip = str(server.get("connect_ip", server.get("ip_address", server.get("public_ip", "127.0.0.1"))))
-			_join_server(ip, int(server.get("port", GameManager.DefaultPort)))
+			var port: int = int(server.get("port", GameManager.DefaultPort))
+			if not _is_valid_port(port):
+				_show_error("Invalid server port. Expected %d-%d." % [MIN_PORT, MAX_PORT])
+				return
+			_join_server(ip, port)
 	else:
 		_on_direct_connect_pressed()
 
@@ -79,6 +85,9 @@ func _on_direct_connect_pressed() -> void:
 
 	var port_text: String = port_line_edit.text
 	var port: int = port_text.to_int() if port_text != "" else GameManager.DefaultPort
+	if not _is_valid_port(port):
+		_show_error("Invalid port. Expected %d-%d." % [MIN_PORT, MAX_PORT])
+		return
 
 	_join_server(ip, port)
 
@@ -98,12 +107,7 @@ func _on_successfully_connected() -> void:
 func _on_connection_failed() -> void:
 	join_button.disabled = false
 	join_button.text = "Join Game"
-	var error_label = Label.new()
-	error_label.text = "Failed to connect: No server found"
-	error_label.modulate = Color.RED
-	get_node("JoinUI").add_child(error_label)
-	await get_tree().create_timer(3.0).timeout
-	error_label.queue_free()
+	_show_error("Failed to connect. Verify server IP/port and host port forwarding.")
 
 func _on_refresh_pressed() -> void:
 	if lobby_manager != null:
@@ -137,3 +141,14 @@ func _on_server_selected(index: int) -> void:
 func _on_server_activated(index: int) -> void:
 	_on_server_selected(index)
 	_on_join_pressed()
+
+func _is_valid_port(port: int) -> bool:
+	return port >= MIN_PORT and port <= MAX_PORT
+
+func _show_error(message: String) -> void:
+	var error_label = Label.new()
+	error_label.text = message
+	error_label.modulate = Color.RED
+	get_node("JoinUI").add_child(error_label)
+	await get_tree().create_timer(3.0).timeout
+	error_label.queue_free()

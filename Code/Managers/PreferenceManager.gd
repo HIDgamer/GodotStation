@@ -79,6 +79,9 @@ func load_from_slot(slot: int) -> void:
 	if local_peer_id <= 0:
 		local_peer_id = 1
 	peer_characters[local_peer_id] = current_character.duplicate()
+	game_manager.SetPeerCharacterData(local_peer_id, current_character.duplicate())
+	if game_manager.has_method("PushLocalAppearanceUpdate"):
+		game_manager.PushLocalAppearanceUpdate()
 	character_data_changed.emit()
 	current_slot = slot
 	_save_last_slot(slot)
@@ -325,5 +328,9 @@ func _persist_current_character() -> void:
 	var local_peer_id := multiplayer.get_unique_id()
 	if local_peer_id <= 0:
 		local_peer_id = 1
-	peer_characters[local_peer_id] = current_character.duplicate()
+	var local_data = current_character.duplicate()
+	peer_characters[local_peer_id] = local_data
+	game_manager.SetPeerCharacterData(local_peer_id, local_data)
 	game_manager.SaveSlot(current_slot, current_character.duplicate())
+	if game_manager.has_method("PushLocalAppearanceUpdate"):
+		game_manager.PushLocalAppearanceUpdate()

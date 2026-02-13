@@ -20,6 +20,8 @@ var UIAnimationHelperScript = load("uid://dop12m7xxcnmg")
 
 var time: float = 0.0
 var mouse_influence: float = 0.5
+const MIN_PORT: int = 1024
+const MAX_PORT: int = 65535
 
 var map_uids: Dictionary = {
 	"DDome": "uid://dible6m71p44g",
@@ -63,6 +65,9 @@ func _on_create_pressed() -> void:
 	var selected_map_name: String = map_option.get_item_text(map_option.selected)
 	var player_limit: int = int(player_limit_spin.value)
 	var port: int = int(port_spin.value)
+	if port < MIN_PORT or port > MAX_PORT:
+		_show_error("Invalid port. Expected %d-%d." % [MIN_PORT, MAX_PORT])
+		return
 	var selected_gamemode: String = gamemode_option.get_item_text(gamemode_option.selected)
 
 	game_manager.MaxPlayers = player_limit
@@ -95,3 +100,11 @@ func _setup_ui_animations() -> void:
 
 	map_option.mouse_entered.connect(func(): UIAnimationHelperScript.animate_option_button_pulse(map_option))
 	gamemode_option.mouse_entered.connect(func(): UIAnimationHelperScript.animate_option_button_pulse(gamemode_option))
+
+func _show_error(message: String) -> void:
+	var error_label := Label.new()
+	error_label.text = message
+	error_label.modulate = Color.RED
+	get_node("GameMakerUI").add_child(error_label)
+	await get_tree().create_timer(3.0).timeout
+	error_label.queue_free()

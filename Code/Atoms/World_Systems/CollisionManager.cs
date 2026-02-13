@@ -99,7 +99,7 @@ public partial class CollisionManager : Node
 		if (_processingCollisions.Contains(bumper))
 		{
 			GD.Print($"[CollisionManager] Collision already being processed for {bumper.GetPlayerName()}, skipping");
-			return true;
+			return false;
 		}
 		
 		
@@ -179,6 +179,12 @@ public partial class CollisionManager : Node
 
 	private bool HandleDisarmCollision(Mob actor, Mob target, Vector2I targetTile)
 	{
+		if (IsMobCurrentlyMoving(target))
+		{
+			GD.Print($"[CollisionManager] Disarm collision blocked because {target.GetPlayerName()} is already moving");
+			return false;
+		}
+
 		var actorTile = GetTileCoords(actor.Position);
 		var direction = targetTile - actorTile;
 		var pushTile = targetTile + direction;
@@ -188,6 +194,15 @@ public partial class CollisionManager : Node
 			return HandleMovement(actor, target, direction, "disarm");
 		}
 		return false;
+	}
+
+	private bool IsMobCurrentlyMoving(Mob mob)
+	{
+		if (mob == null)
+			return false;
+
+		var movement = mob.GetNodeOrNull<MovementController>("MovementController");
+		return movement?.IsMoving() ?? false;
 	}
 	
 	private bool HandleGrabCollision(Mob actor, Mob target, Vector2I targetTile)

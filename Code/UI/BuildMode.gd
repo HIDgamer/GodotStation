@@ -24,10 +24,15 @@ func _ready() -> void:
 	_initialize_world_references()
 	_setup_ui_animations()
 	
-	if GameManager.has_signal("BuildActionReceived"):
-		GameManager.BuildActionReceived.connect(_on_build_action_received)
+	_connect_build_signal(["BuildActionReceived", "build_action_received"])
 	
 	visible = false
+
+func _connect_build_signal(signal_names: Array) -> void:
+	for signal_name in signal_names:
+		if GameManager.has_signal(signal_name):
+			GameManager.connect(signal_name, Callable(self, "_on_build_action_received"))
+			return
 
 func _setup_ui_animations() -> void:
 	UIAnimationHelper.setup_button_animations(build_button)
@@ -160,10 +165,11 @@ func _complete_build(type: String, pos: Vector2, cell: Vector2i, source_id: int,
 	collision_manager.UpdateWalkable(cell, type)
 	
 	if type == "structure":
-		var structure_scene = load("uid://bh4gsgvfy7isy")
-		var structure = structure_scene.instantiate()
-		structure.position = pos
-		build_mode_tile_map.add_child(structure)
+		if not _has_structure_node_at(pos):
+			var structure_scene = load("uid://bh4gsgvfy7isy")
+			var structure = structure_scene.instantiate()
+			structure.position = pos
+			build_mode_tile_map.add_child(structure)
 
 	if broadcast:
 		_broadcast_build_action("complete_build", {"object_type": type, "position": pos})
@@ -235,6 +241,14 @@ func _update_wall_terrains(center: Vector2i) -> void:
 		build_mode_tile_map.set_cells_terrain_connect(0, [c], terrain_set, 0)
 
 func _on_build_action_received(_peer_id: int, action: String, data: Dictionary) -> void:
+	if _peer_id == multiplayer.get_unique_id():
+		return
+
+	if not build_mode_tile_map or not world_manager:
+		_initialize_world_references()
+		if not build_mode_tile_map or not world_manager:
+			return
+
 	match action:
 		"complete_build":
 			_sync_build(data)
@@ -267,3 +281,11 @@ func _sync_destroy(data: Dictionary) -> void:
 func _broadcast_build_action(action: String, data: Dictionary) -> void:
 	if multiplayer.is_server():
 		GameManager.call("SendBuildAction", multiplayer.get_unique_id(), action, data)
+
+func _has_structure_node_at(pos: Vector2) -> bool:
+	if not build_mode_tile_map:
+		return false
+	for child in build_mode_tile_map.get_children():
+		if child is Node2D and child.position == pos:
+			return true
+	return false

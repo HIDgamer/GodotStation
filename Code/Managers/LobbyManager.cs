@@ -15,6 +15,8 @@ public partial class LobbyManager : Node
 {
 	[Export] public string ApiUrl = "https://godotstation.duckdns.org";
 	[Export] public float HeartbeatInterval = 10.0f;
+	private const int MinPort = 1024;
+	private const int MaxPort = 65535;
 	
 	[Signal] public delegate void ServerListUpdatedEventHandler(Array servers);
 	[Signal] public delegate void ServerRegisteredEventHandler(string serverId);
@@ -231,6 +233,17 @@ public partial class LobbyManager : Node
 				passwordProtected = (bool)serverInfo["password_protected"];
 			if (serverInfo.ContainsKey("description")) 
 				description = serverInfo["description"].ToString();
+
+			if (port < MinPort || port > MaxPort)
+			{
+				EmitSignal(SignalName.ServerRegistrationFailed, $"Invalid port {port}. Expected {MinPort}-{MaxPort}.");
+				return;
+			}
+			if (ipAddress == "127.0.0.1" || ipAddress == "0.0.0.0")
+			{
+				EmitSignal(SignalName.ServerRegistrationFailed, "Could not resolve a public IP. Ensure internet access and port forwarding are configured.");
+				return;
+			}
 			
 			if (gameManager != null)
 			{

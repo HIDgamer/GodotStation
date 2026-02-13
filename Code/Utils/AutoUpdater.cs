@@ -1,7 +1,9 @@
 using Godot;
 using Godot.Collections;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HttpClient = System.Net.Http.HttpClient;
@@ -11,7 +13,7 @@ public partial class AutoUpdater : Node
 	[Export] public string UpdateServerUrl = "https://godotstation.duckdns.org:8086/updates/version-manifest.json";
 	[Export] public string GitHubRepo = "HIDgamer/GodotStation";
 	[Export] public bool CheckOnStartup = true;
-	[Export] public string CurrentVersion = "0.9.0";
+	[Export] public string CurrentVersion = "0.9.2";
 	[Export] public string UpdateUISceneUid = "uid://cdux206csw0ra";
 	[Signal] public delegate void UpdateAvailableEventHandler(string version);
 	[Signal] public delegate void UpdateDownloadProgressEventHandler(float progress);
@@ -216,8 +218,40 @@ public partial class AutoUpdater : Node
 	}
 	public void RestartToApplyUpdate()
 	{
-		OS.CreateInstance(new string[] { });
-		GetTree().Quit();
+		try
+		{
+			var exePath = OS.GetExecutablePath();
+			if (string.IsNullOrWhiteSpace(exePath))
+				throw new InvalidOperationException("Executable path is empty");
+
+			var args = OS.GetCmdlineArgs().Select(QuoteArgument);
+			var startInfo = new ProcessStartInfo
+			{
+				FileName = exePath,
+				Arguments = string.Join(" ", args),
+				UseShellExecute = true,
+				WorkingDirectory = Path.GetDirectoryName(exePath) ?? ""
+			};
+
+			Process.Start(startInfo);
+			GetTree().Quit();
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr($"[AutoUpdater] Restart failed: {e.Message}");
+			var fallback = OS.CreateInstance(new string[] { });
+			if (fallback <= 0)
+				EmitSignal(SignalName.UpdateError, "Failed to restart after update download.");
+			else
+				GetTree().Quit();
+		}
+	}
+
+	private static string QuoteArgument(string arg)
+	{
+		if (string.IsNullOrEmpty(arg))
+			return "\"\"";
+		return arg.Contains(' ') ? $"\"{arg.Replace("\"", "\\\"")}\"" : arg;
 	}
 	
 	private async Task<Dictionary> GetUpdateManifest()

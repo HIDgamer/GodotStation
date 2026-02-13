@@ -305,10 +305,20 @@ public partial class WorldItem : RigidBody2D
 				start.Y + Mathf.RoundToInt(stepY * i)
 			);
 			
-			if (!collision.IsWalkable(checkTile, true))
+			if (!collision.IsWalkable(checkTile, false))
 			{
 				GD.Print($"[WorldItem] Hit wall at {checkTile}, landing at {lastValid}");
 				return lastValid;
+			}
+
+			var entities = collision.GetEntitiesAt(checkTile);
+			foreach (var entity in entities)
+			{
+				if (entity is Mob mob && !mob.IsGhost)
+				{
+					GD.Print($"[WorldItem] Path blocked by mob at {checkTile}, landing on mob tile");
+					return checkTile;
+				}
 			}
 			
 			lastValid = checkTile;

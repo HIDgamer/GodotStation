@@ -17,6 +17,7 @@ extends Control
 @onready var status_info: VBoxContainer = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo
 @onready var server_buttons: VBoxContainer = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons
 @onready var preferences_buttons: VBoxContainer = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons
+@onready var back_to_lobby_button: Button = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons/BackToLobby
 @onready var day_night_toggle: CheckButton = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons/DayNightToggle
 @onready var shadow_quality_label: Label = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons/ShadowQualityLabel
 @onready var map_label: Label = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/StatusInfo/MapLabel
@@ -115,6 +116,7 @@ func _setup_admin_buttons() -> void:
 	$HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/DelayButton.connect("pressed", Callable(self, "_on_delay_pressed"))
 	$HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/StartButton.connect("pressed", Callable(self, "_on_start_pressed"))
 	$HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons/Preference.connect("pressed", Callable(self, "_on_preference_pressed"))
+	back_to_lobby_button.connect("pressed", Callable(self, "_on_back_to_lobby_pressed"))
 
 func _setup_popup_connections() -> void:
 	media_popup.media_selected.connect(_on_media_selected)
@@ -144,6 +146,7 @@ func _setup_ui_animations() -> void:
 	UIAnimationHelper.setup_button_animations($HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/AdminButtons/AdminArt)
 	UIAnimationHelper.setup_button_animations($HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/DelayButton)
 	UIAnimationHelper.setup_button_animations($HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/StartButton)
+	UIAnimationHelper.setup_button_animations(back_to_lobby_button)
 	media_popup.mouse_entered.connect(func(): _animate_panel_pulse(media_popup))
 	music_options_popup.mouse_entered.connect(func(): _animate_panel_pulse(music_options_popup))
 
@@ -350,8 +353,16 @@ func _on_preference_pressed() -> void:
 		get_tree().root.add_child(pref)
 		pref.popup_centered()
 
+func _on_back_to_lobby_pressed() -> void:
+	GameManager.BackToLobby()
+
 func _on_media_selected(type: String, path: String) -> void:
 	if not multiplayer.is_server():
+		return
+
+	var synced_path := _normalize_media_path_for_sync(path)
+	if synced_path == "":
+		music_label.text = "Media sync failed: select files from inside the game folder/resources."
 		return
 	
 	var lobby_viewport: SubViewport = lobby_subviewport.get_node_or_null("SubViewport") as SubViewport
@@ -359,14 +370,14 @@ func _on_media_selected(type: String, path: String) -> void:
 		var lobby: Node = lobby_viewport.get_child(0)
 		if "load_media" in lobby:
 			if type == "music":
-				lobby.load_media(type, path, music_loops, music_volume)
+				lobby.load_media(type, synced_path, music_loops, music_volume)
 			else:
-				lobby.load_media(type, path)
+				lobby.load_media(type, synced_path)
 			if type == "music":
-				var path_parts = path.split("/")
+				var path_parts = synced_path.split("/")
 				current_music_name = path_parts[-1] if path_parts.size() > 0 else "Unknown"
 
-	GameManager.SyncMedia(type, path, music_loops if type == "music" else 0, music_volume if type == "music" else 0.5)
+	GameManager.SyncMedia(type, synced_path, music_loops if type == "music" else 0, music_volume if type == "music" else 0.5)
 
 func _input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed("text") and text_input_instance:
@@ -503,6 +514,9 @@ func _hide_server_round_controls() -> void:
 		delay_btn.disabled = true
 
 func _on_media_sync_received(type: String, path: String, loops: int, volume: float) -> void:
+	if path == "":
+		return
+
 	var lobby_viewport: SubViewport = lobby_subviewport.get_node_or_null("SubViewport") as SubViewport
 	if not lobby_viewport:
 		return
@@ -530,3 +544,17 @@ func _sync_video_to_all_peers(path: String) -> void:
 		var lobby: Node = lobby_viewport.get_child(0)
 		if "load_media" in lobby:
 			lobby.load_media("video", path)
+
+func _normalize_media_path_for_sync(path: String) -> String:
+	if path.begins_with("uid://") or path.begins_with("res://"):
+		return path
+
+	var normalized: String = path.replace("\\", "/")
+	var project_root: String = ProjectSettings.globalize_path("res://").replace("\\", "/")
+	if not project_root.ends_with("/"):
+		project_root += "/"
+
+	if normalized.begins_with(project_root):
+		return "res://" + normalized.substr(project_root.length())
+
+	return ""

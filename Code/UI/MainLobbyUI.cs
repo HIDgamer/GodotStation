@@ -1,5 +1,7 @@
 using Godot;
 using Godot.Collections;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 
 public partial class MainLobbyUI : Control
 {
@@ -47,6 +49,15 @@ public partial class MainLobbyUI : Control
 	private int _selectedFriendId = -1;
 	private int _currentChatFriendId = -1;
 	private Array _servers = new();
+	private Timer _serverRefreshTimer;
+	private bool _serverRefreshInFlight = false;
+	private long _lastServerRefreshRequestMs = 0;
+	private long _serverRefreshInFlightSinceMs = 0;
+	private const int MinPort = 1024;
+	private const int MaxPort = 65535;
+	private const double AutoServerRefreshIntervalSeconds = 12.0;
+	private const long MinServerRefreshIntervalMs = 4000;
+	private const long ServerRefreshTimeoutMs = 8000;
 	
 	public override void _Ready()
 	{
@@ -56,6 +67,7 @@ public partial class MainLobbyUI : Control
 		_chatManager = GetNode<ChatManager>("/root/ChatManager");
 		_gameManager = GetNode<GameManager>("/root/GameManager");
 		_discordRPC = GetNode<DiscordRPC>("/root/DiscordRpc");
+		SetupServerRefreshTimer();
 		
 		ConnectSignals();
 		
@@ -77,6 +89,8 @@ public partial class MainLobbyUI : Control
 		
 		_lobbyManager.ServerListUpdated += OnServerListUpdated;
 		_lobbyManager.ServerRegistered += OnServerRegistered;
+		_lobbyManager.ServerRegistrationFailed += OnServerRegistrationFailed;
+		_gameManager.ConnectionFailed += OnConnectionFailed;
 		
 		_friendsManager.FriendsListUpdated += OnFriendsListUpdated;
 		_friendsManager.FriendRequestsUpdated += OnFriendRequestsUpdated;
@@ -112,6 +126,7 @@ public partial class MainLobbyUI : Control
 	
 	private void ShowLogin()
 	{
+		StopServerAutoRefresh();
 		if (LoginPanel != null) LoginPanel.Show();
 		if (MainLobbyPanel != null) MainLobbyPanel.Hide();
 		if (LoginStatusLabel != null) LoginStatusLabel.Text = "";
@@ -125,9 +140,74 @@ public partial class MainLobbyUI : Control
 		
 		_discordRPC?.SetInLobby();
 		
-		_lobbyManager.GetServerList();
+		RequestServerListRefresh(true);
+		StartServerAutoRefresh();
 		_friendsManager.RefreshFriendsList();
 		_friendsManager.RefreshPendingRequests();
+	}
+
+	private void SetupServerRefreshTimer()
+	{
+		_serverRefreshTimer = new Timer
+		{
+			Name = "ServerRefreshTimer",
+			WaitTime = AutoServerRefreshIntervalSeconds,
+			OneShot = false,
+			Autostart = false
+		};
+		_serverRefreshTimer.Timeout += OnServerAutoRefreshTimeout;
+		AddChild(_serverRefreshTimer);
+	}
+
+	private void StartServerAutoRefresh()
+	{
+		if (_serverRefreshTimer == null)
+			return;
+		if (_serverRefreshTimer.IsStopped())
+			_serverRefreshTimer.Start();
+	}
+
+	private void StopServerAutoRefresh()
+	{
+		_serverRefreshTimer?.Stop();
+		_serverRefreshInFlight = false;
+		_serverRefreshInFlightSinceMs = 0;
+	}
+
+	private void OnServerAutoRefreshTimeout()
+	{
+		RequestServerListRefresh();
+	}
+
+	private void RequestServerListRefresh(bool force = false)
+	{
+		if (_lobbyManager == null)
+			return;
+		
+		var now = (long)Time.GetTicksMsec();
+		
+		if (_serverRefreshInFlight)
+		{
+			if (now - _serverRefreshInFlightSinceMs < ServerRefreshTimeoutMs)
+				return;
+			
+			_serverRefreshInFlight = false;
+			_serverRefreshInFlightSinceMs = 0;
+		}
+		
+		if (!force && now - _lastServerRefreshRequestMs < MinServerRefreshIntervalMs)
+			return;
+		
+		_serverRefreshInFlight = true;
+		_serverRefreshInFlightSinceMs = now;
+		_lastServerRefreshRequestMs = now;
+		_lobbyManager.GetServerList();
+	}
+
+	private void CompleteServerListRefresh()
+	{
+		_serverRefreshInFlight = false;
+		_serverRefreshInFlightSinceMs = 0;
 	}
 
 	private void UpdateWelcomeHeader()
@@ -229,11 +309,13 @@ private void OnLogoutPressed()
 }
 	private void OnRefreshServersPressed()
 	{
-		_lobbyManager.GetServerList();
+		RequestServerListRefresh(true);
 	}
 	
 	private void OnServerListUpdated(Array servers)
 	{
+		CompleteServerListRefresh();
+		
 		if (!GodotObject.IsInstanceValid(this) || !IsInsideTree())
 			return;
 		if (!GodotObject.IsInstanceValid(ServerList))
@@ -271,7 +353,7 @@ private void OnLogoutPressed()
 		OnJoinServerPressed();
 	}
 	
-	private void OnJoinServerPressed()
+	private async void OnJoinServerPressed()
 	{
 		if (_selectedServerId < 0 || _selectedServerId >= _servers.Count)
 			return;
@@ -279,6 +361,18 @@ private void OnLogoutPressed()
 		var server = (Dictionary)_servers[_selectedServerId];
 		var ip = GetServerAddress(server);
 		var port = VariantToInt(server.ContainsKey("port") ? server["port"] : 7777);
+		if (!IsValidPort(port))
+		{
+			SetLobbyStatus($"Invalid server port: {port}. Expected {MinPort}-{MaxPort}.");
+			return;
+		}
+
+		if (!await CanReachServerAsync(ip, port))
+		{
+			SetLobbyStatus($"Cannot reach {ip}:{port}. If hosting, ensure this port is forwarded.");
+			return;
+		}
+
 		var name = server["name"].ToString();
 		var currentPlayers = VariantToInt(server["current_players"]);
 		var maxPlayers = VariantToInt(server["max_players"]);
@@ -294,7 +388,14 @@ private void OnLogoutPressed()
 		
 		if (!int.TryParse(ServerPortInput?.Text, out int port))
 		{
-			port = 7777;
+			SetLobbyStatus($"Invalid port. Expected {MinPort}-{MaxPort}.");
+			return;
+		}
+
+		if (!IsValidPort(port))
+		{
+			SetLobbyStatus($"Invalid port: {port}. Expected {MinPort}-{MaxPort}.");
+			return;
 		}
 
 		var serverInfo = new Dictionary
@@ -311,9 +412,14 @@ private void OnLogoutPressed()
 		_lobbyManager.RegisterServer(serverInfo);
 		Hide();
 	}	
-private void OnServerRegistered(string serverId)
+	private void OnServerRegistered(string serverId)
 	{
 		GD.Print($"[MainLobbyUI] Server registered: {serverId}");
+	}
+
+	private void OnServerRegistrationFailed(string error)
+	{
+		SetLobbyStatus($"Server registration failed: {error}");
 	}
 	
 	private void OnFriendsListUpdated(Array friends)
@@ -462,6 +568,8 @@ private void OnServerRegistered(string serverId)
 			
 			ChatHistory.AppendText($"[{timestamp}] {sender}: {message}\n");
 		}
+
+		ScrollChatHistoryToBottom();
 	}
 	
 	private void OnSendMessagePressed()
@@ -502,6 +610,7 @@ private void OnServerRegistered(string serverId)
 		{
 			var text = message["message"].ToString();
 			ChatHistory.AppendText($"[Now] You: {text}\n");
+			ScrollChatHistoryToBottom();
 		}
 	}
 	
@@ -516,6 +625,7 @@ private void OnServerRegistered(string serverId)
 			var text = message["message"].ToString();
 			var senderName = GetFriendUsername(senderId);
 			ChatHistory.AppendText($"[Now] {senderName}: {text}\n");
+			ScrollChatHistoryToBottom();
 		}
 	}
 	
@@ -573,8 +683,59 @@ private void OnServerRegistered(string serverId)
 		return 0;
 	}
 
+	private void ScrollChatHistoryToBottom()
+	{
+		if (!GodotObject.IsInstanceValid(ChatHistory))
+			return;
+
+		var lineCount = ChatHistory.GetLineCount();
+		ChatHistory.ScrollToLine(Mathf.Max(0, lineCount - 1));
+	}
+
+	private static bool IsValidPort(int port) => port >= MinPort && port <= MaxPort;
+
+	private static async Task<bool> CanReachServerAsync(string ip, int port)
+	{
+		try
+		{
+			using var tcpClient = new TcpClient();
+			var connectTask = tcpClient.ConnectAsync(ip, port);
+			var completed = await Task.WhenAny(connectTask, Task.Delay(1500));
+			if (completed != connectTask)
+				return false;
+
+			await connectTask;
+			return tcpClient.Connected;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
+	private void OnConnectionFailed()
+	{
+		SetLobbyStatus("Connection failed. Ensure the server exists and the host port is properly forwarded.");
+	}
+
+	private void SetLobbyStatus(string text)
+	{
+		if (GodotObject.IsInstanceValid(FriendsStatusLabel))
+			FriendsStatusLabel.Text = text;
+		else if (GodotObject.IsInstanceValid(LoginStatusLabel))
+			LoginStatusLabel.Text = text;
+	}
+
 	public override void _ExitTree()
 	{
+		StopServerAutoRefresh();
+		if (_serverRefreshTimer != null)
+		{
+			_serverRefreshTimer.Timeout -= OnServerAutoRefreshTimeout;
+			_serverRefreshTimer.QueueFree();
+			_serverRefreshTimer = null;
+		}
+
 		if (_accountManager != null)
 		{
 			_accountManager.LoginSuccess -= OnLoginSuccess;
@@ -586,6 +747,7 @@ private void OnServerRegistered(string serverId)
 		{
 			_lobbyManager.ServerListUpdated -= OnServerListUpdated;
 			_lobbyManager.ServerRegistered -= OnServerRegistered;
+			_lobbyManager.ServerRegistrationFailed -= OnServerRegistrationFailed;
 		}
 
 		if (_friendsManager != null)
@@ -603,6 +765,11 @@ private void OnServerRegistered(string serverId)
 			_chatManager.MessageSent -= OnMessageSent;
 			_chatManager.MessageFailed -= OnChatMessageFailed;
 			_chatManager.ChatHistoryLoaded -= OnChatHistoryLoaded;
+		}
+
+		if (_gameManager != null)
+		{
+			_gameManager.ConnectionFailed -= OnConnectionFailed;
 		}
 	}
 }

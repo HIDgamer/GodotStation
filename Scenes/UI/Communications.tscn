@@ -737,6 +737,14 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_jsngy")
 text = "Preference"
 icon_alignment = 1
 
+[node name="BackToLobby" type="Button" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons" unique_id=574205257]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_n8k6a")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_ictnk")
+theme_override_styles/hover = SubResource("StyleBoxTexture_jsngy")
+text = "Back to Lobby"
+icon_alignment = 1
+
 [node name="DayNightToggle" type="CheckButton" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/PreferencesButtons" unique_id=292668568]
 layout_mode = 2
 button_pressed = true

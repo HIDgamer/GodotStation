@@ -121,14 +121,10 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		if (GD.Randf() > 0.5f)
 		{
 			GD.Print($"[PlayerInteraction] Help action: hug");
-			_owner.ShowPrivateThought("I hug them");
-			target.ShowPrivateMessageTo(target.GetMultiplayerAuthority(), $"{_owner.GetPlayerName()} hugs you");
 		}
 		else
 		{
 			GD.Print($"[PlayerInteraction] Help action: pat");
-			_owner.ShowPrivateThought("I pat them on the back");
-			target.ShowPrivateMessageTo(target.GetMultiplayerAuthority(), $"{_owner.GetPlayerName()} pats you on the back");
 		}
 		
 		var targetState = target.GetNodeOrNull<MobStateSystem>("MobStateSystem");
@@ -156,14 +152,9 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 			{
 				targetState.SetStunned(1.0f);
 			}
-			
-			_owner.ShowPrivateThought("I disarm and shove them to the ground");
-			target.ShowPrivateMessageTo(target.GetMultiplayerAuthority(), $"{_owner.GetPlayerName()} disarms and shoves you to the ground!");
 		}
 		else
 		{
-			_owner.ShowPrivateThought("I try to disarm them");
-			target.ShowPrivateMessageTo(target.GetMultiplayerAuthority(), $"{_owner.GetPlayerName()} tries to disarm you");
 		}
 	}
 	
@@ -176,12 +167,10 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 			if (_pullingTarget == target)
 			{
 				GD.Print($"[PlayerInteraction] Grab blocked: already grabbing {target.GetPlayerName()}");
-				_owner.ShowPrivateThought("I'm already grabbing them");
 			}
 			else
 			{
 				GD.Print($"[PlayerInteraction] Grab blocked: already grabbing someone else");
-				_owner.ShowPrivateThought("I'm already grabbing someone else");
 			}
 		}
 		else
@@ -211,16 +200,12 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 			targetHealth?.ApplyDamage(DamageType.Brute, damage, _owner.GetPlayerName());
 			
 			GD.Print($"[PlayerInteraction] Harm successful: dealt {damage} damage to {target.GetPlayerName()}");
-			_owner.ShowPrivateThought("I punch them");
-			target.ShowPrivateMessageTo(target.GetMultiplayerAuthority(), $"{_owner.GetPlayerName()} punches you!");
 			Rpc(nameof(PlayThrustAnimationRpc), target.GlobalPosition);
 			target.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem")?.Rpc(nameof(PlayHitEffectRpc), target.GlobalPosition);
 		}
 		else
 		{
 			GD.Print($"[PlayerInteraction] Harm missed: {(_owner.GetPlayerName() ?? "Unknown")} missed {target.GetPlayerName()}");
-			_owner.ShowPrivateThought("I miss them");
-			target.ShowPrivateMessageTo(target.GetMultiplayerAuthority(), $"{_owner.GetPlayerName()} misses you");
 		}
 	}
 	

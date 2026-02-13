@@ -37,6 +37,7 @@ public partial class GameManager : Node
 
 	private ENetMultiplayerPeer _peer = new();
 	private Timer _lobbyTimer;
+	private Timer _lobbyUpdateTimer;
 	private bool _gameStarted = false;
 	private System.Collections.Generic.List<int> _connectedPeers = new();
 	private System.Collections.Generic.Dictionary<int, string> _playerNames = new();
@@ -47,6 +48,10 @@ public partial class GameManager : Node
 	private const int MAX_MESSAGE_LENGTH = 200;
 	private const int MESSAGE_COOLDOWN_MS = 500;
 	private const float CHAT_PROXIMITY_RANGE = 500.0f;
+	private const int MIN_NETWORK_PORT = 1024;
+	private const int MAX_NETWORK_PORT = 65535;
+	private const string CommunicationsSceneUid = "uid://bjnqqapnkk8uq";
+	private const string MainLobbyScenePath = "res://Scenes/UI/MainLobbyUI.tscn";
 
 	private LobbyManager _lobbyManager;
 	private bool _isHosting = false;
@@ -170,6 +175,11 @@ public partial class GameManager : Node
 	public void HostGame(int port = -1)
 	{
 		if (port == -1) port = DefaultPort;
+		if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
+		{
+			GD.PrintErr($"[GameManager] Invalid host port: {port}. Expected {MIN_NETWORK_PORT}-{MAX_NETWORK_PORT}");
+			return;
+		}
 		
 		_peer = new ENetMultiplayerPeer();
 		var error = _peer.CreateServer(port, MaxPlayers);
@@ -207,7 +217,7 @@ public partial class GameManager : Node
 			EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
 
 			SetGameState(GameState.Lobby);
-			GetTree().ChangeSceneToFile("uid://bjnqqapnkk8uq");
+			GetTree().ChangeSceneToFile(CommunicationsSceneUid);
 		}
 		else
 		{
@@ -247,6 +257,12 @@ public partial class GameManager : Node
 	public void JoinGame(string address, int port = -1)
 	{
 		if (port == -1) port = DefaultPort;
+		if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
+		{
+			GD.PrintErr($"[GameManager] Invalid join port: {port}. Expected {MIN_NETWORK_PORT}-{MAX_NETWORK_PORT}");
+			EmitSignal(SignalName.ConnectionFailed);
+			return;
+		}
 		
 		_peer = new ENetMultiplayerPeer();
 		var error = _peer.CreateClient(address, port);
@@ -279,12 +295,61 @@ public partial class GameManager : Node
 			_lobbyManager.UnregisterServer();
 		}
 		
-		_isHosting = false;
-		_isConnected = false;
-		PlayerCount = 0;
+		CleanupLobbyTimers();
+		ResetSessionState();
+		SetGameState(GameState.Menu);
 		
 		GD.Print("[GameManager] Left game");
 		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
+	}
+
+	public void BackToLobby()
+	{
+		LeaveGame();
+		var tree = GetTree();
+		if (tree == null) return;
+		if (tree.CurrentScene != null && tree.CurrentScene.SceneFilePath == MainLobbyScenePath) return;
+		tree.ChangeSceneToFile(MainLobbyScenePath);
+	}
+
+	private void CleanupLobbyTimers()
+	{
+		if (_lobbyUpdateTimer != null)
+		{
+			_lobbyUpdateTimer.Timeout -= UpdateLobbyTime;
+			_lobbyUpdateTimer.Stop();
+			_lobbyUpdateTimer.QueueFree();
+			_lobbyUpdateTimer = null;
+		}
+
+		if (_lobbyTimer != null)
+		{
+			_lobbyTimer.Timeout -= OnLobbyTimeout;
+			_lobbyTimer.Stop();
+			_lobbyTimer.QueueFree();
+			_lobbyTimer = null;
+		}
+	}
+
+	private void ResetSessionState()
+	{
+		_gameStarted = false;
+		_isHosting = false;
+		_isConnected = false;
+		LobbyTimerPaused = false;
+		LobbyTimeLeft = 300.0f;
+		PlayerCount = 0;
+		IngameTime = 0.0f;
+		CurrentVideoUid = "";
+		CurrentMediaType = "";
+		CurrentMediaPath = "";
+		CurrentMediaLoops = 0;
+		CurrentMediaVolume = 0.5f;
+		_connectedPeers.Clear();
+		_playerNames.Clear();
+		_peerCharacters.Clear();
+		_connectionAttempts.Clear();
+		_messageTimestamps.Clear();
 	}
 
 	private void OnJoinTimeout()
@@ -300,6 +365,7 @@ public partial class GameManager : Node
 
 	private void SetupLobbyTimer()
 	{
+		CleanupLobbyTimers();
 		CurrentVideoUid = GetRandomVideo();
 		LobbyTimeLeft = 300.0f;
 		
@@ -308,9 +374,9 @@ public partial class GameManager : Node
 		AddChild(_lobbyTimer);
 		_lobbyTimer.Start();
 
-		var updateTimer = new Timer { WaitTime = 1.0f, Autostart = true };
-		updateTimer.Timeout += UpdateLobbyTime;
-		AddChild(updateTimer);
+		_lobbyUpdateTimer = new Timer { Name = "LobbyUpdateTimer", WaitTime = 1.0f, Autostart = true };
+		_lobbyUpdateTimer.Timeout += UpdateLobbyTime;
+		AddChild(_lobbyUpdateTimer);
 
 		if (Multiplayer.IsServer() && !string.IsNullOrEmpty(CurrentVideoUid))
 			Rpc(MethodName.BroadcastMediaSync, "video", CurrentVideoUid, 0, 0.5f);
@@ -499,7 +565,7 @@ public partial class GameManager : Node
 		GD.Print("[GameManager] Successfully connected to server");
 		_isConnected = true;
 		
-		GetTree().ChangeSceneToFile("uid://bjnqqapnkk8uq");
+		GetTree().ChangeSceneToFile(CommunicationsSceneUid);
 		SetGameState(GameState.Lobby);
 		
 		UpdatePlayerCount();
@@ -541,7 +607,7 @@ public partial class GameManager : Node
 	private void OnServerDisconnected()
 	{
 		GD.Print("[GameManager] Disconnected from server");
-		LeaveGame();
+		BackToLobby();
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -836,6 +902,46 @@ public partial class GameManager : Node
 	public void SetPeerCharacterData(int peerId, Dictionary data)
 	{
 		_peerCharacters[peerId] = data;
+	}
+
+	public void PushLocalAppearanceUpdate()
+	{
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		if (prefManager == null)
+			return;
+
+		var myId = Multiplayer.GetUniqueId();
+		if (myId <= 0)
+			myId = 1;
+
+		var playerData = (Dictionary)prefManager.Call("get_character_data");
+		if (playerData == null || playerData.Count == 0)
+			return;
+
+		playerData["peer_id"] = myId;
+		_peerCharacters[myId] = playerData;
+		prefManager.Call("set_peer_character_data", myId, playerData);
+
+		if (playerData.ContainsKey("name"))
+		{
+			var playerName = playerData["name"].ToString();
+			if (string.IsNullOrWhiteSpace(playerName))
+				playerName = $"Player {myId}";
+			_playerNames[myId] = playerName;
+		}
+
+		if (!Multiplayer.HasMultiplayerPeer())
+			return;
+
+		if (Multiplayer.IsServer())
+		{
+			Rpc(MethodName.SyncPlayerAppearance, myId, playerData);
+			CallDeferred(MethodName.ApplyAppearanceDeferred, myId, playerData);
+		}
+		else
+		{
+			RpcId(1, MethodName.ReceivePlayerAppearance, myId, playerData);
+		}
 	}
 
 	public Godot.Collections.Array GetSlotNames()

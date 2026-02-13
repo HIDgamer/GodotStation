@@ -146,6 +146,7 @@ func load_character_data() -> void:
 		hair_base_color_button.color = Color(data.get("hair_base_color", "#000000"))
 	if eye_color_button:
 		eye_color_button.color = Color(data.get("eye_color", "#0000FF"))
+	_update_color_labels()
 
 	update_sprite_preview()
 
@@ -292,6 +293,7 @@ func _on_cycle_bg_pressed() -> void:
 
 func _on_hair_base_color_changed(color: Color) -> void:
 	preference_manager.update_character_field("hair_base_color", color.to_html())
+	_update_color_labels()
 	update_sprite_preview()
 
 func _on_hair_gradient_color_changed(color: Color) -> void:
@@ -300,7 +302,14 @@ func _on_hair_gradient_color_changed(color: Color) -> void:
 
 func _on_eye_color_changed(color: Color) -> void:
 	preference_manager.update_character_field("eye_color", color.to_html())
+	_update_color_labels()
 	update_sprite_preview()
+
+func _update_color_labels() -> void:
+	if hair_base_color_button:
+		hair_base_color_button.text = "Hair Color: " + hair_base_color_button.color.to_html(false).to_upper()
+	if eye_color_button:
+		eye_color_button.text = "Eye Color: " + eye_color_button.color.to_html(false).to_upper()
 
 func _on_close_requested() -> void:
 	hide()

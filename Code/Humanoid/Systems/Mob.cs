@@ -205,6 +205,9 @@ public partial class Mob : CharacterBody2D
 
 	private void _show_chat_bubble_local(string message, string mode = "IC")
 	{
+		if (mode == "IC" || mode == "ME" || mode == "LOOC")
+			return;
+
 		Node2D existingBubble = null;
 		foreach (Node child in GetChildren())
 		{
