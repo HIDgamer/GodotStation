@@ -430,6 +430,7 @@ func _on_message_sent(message: String, mode: String) -> void:
 
 func _on_chat_message_received(sender_peer_id: int, sender_name: String, message: String, mode: String = "IC") -> void:
 	_add_chat_message(sender_name, message, mode)
+	_show_chat_bubble_for_player(sender_peer_id, message, mode)
 
 func _add_chat_message(sender: String, message: String, mode: String = "IC") -> void:
 	if not chat_vbox:
@@ -470,19 +471,28 @@ func _add_chat_message(sender: String, message: String, mode: String = "IC") -> 
 func AddChatMessage(message: String, mode: String = "IC", sender: String = "") -> void:
 	_add_chat_message(sender, message, mode)
 
-func _show_chat_bubble_for_player(peer_id: int, message: String) -> void:
-	if not game_started:
+func _show_chat_bubble_for_player(peer_id: int, message: String, mode: String = "IC") -> void:
+	if message.strip_edges() == "":
 		return
-	
-	var subviewport = game_subviewport.get_node_or_null("SubViewport")
-	if not subviewport or subviewport.get_child_count() == 0:
+	if mode == "OOC":
 		return
-	
-	var world = subviewport.get_child(0)
+
+	var world: Node = get_tree().get_first_node_in_group("World")
+	if not world:
+		var subviewport = game_subviewport.get_node_or_null("SubViewport")
+		if subviewport and subviewport.get_child_count() > 0:
+			world = subviewport.get_child(0)
+	if not world and lobby_subviewport:
+		var lobby_viewport = lobby_subviewport.get_node_or_null("SubViewport")
+		if lobby_viewport and lobby_viewport.get_child_count() > 0:
+			world = lobby_viewport.get_child(0)
+	if not world:
+		return
+
 	var player = world.get_node_or_null(str(peer_id))
 	
 	if player and player.has_method("ShowChatBubble"):
-		player.call("ShowChatBubble", message)
+		player.call("ShowChatBubble", message, mode, false)
 
 func broadcast_status_to_peers() -> void:
 	if multiplayer.is_server():

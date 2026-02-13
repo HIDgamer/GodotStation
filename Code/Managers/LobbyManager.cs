@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Collections;
 using System;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,15 +30,23 @@ public partial class LobbyManager : Node
 	private string _currentServerId = "";
 	private bool _isHosting = false;
 	private CancellationTokenSource _wsCancellation;
+	private FriendsManager _friendsManager;
+	private ChatManager _chatManager;
+	private Dictionary _lastServerRegistration;
+	private long _lastReregisterAttemptMs = 0;
+	private const long ReregisterCooldownMs = 15000;
 	
 	public override void _Ready()
 	{
 		_httpClient = new HttpClient();
 		_accountManager = GetNode<AccountManager>("/root/AccountManager");
+		_friendsManager = GetNodeOrNull<FriendsManager>("/root/FriendsManager");
+		_chatManager = GetNodeOrNull<ChatManager>("/root/ChatManager");
 		
 		// Setup heartbeat timer
 		_heartbeatTimer = new Godot.Timer();
 		_heartbeatTimer.WaitTime = HeartbeatInterval;
+		_heartbeatTimer.ProcessMode = ProcessModeEnum.Always;
 		_heartbeatTimer.Timeout += SendHeartbeat;
 		AddChild(_heartbeatTimer);
 		
@@ -55,10 +64,15 @@ public partial class LobbyManager : Node
 			CallDeferred(MethodName.ConnectWebSocket);
 			return;
 		}
+
+		if (_webSocket != null && _webSocket.State == WebSocketState.Open)
+			return;
 		
 		try
 		{
+			_wsCancellation?.Cancel();
 			_wsCancellation = new CancellationTokenSource();
+			_webSocket?.Dispose();
 			_webSocket = new ClientWebSocket();
 			
 			var wsUrl = ApiUrl.Replace("http://", "ws://").Replace("https://", "wss://");
@@ -86,6 +100,16 @@ public partial class LobbyManager : Node
 		catch (System.Exception e)
 		{
 			GD.PrintErr($"[LobbyManager] WebSocket connection failed: {e.Message}");
+			CallDeferred(MethodName.ScheduleWebSocketReconnect);
+		}
+	}
+
+	private async void ScheduleWebSocketReconnect()
+	{
+		await Task.Delay(2000);
+		if (IsInsideTree())
+		{
+			ConnectWebSocket();
 		}
 	}
 	
@@ -103,9 +127,23 @@ public partial class LobbyManager : Node
 					_wsCancellation.Token
 				);
 				
+				if (result.MessageType == WebSocketMessageType.Close)
+				{
+					break;
+				}
+
 				if (result.MessageType == WebSocketMessageType.Text)
 				{
-					var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+					var builder = new StringBuilder();
+					builder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+					while (!result.EndOfMessage)
+					{
+						result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _wsCancellation.Token);
+						if (result.MessageType != WebSocketMessageType.Text)
+							break;
+						builder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+					}
+					var message = builder.ToString();
 					CallDeferred(MethodName.HandleWebSocketMessage, message);
 				}
 			}
@@ -114,6 +152,11 @@ public partial class LobbyManager : Node
 				GD.PrintErr($"[LobbyManager] WebSocket error: {e.Message}");
 				break;
 			}
+		}
+
+		if (_wsCancellation != null && !_wsCancellation.IsCancellationRequested)
+		{
+			CallDeferred(MethodName.ScheduleWebSocketReconnect);
 		}
 	}
 	
@@ -143,6 +186,27 @@ public partial class LobbyManager : Node
 				
 				case "auth_success":
 					GD.Print("[LobbyManager] WebSocket authenticated");
+					break;
+
+				case "friend_request":
+					_friendsManager?.RefreshPendingRequests();
+					break;
+
+				case "friend_accepted":
+					_friendsManager?.RefreshFriendsList();
+					break;
+
+				case "friend_status":
+					if (data.ContainsKey("user_id") && data.ContainsKey("online"))
+					{
+						var userId = VariantToInt(data["user_id"]);
+						var online = data["online"].AsBool();
+						_friendsManager?.OnFriendStatusUpdate(userId, online);
+					}
+					break;
+
+				case "chat_message":
+					_chatManager?.OnMessageReceived(data);
 					break;
 			}
 		}
@@ -281,6 +345,7 @@ public partial class LobbyManager : Node
 				{ "password_protected", passwordProtected },
 				{ "description", description }
 			};
+			_lastServerRegistration = data;
 			
 			var json = Json.Stringify(data);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -359,12 +424,34 @@ public partial class LobbyManager : Node
 			var json = Json.Stringify(data);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			
-			await _httpClient.PostAsync($"{ApiUrl}/api/servers/heartbeat", content);
+			var response = await _httpClient.PostAsync($"{ApiUrl}/api/servers/heartbeat", content);
+			if (!response.IsSuccessStatusCode)
+			{
+				GD.PrintErr($"[LobbyManager] Heartbeat failed with status {(int)response.StatusCode}");
+				AttemptServerReregister(response.StatusCode);
+			}
 		}
 		catch (System.Exception e)
 		{
 			GD.PrintErr($"[LobbyManager] Heartbeat failed: {e.Message}");
 		}
+	}
+
+	private void AttemptServerReregister(HttpStatusCode statusCode)
+	{
+		if (_lastServerRegistration == null || _lastServerRegistration.Count == 0)
+			return;
+
+		if (statusCode != HttpStatusCode.NotFound && statusCode != HttpStatusCode.Forbidden && statusCode != HttpStatusCode.Unauthorized)
+			return;
+
+		var now = (long)Time.GetTicksMsec();
+		if (now - _lastReregisterAttemptMs < ReregisterCooldownMs)
+			return;
+
+		_lastReregisterAttemptMs = now;
+		GD.Print("[LobbyManager] Attempting to re-register server after heartbeat rejection");
+		RegisterServer(_lastServerRegistration);
 	}
 	
 	// Unregister server from lobby
@@ -388,6 +475,7 @@ public partial class LobbyManager : Node
 			await _httpClient.PostAsync($"{ApiUrl}/api/servers/unregister", content);
 			
 			_currentServerId = "";
+			_lastServerRegistration = null;
 			GD.Print("[LobbyManager] Server unregistered");
 		}
 		catch (System.Exception e)
@@ -458,6 +546,15 @@ public partial class LobbyManager : Node
 			// Ignore
 		}
 		return "Unknown error occurred";
+	}
+
+	private static int VariantToInt(Variant value)
+	{
+		if (value.VariantType == Variant.Type.Int)
+			return value.AsInt32();
+		if (value.VariantType == Variant.Type.Float)
+			return (int)value.AsDouble();
+		return int.TryParse(value.ToString(), out var result) ? result : 0;
 	}
 	
 	public override void _ExitTree()

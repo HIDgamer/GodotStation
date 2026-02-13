@@ -21,17 +21,24 @@ public partial class FriendsManager : Node
 	private AccountManager _accountManager;
 	private Array _friendsList = new();
 	private Array _pendingRequests = new();
+	private Godot.Timer _refreshTimer;
 	
 	public override void _Ready()
 	{
 		_httpClient = new HttpClient();
 		_accountManager = GetNode<AccountManager>("/root/AccountManager");
 		
-		var refreshTimer = new Godot.Timer();
-		refreshTimer.WaitTime = 30.0f;
-		refreshTimer.Timeout += RefreshFriendsList;
-		AddChild(refreshTimer);
-		refreshTimer.Start();
+		_refreshTimer = new Godot.Timer();
+		_refreshTimer.WaitTime = 15.0f;
+		_refreshTimer.Timeout += OnPeriodicRefresh;
+		AddChild(_refreshTimer);
+		_refreshTimer.Start();
+	}
+
+	private void OnPeriodicRefresh()
+	{
+		RefreshFriendsList();
+		RefreshPendingRequests();
 	}
 	
 	public Array GetFriendsList()
@@ -306,19 +313,18 @@ public partial class FriendsManager : Node
 		var value = raw.Trim();
 		if (value.StartsWith("@"))
 			value = value.Substring(1);
-
-		var hashIndex = value.IndexOf('#');
-		if (hashIndex > 0)
-		{
-			// Backward-compatible support for Discord-style tags like username#1234.
-			value = value.Substring(0, hashIndex);
-		}
-
 		return value;
 	}
 	
 	public override void _ExitTree()
 	{
+		if (_refreshTimer != null)
+		{
+			_refreshTimer.Timeout -= OnPeriodicRefresh;
+			_refreshTimer.Stop();
+			_refreshTimer.QueueFree();
+			_refreshTimer = null;
+		}
 		_httpClient?.Dispose();
 	}
 }

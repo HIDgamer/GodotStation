@@ -1,7 +1,5 @@
 using Godot;
 using Godot.Collections;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 
 public partial class MainLobbyUI : Control
 {
@@ -353,7 +351,7 @@ private void OnLogoutPressed()
 		OnJoinServerPressed();
 	}
 	
-	private async void OnJoinServerPressed()
+	private void OnJoinServerPressed()
 	{
 		if (_selectedServerId < 0 || _selectedServerId >= _servers.Count)
 			return;
@@ -364,12 +362,6 @@ private void OnLogoutPressed()
 		if (!IsValidPort(port))
 		{
 			SetLobbyStatus($"Invalid server port: {port}. Expected {MinPort}-{MaxPort}.");
-			return;
-		}
-
-		if (!await CanReachServerAsync(ip, port))
-		{
-			SetLobbyStatus($"Cannot reach {ip}:{port}. If hosting, ensure this port is forwarded.");
 			return;
 		}
 
@@ -693,25 +685,6 @@ private void OnLogoutPressed()
 	}
 
 	private static bool IsValidPort(int port) => port >= MinPort && port <= MaxPort;
-
-	private static async Task<bool> CanReachServerAsync(string ip, int port)
-	{
-		try
-		{
-			using var tcpClient = new TcpClient();
-			var connectTask = tcpClient.ConnectAsync(ip, port);
-			var completed = await Task.WhenAny(connectTask, Task.Delay(1500));
-			if (completed != connectTask)
-				return false;
-
-			await connectTask;
-			return tcpClient.Connected;
-		}
-		catch
-		{
-			return false;
-		}
-	}
 
 	private void OnConnectionFailed()
 	{
