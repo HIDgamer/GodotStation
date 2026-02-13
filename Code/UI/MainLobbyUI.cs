@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using System.Collections.Generic;
 
 public partial class MainLobbyUI : Control
 {
@@ -47,13 +48,28 @@ public partial class MainLobbyUI : Control
 	private int _selectedFriendId = -1;
 	private int _currentChatFriendId = -1;
 	private Array _servers = new();
+	private readonly Queue<string> _uiNotificationQueue = new();
+	private readonly HashSet<string> _knownFriendKeys = new();
+	private readonly HashSet<string> _knownPendingRequestKeys = new();
+	private readonly System.Collections.Generic.Dictionary<int, int> _unreadChatByFriend = new();
 	private Timer _serverRefreshTimer;
+	private Timer _uiNotificationTimer;
+	private PanelContainer _uiNotificationPanel;
+	private Label _uiNotificationLabel;
 	private bool _serverRefreshInFlight = false;
+	private bool _friendListInitialized = false;
+	private bool _pendingRequestsInitialized = false;
 	private long _lastServerRefreshRequestMs = 0;
 	private long _serverRefreshInFlightSinceMs = 0;
+	private int _unreadFriendRequestCount = 0;
+	private int _unreadChatCount = 0;
 	private const int MinPort = 1024;
 	private const int MaxPort = 65535;
+	private const int ServersTabIndex = 0;
+	private const int FriendsTabIndex = 1;
+	private const int ChatTabIndex = 2;
 	private const double AutoServerRefreshIntervalSeconds = 12.0;
+	private const double UiNotificationDurationSeconds = 4.0;
 	private const long MinServerRefreshIntervalMs = 4000;
 	private const long ServerRefreshTimeoutMs = 8000;
 	
@@ -66,6 +82,7 @@ public partial class MainLobbyUI : Control
 		_gameManager = GetNode<GameManager>("/root/GameManager");
 		_discordRPC = GetNode<DiscordRPC>("/root/DiscordRpc");
 		SetupServerRefreshTimer();
+		SetupNotificationUi();
 		
 		ConnectSignals();
 		
@@ -120,11 +137,14 @@ public partial class MainLobbyUI : Control
 		if (FriendsList != null) FriendsList.ItemSelected += OnFriendSelected;
 		if (FriendRequestsList != null) FriendRequestsList.ItemActivated += OnFriendRequestActivated;
 		if (ChatFriendsList != null) ChatFriendsList.ItemSelected += OnChatFriendSelected;
+		if (TabContainer != null) TabContainer.TabChanged += OnLobbyTabChanged;
 	}
 	
 	private void ShowLogin()
 	{
 		StopServerAutoRefresh();
+		ClearUiNotifications();
+		ResetSocialNotificationTracking();
 		if (LoginPanel != null) LoginPanel.Show();
 		if (MainLobbyPanel != null) MainLobbyPanel.Hide();
 		if (LoginStatusLabel != null) LoginStatusLabel.Text = "";
@@ -134,6 +154,7 @@ public partial class MainLobbyUI : Control
 	{
 		if (LoginPanel != null) LoginPanel.Hide();
 		if (MainLobbyPanel != null) MainLobbyPanel.Show();
+		ResetSocialNotificationTracking();
 		UpdateWelcomeHeader();
 		
 		_discordRPC?.SetInLobby();
@@ -155,6 +176,69 @@ public partial class MainLobbyUI : Control
 		};
 		_serverRefreshTimer.Timeout += OnServerAutoRefreshTimeout;
 		AddChild(_serverRefreshTimer);
+	}
+
+	private void SetupNotificationUi()
+	{
+		_uiNotificationTimer = new Timer
+		{
+			Name = "LobbyNotificationTimer",
+			WaitTime = UiNotificationDurationSeconds,
+			OneShot = true
+		};
+		_uiNotificationTimer.Timeout += OnUiNotificationTimeout;
+		AddChild(_uiNotificationTimer);
+
+		_uiNotificationPanel = new PanelContainer
+		{
+			Name = "LobbyNotificationPanel",
+			Visible = false,
+			MouseFilter = MouseFilterEnum.Ignore,
+			CustomMinimumSize = new Vector2(360, 64)
+		};
+		_uiNotificationPanel.SetAnchorsPreset(LayoutPreset.TopRight);
+		_uiNotificationPanel.OffsetLeft = -376;
+		_uiNotificationPanel.OffsetTop = 18;
+		_uiNotificationPanel.OffsetRight = -16;
+		_uiNotificationPanel.OffsetBottom = 90;
+
+		var style = new StyleBoxFlat
+		{
+			BgColor = new Color(0.08f, 0.13f, 0.23f, 0.94f),
+			BorderColor = new Color(0.35f, 0.7f, 1.0f, 0.95f),
+			BorderWidthLeft = 2,
+			BorderWidthTop = 2,
+			BorderWidthRight = 2,
+			BorderWidthBottom = 2,
+			CornerRadiusTopLeft = 10,
+			CornerRadiusTopRight = 10,
+			CornerRadiusBottomLeft = 10,
+			CornerRadiusBottomRight = 10,
+			ShadowColor = new Color(0f, 0f, 0f, 0.45f),
+			ShadowSize = 4
+		};
+		_uiNotificationPanel.AddThemeStyleboxOverride("panel", style);
+
+		var margin = new MarginContainer();
+		margin.SetAnchorsPreset(LayoutPreset.FullRect);
+		margin.AddThemeConstantOverride("margin_left", 12);
+		margin.AddThemeConstantOverride("margin_top", 8);
+		margin.AddThemeConstantOverride("margin_right", 12);
+		margin.AddThemeConstantOverride("margin_bottom", 8);
+		_uiNotificationPanel.AddChild(margin);
+
+		_uiNotificationLabel = new Label
+		{
+			Name = "Message",
+			AutowrapMode = TextServer.AutowrapMode.WordSmart,
+			HorizontalAlignment = HorizontalAlignment.Left,
+			VerticalAlignment = VerticalAlignment.Center
+		};
+		_uiNotificationLabel.AddThemeColorOverride("font_color", new Color(0.9f, 0.96f, 1f, 1f));
+		_uiNotificationLabel.AddThemeFontSizeOverride("font_size", 14);
+		margin.AddChild(_uiNotificationLabel);
+
+		AddChild(_uiNotificationPanel);
 	}
 
 	private void StartServerAutoRefresh()
@@ -206,6 +290,202 @@ public partial class MainLobbyUI : Control
 	{
 		_serverRefreshInFlight = false;
 		_serverRefreshInFlightSinceMs = 0;
+	}
+
+	private void OnLobbyTabChanged(long tab)
+	{
+		if (tab == FriendsTabIndex)
+			_unreadFriendRequestCount = 0;
+		if (tab == ChatTabIndex)
+		{
+			EnsureChatFriendSelection();
+			if (GodotObject.IsInstanceValid(ChatMessageInput))
+				ChatMessageInput.GrabFocus();
+		}
+		UpdateTabBadges();
+	}
+
+	private void UpdateTabBadges()
+	{
+		if (!GodotObject.IsInstanceValid(TabContainer))
+			return;
+
+		TabContainer.SetTabTitle(ServersTabIndex, "Servers");
+		TabContainer.SetTabTitle(
+			FriendsTabIndex,
+			_unreadFriendRequestCount > 0 ? $"Friends ({_unreadFriendRequestCount})" : "Friends"
+		);
+		TabContainer.SetTabTitle(
+			ChatTabIndex,
+			_unreadChatCount > 0 ? $"Chat ({_unreadChatCount})" : "Chat"
+		);
+	}
+
+	private void RecalculateUnreadChatCount()
+	{
+		_unreadChatCount = 0;
+		foreach (var unread in _unreadChatByFriend.Values)
+		{
+			_unreadChatCount += unread;
+		}
+	}
+
+	private void AddUnreadForFriend(int friendId)
+	{
+		if (friendId <= 0)
+			return;
+
+		_unreadChatByFriend[friendId] = _unreadChatByFriend.TryGetValue(friendId, out var unread) ? unread + 1 : 1;
+		RecalculateUnreadChatCount();
+		RefreshChatFriendListLabels();
+		UpdateTabBadges();
+	}
+
+	private void ClearUnreadForFriend(int friendId)
+	{
+		if (friendId <= 0)
+			return;
+
+		if (_unreadChatByFriend.Remove(friendId))
+		{
+			RecalculateUnreadChatCount();
+			RefreshChatFriendListLabels();
+			UpdateTabBadges();
+		}
+	}
+
+	private void RefreshChatFriendListLabels()
+	{
+		if (!GodotObject.IsInstanceValid(ChatFriendsList) || _friendsManager == null)
+			return;
+
+		var friends = _friendsManager.GetFriendsList();
+		if (friends == null)
+			return;
+
+		var selectedFriendId = _currentChatFriendId;
+		ChatFriendsList.Clear();
+
+		for (int i = 0; i < friends.Count; i++)
+		{
+			var friend = (Dictionary)friends[i];
+			var username = GetVal(friend, "username", $"User {GetUserIdFromDictionary(friend)}");
+			var friendId = GetUserIdFromDictionary(friend);
+			if (_unreadChatByFriend.TryGetValue(friendId, out var unread) && unread > 0)
+				ChatFriendsList.AddItem($"{username} ({unread})");
+			else
+				ChatFriendsList.AddItem(username);
+		}
+
+		var selectedIndex = FindFriendIndexById(friends, selectedFriendId);
+		if (selectedIndex >= 0)
+			ChatFriendsList.Select(selectedIndex);
+	}
+
+	private int FindFriendIndexById(Array friends, int friendId)
+	{
+		if (friendId <= 0 || friends == null)
+			return -1;
+
+		for (int i = 0; i < friends.Count; i++)
+		{
+			var friend = (Dictionary)friends[i];
+			if (GetUserIdFromDictionary(friend) == friendId)
+				return i;
+		}
+
+		return -1;
+	}
+
+	private void EnsureChatFriendSelection()
+	{
+		if (_friendsManager == null)
+			return;
+
+		var friends = _friendsManager.GetFriendsList();
+		if (friends == null || friends.Count == 0)
+		{
+			_currentChatFriendId = -1;
+			if (GodotObject.IsInstanceValid(ChatWithLabel))
+				ChatWithLabel.Text = "Select a friend to chat";
+			if (GodotObject.IsInstanceValid(ChatHistory))
+				ChatHistory.Clear();
+			return;
+		}
+
+		var selectedIndex = FindFriendIndexById(friends, _currentChatFriendId);
+		if (selectedIndex >= 0)
+		{
+			if (GodotObject.IsInstanceValid(ChatFriendsList))
+				ChatFriendsList.Select(selectedIndex);
+			return;
+		}
+
+		if (GodotObject.IsInstanceValid(ChatFriendsList))
+			ChatFriendsList.Select(0);
+		OnChatFriendSelected(0);
+	}
+
+	private void EnqueueUiNotification(string message)
+	{
+		if (string.IsNullOrWhiteSpace(message))
+			return;
+
+		_uiNotificationQueue.Enqueue(message.Trim());
+		if (!GodotObject.IsInstanceValid(_uiNotificationPanel) || !GodotObject.IsInstanceValid(_uiNotificationLabel))
+			return;
+
+		if (!_uiNotificationPanel.Visible)
+			ShowNextUiNotification();
+	}
+
+	private void ShowNextUiNotification()
+	{
+		if (!GodotObject.IsInstanceValid(_uiNotificationPanel) || !GodotObject.IsInstanceValid(_uiNotificationLabel))
+			return;
+
+		if (_uiNotificationQueue.Count == 0)
+		{
+			_uiNotificationPanel.Visible = false;
+			return;
+		}
+
+		_uiNotificationLabel.Text = _uiNotificationQueue.Dequeue();
+		_uiNotificationPanel.Visible = true;
+		_uiNotificationPanel.MoveToFront();
+		_uiNotificationTimer?.Start();
+	}
+
+	private void OnUiNotificationTimeout()
+	{
+		if (_uiNotificationQueue.Count > 0)
+		{
+			ShowNextUiNotification();
+			return;
+		}
+
+		if (GodotObject.IsInstanceValid(_uiNotificationPanel))
+			_uiNotificationPanel.Visible = false;
+	}
+
+	private void ClearUiNotifications()
+	{
+		_uiNotificationQueue.Clear();
+		_uiNotificationTimer?.Stop();
+		if (GodotObject.IsInstanceValid(_uiNotificationPanel))
+			_uiNotificationPanel.Visible = false;
+	}
+
+	private void ResetSocialNotificationTracking()
+	{
+		_knownFriendKeys.Clear();
+		_knownPendingRequestKeys.Clear();
+		_unreadChatByFriend.Clear();
+		_friendListInitialized = false;
+		_pendingRequestsInitialized = false;
+		_unreadFriendRequestCount = 0;
+		_unreadChatCount = 0;
+		UpdateTabBadges();
 	}
 
 	private void UpdateWelcomeHeader()
@@ -420,24 +700,66 @@ private void OnLogoutPressed()
 			return;
 		if (!GodotObject.IsInstanceValid(FriendsList))
 			return;
+
+		var nextFriendKeys = new HashSet<string>();
+		var newlyAddedFriends = new List<string>();
+		var validFriendIds = new HashSet<int>();
 		
 		FriendsList.Clear();
 		
 		foreach (Dictionary friend in friends)
 		{
-			var username = friend["username"].ToString();
+			var username = GetVal(friend, "username", $"User {GetUserIdFromDictionary(friend)}");
 			var online = friend.ContainsKey("online") && (bool)friend["online"] ? "ONLINE" : "OFFLINE";
 			FriendsList.AddItem($"{online} {username}");
+
+			var friendKey = BuildSocialKey(friend);
+			var friendId = GetUserIdFromDictionary(friend);
+			if (friendId > 0)
+				validFriendIds.Add(friendId);
+			if (!string.IsNullOrEmpty(friendKey))
+			{
+				nextFriendKeys.Add(friendKey);
+				if (_friendListInitialized && !_knownFriendKeys.Contains(friendKey))
+					newlyAddedFriends.Add(username);
+			}
 		}
 		
 		if (GodotObject.IsInstanceValid(ChatFriendsList))
 		{
-			ChatFriendsList.Clear();
-			foreach (Dictionary friend in friends)
+			RefreshChatFriendListLabels();
+			if (TabContainer != null && TabContainer.CurrentTab == ChatTabIndex)
+				EnsureChatFriendSelection();
+		}
+
+		_knownFriendKeys.Clear();
+		foreach (var key in nextFriendKeys)
+			_knownFriendKeys.Add(key);
+
+		var removedUnreadKeys = new List<int>();
+		foreach (var friendId in _unreadChatByFriend.Keys)
+		{
+			if (!validFriendIds.Contains(friendId))
+				removedUnreadKeys.Add(friendId);
+		}
+		foreach (var friendId in removedUnreadKeys)
+			_unreadChatByFriend.Remove(friendId);
+		RecalculateUnreadChatCount();
+		UpdateTabBadges();
+
+		if (FindFriendIndexById(friends, _currentChatFriendId) < 0)
+			_currentChatFriendId = -1;
+
+		if (_friendListInitialized)
+		{
+			foreach (var username in newlyAddedFriends)
 			{
-				var username = friend["username"].ToString();
-				ChatFriendsList.AddItem(username);
+				EnqueueUiNotification($"{username} is now your friend.");
 			}
+		}
+		else
+		{
+			_friendListInitialized = true;
 		}
 	}
 	
@@ -447,13 +769,46 @@ private void OnLogoutPressed()
 			return;
 		if (!GodotObject.IsInstanceValid(FriendRequestsList))
 			return;
+
+		var nextPendingKeys = new HashSet<string>();
+		var newRequesters = new List<string>();
 		
 		FriendRequestsList.Clear();
 		
 		foreach (Dictionary request in requests)
 		{
-			var username = request["username"].ToString();
+			var username = GetVal(request, "username", $"User {GetUserIdFromDictionary(request)}");
 			FriendRequestsList.AddItem($"{username} wants to be friends (Click to accept)");
+
+			var requestKey = BuildSocialKey(request);
+			if (!string.IsNullOrEmpty(requestKey))
+			{
+				nextPendingKeys.Add(requestKey);
+				if (_pendingRequestsInitialized && !_knownPendingRequestKeys.Contains(requestKey))
+					newRequesters.Add(username);
+			}
+		}
+
+		_knownPendingRequestKeys.Clear();
+		foreach (var key in nextPendingKeys)
+			_knownPendingRequestKeys.Add(key);
+
+		if (_pendingRequestsInitialized)
+		{
+			if (newRequesters.Count > 0)
+			{
+				foreach (var username in newRequesters)
+					EnqueueUiNotification($"Friend request from {username}.");
+
+				if (TabContainer == null || TabContainer.CurrentTab != FriendsTabIndex)
+					_unreadFriendRequestCount += newRequesters.Count;
+
+				UpdateTabBadges();
+			}
+		}
+		else
+		{
+			_pendingRequestsInitialized = true;
 		}
 	}
 	
@@ -475,6 +830,7 @@ private void OnLogoutPressed()
 			var request = (Dictionary)requests[(int)index];
 			var userId = GetUserIdFromDictionary(request);
 			_friendsManager.AcceptFriendRequest(userId);
+			EnqueueUiNotification("Friend request accepted.");
 		}
 	}
 	
@@ -511,6 +867,7 @@ private void OnLogoutPressed()
 	{
 		if (FriendsStatusLabel != null)
 			FriendsStatusLabel.Text = "Friend request sent!";
+		EnqueueUiNotification("Friend request sent.");
 	}
 	
 	private void OnFriendRequestFailed(string error)
@@ -531,12 +888,17 @@ private void OnLogoutPressed()
 		{
 			var friend = (Dictionary)friends[(int)index];
 			_currentChatFriendId = GetUserIdFromDictionary(friend);
-			var username = friend["username"].ToString();
+			var username = GetVal(friend, "username", $"User {_currentChatFriendId}");
 			
 			if (ChatWithLabel != null)
 				ChatWithLabel.Text = $"Chat with {username}";
+
+			ClearUnreadForFriend(_currentChatFriendId);
 			
 			_chatManager.LoadChatHistory(_currentChatFriendId);
+
+			if (GodotObject.IsInstanceValid(ChatMessageInput))
+				ChatMessageInput.GrabFocus();
 		}
 	}
 	
@@ -611,11 +973,24 @@ private void OnLogoutPressed()
 		if (!GodotObject.IsInstanceValid(this) || !IsInsideTree())
 			return;
 		var senderId = VariantToInt(message["sender_id"]);
+		var text = message.ContainsKey("message") ? message["message"].ToString() : "";
+		var senderName = GetFriendUsername(senderId);
+		var isChatTabActive = TabContainer != null && TabContainer.CurrentTab == ChatTabIndex;
+		var isActiveConversation = isChatTabActive && senderId == _currentChatFriendId;
+
+		if (!isActiveConversation)
+		{
+			if (_accountManager == null || senderId != _accountManager.GetUserId())
+			{
+				AddUnreadForFriend(senderId);
+				var preview = BuildNotificationPreview(text);
+				var body = string.IsNullOrEmpty(preview) ? senderName : $"{senderName}: {preview}";
+				EnqueueUiNotification($"New chat message from {body}");
+			}
+		}
 		
 		if (senderId == _currentChatFriendId && GodotObject.IsInstanceValid(ChatHistory))
 		{
-			var text = message["message"].ToString();
-			var senderName = GetFriendUsername(senderId);
 			ChatHistory.AppendText($"[Now] {senderName}: {text}\n");
 			ScrollChatHistoryToBottom();
 		}
@@ -649,6 +1024,32 @@ private void OnLogoutPressed()
 		if (data.ContainsKey("friend_id"))
 			return VariantToInt(data["friend_id"]);
 		return 0;
+	}
+
+	private string BuildSocialKey(Dictionary data)
+	{
+		var id = GetUserIdFromDictionary(data);
+		if (id > 0)
+			return $"id:{id}";
+
+		var username = GetVal(data, "username", "").Trim().ToLowerInvariant();
+		if (!string.IsNullOrEmpty(username))
+			return $"username:{username}";
+
+		return "";
+	}
+
+	private static string BuildNotificationPreview(string text)
+	{
+		if (string.IsNullOrWhiteSpace(text))
+			return "";
+
+		var normalized = text.Replace("\r", " ").Replace("\n", " ").Trim();
+		const int maxLength = 72;
+		if (normalized.Length <= maxLength)
+			return normalized;
+
+		return $"{normalized.Substring(0, maxLength)}...";
 	}
 
 	private string GetServerAddress(Dictionary server)
@@ -702,6 +1103,19 @@ private void OnLogoutPressed()
 	public override void _ExitTree()
 	{
 		StopServerAutoRefresh();
+		ClearUiNotifications();
+		if (_uiNotificationTimer != null)
+		{
+			_uiNotificationTimer.Timeout -= OnUiNotificationTimeout;
+			_uiNotificationTimer.Stop();
+			_uiNotificationTimer.QueueFree();
+			_uiNotificationTimer = null;
+		}
+		if (_uiNotificationPanel != null)
+		{
+			_uiNotificationPanel.QueueFree();
+			_uiNotificationPanel = null;
+		}
 		if (_serverRefreshTimer != null)
 		{
 			_serverRefreshTimer.Timeout -= OnServerAutoRefreshTimeout;
@@ -743,6 +1157,11 @@ private void OnLogoutPressed()
 		if (_gameManager != null)
 		{
 			_gameManager.ConnectionFailed -= OnConnectionFailed;
+		}
+
+		if (TabContainer != null)
+		{
+			TabContainer.TabChanged -= OnLobbyTabChanged;
 		}
 	}
 }

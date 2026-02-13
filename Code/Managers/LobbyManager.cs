@@ -33,11 +33,15 @@ public partial class LobbyManager : Node
 	private FriendsManager _friendsManager;
 	private ChatManager _chatManager;
 	private Dictionary _lastServerRegistration;
+	private Dictionary _pendingServerRegistration;
+	private bool _registrationInFlight = false;
 	private long _lastReregisterAttemptMs = 0;
 	private const long ReregisterCooldownMs = 15000;
 	
 	public override void _Ready()
 	{
+		ProcessMode = ProcessModeEnum.Always;
+		
 		_httpClient = new HttpClient();
 		_accountManager = GetNode<AccountManager>("/root/AccountManager");
 		_friendsManager = GetNodeOrNull<FriendsManager>("/root/FriendsManager");
@@ -250,13 +254,28 @@ public partial class LobbyManager : Node
 			GD.Print($"[LobbyManager] Dedicated Server Registered: {_currentServerId}");
 		}
 	}
-	public async void RegisterServer(Dictionary serverInfo)
+	public void RegisterServer(Dictionary serverInfo)
+	{
+		RegisterServerInternal(serverInfo, false);
+	}
+
+	private async void RegisterServerInternal(Dictionary serverInfo, bool force)
 	{
 		if (!_accountManager.IsLoggedIn())
 		{
 			EmitSignal(SignalName.ServerRegistrationFailed, "Not logged in");
 			return;
 		}
+
+		if (_registrationInFlight)
+		{
+			if (force)
+				return;
+			_pendingServerRegistration = CloneDictionary(serverInfo);
+			return;
+		}
+
+		_registrationInFlight = true;
 		
 		try
 		{
@@ -297,6 +316,16 @@ public partial class LobbyManager : Node
 				passwordProtected = (bool)serverInfo["password_protected"];
 			if (serverInfo.ContainsKey("description")) 
 				description = serverInfo["description"].ToString();
+			if (string.IsNullOrWhiteSpace(serverName))
+				serverName = "GodotStation Server";
+			if (string.IsNullOrWhiteSpace(map))
+				map = "Station";
+			if (string.IsNullOrWhiteSpace(gamemode))
+				gamemode = "Sandbox";
+			serverName = serverName.Trim();
+			map = map.Trim();
+			gamemode = gamemode.Trim();
+			description ??= "";
 
 			if (port < MinPort || port > MaxPort)
 			{
@@ -387,6 +416,18 @@ public partial class LobbyManager : Node
 			EmitSignal(SignalName.ServerRegistrationFailed, errorMsg);
 			GD.PrintErr($"[LobbyManager] {errorMsg}");
 		}
+		finally
+		{
+			_registrationInFlight = false;
+
+			if (!force && _pendingServerRegistration != null)
+			{
+				var pending = _pendingServerRegistration;
+				_pendingServerRegistration = null;
+				if (!_isHosting)
+					RegisterServerInternal(pending, false);
+			}
+		}
 	}
 	
 	// Send heartbeat to keep server alive in lobby
@@ -451,7 +492,7 @@ public partial class LobbyManager : Node
 
 		_lastReregisterAttemptMs = now;
 		GD.Print("[LobbyManager] Attempting to re-register server after heartbeat rejection");
-		RegisterServer(_lastServerRegistration);
+		RegisterServerInternal(_lastServerRegistration, true);
 	}
 	
 	// Unregister server from lobby
@@ -546,6 +587,18 @@ public partial class LobbyManager : Node
 			// Ignore
 		}
 		return "Unknown error occurred";
+	}
+
+	private static Dictionary CloneDictionary(Dictionary source)
+	{
+		var copy = new Dictionary();
+		if (source == null)
+			return copy;
+		foreach (var key in source.Keys)
+		{
+			copy[key] = source[key];
+		}
+		return copy;
 	}
 
 	private static int VariantToInt(Variant value)

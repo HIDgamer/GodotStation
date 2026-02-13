@@ -33,6 +33,19 @@ public partial class FriendsManager : Node
 		_refreshTimer.Timeout += OnPeriodicRefresh;
 		AddChild(_refreshTimer);
 		_refreshTimer.Start();
+
+		_accountManager.LoginSuccess += OnLoginSuccess;
+
+		if (_accountManager.IsLoggedIn())
+		{
+			CallDeferred(MethodName.OnLoginSuccess, new Dictionary(), "");
+		}
+	}
+
+	private void OnLoginSuccess(Dictionary userData, string token)
+	{
+		RefreshFriendsList();
+		RefreshPendingRequests();
 	}
 
 	private void OnPeriodicRefresh()
@@ -318,6 +331,10 @@ public partial class FriendsManager : Node
 	
 	public override void _ExitTree()
 	{
+		if (_accountManager != null)
+		{
+			_accountManager.LoginSuccess -= OnLoginSuccess;
+		}
 		if (_refreshTimer != null)
 		{
 			_refreshTimer.Timeout -= OnPeriodicRefresh;
