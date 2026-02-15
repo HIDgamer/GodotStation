@@ -444,17 +444,33 @@ public partial class GameManager : Node
 						wm.Call("UpdateTileRpc", cell, "floor");
 					}
 				}
+				// Modified spawner - here
 				
 				await ToSignal(GetTree(), "process_frame");
-				
+				//Count the connected peers to list/wait for.
 				var spawnIndex = 0;
-				foreach (var peerId in _connectedPeers)
+				var SpawnArray = _connectedPeers.ToArray();
+				var PlayersReadyNow = SpawnArray.Count();
+				// use up to 15 groups for spawning in frames but never use more than there are players to avoid frames with "null" in the spawn array
+				var TotalFrames = Mathf.Min(15, PlayersReadyNow);
+				var SpawnPerFrame = Mathf.CeilToInt(PlayersReadyNow / (float)TotalFrames);
+				var SpawnedThisFrame = 0;
+				foreach (var peerId in SpawnArray)
 				{
+					
 					if (peerId > 0)
 					{
-						var spawnPos = spawnPositions[spawnIndex % spawnPositions.Length];
+						var spawnPos = spawnPositions[spawnIndex % spawnPositions.Length];	
 						SpawnPlayer(peerId, spawnPos);
 						spawnIndex++;
+						SpawnedThisFrame++;
+
+						if (SpawnedThisFrame >= SpawnPerFrame)
+						{
+							SpawnedThisFrame = 0;
+							await ToSignal(GetTree(), "process_frame");
+						}
+						
 					}
 				}
 			}
