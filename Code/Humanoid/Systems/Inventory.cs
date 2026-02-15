@@ -16,6 +16,10 @@ public partial class Inventory : Node, IMobSystem
 	private int _activeHand = 0;
 	private List<WorldItem> _recentDrops = new();
 	
+	private float _foodQualityMultiplier = 1.0f;
+	private float _foodQualityTimer = 0f;
+	private const float FoodQualityDecayInterval = 60f;
+	
 	[Signal] public delegate void InventoryChangedEventHandler();
 	
 	public override void _Ready()
@@ -113,17 +117,41 @@ public partial class Inventory : Node, IMobSystem
 		return false;
 	}
 	
-public bool Equip(Item item, string slot)
-{
-	if (!Multiplayer.IsServer()) return false;
-	
-	if (!_equipped.ContainsKey(slot)) return false;
-	if (_equipped[slot] != null) return false;
-	
-	if (item == null) return false;
-	
-	_equipped[slot] = item;
+	public bool Equip(Item item, string slot)
+	{
+		if (!Multiplayer.IsServer()) return false;
 		
+		GD.Print($"[Inventory] Equip called: item={item?.ItemName}, slot={slot}");
+		
+		if (!_equipped.ContainsKey(slot))
+		{
+			GD.Print($"[Inventory] Equip failed: slot {slot} not in _equipped dictionary");
+			return false;
+		}
+		
+		if (_equipped[slot] != null)
+		{
+			GD.Print($"[Inventory] Equip failed: slot {slot} already occupied by {_equipped[slot].ItemName}");
+			return false;
+		}
+		
+		if (item == null)
+		{
+			GD.Print($"[Inventory] Equip failed: item is null");
+			return false;
+		}
+		
+		if (IsHandBlocked(slot, item))
+		{
+			GD.Print($"[Inventory] Equip failed: IsHandBlocked returned true");
+			_owner.ShowChatBubble("Hand is occupied with pulling");
+			return false;
+		}
+		
+		GD.Print($"[Inventory] All checks passed, equipping {item.ItemName} to {slot}");
+		
+		_equipped[slot] = item;
+			
 		UpdateHandSprite(slot);
 		EmitSignal(SignalName.InventoryChanged);
 		
@@ -190,6 +218,7 @@ public bool Equip(Item item, string slot)
 		if (scenePath == GrabItemToken)
 		{
 			_equipped[slot] = new GrabItem();
+			UpdateHandSprite(slot);
 			CallDeferred(MethodName.EmitSignal, SignalName.InventoryChanged);
 			return;
 		}
@@ -247,8 +276,6 @@ public bool Equip(Item item, string slot)
 		CallDeferred(MethodName.EmitSignal, SignalName.InventoryChanged);
 	}
 	
-
-	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void SyncInventoryChangeRpc()
 	{
@@ -257,12 +284,16 @@ public bool Equip(Item item, string slot)
 	
 	private void UpdateHandSprite(string slot)
 	{
-		if (!Multiplayer.IsServer()) return;
+		GD.Print($"[Inventory] UpdateHandSprite called: slot={slot}, item={_equipped.GetValueOrDefault(slot)?.ItemName}");
 		
 		Node2D handSprite = slot == "left_hand" ? _leftHandSprite : 
 							slot == "right_hand" ? _rightHandSprite : null;
 		
-		if (handSprite == null) return;
+		if (handSprite == null)
+		{
+			GD.Print($"[Inventory] UpdateHandSprite: handSprite is null for slot {slot}");
+			return;
+		}
 		
 		foreach (var child in handSprite.GetChildren())
 		{
@@ -276,11 +307,16 @@ public bool Equip(Item item, string slot)
 		var item = _equipped[slot];
 		if (item != null)
 		{
-			if (item is GrabItem)
-				return;
-			
 			var spriteSystemNode = _owner.GetNodeOrNull<SpriteSystem>("SpriteSystem");
 			int currentDirection = spriteSystemNode?.Direction ?? 0;
+			
+			if (item is GrabItem grabItem)
+			{
+				GD.Print($"[Inventory] GrabItem equipped to slot {slot} - no separate sprite needed");
+				// GrabItem doesn't need a separate sprite system - the grab animation
+				// is handled by the character's existing animation system
+				return;
+			}
 			
 			string scenePath = GetScenePathForItem(item);
 			if (scenePath != null)
@@ -297,6 +333,14 @@ public bool Equip(Item item, string slot)
 						handSprite.AddChild(spriteSystem);
 						spriteSystem.ShowInHand(currentDirection, slot == "left_hand");
 						ApplyItemFrameSettings(spriteSystem, item);
+						
+						foreach (Node child in spriteSystem.GetChildren())
+						{
+							if (child is Sprite2D sprite)
+							{
+								sprite.ZIndex = -1;
+							}
+						}
 					}
 					instance.QueueFree();
 				}
@@ -305,13 +349,23 @@ public bool Equip(Item item, string slot)
 					GD.PrintErr($"[Inventory] Warning: Could not load scene file '{scenePath}' for item '{item.ItemName}'. Using fallback icon.");
 					var fallbackSpriteSystem = new ItemSpriteSystem();
 					fallbackSpriteSystem.IconTexture = item.Icon;
-					fallbackSpriteSystem.IconHframes = 1;
-					fallbackSpriteSystem.IconVframes = 1;
+					fallbackSpriteSystem.IconHframes = item.IconHframes;
+					fallbackSpriteSystem.IconVframes = item.IconVframes;
+					fallbackSpriteSystem.InHandHframes = item.IconHframes;
+					fallbackSpriteSystem.InHandVframes = item.IconVframes;
 					fallbackSpriteSystem.DefaultStateId = "default";
+					handSprite.AddChild(fallbackSpriteSystem);
 					fallbackSpriteSystem._Ready();
 					ApplyItemFrameSettings(fallbackSpriteSystem, item);
-					handSprite.AddChild(fallbackSpriteSystem);
-					fallbackSpriteSystem.ShowIcon();
+					fallbackSpriteSystem.ShowInHand(currentDirection, slot == "left_hand");
+					
+					foreach (Node child in fallbackSpriteSystem.GetChildren())
+					{
+						if (child is Sprite2D sprite)
+						{
+							sprite.ZIndex = -1;
+						}
+					}
 				}
 			}
 		}
@@ -496,6 +550,94 @@ public bool Equip(Item item, string slot)
 	}
 	
 	public void Init(Mob mob) { }
-	public void Process(double delta) { }
+	
+	public void Process(double delta) 
+	{
+		if (!Multiplayer.IsServer()) return;
+		
+		_foodQualityTimer += (float)delta;
+		if (_foodQualityTimer >= FoodQualityDecayInterval)
+		{
+			_foodQualityTimer = 0f;
+			DecayFoodQuality();
+		}
+	}
+	
 	public void Cleanup() { _items.Clear(); }
+	
+	public void ApplyFoodQuality(float qualityMultiplier)
+	{
+		if (!Multiplayer.IsServer()) return;
+		
+		_foodQualityMultiplier = Mathf.Clamp(_foodQualityMultiplier * qualityMultiplier, 0.1f, 2.0f);
+	}
+	
+	public void ResetFoodQuality()
+	{
+		if (!Multiplayer.IsServer()) return;
+		
+		_foodQualityMultiplier = 1.0f;
+	}
+	
+	private void DecayFoodQuality()
+	{
+		if (_foodQualityMultiplier > 1.0f)
+		{
+			_foodQualityMultiplier = Mathf.Max(1.0f, _foodQualityMultiplier * 0.95f);
+		}
+	}
+	
+	public float GetFoodQualityMultiplier() => _foodQualityMultiplier;
+	
+	public bool ConsumeFood(string slot)
+	{
+		if (!Multiplayer.IsServer()) return false;
+		
+		var item = GetEquipped(slot);
+		if (item == null) return false;
+		
+		if (item is FoodItem food)
+		{
+			var healthSystem = _owner.GetNodeOrNull<HealthSystem>("HealthSystem");
+			
+			if (healthSystem != null)
+			{
+				healthSystem.ApplyHealing(food.HealingAmount * _foodQualityMultiplier);
+				var currentPain = healthSystem.GetCurrentPainLevel();
+				if (currentPain > PainLevel.None)
+				{
+					int painIndex = (int)currentPain;
+					int newPainIndex = Mathf.Max(0, painIndex - (int)food.PainReduction);
+					healthSystem.SetPainLevel((PainLevel)newPainIndex);
+				}
+			}
+			
+			ApplyFoodQuality(food.QualityMultiplier);
+			
+			Unequip(slot);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private bool IsHandBlocked(string slot, Item item = null)
+	{
+		if (item is GrabItem)
+		{
+			GD.Print($"[Inventory] IsHandBlocked: allowing GrabItem");
+			return false;
+		}
+		
+		var interactionSystem = _owner.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
+		if (interactionSystem?.IsPulling() == true)
+		{
+			var activeSlot = _activeHand == 0 ? "left_hand" : "right_hand";
+			bool blocked = slot == activeSlot;
+			GD.Print($"[Inventory] IsHandBlocked: pulling={true}, slot={slot}, activeSlot={activeSlot}, blocked={blocked}");
+			return blocked;
+		}
+		GD.Print($"[Inventory] IsHandBlocked: not pulling, not blocked");
+		return false;
+	}
 }

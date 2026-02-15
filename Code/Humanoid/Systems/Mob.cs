@@ -24,11 +24,6 @@ public partial class Mob : CharacterBody2D
 
 	public override void _Ready()
 	{
-		if (GetNodeOrNull<WeaponHandlingComponent>("WeaponHandlingComponent") == null)
-		{
-			var weaponHandling = new WeaponHandlingComponent { Name = "WeaponHandlingComponent" };
-			AddChild(weaponHandling);
-		}
 		
 		RegisterSystemsRecursive(this);
 		ChildEnteredTree += OnChildEnteredTree;

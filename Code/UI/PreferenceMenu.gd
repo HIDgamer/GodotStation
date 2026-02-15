@@ -2,6 +2,7 @@ extends Window
 
 @onready var preference_manager: Node = $/root/PreferenceManager
 @onready var sprite_system: Node2D = $PreviewBackground/CharacterBackground/SpriteSystem
+@onready var audio_manager: Node = $/root/AudioManager
 
 @onready var name_edit: LineEdit = $TabHuman/CharacterInfo/Name/Picker
 @onready var randomize_name_check: CheckButton = $TabHuman/CharacterInfo/Name/RandName/RandomName
@@ -84,6 +85,36 @@ func _ready() -> void:
 	save_slot_button.pressed.connect(_on_save_slot_pressed)
 	load_slot_button.pressed.connect(_on_load_slot_pressed)
 	reload_slot_button.pressed.connect(_on_reload_slot_pressed)
+	
+	# Add hover sounds to buttons
+	add_hover_sounds()
+
+func add_hover_sounds() -> void:
+	if audio_manager:
+		if role_button:
+			role_button.mouse_entered.connect(_on_button_hover)
+		if assign_role_button:
+			assign_role_button.mouse_entered.connect(_on_button_hover)
+		if hair_button:
+			hair_button.mouse_entered.connect(_on_button_hover)
+		if facial_hair_button:
+			facial_hair_button.mouse_entered.connect(_on_button_hover)
+		if underwear_button:
+			underwear_button.mouse_entered.connect(_on_button_hover)
+		if undershirt_button:
+			undershirt_button.mouse_entered.connect(_on_button_hover)
+		if left_rotate_button:
+			left_rotate_button.mouse_entered.connect(_on_button_hover)
+		if right_rotate_button:
+			right_rotate_button.mouse_entered.connect(_on_button_hover)
+		if cycle_bg_button:
+			cycle_bg_button.mouse_entered.connect(_on_button_hover)
+		if save_slot_button:
+			save_slot_button.mouse_entered.connect(_on_button_hover)
+		if load_slot_button:
+			load_slot_button.mouse_entered.connect(_on_button_hover)
+		if reload_slot_button:
+			reload_slot_button.mouse_entered.connect(_on_button_hover)
 
 func populate_races() -> void:
 	race_option.clear()
@@ -222,55 +253,77 @@ func _on_pref_squad_selected(id: int) -> void:
 	preference_manager.update_character_field("pref_squad", text)
 
 func _on_role_button_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	role_pref_popup.popup_centered()
 
 func _on_assign_role_button_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	preference_manager.assign_character_to_role("Assistant")
 	print("Assigned current character to Assistant")
 
 func _on_hair_button_pressed() -> void:
 	print("PreferenceMenu._on_hair_button_pressed called")
+	if audio_manager:
+		audio_manager.play_ui_click()
 	item_popup.set_type("hair", hair_button)
 	item_popup.populate_items()
 	item_popup.popup_centered()
 
 func _on_facial_hair_button_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	item_popup.set_type("facial_hair", facial_hair_button)
 	item_popup.populate_items()
 	item_popup.popup_centered()
 
 func _on_underwear_button_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	item_popup.set_type("underwear", underwear_button)
 	item_popup.populate_items()
 	item_popup.popup_centered()
 
 func _on_undershirt_button_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	item_popup.set_type("undershirt", undershirt_button)
 	item_popup.populate_items()
 	item_popup.popup_centered()
 
 func _on_left_rotate_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_menu_selection()
 	var current_dir: int = sprite_system.GetDirection()
 	var new_dir: int = (current_dir - 1 + 4) % 4
 	sprite_system.call("SetDirection", new_dir)
 
 func _on_right_rotate_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_menu_selection()
 	var current_dir: int = sprite_system.GetDirection()
 	var new_dir: int = (current_dir + 1) % 4
 	sprite_system.call("SetDirection", new_dir)
 
 func _on_save_slot_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	slot_popup.set_action_mode("save")
 	slot_popup.populate_slots()
 	slot_popup.popup_centered()
 
 func _on_load_slot_pressed() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	slot_popup.set_action_mode("load")
 	slot_popup.populate_slots()
 	slot_popup.popup_centered()
 
 func _on_reload_slot_pressed() -> void:
 	load_character_data()
+	if audio_manager:
+		audio_manager.play_ui_saved()
 
 func load_backgrounds() -> void:
 	backgrounds = []
@@ -290,6 +343,8 @@ func _on_cycle_bg_pressed() -> void:
 	if backgrounds.size() > 0:
 		current_bg = (current_bg + 1) % backgrounds.size()
 		character_background.texture = load(backgrounds[current_bg])
+	if audio_manager:
+		audio_manager.play_ui_menu_selection()
 
 func _on_hair_base_color_changed(color: Color) -> void:
 	preference_manager.update_character_field("hair_base_color", color.to_html())
@@ -312,4 +367,10 @@ func _update_color_labels() -> void:
 		eye_color_button.text = "Eye Color: " + eye_color_button.color.to_html(false).to_upper()
 
 func _on_close_requested() -> void:
+	if audio_manager:
+		audio_manager.play_ui_close_menu()
 	hide()
+
+func _on_button_hover() -> void:
+	if audio_manager:
+		audio_manager.play_ui_hover()

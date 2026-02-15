@@ -3,11 +3,22 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 [GlobalClass]
-public partial class VisibilitySystem : Node2D
+public partial class VisibilitySystem : Node2D, ISchedulable
 {
 	[Export] public int ViewRange = 20;
 	[Export] public float FogIntensity = 0.3f;
 	[Export] public float FogSpeed = 0.5f;
+	
+	[Export] public float SchedulerUpdateInterval = 0.5f;
+	[Export] public int SchedulerPriority = 5;
+	[Export] public bool SchedulerUpdateOnRegister = false;
+	[Export] public bool EnableDebugLogging = false;
+	
+	// GPU optimization settings
+	[Export] public int TextureScale = 2;
+	[Export] public bool EnableFogSystem = true; // Master toggle - disable completely if GPU struggling
+	[Export] public bool EnableFogAnimation = true; // Disable for static fog (saves GPU)
+	[Export] public bool EnableTextureCaching = true;
 	
 	private GridSystem _gridSystem;
 	private ColorRect _fogRect;
@@ -16,9 +27,11 @@ public partial class VisibilitySystem : Node2D
 	private Vector2I _mapMin;
 	private readonly HashSet<string> _blockingMaterials = new() { "wall" };
 	private const int TileSize = 32;
-	private const int TextureScale = 4;
+	// Note: TextureScale is now an exported property, removed the const
 	private Mob _cachedPlayer;
 	private bool _isProcessingGrid;
+	private Scheduler _scheduler;
+	private double _lastTimeUpdate = 0.0;
 
 	public override void _Ready()
 	{
@@ -30,6 +43,24 @@ public partial class VisibilitySystem : Node2D
 			// Process existing grid if available
 			if (_gridSystem.Grid?.Count > 0)
 				OnGridScanCompleted(_gridSystem.Grid);
+		}
+		
+		_scheduler = GetNodeOrNull<Scheduler>("/root/Scheduler");
+		
+		if (_scheduler == null)
+		{
+			_scheduler = GetTree().GetFirstNodeInGroup("Scheduler") as Scheduler;
+		}
+		
+		if (_scheduler != null)
+		{
+			_scheduler.Register(this);
+			if (EnableDebugLogging)
+				GD.Print("[VisibilitySystem] Registered with scheduler");
+		}
+		else
+		{
+			GD.PrintErr("[VisibilitySystem] No scheduler found in scene or autoloads!");
 		}
 	}
 
@@ -46,8 +77,6 @@ public partial class VisibilitySystem : Node2D
 		if (grid.Count == 0 || _isProcessingGrid) return;
 		ProcessGridAsync(grid);
 	}
-
-	// Simplified async processing - no manual thread management needed
 	private async void ProcessGridAsync(Godot.Collections.Dictionary<Vector2I, string> grid)
 	{
 		if (_isProcessingGrid) return;
@@ -185,7 +214,9 @@ public partial class VisibilitySystem : Node2D
 
 	public override void _Process(double delta)
 	{
-		if (_fogMaterial == null) return;
+		// Master toggle - skip all processing if fog is disabled
+		if (!EnableFogSystem || _fogMaterial == null)
+			return;
 
 		// Cache player reference
 		if (_cachedPlayer == null || !IsInstanceValid(_cachedPlayer))
@@ -193,11 +224,23 @@ public partial class VisibilitySystem : Node2D
 			_cachedPlayer = FindPlayerMob();
 		}
 
-		// Update player position in shader
+		// Update player position EVERY frame for smooth fog movement (original behavior)
 		if (_cachedPlayer != null)
 		{
 			_fogMaterial.SetShaderParameter("player_position", _cachedPlayer.GlobalPosition);
 		}
+	}
+	
+	public void ScheduledUpdate(float delta, WorldSnapshot snapshot)
+	{
+		// Skip if fog system is disabled or animation is disabled
+		if (!EnableFogSystem || !EnableFogAnimation || _fogMaterial == null)
+			return;
+		
+		// Update time parameter for fog animation every call (every 0.5s)
+		var currentTime = Time.GetUnixTimeFromSystem();
+		_fogMaterial.SetShaderParameter("time", currentTime);
+		_lastTimeUpdate = currentTime;
 	}
 
 	private Mob FindPlayerMob()
@@ -210,5 +253,30 @@ public partial class VisibilitySystem : Node2D
 			}
 		}
 		return null;
+	}
+	
+	public void Cleanup()
+	{
+		if (_gridSystem != null)
+			_gridSystem.ScanCompleted -= OnGridScanCompleted;
+		
+		// Unregister from scheduler
+		if (_scheduler != null)
+		{
+			_scheduler.Unregister(this);
+		}
+	}
+	
+	public string SchedulerId => "VisibilitySystem";
+	public float UpdateInterval => SchedulerUpdateInterval;
+	public int Priority => SchedulerPriority;
+	public bool UpdateOnRegister => SchedulerUpdateOnRegister;
+	public bool IsActive => IsInsideTree() && _fogMaterial != null;
+	public bool NeedsProcessing => IsInsideTree() && _fogMaterial != null;
+	
+	public override void _ExitTree()
+	{
+		Cleanup();
+		base._ExitTree();
 	}
 }

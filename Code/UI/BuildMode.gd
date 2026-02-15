@@ -52,33 +52,6 @@ func _find_world() -> Node:
 		return subviewport.get_child(0)
 	return get_tree().current_scene
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("toggle_build_mode"):
-		visible = not visible
-		var container = get_node("/root/Communications/HSplitContainer/SubViewportContainer")
-		container.visible = visible
-		if not visible:
-			current_mode = Mode.NONE
-		return
-
-	if visible and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var hovered = get_viewport().gui_get_hovered_control()
-		var container = get_node("/root/Communications/HSplitContainer/SubViewportContainer")
-		if hovered != null and hovered != container:
-			return
-		
-		var screen_pos = get_viewport().get_mouse_position()
-		if not container.get_global_rect().has_point(screen_pos):
-			return
-		
-		var world_pos = _get_world_mouse_position()
-		var cell = _world_to_grid(world_pos)
-		
-		if current_mode == Mode.BUILD:
-			_build_at(cell)
-		elif current_mode == Mode.DESTROY:
-			_destroy_at(cell)
-
 func _on_back_pressed() -> void:
 	visible = false
 	current_mode = Mode.NONE

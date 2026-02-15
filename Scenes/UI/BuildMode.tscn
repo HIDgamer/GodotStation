@@ -1,18 +1,18 @@
 [gd_scene format=3 uid="uid://d5qqddm1cxen"]
 
 [ext_resource type="Script" uid="uid://bsxg5qsovj1ly" path="res://Code/UI/BuildMode.gd" id="1_b2qlh"]
-[ext_resource type="Texture2D" uid="uid://b8ayddrd1mn61" path="res://Assets/UI/Interface/Button08.png" id="2_lkbs7"]
-[ext_resource type="Texture2D" uid="uid://bt8h80kx8gan3" path="res://Assets/UI/Interface/Button05.png" id="3_tyqx3"]
-[ext_resource type="Texture2D" uid="uid://c0wcjh0xku1f" path="res://Assets/UI/Interface/Button02.png" id="4_rvrkw"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lkbs7"]
-texture = ExtResource("2_lkbs7")
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tyqx3"]
-texture = ExtResource("3_tyqx3")
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rvrkw"]
-texture = ExtResource("4_rvrkw")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel_inner"]
+bg_color = Color(0.08, 0.12, 0.2, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.3)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="BuildMode" type="Control" unique_id=1947768626]
 layout_mode = 3
@@ -35,14 +35,15 @@ metadata/_edit_use_anchors_ = true
 [node name="Build" type="Button" parent="HBoxContainer" unique_id=1675824444]
 custom_minimum_size = Vector2(50, 50)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxTexture_lkbs7")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Build"
 icon_alignment = 1
 expand_icon = true
 
 [node name="Destroy" type="Button" parent="HBoxContainer" unique_id=928714057]
 custom_minimum_size = Vector2(50, 50)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxTexture_tyqx3")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 text = "Destroy"
 icon_alignment = 1
 expand_icon = true
@@ -50,6 +51,6 @@ expand_icon = true
 [node name="Back" type="Button" parent="HBoxContainer" unique_id=316281345]
 custom_minimum_size = Vector2(50, 50)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxTexture_rvrkw")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 text = "Back"
 icon_alignment = 1

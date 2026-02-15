@@ -90,7 +90,7 @@ public partial class DoAfterComponent : Node, IMobSystem
 		_animationSprite = new Sprite2D
 		{
 			ZIndex = 1000,
-			Position = new Vector2(0, -40),
+			Position = new Vector2(0, -20),
 			Texture = ResourceLoader.Load<Texture2D>("uid://cqglc2mfqbup1"),
 			Hframes = 20,
 			Vframes = 1,

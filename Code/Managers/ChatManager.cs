@@ -24,6 +24,12 @@ public partial class ChatManager : Node
 	{
 		_httpClient = new HttpClient();
 		_accountManager = GetNode<AccountManager>("/root/AccountManager");
+		_accountManager.Logout += OnLogout;
+	}
+	
+	private void OnLogout()
+	{
+		_chatHistories.Clear();
 	}
 	
 	// Send a chat message to a friend
@@ -75,7 +81,6 @@ public partial class ChatManager : Node
 					{
 						var messageData = result["message"].AsGodotDictionary();
 						
-						// Add to local history
 						AddMessageToHistory(receiverId, messageData);
 						
 						EmitSignal(SignalName.MessageSent, messageData);
@@ -98,7 +103,6 @@ public partial class ChatManager : Node
 		}
 	}
 	
-	// Load chat history with a friend
 	public async void LoadChatHistory(int friendId, int limit = 50)
 	{
 		if (!_accountManager.IsLoggedIn())
@@ -146,7 +150,6 @@ public partial class ChatManager : Node
 		return new Array();
 	}
 	
-	// Handle incoming message from WebSocket
 	public void OnMessageReceived(Dictionary message)
 	{
 		Variant v = message["sender_id"];
@@ -163,7 +166,6 @@ public partial class ChatManager : Node
 		EmitSignal(SignalName.MessageReceived, message);
 	}
 	
-	// Add message to local history
 	private void AddMessageToHistory(int otherUserId, Dictionary message)
 	{
 		if (!_chatHistories.ContainsKey(otherUserId))
@@ -173,14 +175,12 @@ public partial class ChatManager : Node
 		
 		_chatHistories[otherUserId].Add(message);
 		
-		// Keep only last 100 messages in memory
 		if (_chatHistories[otherUserId].Count > 100)
 		{
 			_chatHistories[otherUserId].RemoveAt(0);
 		}
 	}
 	
-	// Clear chat history for a friend
 	public void ClearChatHistory(int friendId)
 	{
 		if (_chatHistories.ContainsKey(friendId))
@@ -189,7 +189,6 @@ public partial class ChatManager : Node
 		}
 	}
 	
-	// Clear all chat histories
 	public void ClearAllChatHistories()
 	{
 		_chatHistories.Clear();
@@ -211,13 +210,16 @@ public partial class ChatManager : Node
 		}
 		catch
 		{
-			// Ignore
 		}
 		return "Unknown error occurred";
 	}
 	
 	public override void _ExitTree()
 	{
+		if (_accountManager != null)
+		{
+			_accountManager.Logout -= OnLogout;
+		}
 		_httpClient?.Dispose();
 	}
 }

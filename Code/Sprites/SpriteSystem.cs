@@ -12,10 +12,14 @@ public partial class SpriteSystem : Node2D
 	[Export] public string HairBaseColor { get; set; } = "#000000";
 	[Export] public float HeadTurnSpeed { get; set; } = 0.15f;
 	[Export] public bool IsPreviewMode { get; set; } = false;
+	[Export] public bool EnableNormalMaps { get; set; } = false; // Disable normal maps to save VRAM
+	[Export] public bool EnableTextureCompression { get; set; } = true; // Enable texture compression
 
 	private Node _preferenceManager;
 	private readonly Dictionary<string, Texture2D> _textureCache = new();
-	private const int MaxCacheSize = 50;
+	private readonly Dictionary<string, CanvasTexture> _canvasTextureCache = new(); // Cache complete CanvasTextures
+	private const int MaxCacheSize = 25; // Reduced cache size to save memory
+	private ProfilingManager _profilingManager;
 	private readonly int[] _frameMap = { 0, 1, 2, 3 };
 	private Vector2 _mouseTarget;
 	private bool _hasMouseTarget;
@@ -60,6 +64,8 @@ public partial class SpriteSystem : Node2D
 							GetNodeOrNull("../../PreferenceManager") ??
 							(GetTree().GetNodesInGroup("PreferenceManager").Count > 0 ? 
 							 GetTree().GetNodesInGroup("PreferenceManager")[0] : null);
+
+		_profilingManager = GetNodeOrNull<ProfilingManager>("/root/ProfilingManager");
 
 		if (_preferenceManager != null)
 		{
@@ -124,11 +130,29 @@ public partial class SpriteSystem : Node2D
 			var diffuseTexture = LoadTexture(partName, "base");
 			if (diffuseTexture != null)
 			{
-				var canvasTexture = new CanvasTexture
+				// Check if we have a cached CanvasTexture for this part
+				string canvasCacheKey = $"{partName}_canvas";
+				CanvasTexture canvasTexture;
+				
+				if (_canvasTextureCache.TryGetValue(canvasCacheKey, out var cachedCanvas))
 				{
-					DiffuseTexture = diffuseTexture,
-					NormalTexture = LoadTexture(partName, "normal")
-				};
+					canvasTexture = cachedCanvas;
+				}
+				else
+				{
+					// Create new CanvasTexture with optional normal map
+					canvasTexture = new CanvasTexture
+					{
+						DiffuseTexture = diffuseTexture,
+						NormalTexture = EnableNormalMaps ? LoadTexture(partName, "normal") : null
+					};
+					
+					// Cache it if we have room
+					if (_canvasTextureCache.Count < MaxCacheSize)
+					{
+						_canvasTextureCache[canvasCacheKey] = canvasTexture;
+					}
+				}
 
 				sprite.Texture = canvasTexture;
 				sprite.Hframes = 4;
@@ -181,6 +205,14 @@ public partial class SpriteSystem : Node2D
 		if (texture != null)
 		{
 			_textureCache[cacheKey] = texture;
+			
+			// Track texture memory usage
+			if (_profilingManager != null)
+			{
+				var textureSize = texture.GetSize();
+				float estimatedMemory = (textureSize.X * textureSize.Y * 4) / (1024.0f * 1024.0f); // RGBA8 = 4 bytes per pixel
+				_profilingManager.AddResourceUsage("TextureMemory", estimatedMemory, "MB");
+			}
 		}
 		
 		return texture;

@@ -28,6 +28,11 @@ public partial class IntentSystem : Node, IMobSystem
 			SetIntent(newIntent.Value);
 			GetViewport().SetInputAsHandled();
 		}
+	}
+	
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (!_owner.IsMultiplayerAuthority()) return;
 		
 		if (@event.IsActionPressed("peek"))
 		{

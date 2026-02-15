@@ -282,6 +282,37 @@ public partial class GameManager : Node
 		}
 	}
 
+	public void JoinGameLate(string address, int port = -1)
+	{
+		if (port == -1) port = DefaultPort;
+		if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
+		{
+			GD.PrintErr($"[GameManager] Invalid join port: {port}. Expected {MIN_NETWORK_PORT}-{MAX_NETWORK_PORT}");
+			EmitSignal(SignalName.ConnectionFailed);
+			return;
+		}
+		
+		_peer = new ENetMultiplayerPeer();
+		var error = _peer.CreateClient(address, port);
+		
+		if (error == Error.Ok)
+		{
+			Multiplayer.MultiplayerPeer = _peer;
+			var timeoutTimer = new Timer { WaitTime = 5.0f, OneShot = true };
+			timeoutTimer.Timeout += OnJoinTimeout;
+			AddChild(timeoutTimer);
+			timeoutTimer.Start();
+			
+			// Request game state sync
+			RpcId(1, MethodName.RequestGameStateSync);
+		}
+		else
+		{
+			GD.PrintErr($"Failed to create client: {error}");
+			EmitSignal(SignalName.ConnectionFailed);
+		}
+	}
+
 	public void LeaveGame()
 	{
 		if (Multiplayer.MultiplayerPeer != null)
@@ -655,7 +686,219 @@ public partial class GameManager : Node
 							existingPlayer.Call("SetPlayerName", playerName);
 					}
 				}
+				else
+				{
+					// Late joiner - spawn them in the game
+					SpawnLateJoiner(peerId, playerData);
+				}
 			}
+		}
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void RequestGameStateSync()
+	{
+		if (!Multiplayer.IsServer()) return;
+		var requesterId = Multiplayer.GetRemoteSenderId();
+		if (requesterId <= 0) return;
+		
+		// Send current game state to late joiner
+		RpcId(requesterId, MethodName.SendGameStateSync, _gameStarted, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid, CurrentMediaType, CurrentMediaPath, CurrentMediaLoops, CurrentMediaVolume, IngameTime);
+		
+		// Send all player appearances
+		foreach (var kvp in _peerCharacters)
+		{
+			RpcId(requesterId, MethodName.SyncPlayerAppearance, kvp.Key, kvp.Value);
+		}
+		
+		// Send current player count
+		RpcId(requesterId, MethodName.SyncPlayerCount, PlayerCount);
+		
+		// If game is running, send world state and transition late joiner to game
+		if (_gameStarted)
+		{
+			SendWorldStateToPlayer(requesterId);
+			RpcId(requesterId, MethodName.TransitionLateJoinerToGame);
+		}
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SendGameStateSync(bool gameStarted, float lobbyTimeLeft, bool lobbyTimerPaused, string videoUid, string mediaType, string mediaPath, int mediaLoops, float mediaVolume, float ingameTime)
+	{
+		_gameStarted = gameStarted;
+		LobbyTimeLeft = lobbyTimeLeft;
+		LobbyTimerPaused = lobbyTimerPaused;
+		CurrentVideoUid = videoUid;
+		CurrentMediaType = mediaType;
+		CurrentMediaPath = mediaPath;
+		CurrentMediaLoops = mediaLoops;
+		CurrentMediaVolume = mediaVolume;
+		IngameTime = ingameTime;
+		
+		if (gameStarted)
+		{
+			SetGameState(GameState.Playing);
+			// Emit GameStarted signal immediately for late joiners
+			EmitSignal(SignalName.GameStarted);
+		}
+		else
+		{
+			SetGameState(GameState.Lobby);
+			SetupLobbyTimer();
+		}
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SyncPlayerCount(int count)
+	{
+		PlayerCount = count;
+		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
+	}
+
+	private void SpawnLateJoiner(int peerId, Dictionary playerData)
+	{
+		var world = GetWorld();
+		if (world == null || PlayerScene == null) return;
+		
+		// Find a safe spawn position
+		var spawnPos = FindSafeSpawnPosition();
+		
+		var player = PlayerScene.Instantiate();
+		player.Name = peerId.ToString();
+		player.Set("Position", spawnPos);
+		
+		if (playerData.ContainsKey("name"))
+		{
+			var playerName = (string)playerData["name"];
+			if (!string.IsNullOrEmpty(playerName))
+				player.Call("SetPlayerName", playerName);
+		}
+		
+		world.AddChild(player, true);
+		
+		// Send spawn confirmation to the player
+		RpcId(peerId, MethodName.ConfirmSpawn, spawnPos);
+	}
+
+	private Vector2 FindSafeSpawnPosition()
+	{
+		// Try to find a safe position near existing players
+		var world = GetWorld();
+		if (world == null) return new Vector2(2 * 32, 2 * 32);
+		
+		var existingPlayers = new System.Collections.Generic.List<Vector2>();
+		foreach (var child in world.GetChildren())
+		{
+			if (child is Node2D node2D && int.TryParse(child.Name, out _))
+			{
+				existingPlayers.Add(node2D.GlobalPosition);
+			}
+		}
+		
+		if (existingPlayers.Count > 0)
+		{
+			// Spawn near the last player
+			var lastPlayerPos = existingPlayers[existingPlayers.Count - 1];
+			return lastPlayerPos + new Vector2(64, 64);
+		}
+		
+		// Default spawn positions
+		var spawnPositions = new Vector2[] {
+			new(2 * 32, 2 * 32),
+			new(3 * 32, 3 * 32),
+			new(1 * 32, 3 * 32),
+			new(3 * 32, 1 * 32)
+		};
+		
+		return spawnPositions[GD.RandRange(0, spawnPositions.Length - 1)];
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void ConfirmSpawn(Vector2 position)
+	{
+		GD.Print($"[GameManager] Late joiner spawned at {position}");
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void TransitionLateJoinerToGame()
+	{
+		GD.Print("[GameManager] Transitioning late joiner to game");
+		
+		EmitSignal(SignalName.GameStarted);
+		
+		EmitSignal("LateJoinerTransitioned");
+		
+		var communications = GetNodeOrNull<Control>("../Communications");
+		if (communications != null)
+		{
+			if (communications.HasMethod("_on_late_joiner_transitioned"))
+				communications.Call("_on_late_joiner_transitioned");
+		}
+	}
+
+	private void SendWorldStateToPlayer(int playerId)
+	{
+		var world = GetWorld();
+		if (world == null) return;
+		
+		foreach (var child in world.GetChildren())
+		{
+			if (child is Node2D node2D && int.TryParse(child.Name, out var id) && id != playerId)
+			{
+				RpcId(playerId, MethodName.SendPlayerState, id, node2D.GlobalPosition, node2D.Rotation);
+			}
+		}
+		
+		// Send world items
+		SendWorldItemsToPlayer(playerId);
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SendPlayerState(int playerId, Vector2 position, float rotation)
+	{
+		// This is called on the late joiner's client to sync other players' states
+		var world = GetWorld();
+		if (world == null) return;
+		
+		var existingPlayer = world.GetNodeOrNull<Node2D>(playerId.ToString());
+		if (existingPlayer != null)
+		{
+			existingPlayer.GlobalPosition = position;
+			existingPlayer.Rotation = rotation;
+		}
+	}
+
+	private void SendWorldItemsToPlayer(int playerId)
+	{
+		var world = GetWorld();
+		if (world == null) return;
+		
+		// Send all world items to the late joiner
+		foreach (var child in world.GetChildren())
+		{
+			if (child is WorldItem worldItem)
+			{
+				RpcId(playerId, MethodName.SendWorldItem, worldItem.ItemId, worldItem.GlobalPosition, worldItem.Quantity);
+			}
+		}
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SendWorldItem(string itemId, Vector2 position, int quantity)
+	{
+		// This is called on the late joiner's client to sync world items
+		var world = GetWorld();
+		if (world == null) return;
+		
+		// Create the item for the late joiner
+		var itemScene = GD.Load<PackedScene>($"res://Scenes/Items/{itemId}.tscn");
+		if (itemScene != null)
+		{
+			var item = itemScene.Instantiate<WorldItem>();
+			item.ItemId = itemId;
+			item.GlobalPosition = position;
+			item.Quantity = quantity;
+			world.AddChild(item, true);
 		}
 	}
 
@@ -1070,6 +1313,192 @@ public partial class GameManager : Node
 		world.AddChild(item, true);
 		await ToSignal(GetTree(), "process_frame");
 		item.InitAtPosition(position);
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	public async void RequestSpawnMob(Vector2 position, Dictionary characterData)
+	{
+		if (!Multiplayer.IsServer()) return;
+		
+		var playerScene = GD.Load<PackedScene>("uid://cj25bsb3ooj62");
+		if (playerScene == null) return;
+		
+		var worlds = GetTree().GetNodesInGroup("World");
+		if (worlds.Count == 0) return;
+		
+		var world = worlds[0];
+		var player = playerScene.Instantiate();
+		
+		// Grid-align the position
+		var gridX = Mathf.FloorToInt(position.X / 32) * 32 + 16;
+		var gridY = Mathf.FloorToInt(position.Y / 32) * 32 + 16;
+		var spawnPos = new Vector2(gridX, gridY);
+		
+		// Generate random character data if none provided
+		if (characterData == null || characterData.Count == 0)
+		{
+			characterData = GenerateRandomCharacterData();
+		}
+		
+		// Use the character data's name if provided, otherwise generate a proper name
+		string mobName = "DebugMob_" + GetUniqueMobId();
+		if (characterData != null && characterData.ContainsKey("name"))
+		{
+			var name = (string)characterData["name"];
+			if (!string.IsNullOrEmpty(name))
+				mobName = name;
+		}
+		player.Name = mobName;
+		player.Set("Position", spawnPos);
+		
+		// Apply character data if provided
+		if (characterData != null && characterData.Count > 0)
+		{
+			// Store character data for the mob
+			player.Set("CharacterData", characterData);
+			
+			// Set player name if provided
+			if (characterData.ContainsKey("name"))
+			{
+				var playerName = (string)characterData["name"];
+				if (!string.IsNullOrEmpty(playerName))
+					player.Call("SetPlayerName", playerName);
+			}
+		}
+		
+		world.AddChild(player, true);
+		await ToSignal(GetTree(), "process_frame");
+		
+		// Initialize the mob properly
+		if (player.HasMethod("Initialize"))
+			player.Call("Initialize");
+	}
+	
+	private Dictionary GenerateRandomCharacterData()
+	{
+		var characterData = new Dictionary
+		{
+			["name"] = GenerateRandomName(),
+			["age"] = GD.RandRange(18, 50),
+			["religion"] = GenerateRandomReligion(),
+			["clothing"] = "Standard Uniform",
+			["underwear"] = "1",
+			["hair_style"] = GenerateRandomHairStyle(),
+			["facial_hair_style"] = GenerateRandomFacialHairStyle(),
+			["underwear_style"] = "1",
+			["undershirt_style"] = GenerateRandomUndershirtStyle(),
+			["hair_base_color"] = GenerateRandomColor(),
+			["hair_gradient_color"] = GenerateRandomColor(),
+			["eye_color"] = GenerateRandomColor(),
+			["race"] = GenerateRandomRace(),
+			["gender"] = GenerateRandomGender(),
+			["traits"] = new Godot.Collections.Array<string>(),
+			["role_priorities"] = new Dictionary(),
+			["background"] = GenerateRandomBackground(),
+			["randomize_name"] = false,
+			["randomize_appearance"] = false,
+			["origin"] = GenerateRandomOrigin(),
+			["relations"] = "",
+			["pref_squad"] = "",
+			["assigned_roles"] = new Dictionary(),
+			["is_debug_mob"] = true
+		};
+		
+		return characterData;
+	}
+	
+	private string GenerateRandomName()
+	{
+		var firstNames = new string[] { "John", "Jane", "Alex", "Chris", "Sam", "Taylor", "Jordan", "Morgan", "Casey", "Riley", "Jamie", "Avery", "Cameron", "Dakota", "Emery", "Finley", "Harper", "Quinn", "Reese", "Sage" };
+		var lastNames = new string[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Wilson", "Anderson", "Taylor", "Thomas", "Hernandez", "Moore", "Martin", "Jackson", "Thompson", "White" };
+		
+		return $"{firstNames[GD.RandRange(0, firstNames.Length - 1)]} {lastNames[GD.RandRange(0, lastNames.Length - 1)]}";
+	}
+	
+	private string GenerateRandomReligion()
+	{
+		var religions = new string[] { "Atheist", "Christian", "Muslim", "Hindu", "Buddhist", "Jewish", "Agnostic", "Scientologist", "Pagan", "Spiritual" };
+		return religions[GD.RandRange(0, religions.Length - 1)];
+	}
+	
+	private string GenerateRandomHairStyle()
+	{
+		var styles = new string[] { "(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)", "(11)", "(12)", "(13)", "(14)", "(15)" };
+		return styles[GD.RandRange(0, styles.Length - 1)];
+	}
+	
+	private string GenerateRandomFacialHairStyle()
+	{
+		var styles = new string[] { "_1", "_2", "_3", "_4", "_5", "_6", "_7", "_8", "_9", "_10" };
+		return styles[GD.RandRange(0, styles.Length - 1)];
+	}
+	
+	private string GenerateRandomUndershirtStyle()
+	{
+		var styles = new string[] { "1", "2", "3", "4", "5" };
+		return styles[GD.RandRange(0, styles.Length - 1)];
+	}
+	
+	private string GenerateRandomColor()
+	{
+		var r = GD.RandRange(0, 255);
+		var g = GD.RandRange(0, 255);
+		var b = GD.RandRange(0, 255);
+		return $"#{r:X2}{g:X2}{b:X2}";
+	}
+	
+	private string GenerateRandomRace()
+	{
+		var races = new string[] { "Western", "Eastern", "African", "Asian", "Hispanic", "Mixed" };
+		return races[GD.RandRange(0, races.Length - 1)];
+	}
+	
+	private string GenerateRandomGender()
+	{
+		var genders = new string[] { "Male", "Female", "Non-Binary" };
+		return genders[GD.RandRange(0, genders.Length - 1)];
+	}
+	
+	private string GenerateRandomBackground()
+	{
+		var backgrounds = new string[] 
+		{ 
+			"Former civilian contractor", 
+			"Ex-military personnel", 
+			"Scientific researcher", 
+			"Corporate employee",
+			"Colonial settler",
+			"Space explorer",
+			"Medical professional",
+			"Engineer by trade",
+			"Security officer",
+			"Logistics specialist"
+		};
+		return backgrounds[GD.RandRange(0, backgrounds.Length - 1)];
+	}
+	
+	private string GenerateRandomOrigin()
+	{
+		var origins = new string[] 
+		{ 
+			"Earth", 
+			"Mars Colony", 
+			"Luna Base", 
+			"Titan Station",
+			"Europa Outpost",
+			"Venus Orbital",
+			"Deep Space Born",
+			"Jupiter Station",
+			"Saturn Ring",
+			"Mercury Mining"
+		};
+		return origins[GD.RandRange(0, origins.Length - 1)];
+	}
+
+	private int _mobIdCounter = 1000;
+	private int GetUniqueMobId()
+	{
+		return _mobIdCounter++;
 	}
 
 	public override void _ExitTree()

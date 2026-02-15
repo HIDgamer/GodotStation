@@ -29,6 +29,8 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		_doAfter = mob.GetNodeOrNull<DoAfterComponent>("DoAfterComponent");
 		_intentSystem = mob.GetNodeOrNull<IntentSystem>("IntentSystem");
 		_inventory = mob.GetNodeOrNull<Inventory>("Inventory");
+		
+		GD.Print($"[PlayerInteraction] Init: _inventory is {(_inventory == null ? "NULL" : "NOT NULL")}");
 	}
 	
 	public void Process(double delta)
@@ -65,7 +67,17 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	public void InteractWithMob(Mob target, Intent? intentOverride = null)
 	{
 		if (!Multiplayer.IsServer()) return;
-		if (target == null || target == _owner) return;
+		if (target == null)
+		{
+			GD.Print("[PlayerInteraction] InteractWithMob: target is null");
+			return;
+		}
+		if (target == _owner)
+		{
+			GD.Print("[PlayerInteraction] InteractWithMob: cannot interact with self");
+			_owner.ShowChatBubble("You can't interact with yourself!");
+			return;
+		}
 
 		if (!CanInteract())
 			return;
@@ -153,29 +165,34 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 				targetState.SetStunned(1.0f);
 			}
 		}
-		else
-		{
-		}
 	}
 	
 	private void HandleGrabIntent(Mob target)
 	{
-		GD.Print($"[PlayerInteraction] Grab intent: {(_owner.GetPlayerName() ?? "Unknown")} attempting to grab {target.GetPlayerName()}");
+		GD.Print($"[PlayerInteraction] HandleGrabIntent: owner={_owner?.Name}, target={target?.Name}, same={target == _owner}");
+		
+		if (target == _owner)
+		{
+			GD.Print($"[PlayerInteraction] Cannot grab yourself!");
+			_owner.ShowChatBubble("You can't grab yourself!");
+			return;
+		}
 		
 		if (_pullingTarget != null)
 		{
 			if (_pullingTarget == target)
 			{
-				GD.Print($"[PlayerInteraction] Grab blocked: already grabbing {target.GetPlayerName()}");
+				GD.Print($"[PlayerInteraction] Already grabbing this target, progressing grab");
+				ProgressGrab();
 			}
 			else
 			{
-				GD.Print($"[PlayerInteraction] Grab blocked: already grabbing someone else");
+				GD.Print($"[PlayerInteraction] Already grabbing someone else");
 			}
 		}
 		else
 		{
-			GD.Print($"[PlayerInteraction] Grab successful: starting pull on {target.GetPlayerName()}");
+			GD.Print($"[PlayerInteraction] Starting new pull");
 			StartPull(target);
 		}
 	}
@@ -226,7 +243,11 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	public void StartPull(Mob target)
 	{
 		if (!Multiplayer.IsServer()) return;
-		if (target == null || target == _owner) return;
+		if (target == null || target == _owner)
+		{
+			GD.Print("[PlayerInteraction] StartPull rejected: target is null or self");
+			return;
+		}
 		
 		var targetInteraction = target.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
 		if (targetInteraction?._pulledBy != null)
@@ -236,18 +257,36 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		}
 		
 		var activeSlot = _inventory.GetActiveHand() == 0 ? "left_hand" : "right_hand";
-		if (_inventory.GetEquipped(activeSlot) != null)
+		var currentItem = _inventory.GetEquipped(activeSlot);
+		if (currentItem != null)
 		{
-			_owner.ShowChatBubble("Hand is occupied");
-			return;
+			if (currentItem is GrabItem && _pullingTarget == null)
+			{
+				GD.Print($"[PlayerInteraction] Clearing stale GrabItem from hand");
+				_inventory.Unequip(activeSlot);
+			}
+			else
+			{
+				GD.Print($"[PlayerInteraction] Hand is occupied with: {currentItem.ItemName} (type: {currentItem.GetType().Name})");
+				_owner.ShowChatBubble($"Hand is occupied with {currentItem.ItemName}");
+				return;
+			}
 		}
+		
+		GD.Print($"[PlayerInteraction] Hand {activeSlot} is free, proceeding with grab");
 		
 		_pullingTarget = target;
 		_grabLevel = GrabLevel.Passive;
 		targetInteraction._pulledBy = _owner;
 		targetInteraction.Rpc(nameof(SyncPulledByRpc), _owner.GetPath());
 		_grabItem = new GrabItem();
+		
+		GD.Print($"[PlayerInteraction] About to equip GrabItem to slot {activeSlot}, _inventory is {(_inventory == null ? "NULL" : "NOT NULL")}");
+		
 		_inventory.Equip(_grabItem, activeSlot);
+		UpdateGrabItemSpriteFrame();
+		
+		GD.Print($"[PlayerInteraction] After Equip call");
 		
 		EmitSignal(SignalName.StartedPulling, target);
 		_owner.ShowChatBubble($"grabs {target.GetPlayerName()}");
@@ -299,6 +338,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 			targetState?.SetState(MobState.Prone);
 			
 			_owner.ShowChatBubble($"aggressively grabs {_pullingTarget.GetPlayerName()}!");
+			UpdateGrabItemSpriteFrame();
 			Rpc(nameof(SyncGrabLevelRpc), (int)_grabLevel);
 			UpdatePullerSpeed();
 		}
@@ -306,6 +346,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		{
 			_grabLevel = GrabLevel.Choke;
 			_owner.ShowChatBubble($"starts choking {_pullingTarget.GetPlayerName()}!");
+			UpdateGrabItemSpriteFrame();
 			Rpc(nameof(SyncGrabLevelRpc), (int)_grabLevel);
 			UpdatePullerSpeed();
 		}
@@ -338,6 +379,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 				_pullingTarget.GlobalPosition = _owner.GlobalPosition;
 				
 				_owner.ShowChatBubble($"lifts {_pullingTarget.GetPlayerName()} onto shoulder");
+				UpdateGrabItemSpriteFrame();
 				Rpc(nameof(SyncGrabLevelRpc), (int)_grabLevel);
 				EmitSignal(SignalName.GrabLevelChanged, (int)_grabLevel);
 			},
@@ -407,6 +449,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		_pullingTarget.GlobalPosition = _owner.GlobalPosition;
 		
 		_owner.ShowChatBubble($"lifts {_pullingTarget.GetPlayerName()} onto shoulder");
+		UpdateGrabItemSpriteFrame();
 		Rpc(nameof(SyncGrabLevelRpc), (int)_grabLevel);
 		EmitSignal(SignalName.GrabLevelChanged, (int)_grabLevel);
 		UpdatePullerSpeed();
@@ -500,6 +543,9 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		_grabLevel = (GrabLevel)level;
 		EmitSignal(SignalName.GrabLevelChanged, level);
 		UpdatePullerSpeed();
+		
+		// Update UI button to show current grab level
+		UpdatePUIGrabSprite(level - 1);
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -539,7 +585,6 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		MovePulledTarget(target, targetTile, ignoreEntities);
 	}
 	
-	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void PlayThrustAnimationRpc(Vector2 targetPosition)
 	{
@@ -564,19 +609,38 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		if (ownerTile == ownerTargetTile) return;
 
 		var targetTile = _gridSystem.WorldToGrid(_pullingTarget.GlobalPosition);
-		var shouldSwap = targetTile == ownerTargetTile;
-		var shouldFollow = shouldSwap || IsAdjacentOneStep(targetTile, ownerTargetTile);
-
-		var desiredTile = shouldFollow ? ownerTile : StepToward(targetTile, ownerTargetTile);
-		if (!shouldSwap && desiredTile == ownerTargetTile)
-			desiredTile = StepToward(targetTile, ownerTile);
-		var ignoreEntities = shouldFollow || desiredTile == ownerTile;
-
+		var pullerDirection = ownerTargetTile - ownerTile;
+		var desiredTile = ownerTargetTile - pullerDirection;
+		
 		if (desiredTile == targetTile) return;
-		if (!MovePulledTarget(_pullingTarget, desiredTile, ignoreEntities)) return;
+		
+		if (!_gridSystem.IsWalkable(desiredTile))
+		{
+			var adjacentTiles = new[]
+			{
+				ownerTargetTile + Vector2I.Up,
+				ownerTargetTile + Vector2I.Down,
+				ownerTargetTile + Vector2I.Left,
+				ownerTargetTile + Vector2I.Right
+			};
+			
+			desiredTile = targetTile;
+			foreach (var tile in adjacentTiles)
+			{
+				if (_gridSystem.IsWalkable(tile) && IsAdjacentOneStep(targetTile, tile))
+				{
+					desiredTile = tile;
+					break;
+				}
+			}
+		}
+		
+		if (desiredTile == targetTile) return;
+		
+		if (!MovePulledTarget(_pullingTarget, desiredTile, true)) return;
 
 		if (broadcast)
-			Rpc(nameof(SyncPullStepRpc), _pullingTarget.GetPath(), desiredTile, ignoreEntities);
+			Rpc(nameof(SyncPullStepRpc), _pullingTarget.GetPath(), desiredTile, true);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -678,6 +742,92 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		var dx = Mathf.Clamp(to.X - from.X, -1, 1);
 		var dy = Mathf.Clamp(to.Y - from.Y, -1, 1);
 		return new Vector2I(from.X + dx, from.Y + dy);
+	}
+	
+	private void UpdateGrabItemSpriteFrame()
+	{
+		if (_grabItem == null) return;
+		
+		int frame = 0;
+		switch (_grabLevel)
+		{
+			case GrabLevel.Passive:
+				frame = 0;  // Normal grab
+				break;
+			case GrabLevel.Aggressive:
+				frame = 1;  // Aggressive grab
+				break;
+			case GrabLevel.Choke:
+				frame = 2;  // Choking
+				break;
+			case GrabLevel.Fireman:
+				return;
+		}
+		
+		_grabItem.IconFrame = frame;
+		_grabItem.InHandLeftFrame = frame;
+		_grabItem.InHandRightFrame = frame;
+		
+		// Update the UI button
+		UpdatePUIGrabSprite(frame);
+		
+		// Start frame cycling animation for grabbing
+		StartGrabAnimation(frame);
+	}
+	
+	private void StartGrabAnimation(int baseFrame)
+	{
+		if (_grabItem == null) return;
+		
+		// Create a tween to cycle through frames for grabbing animation
+		// Use the owner node to manage the tween since GrabItem might not be a Node
+		var tween = _owner.GetNodeOrNull<Tween>("GrabAnimation");
+		if (tween != null)
+		{
+			tween.Kill();
+		}
+		
+		tween = GetTree().CreateTween();
+		tween.SetLoops();
+		
+		// Cycle through frames for grabbing animation
+		tween.TweenProperty(_grabItem, "icon_frame", baseFrame + 1, 0.2f);
+		tween.TweenProperty(_grabItem, "icon_frame", baseFrame + 2, 0.2f);
+		tween.TweenProperty(_grabItem, "icon_frame", baseFrame, 0.2f);
+	}
+	
+	private void UpdatePUIGrabSprite(int frame)
+	{
+		var pui = GetTree().GetFirstNodeInGroup("PUI") as Control;
+		if (pui == null) return;
+		
+		var grabButton = pui.GetNodeOrNull<TextureButton>("IntentUI/HBoxContainer/IntentContainer/Grab");
+		if (grabButton != null)
+		{
+			var grabTexture = GD.Load<Texture2D>("uid://ddo685l40bkjc");
+			if (grabTexture != null)
+			{
+				var atlas = new AtlasTexture();
+				atlas.Atlas = grabTexture;
+				
+				var textureSize = grabTexture.GetSize();
+				float frameWidth = textureSize.X / 3;
+				float frameHeight = textureSize.Y;
+				
+				atlas.Region = new Rect2(frame * frameWidth, 0, frameWidth, frameHeight);
+				
+				grabButton.TextureNormal = atlas;
+				GD.Print($"[PlayerInteraction] Updated PUI grab sprite to frame {frame}");
+			}
+		}
+	}
+	
+	public void OnDirectionChanged(int newDirection)
+	{
+		if (_grabLevel != GrabLevel.None && _grabLevel != GrabLevel.Fireman)
+		{
+			UpdateGrabItemSpriteFrame();
+		}
 	}
 	
 	public bool IsPulling() => _pullingTarget != null;

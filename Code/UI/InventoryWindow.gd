@@ -13,6 +13,7 @@ signal container_opened(container: Node)
 
 @onready var inventory_tab: TabContainer = $Container
 @onready var status_label: Label = $Container/StatusLabel
+@onready var audio_manager: Node = $/root/AudioManager
 
 var inventory_system = null
 var current_container = null
@@ -37,6 +38,13 @@ func _ready() -> void:
 	
 	_update_inventory_display()
 	_update_equipment_display()
+	
+	# Add hover sounds to inventory tabs
+	if audio_manager:
+		for i in range(inventory_tab.get_tab_count()):
+			var tab = inventory_tab.get_tab_control(i)
+			if tab:
+				tab.mouse_entered.connect(_on_button_hover)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -48,6 +56,8 @@ func _input(event: InputEvent) -> void:
 			_handle_drag_end(mouse_event)
 
 func _handle_drag_start(event: InputEventMouseButton) -> void:
+	if audio_manager:
+		audio_manager.play_ui_menu_selection()
 	var clicked_control = get_viewport().gui_get_drag_data()
 	if clicked_control and clicked_control is TextureRect:
 		var item_data = clicked_control.get_meta("item_data", null)
@@ -92,6 +102,8 @@ func _can_transfer_item(item, target_slot: String, target_index: int) -> bool:
 	return false
 
 func _transfer_item(item, target_slot: String, target_index: int) -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	match target_slot:
 		"inventory":
 			# Move from equipment/container to inventory
@@ -236,6 +248,8 @@ func _show_item_context_menu(item, position: Vector2) -> void:
 	menu.popup()
 
 func _on_menu_item_selected(item, option_id: int) -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	match option_id:
 		1:  # Use
 			item.use(inventory_system.owner)
@@ -279,17 +293,27 @@ func _update_status() -> void:
 		status_label.text = "Weight: %.1f%% | Slots: %d/%d" % [weight_pct, total_slots - free_slots, total_slots]
 
 func open_container(container) -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	current_container = container
 	inventory_tab.set_current_tab(2)  # Switch to container tab
 	_update_container_display()
 	emit_signal("container_opened", container)
 
 func close_container() -> void:
+	if audio_manager:
+		audio_manager.play_ui_close_menu()
 	current_container = null
 	_update_container_display()
 
 func show_inventory() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 	popup()
 	_update_inventory_display()
 	_update_equipment_display()
 	_update_status()
+
+func _on_button_hover() -> void:
+	if audio_manager:
+		audio_manager.play_ui_hover()

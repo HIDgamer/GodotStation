@@ -25,6 +25,18 @@ func _ready() -> void:
 	_game_manager = get_node_or_null("/root/GameManager")
 	if _game_manager == null:
 		print("[AdminSpawnPopup] Could not find GameManager")
+	
+	set_process_unhandled_input(true)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not spawn_mode:
+		return
+	
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			var world_pos = get_world_mouse_position()
+			try_spawn_at_position(world_pos)
+			get_viewport().set_input_as_handled()
 
 func _on_close() -> void:
 	visible = false
@@ -127,3 +139,29 @@ func try_spawn_at_position(world_pos: Vector2) -> void:
 	spawn_mode = false
 	selected_item_uid = ""
 	$VBoxContainer/Label.text = "Spawn Item"
+
+func get_world_mouse_position() -> Vector2:
+	var viewport = get_viewport()
+	if not viewport:
+		print("[AdminSpawn] No viewport found")
+		return Vector2.ZERO
+	
+	var mouse_pos = viewport.get_mouse_position()
+	
+	var camera = get_tree().get_first_node_in_group("Camera") as Camera2D
+	if not camera:
+		var world = get_tree().get_first_node_in_group("World")
+		if world:
+			camera = world.get_node_or_null("Camera2D")
+			if not camera:
+				for child in world.get_children():
+					camera = child.get_node_or_null("Camera2D")
+					if camera:
+						break
+	
+	if camera:
+		# Use unproject_position to properly convert screen coordinates to world coordinates
+		return camera.unproject_position(mouse_pos)
+	
+	print("[AdminSpawn] No camera found, using raw mouse position")
+	return mouse_pos

@@ -143,6 +143,32 @@ func set_character_data(data: Dictionary) -> void:
 	_persist_current_character()
 	character_data_changed.emit()
 
+func randomize_character() -> void:
+	if current_character.is_empty():
+		current_character = _get_default_character()
+	
+	if current_character.get("randomize_name", false):
+		current_character["name"] = _generate_random_name()
+	
+	if current_character.get("randomize_appearance", false):
+		current_character["hair_style"] = _generate_random_hair_style()
+		current_character["facial_hair_style"] = _generate_random_facial_hair_style()
+		current_character["hair_base_color"] = _generate_random_color()
+		current_character["hair_gradient_color"] = _generate_random_color()
+		current_character["eye_color"] = _generate_random_color()
+		current_character["race"] = _generate_random_race()
+		current_character["gender"] = _generate_random_gender()
+		current_character["clothing"] = _generate_random_clothing()
+	
+	_persist_current_character()
+	character_data_changed.emit()
+
+func randomize_on_toggle() -> void:
+	current_character["randomize_name"] = not current_character.get("randomize_name", false)
+	current_character["randomize_appearance"] = not current_character.get("randomize_appearance", false)
+	_persist_current_character()
+	character_data_changed.emit()
+
 func update_character_field(field: String, value) -> void:
 	current_character[field] = value
 	_persist_current_character()
@@ -334,3 +360,34 @@ func _persist_current_character() -> void:
 	game_manager.SaveSlot(current_slot, current_character.duplicate())
 	if game_manager.has_method("PushLocalAppearanceUpdate"):
 		game_manager.PushLocalAppearanceUpdate()
+
+func _generate_random_name() -> String:
+	var first_names = ["John", "Jane", "Alex", "Chris", "Sam", "Taylor", "Jordan", "Morgan", "Casey", "Riley"]
+	var last_names = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"]
+	return first_names[randi() % first_names.size()] + " " + last_names[randi() % last_names.size()]
+
+func _generate_random_hair_style() -> String:
+	var styles = ["(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)", "(9)", "(10)"]
+	return styles[randi() % styles.size()]
+
+func _generate_random_facial_hair_style() -> String:
+	var styles = ["_1", "_2", "_3", "_4", "_5", "_6", "_7", "_8", "_9", "_10"]
+	return styles[randi() % styles.size()]
+
+func _generate_random_color() -> String:
+	var r = randi() % 256
+	var g = randi() % 256
+	var b = randi() % 256
+	return "#" + r.to_hex() + g.to_hex() + b.to_hex()
+
+func _generate_random_race() -> String:
+	var races = ["Western", "Eastern", "African", "Asian", "Hispanic", "Mixed"]
+	return races[randi() % races.size()]
+
+func _generate_random_gender() -> String:
+	var genders = ["Male", "Female", "Non-Binary"]
+	return genders[randi() % genders.size()]
+
+func _generate_random_clothing() -> String:
+	var clothing = ["Marine Uniform", "Lab Coat", "Engineering Suit", "Medical Scrubs", "Security Uniform", "Standard Uniform"]
+	return clothing[randi() % clothing.size()]

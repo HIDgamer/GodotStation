@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 public partial class InteractionComponent : Node, IMobSystem
 {
@@ -6,22 +7,47 @@ public partial class InteractionComponent : Node, IMobSystem
 	private Inventory _inventory;
 	private int _activeHand;
 	private bool _throwMode;
-	private WeaponHandlingComponent _weaponHandling;
+	private bool _longThrowMode;
+	private bool _isThrowing;
+	private float _throwCooldown = 0.0f;
 	
 	[Signal] public delegate void HandSwitchedEventHandler(int hand);
+	[Signal] public delegate void LimbSelectedEventHandler(string limbName);
 	
 	public void Init(Mob mob)
 	{
 		_owner = mob;
 		_inventory = mob.GetNodeOrNull<Inventory>("Inventory");
-		_weaponHandling = mob.GetNodeOrNull<WeaponHandlingComponent>("WeaponHandlingComponent");
 		if (_inventory != null)
 			_activeHand = _inventory.GetActiveHand();
+		
+		GD.Print($"[InteractionComponent] Init called for {mob.Name}, IsMultiplayerAuthority={mob.IsMultiplayerAuthority()}");
+		SetProcessUnhandledInput(true);
 	}
 	
-	public override void _Input(InputEvent @event)
+	public override void _Ready()
 	{
-		if (!_owner.IsMultiplayerAuthority()) return;
+		GD.Print($"[InteractionComponent] _Ready called");
+		SetProcessUnhandledInput(true);
+	}
+	
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (_owner == null)
+		{
+			GD.PrintErr("[InteractionComponent] _UnhandledInput called but _owner is null!");
+			return;
+		}
+		
+		if (!_owner.IsMultiplayerAuthority())
+		{
+			return;
+		}
+		
+		if (@event is InputEventKey keyEvent)
+		{
+			GD.Print($"[InteractionComponent] Unhandled key event: {keyEvent.Keycode}, Pressed={keyEvent.Pressed}");
+		}
 		
 		var state = _owner.GetNodeOrNull<MobStateSystem>("MobStateSystem");
 		if (state != null && state.GetState() != MobState.Standing)
@@ -29,28 +55,54 @@ public partial class InteractionComponent : Node, IMobSystem
 		
 		if (@event.IsActionPressed("switch_hand"))
 		{
+			GD.Print("[InteractionComponent] switch_hand pressed");
 			SwitchHands();
 			GetViewport().SetInputAsHandled();
 		}
 		else if (@event.IsActionPressed("drop"))
 		{
+			GD.Print("[InteractionComponent] drop pressed");
 			DropActive();
 			GetViewport().SetInputAsHandled();
 		}
 		else if (@event.IsActionPressed("throw_toggle"))
 		{
-			if (@event is InputEventKey keyEvent && keyEvent.ShiftPressed)
+			GD.Print("[InteractionComponent] throw_toggle pressed!");
+			
+			if (@event is InputEventKey keyEvent2 && keyEvent2.ShiftPressed)
+			{
+				GD.Print("[InteractionComponent] Shift is pressed, ignoring");
 				return;
-			_throwMode = !_throwMode;
+			}
+			
+			bool isCtrlPressed = Input.IsKeyPressed(Key.Ctrl);
+			GD.Print($"[InteractionComponent] Ctrl={isCtrlPressed}");
+			
+			if (isCtrlPressed)
+			{
+				_longThrowMode = !_longThrowMode;
+				if (_longThrowMode)
+					_throwMode = false;
+				GD.Print($"[InteractionComponent] Long throw mode: {_longThrowMode}");
+			}
+			else
+			{
+				_throwMode = !_throwMode;
+				if (_throwMode)
+					_longThrowMode = false;
+				GD.Print($"[InteractionComponent] Normal throw mode: {_throwMode}");
+			}
 			GetViewport().SetInputAsHandled();
 		}
 		else if (@event.IsActionPressed("activate"))
 		{
+			GD.Print("[InteractionComponent] activate pressed");
 			ActivateHeld();
 			GetViewport().SetInputAsHandled();
 		}
 		else if (@event.IsActionPressed("quick_pickup"))
 		{
+			GD.Print("[InteractionComponent] quick_pickup pressed");
 			_inventory?.QuickPickup();
 			GetViewport().SetInputAsHandled();
 		}
@@ -122,23 +174,115 @@ public partial class InteractionComponent : Node, IMobSystem
 	
 	public void ThrowActive(Vector2 targetPos)
 	{
-		if (_inventory == null || !_throwMode) return;
+		if (_inventory == null) return;
+		if (!_throwMode && !_longThrowMode) return;
 		
 		var slot = _activeHand == 0 ? "left_hand" : "right_hand";
 		var item = _inventory.GetEquipped(slot);
 		if (item == null) return;
 		
-		if (Multiplayer.IsServer())
+		if (_throwCooldown > 0) return;
+		
+		if (_longThrowMode)
 		{
-			_inventory.Unequip(slot);
-			ThrowWorldItem(item, _owner.GlobalPosition, targetPos);
-			_throwMode = false;
+			if (Multiplayer.IsServer())
+			{
+				PerformLongThrow(targetPos, slot, item);
+			}
+			else
+			{
+				RpcId(1, nameof(ServerPerformLongThrow), _owner.GetPath(), targetPos, slot, item.ItemName);
+			}
+		}
+		else if (_throwMode)
+		{
+			if (Multiplayer.IsServer())
+			{
+				PerformNormalThrow(targetPos, slot, item);
+			}
+			else
+			{
+				RpcId(1, nameof(ServerPerformNormalThrow), _owner.GetPath(), targetPos, slot, item.ItemName);
+			}
+		}
+	}
+	
+	private void PerformLongThrow(Vector2 targetPos, string slot, Item item)
+	{
+		if (_inventory == null) return;
+		
+		var currentItem = _inventory.GetEquipped(slot);
+		if (currentItem == null || currentItem.ItemName != item.ItemName)
+		{
+			GD.Print("[InteractionComponent] Item changed during long throw");
+			return;
+		}
+		
+		_inventory.Unequip(slot);
+		ThrowWorldItem(item, _owner.GlobalPosition, targetPos);
+		
+		_throwMode = false;
+		_longThrowMode = false;
+		_throwCooldown = 1.0f;
+	}
+	
+	private void PerformNormalThrow(Vector2 targetPos, string slot, Item item)
+	{
+		var throwPath = GetThrowPath(_owner.GlobalPosition, targetPos);
+		var interceptingMob = FindInterceptingMob(throwPath);
+		
+		_inventory.Unequip(slot);
+		
+		if (interceptingMob != null)
+		{
+			ThrowWorldItem(item, _owner.GlobalPosition, interceptingMob.GlobalPosition);
 		}
 		else
 		{
-			RpcId(1, nameof(ServerThrowItem), _owner.GetPath(), slot, _owner.GlobalPosition, targetPos);
-			_throwMode = false;
+			ThrowWorldItem(item, _owner.GlobalPosition, targetPos);
 		}
+		
+		_throwMode = false;
+		_throwCooldown = 0.5f;
+	}
+	
+	private Godot.Collections.Array<Vector2> GetThrowPath(Vector2 startPos, Vector2 endPos)
+	{
+		var path = new Godot.Collections.Array<Vector2>();
+		var direction = (endPos - startPos).Normalized();
+		var distance = startPos.DistanceTo(endPos);
+		var stepSize = 16.0f;
+		
+		for (float d = 0; d <= distance; d += stepSize)
+		{
+			path.Add(startPos + direction * d);
+		}
+		
+		return path;
+	}
+	
+	private Mob FindInterceptingMob(Godot.Collections.Array<Vector2> throwPath)
+	{
+		var world = _owner.GetTree().GetFirstNodeInGroup("World");
+		if (world == null) return null;
+		
+		foreach (var pos in throwPath)
+		{
+			foreach (var node in world.GetChildren())
+			{
+				if (node is Mob mob && mob != _owner)
+				{
+					var mobPos = mob.GlobalPosition;
+					var distance = pos.DistanceTo(mobPos);
+					if (distance <= 32.0f)
+					{
+						return mob;
+					}
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	private void ActivateHeld()
@@ -401,9 +545,72 @@ public partial class InteractionComponent : Node, IMobSystem
 		}
 	}
 	
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void ServerPerformLongThrow(NodePath mobPath, Vector2 targetPos, string slot, string itemName)
+	{
+		if (!Multiplayer.IsServer()) return;
+		var mob = GetNode<Mob>(mobPath);
+		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
+		var item = inventory?.GetEquipped(slot);
+		
+		if (item != null && item.ItemName == itemName)
+		{
+			mob.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.PerformLongThrow(targetPos, slot, item);
+		}
+	}
+	
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void ServerPerformNormalThrow(NodePath mobPath, Vector2 targetPos, string slot, string itemName)
+	{
+		if (!Multiplayer.IsServer()) return;
+		var mob = GetNode<Mob>(mobPath);
+		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
+		var item = inventory?.GetEquipped(slot);
+		
+		if (item != null && item.ItemName == itemName)
+		{
+			mob.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.PerformNormalThrow(targetPos, slot, item);
+		}
+	}
+	
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void ServerSetSelectedLimb(NodePath mobPath, string limbName)
+	{
+		if (!Multiplayer.IsServer()) return;
+		GetNodeOrNull<Mob>(mobPath)?.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.SetSelectedLimb(limbName);
+	}
+	
 	public int GetActiveHand() => _activeHand;
 	public bool IsThrowMode() => _throwMode;
+	public bool IsLongThrowMode() => _longThrowMode;
 	
-	public void Process(double delta) { }
+	public bool IsPullMode()
+	{
+		var interactionSystem = _owner.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
+		return interactionSystem?.IsPulling() == true;
+	}
+	
+	public void ToggleLongThrowMode()
+	{
+		_longThrowMode = !_longThrowMode;
+	}
+	
+	public void SetSelectedLimb(string limbName)
+	{
+		if (Multiplayer.IsServer())
+		{
+			EmitSignal(SignalName.LimbSelected, limbName);
+		}
+		else
+		{
+			RpcId(1, nameof(ServerSetSelectedLimb), _owner.GetPath(), limbName);
+		}
+	}
+	
+	public void Process(double delta)
+	{
+		if (_throwCooldown > 0)
+			_throwCooldown -= (float)delta;
+	}
 	public void Cleanup() { }
 }

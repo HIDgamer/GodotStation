@@ -464,6 +464,13 @@ public partial class MovementController : Node2D, IMobSystem
 				_lastPeeking = _isPeeking;
 			}
 		}
+		else
+		{
+			// For non-authority clients, just update local sprites based on network data
+			_sprites.Call("SetDirection", _facing);
+			_sprites.Call("SetState", state);
+			_sprites.Call("SetPeeking", _isPeeking);
+		}
 	}
 	
 	private void BroadcastTransform()
@@ -495,6 +502,7 @@ public partial class MovementController : Node2D, IMobSystem
 	public float GetSpeedMultiplier() => _speedMod;
 	public void SetInteractionSpeedMultiplier(float multiplier) => _interactionSpeedMod = Mathf.Max(0.0f, multiplier);
 	public bool IsMoving() => _isMoving || _targetPos.HasValue;
+	
 	
 	private float GetCurrentSpeedMultiplier()
 	{

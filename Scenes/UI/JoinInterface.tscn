@@ -13,23 +13,85 @@
 [ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="10_5mku6"]
 [ext_resource type="Texture2D" uid="uid://dbm5kkv648tco" path="res://Assets/UI/Interface/Button03.png" id="10_tcyfn"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nhtkr"]
-texture = ExtResource("9_5mku6")
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5bxp6"]
-texture = ExtResource("9_5mku6")
+[ext_resource type="Texture2D" uid="uid://dca55vfaclhk4" path="res://Assets/Effects/Particles/flare_32x32.png" id="space_particles"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_paigv"]
-texture = ExtResource("10_tcyfn")
+[sub_resource type="Gradient" id="Gradient_space"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(0.05, 0.05, 0.15, 1, 0.08, 0.12, 0.25, 1, 0.06, 0.1, 0.2, 1, 0.03, 0.05, 0.12, 1)
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tcyfn"]
-texture = ExtResource("10_5mku6")
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_space"]
+gradient = SubResource("Gradient_space")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3u1th"]
-texture = ExtResource("10_tcyfn")
+[sub_resource type="Curve" id="Curve_particles"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.1), 0.0, 0.0, 0, 0]
+point_count = 3
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_gkcod"]
-texture = ExtResource("10_5mku6")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel"]
+bg_color = Color(0.05, 0.1, 0.2, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 1, 0.4)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel_inner"]
+bg_color = Color(0.08, 0.12, 0.2, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.3)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_normal"]
+bg_color = Color(0.2, 0.4, 0.8, 0.3)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 1, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_hover"]
+bg_color = Color(0.3, 0.5, 1, 0.5)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.7, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.3, 0.6, 1, 0.5)
+shadow_size = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_pressed"]
+bg_color = Color(0.4, 0.6, 1, 0.6)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.8, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="JoinInterface" type="Control" unique_id=1678382324]
 layout_mode = 3
@@ -41,6 +103,35 @@ grow_vertical = 2
 theme = ExtResource("8_theme")
 script = ExtResource("7")
 
+
+[node name="SpaceBackground" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_space")
+z_index = -10
+
+[node name="SpaceParticles" type="CPUParticles2D" parent="."]
+position = Vector2(640, 360)
+amount = 60
+texture = ExtResource("space_particles")
+lifetime = 10.0
+preprocess = 10.0
+emission_shape = 3
+emission_rect_extents = Vector2(700, 400)
+gravity = Vector2(0, 0)
+initial_velocity_min = 4.0
+initial_velocity_max = 10.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+scale_amount_min = 1.5
+scale_amount_max = 3.5
+scale_amount_curve = SubResource("Curve_particles")
+color = Color(0.6, 0.8, 1, 0.3)
+z_index = -5
 [node name="Background" type="Control" parent="." unique_id=504212286]
 layout_mode = 1
 anchors_preset = 15
@@ -134,14 +225,14 @@ metadata/_edit_use_anchors_ = true
 [node name="Lobby" type="Label" parent="JoinUI" unique_id=1489439650]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/normal = SubResource("StyleBoxTexture_nhtkr")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 text = "Lobby"
 horizontal_alignment = 1
 
 [node name="Instructions" type="Label" parent="JoinUI" unique_id=1195228739]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/normal = SubResource("StyleBoxTexture_5bxp6")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 text = "Enter IP and Port below"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -151,7 +242,7 @@ layout_mode = 2
 
 [node name="IPLabel" type="Label" parent="JoinUI/HBoxContainer" unique_id=1090447024]
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxTexture_paigv")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 text = "IP:"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -159,12 +250,12 @@ vertical_alignment = 1
 [node name="IPLineEdit" type="LineEdit" parent="JoinUI/HBoxContainer" unique_id=1659232105]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/normal = SubResource("StyleBoxTexture_tcyfn")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 alignment = 1
 
 [node name="PortLabel" type="Label" parent="JoinUI/HBoxContainer" unique_id=953259617]
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxTexture_3u1th")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 text = "Port:"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -172,7 +263,7 @@ vertical_alignment = 1
 [node name="PortLineEdit" type="LineEdit" parent="JoinUI/HBoxContainer" unique_id=2023246931]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/normal = SubResource("StyleBoxTexture_gkcod")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 text = "7777"
 alignment = 1
 

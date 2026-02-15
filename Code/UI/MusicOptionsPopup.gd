@@ -1,7 +1,5 @@
 extends PopupPanel
 
-# MusicOptionsPopup - Configuration popup for music playback (loops and volume).
-
 signal options_selected(loops: int, volume: float)
 
 @onready var loop_spin: SpinBox = $VBoxContainer/LoopSpin

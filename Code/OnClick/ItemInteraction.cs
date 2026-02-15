@@ -5,10 +5,12 @@ public partial class ItemInteraction : Node
 {
 	private const float PickupRange = 64f;
 	
-	public override void _Input(InputEvent @event)
+	public override void _UnhandledInput(InputEvent @event)
 	{
 		if (!(@event is InputEventMouseButton mouseEvent)) return;
 		if (mouseEvent.ButtonIndex != MouseButton.Left || !mouseEvent.Pressed) return;
+		
+		if (Input.IsKeyPressed(Key.Ctrl)) return;
 		
 		var player = GetLocalPlayer();
 		if (player == null) return;
@@ -19,14 +21,61 @@ public partial class ItemInteraction : Node
 		var worldPos = cam.GetGlobalMousePosition();
 		
 		var interaction = player.GetNodeOrNull<InteractionComponent>("InteractionComponent");
-		if (interaction?.IsThrowMode() == true)
+		bool isInThrowMode = interaction != null && (interaction.IsThrowMode() || interaction.IsLongThrowMode());
+		
+		if (isInThrowMode)
 		{
-			interaction.ThrowActive(worldPos);
+			var inventory = player.GetNodeOrNull<Inventory>("Inventory");
+			if (inventory == null)
+			{
+				GetViewport().SetInputAsHandled();
+				return;
+			}
+			
+			var activeHand = interaction.GetActiveHand();
+			var slot = activeHand == 0 ? "left_hand" : "right_hand";
+			var heldItem = inventory.GetEquipped(slot);
+			
+			if (heldItem == null)
+			{
+				GetViewport().SetInputAsHandled();
+				return;
+			}
+			
+			if (interaction.IsLongThrowMode())
+			{
+				var doAfter = player.GetNodeOrNull<DoAfterComponent>("DoAfterComponent");
+				if (doAfter != null)
+				{
+					var throwPos = worldPos;
+					doAfter.StartAction(1.5f, () => 
+					{
+						if (interaction != null && interaction.IsLongThrowMode())
+						{
+							interaction.ThrowActive(throwPos);
+						}
+					});
+					doAfter.PlayDoAfterAnimation(1.5f);
+				}
+				else
+				{
+					interaction.ThrowActive(worldPos);
+				}
+			}
+			else
+			{
+				interaction.ThrowActive(worldPos);
+			}
+			GetViewport().SetInputAsHandled();
 			return;
 		}
 		
 		var nearbyItem = FindNearestItem(player, worldPos);
-		nearbyItem?.TryPickup(player);
+		if (nearbyItem != null)
+		{
+			nearbyItem.TryPickup(player);
+			GetViewport().SetInputAsHandled();
+		}
 	}
 	
 	private Mob GetLocalPlayer()

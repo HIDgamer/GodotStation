@@ -61,23 +61,6 @@ public partial class WallLight : Node2D
 			return;
 		}
 
-		if (_debugCooldown > 0)
-			_debugCooldown -= (float)delta;
-
-		if (Input.IsActionJustPressed("debug_short_circuit") && _debugCooldown <= 0 && !_isShortCircuiting)
-		{
-			if (Multiplayer.IsServer())
-			{
-				BurnoutFlicker();
-				Rpc(nameof(BurnoutFlickerRpc));
-			}
-			else
-			{
-				RpcId(1, nameof(RequestBurnoutRpc), GetPath());
-			}
-			_debugCooldown = 2f;
-		}
-
 		if (_isVisible && EnableFlicker)
 		{
 			if (!_isBurningOut)

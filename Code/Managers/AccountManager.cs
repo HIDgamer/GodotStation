@@ -62,6 +62,7 @@ public partial class AccountManager : Node
 		{
 			_httpClient.DefaultRequestHeaders.Clear();
 			_httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+			_httpClient.Timeout = TimeSpan.FromSeconds(5);
 			
 			var response = await _httpClient.GetAsync($"{ApiUrl}/api/auth/me");
 			var responseText = await response.Content.ReadAsStringAsync();
@@ -76,10 +77,15 @@ public partial class AccountManager : Node
 					if (result.ContainsKey("user"))
 					{
 						_userData = result["user"].AsGodotDictionary();
+						GD.Print($"[AccountManager] Token verified for user: {GetUsername()}");
 						return true;
 					}
 				}
 			}
+		}
+		catch (System.Threading.Tasks.TaskCanceledException)
+		{
+			GD.PrintErr("[AccountManager] Token verification timed out");
 		}
 		catch (Exception e)
 		{

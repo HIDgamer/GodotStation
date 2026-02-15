@@ -16,6 +16,8 @@
 [ext_resource type="Script" uid="uid://cspsm2qi86f62" path="res://Code/Humanoid/Systems/InteractionComponent.cs" id="7_inter"]
 [ext_resource type="Script" uid="uid://bvw01yn278vt6" path="res://Code/Globals/PlayerCameraSetup.gd" id="7_tttvq"]
 [ext_resource type="Script" uid="uid://q2agxt8046e8" path="res://Code/Humanoid/Systems/StateController.cs" id="10_shhub"]
+[ext_resource type="Script" uid="uid://wvxrncmql8s7" path="res://Code/Humanoid/Systems/LimbSystem.cs" id="12_tabs1"]
+[ext_resource type="Script" uid="uid://bgixp8mrtnl0r" path="res://Code/Humanoid/Systems/FireSystem.cs" id="13_m14ys"]
 
 [node name="Human" type="CharacterBody2D" unique_id=257466136 groups=["Mob"]]
 z_index = 5
@@ -47,6 +49,12 @@ script = ExtResource("7_inter")
 
 [node name="StateController" type="Node" parent="." unique_id=1752056659]
 script = ExtResource("10_shhub")
+
+[node name="LimbSystem" type="Node" parent="." unique_id=297768550]
+script = ExtResource("12_tabs1")
+
+[node name="FireSystem" type="Node" parent="." unique_id=1422359470]
+script = ExtResource("13_m14ys")
 
 [node name="SpriteSystem" parent="." unique_id=1319870225 instance=ExtResource("2_234ot")]
 

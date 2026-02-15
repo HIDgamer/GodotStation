@@ -82,34 +82,61 @@ func _load_music(path: String, loops: int = 1, volume: float = 0.5) -> void:
 	if audio_player.playing:
 		audio_player.stop()
 
-	var stream = null
+	var stream: AudioStream = null
+
 	if path.begins_with("res://"):
 		stream = load(path)
-		if stream:
-			stream.loop = false
 	else:
-		stream = AudioStreamOggVorbis.load_from_file(path)
-		if stream:
-			stream.loop = true
-			var length = stream.get_length()
-			var total_time = length * loops
-			if total_time > 0:
-				if music_stop_timer:
-					music_stop_timer.queue_free()
-				music_stop_timer = Timer.new()
-				music_stop_timer.wait_time = total_time
-				music_stop_timer.one_shot = true
-				music_stop_timer.timeout.connect(_on_music_stop_timer_timeout)
-				add_child(music_stop_timer)
-				music_stop_timer.start()
-		else:
-			print("Failed to load external music file: ", path)
+		stream = load_audio_external(path)
+
+	if stream == null:
+		push_error("Could not load music: " + path)
+		return
 
 	audio_player.stream = stream
 	audio_player.volume_db = linear_to_db(volume)
 	music_loops = loops
 	current_loops = 0
 	audio_player.play()
+
+func load_audio_external(path: String) -> AudioStream:
+	if not FileAccess.file_exists(path):
+		push_error("External file does not exist: " + path)
+		return null
+
+	var ext := path.get_extension().to_lower()
+
+	match ext:
+		"ogg":
+			return _load_ogg_stream(path)
+
+		"wav":
+			return _load_wav_stream(path)
+
+		_:
+			push_error("Unsupported audio format: " + ext)
+			return null
+
+func _load_ogg_stream(path: String) -> AudioStreamOggVorbis:
+	var bytes := FileAccess.get_file_as_bytes(path)
+	if bytes.is_empty():
+		push_error("Failed to read OGG file: " + path)
+		return null
+
+	var stream := AudioStreamOggVorbis.new()
+	stream.data = bytes
+	return stream
+
+
+func _load_wav_stream(path: String) -> AudioStreamWAV:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		push_error("Failed to open WAV file: " + path)
+		return null
+
+	var stream := AudioStreamWAV.new()
+	stream.load_wav(file)
+	return stream
 
 func _load_art(path: String) -> void:
 	var image = Image.new()

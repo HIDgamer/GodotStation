@@ -2,6 +2,9 @@ using Godot;
 using Godot.Collections;
 using System.Collections.Generic;
 
+// Forward declaration for AudioManager
+public partial class AudioManager : Node { }
+
 public partial class MainLobbyUI : Control
 {
 	private AccountManager _accountManager;
@@ -138,6 +141,52 @@ public partial class MainLobbyUI : Control
 		if (FriendRequestsList != null) FriendRequestsList.ItemActivated += OnFriendRequestActivated;
 		if (ChatFriendsList != null) ChatFriendsList.ItemSelected += OnChatFriendSelected;
 		if (TabContainer != null) TabContainer.TabChanged += OnLobbyTabChanged;
+		
+		// Add hover sounds for buttons
+		AddHoverSounds();
+	}
+	
+	// Audio helper methods
+	private void PlayUIClick()
+	{
+		var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
+		if (audioManager != null)
+			audioManager.Call("play_ui_click");
+	}
+	
+	private void PlayUIMenuSelection()
+	{
+		var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
+		if (audioManager != null)
+			audioManager.Call("play_ui_menu_selection");
+	}
+	
+	private void PlayUIHover()
+	{
+		var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
+		if (audioManager != null)
+			audioManager.Call("play_ui_hover");
+	}
+	
+	private void AddHoverSounds()
+	{
+		// Add hover sounds to main buttons
+		if (DiscordLoginButton != null)
+			DiscordLoginButton.MouseEntered += PlayUIHover;
+		if (LogoutButton != null)
+			LogoutButton.MouseEntered += PlayUIHover;
+		if (RefreshServersButton != null)
+			RefreshServersButton.MouseEntered += PlayUIHover;
+		if (JoinServerButton != null)
+			JoinServerButton.MouseEntered += PlayUIHover;
+		if (HostServerButton != null)
+			HostServerButton.MouseEntered += PlayUIHover;
+		if (AddFriendButton != null)
+			AddFriendButton.MouseEntered += PlayUIHover;
+		if (RemoveFriendButton != null)
+			RemoveFriendButton.MouseEntered += PlayUIHover;
+		if (SendMessageButton != null)
+			SendMessageButton.MouseEntered += PlayUIHover;
 	}
 	
 	private void ShowLogin()
@@ -606,12 +655,28 @@ private void OnLogoutPressed()
 		foreach (Dictionary server in servers)
 		{
 			string name = GetVal(server, "name", "Unknown Server");
-			string players = $"{GetVal(server, "current_players", "0")}/{GetVal(server, "max_players", "0")}";
+			
+			string currentPlayersStr = "?";
+			string maxPlayersStr = "?";
+			
+			if (server.ContainsKey("current_players"))
+			{
+				currentPlayersStr = server["current_players"].ToString();
+			}
+			
+			if (server.ContainsKey("max_players"))
+			{
+				maxPlayersStr = server["max_players"].ToString();
+			}
+			
+			string players = $"{currentPlayersStr}/{maxPlayersStr}";
 			string map = GetVal(server, "map", "Unknown Map");
 			string host = GetVal(server, "host_username", "Unknown Host");
 			
 			bool isLocked = server.ContainsKey("password_protected") && (bool)server["password_protected"];
-			string lockedPrefix = isLocked ? "LOCK " : "";
+			string lockedPrefix = isLocked ? "🔒 " : "";
+			
+			GD.Print($"[MainLobbyUI] Server: {name}, current_players={currentPlayersStr}, max_players={maxPlayersStr}");
 			
 			ServerList.AddItem($"{lockedPrefix}{name} - {players} - {map} - Host: {host}");
 		}
@@ -674,6 +739,9 @@ private void OnLogoutPressed()
 		{
 			{ "name", name },
 			{ "map", "Station" },
+			{ "gamemode", "default" },
+			{ "max_players", 16 },
+			{ "current_players", 0 },
 			{ "port", port },
 			{ "password_protected", PasswordProtectedCheck?.ButtonPressed ?? false },
 			{ "description", ServerDescInput?.Text ?? "" }

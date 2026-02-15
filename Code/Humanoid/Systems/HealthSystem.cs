@@ -1,8 +1,14 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
-public enum DamageType { Brute, Burn, Toxin, Oxygen, Special }
+public enum DamageType { Brute, Burn, Toxin, Oxygen, Clone, Brain, HalLoss, Special }
 public enum PainLevel { None, Mild, Discomforting, Moderate, Distressing, Severe, Horrible }
+public enum StatusEffectType 
+{ 
+	Stun, KnockDown, KnockOut, Daze, Slow, Superslow, Root, 
+	Sleeping, EyeBlur, EyeBlind, EarDeafness, Stutter, Drowsy 
+}
 
 public struct DamageData
 {
@@ -34,8 +40,26 @@ public struct HealingData
 	}
 }
 
-public partial class HealthSystem : Node, IMobSystem
+public struct StatusEffectData
 {
+	public StatusEffectType Type;
+	public float Duration;
+	public float StartTime;
+	public bool Resistable;
+	
+	public StatusEffectData(StatusEffectType type, float duration, bool resistable = false)
+	{
+		Type = type;
+		Duration = duration;
+		StartTime = 0f;
+		Resistable = resistable;
+	}
+}
+
+public partial class HealthSystem : Node, IMobSystem, ISchedulable
+{
+	private Scheduler _scheduler;
+	
 	[Export] public float MaxHealth = 100f;
 	[Export] public float MaxBruteDamage = 100f;
 	[Export] public float MaxBurnDamage = 100f;
@@ -62,6 +86,11 @@ public partial class HealthSystem : Node, IMobSystem
 	[Export] public float PainSpeedMed = 1.5f;
 	[Export] public float PainSpeedLow = 1.0f;
 	
+	[Export] public float SchedulerUpdateInterval = 0.5f; // Update every 0.5 seconds
+	[Export] public int SchedulerPriority = 8; // High priority for health system
+	[Export] public bool SchedulerUpdateOnRegister = false;
+	[Export] public bool EnableDebugLogging = false;
+	
 	private const float BrutePainMultiplier = 1.0f;
 	private const float BurnPainMultiplier = 1.2f;
 	private const float ToxinPainMultiplier = 1.5f;
@@ -79,6 +108,26 @@ public partial class HealthSystem : Node, IMobSystem
 	private bool _isRegenerating;
 	private bool _isProcessing;
 	private bool _wasCritical;
+	
+	private float _oxygenAccumulator = 0f;
+	private float _bleedAccumulator = 0f;
+	private float _toxinAccumulator = 0f;
+	
+	// Status Effects
+	private Dictionary<StatusEffectType, StatusEffectData> _statusEffects = new();
+	private float _stunnedTime = 0f;
+	private float _knockedDownTime = 0f;
+	private float _knockedOutTime = 0f;
+	private float _dazedTime = 0f;
+	private float _slowTime = 0f;
+	private float _superSlowTime = 0f;
+	private float _rootTime = 0f;
+	private float _sleepingTime = 0f;
+	private float _eyeBlurTime = 0f;
+	private float _eyeBlindTime = 0f;
+	private float _earDeafnessTime = 0f;
+	private float _stutterTime = 0f;
+	private float _drowsyTime = 0f;
 	
 	[Signal] public delegate void HealthChangedEventHandler(float currentHealth, float maxHealth);
 	[Signal] public delegate void DamageTakenEventHandler(int damageType, float damageAmount, string sourceName, float remainingHealth);
@@ -98,6 +147,24 @@ public partial class HealthSystem : Node, IMobSystem
 		_mob = mob;
 		InitializeHealth();
 		_isProcessing = true;
+		
+		_scheduler = GetNodeOrNull<Scheduler>("/root/Scheduler");
+		
+		if (_scheduler == null)
+		{
+			_scheduler = GetTree().GetFirstNodeInGroup("Scheduler") as Scheduler;
+		}
+		
+		if (_scheduler != null)
+		{
+			_scheduler.Register(this);
+			if (EnableDebugLogging)
+				GD.Print("[HealthSystem] Registered with scheduler");
+		}
+		else
+		{
+			GD.PrintErr("[HealthSystem] No scheduler found in scene or autoloads!");
+		}
 	}
 	
 	public void Process(double delta)
@@ -105,11 +172,83 @@ public partial class HealthSystem : Node, IMobSystem
 		if (!_isProcessing || _mob == null) return;
 		
 		_timeSinceLastDamage += (float)delta;
+		
 		UpdatePainLevel();
+		
 		HandleRegeneration((float)delta);
+		
+		UpdateStatusEffects((float)delta);
+		ApplyStatusEffects();
 	}
 	
-	public void Cleanup() => _isProcessing = false;
+	public void ScheduledUpdate(float delta, WorldSnapshot snapshot)
+	{
+		if (!_isProcessing || _mob == null) return;
+		
+		_timeSinceLastDamage += delta;
+		
+		// Apply periodic damage based on accumulators
+		ApplyPeriodicDamage(delta);
+		
+		UpdatePainLevel();
+		HandleRegeneration(delta);
+		UpdateStatusEffects(delta);
+		ApplyStatusEffects();
+	}
+	
+	private void ApplyPeriodicDamage(float delta)
+	{
+		// Oxygen damage every 1.0 seconds
+		_oxygenAccumulator += delta;
+		if (_oxygenAccumulator >= 1.0f && _currentOxygenDamage > 0)
+		{
+			float oxygenDamagePerSecond = 2.0f;
+			float damageAmount = oxygenDamagePerSecond * _oxygenAccumulator;
+			ApplyDamage(DamageType.Oxygen, damageAmount, "Asphyxiation");
+			_oxygenAccumulator = 0f;
+		}
+		
+		// Bleeding damage every 0.5 seconds
+		_bleedAccumulator += delta;
+		if (_bleedAccumulator >= 0.5f && _currentBruteDamage > 0)
+		{
+			float brutePercentage = _currentBruteDamage / MaxBruteDamage;
+			float bleedRate = 1.0f + (brutePercentage * 4.0f);
+			float damageAmount = bleedRate * _bleedAccumulator;
+			ApplyDamage(DamageType.Brute, damageAmount, "Bleeding");
+			_bleedAccumulator = 0f;
+		}
+		
+		// Toxin damage every 1.0 seconds
+		_toxinAccumulator += delta;
+		if (_toxinAccumulator >= 1.0f && _currentToxinDamage > 0)
+		{
+			float toxinPercentage = _currentToxinDamage / MaxToxinDamage;
+			float damagePerSecond = 0.5f + (toxinPercentage * 2.5f);
+			float damageAmount = damagePerSecond * _toxinAccumulator;
+			ApplyDamage(DamageType.Toxin, damageAmount, "Toxin");
+			_toxinAccumulator = 0f;
+		}
+		
+		// Natural bleeding stops after some time, then regeneration starts
+		if (_currentBruteDamage > 0 && _timeSinceLastDamage > RegenDelay)
+		{
+			float regenRate = 0.5f;
+			_currentBruteDamage = Mathf.Max(0, _currentBruteDamage - (regenRate * delta));
+			UpdateHealthFromDamage();
+		}
+	}
+	
+	public void Cleanup()
+	{
+		_isProcessing = false;
+		
+		// Unregister from scheduler
+		if (_scheduler != null)
+		{
+			_scheduler.Unregister(this);
+		}
+	}
 	
 	private void InitializeHealth()
 	{
@@ -343,10 +482,227 @@ public partial class HealthSystem : Node, IMobSystem
 		_currentPainReduction = 0;
 		UpdatePainLevel();
 	}
+	
+	public void SetPainLevel(float painLevel)
+	{
+		_currentPainLevel = (PainLevel)Mathf.Clamp(painLevel, 0, 6);
+		EmitSignal(SignalName.PainLevelChanged, (int)_currentPainLevel, (int)_currentPainLevel);
+	}
+	
+	public void SetPainLevel(PainLevel painLevel)
+	{
+		_currentPainLevel = painLevel;
+		EmitSignal(SignalName.PainLevelChanged, (int)_currentPainLevel, (int)_currentPainLevel);
+	}
 
 	private void ShowDamageFeedback(DamageData damageData)
 	{
 		_mob?.ShowChatBubble($"Took {damageData.Amount:F1} {damageData.Type} damage from {damageData.SourceName}");
+	}
+	private void UpdateStatusEffects(float delta)
+	{
+		// Update status effect timers
+		if (_stunnedTime > 0) _stunnedTime -= delta;
+		if (_knockedDownTime > 0) _knockedDownTime -= delta;
+		if (_knockedOutTime > 0) _knockedOutTime -= delta;
+		if (_dazedTime > 0) _dazedTime -= delta;
+		if (_slowTime > 0) _slowTime -= delta;
+		if (_superSlowTime > 0) _superSlowTime -= delta;
+		if (_rootTime > 0) _rootTime -= delta;
+		if (_sleepingTime > 0) _sleepingTime -= delta;
+		if (_eyeBlurTime > 0) _eyeBlurTime -= delta;
+		if (_eyeBlindTime > 0) _eyeBlindTime -= delta;
+		if (_earDeafnessTime > 0) _earDeafnessTime -= delta;
+		if (_stutterTime > 0) _stutterTime -= delta;
+		if (_drowsyTime > 0) _drowsyTime -= delta;
+	}
+
+	private void ApplyStatusEffects()
+	{
+		if (_mob == null) return;
+		
+		var movementController = _mob.GetNodeOrNull<MovementController>("MovementController");
+		if (movementController == null) return;
+
+		// Apply movement effects
+		float speedMultiplier = 1.0f;
+		bool canMove = true;
+		bool canAct = true;
+
+		if (_rootTime > 0)
+		{
+			canMove = false;
+		}
+
+		if (_knockedDownTime > 0)
+		{
+			canMove = false;
+			speedMultiplier = 0.0f;
+		}
+
+		if (_knockedOutTime > 0)
+		{
+			canMove = false;
+			canAct = false;
+			speedMultiplier = 0.0f;
+		}
+
+		if (_stunnedTime > 0)
+		{
+			canAct = false;
+			speedMultiplier = 0.0f;
+		}
+
+		if (_dazedTime > 0)
+		{
+			speedMultiplier = Mathf.Min(speedMultiplier, 0.5f);
+		}
+
+		// Slow
+		if (_slowTime > 0)
+		{
+			speedMultiplier = Mathf.Min(speedMultiplier, 0.5f);
+		}
+
+		// Superslow
+		if (_superSlowTime > 0)
+		{
+			speedMultiplier = Mathf.Min(speedMultiplier, 0.25f);
+		}
+
+		// Apply final speed multiplier
+		movementController.SetSpeedMultiplier(speedMultiplier);
+	}
+
+	// Status Effect Application Methods
+	public void Stun(float amount, bool resistable = false)
+	{
+		if (_stunnedTime < amount)
+		{
+			_stunnedTime = amount;
+			ShowStatusEffectMessage("stunned");
+		}
+	}
+
+	public void KnockDown(float amount)
+	{
+		if (_knockedDownTime < amount)
+		{
+			_knockedDownTime = amount;
+			ShowStatusEffectMessage("knocked down");
+		}
+	}
+
+	public void KnockOut(float amount)
+	{
+		if (_knockedOutTime < amount)
+		{
+			_knockedOutTime = amount;
+			ShowStatusEffectMessage("knocked out");
+		}
+	}
+
+	public void Daze(float amount)
+	{
+		if (_dazedTime < amount)
+		{
+			_dazedTime = amount;
+			ShowStatusEffectMessage("dazed");
+		}
+	}
+
+	public void Slow(float amount)
+	{
+		if (_slowTime < amount)
+		{
+			_slowTime = amount;
+			ShowStatusEffectMessage("slowed");
+		}
+	}
+
+	public void Superslow(float amount)
+	{
+		if (_superSlowTime < amount)
+		{
+			_superSlowTime = amount;
+			ShowStatusEffectMessage("super slowed");
+		}
+	}
+
+	public void Root(float amount)
+	{
+		if (_rootTime < amount)
+		{
+			_rootTime = amount;
+			ShowStatusEffectMessage("rooted");
+		}
+	}
+
+	public void Sleeping(float amount)
+	{
+		if (_sleepingTime < amount)
+		{
+			_sleepingTime = amount;
+			ShowStatusEffectMessage("sleeping");
+		}
+	}
+
+	public void EyeBlur(float amount)
+	{
+		if (_eyeBlurTime < amount)
+		{
+			_eyeBlurTime = amount;
+			ShowStatusEffectMessage("vision blurred");
+		}
+	}
+
+	public void EyeBlind(float amount)
+	{
+		if (_eyeBlindTime < amount)
+		{
+			_eyeBlindTime = amount;
+			ShowStatusEffectMessage("blinded");
+		}
+	}
+
+	public void EarDeafness(float amount)
+	{
+		if (_earDeafnessTime < amount)
+		{
+			_earDeafnessTime = amount;
+			ShowStatusEffectMessage("deafened");
+		}
+	}
+
+	public void Stutter(float amount)
+	{
+		if (_stutterTime < amount)
+		{
+			_stutterTime = amount;
+			ShowStatusEffectMessage("stuttering");
+		}
+	}
+
+	public void Drowsy(float amount)
+	{
+		if (_drowsyTime < amount)
+		{
+			_drowsyTime = amount;
+			ShowStatusEffectMessage("drowsy");
+		}
+	}
+
+	private void ShowStatusEffectMessage(string effectName)
+	{
+		_mob?.ShowChatBubble($"You are {effectName}!");
+	}
+	
+	private bool HasActiveStatusEffects()
+	{
+		return _stunnedTime > 0 || _knockedDownTime > 0 || _knockedOutTime > 0 ||
+		       _dazedTime > 0 || _slowTime > 0 || _superSlowTime > 0 || _rootTime > 0 ||
+		       _sleepingTime > 0 || _eyeBlurTime > 0 || _eyeBlindTime > 0 ||
+		       _earDeafnessTime > 0 || _stutterTime > 0 || _drowsyTime > 0;
 	}
 
 	public float GetHealthPercentage() => (_currentHealth / MaxHealth) * 100.0f;
@@ -374,9 +730,16 @@ public partial class HealthSystem : Node, IMobSystem
 	public bool IsCriticalHealth() => _currentHealth <= (MaxHealth * 0.25f);
 	public bool IsDead() => _currentHealth <= 0;
 	
+	public string SchedulerId => _mob?.GetPlayerName() + "_HealthSystem" ?? "Unknown_HealthSystem";
+	public float UpdateInterval => SchedulerUpdateInterval;
+	public int Priority => SchedulerPriority;
+	public bool UpdateOnRegister => SchedulerUpdateOnRegister;
+	public bool IsActive => _isProcessing && _mob != null;
+	public bool NeedsProcessing => _isProcessing && _mob != null && (_currentBruteDamage > 0 || _currentBurnDamage > 0 || _currentToxinDamage > 0 || _currentOxygenDamage > 0 || _timeSinceLastDamage < RegenDelay || _currentPainLevel > PainLevel.None || HasActiveStatusEffects());
+	
 	public override void _ExitTree()
 	{
-		_isProcessing = false;
+		Cleanup();
 		base._ExitTree();
 	}
 }

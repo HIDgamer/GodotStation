@@ -121,9 +121,9 @@ func _is_lobby_phase() -> bool:
 	if gm.has_method("IsGameRunning"):
 		return not gm.call("IsGameRunning")
 	if gm.has_method("GetCurrentGameState"):
-		return int(gm.call("GetCurrentGameState")) == 1
+		return int(gm.call("GetCurrentGameState")) as int == 1
 	if "CurrentGameState" in gm:
-		return int(gm.CurrentGameState) == 1
+		return int(gm.CurrentGameState) as int == 1
 	return false
 
 func _get_player_node() -> Node:
@@ -156,9 +156,9 @@ func _get_player_node() -> Node:
 						return grandchild
 	
 	var mobs = get_tree().get_nodes_in_group("Mob")
-	for mob in mobs:
-		if mob.name == player_id:
-			return mob
+	for found_mob in mobs:
+		if found_mob.name == player_id:
+			return found_mob
 	
 	return null
 

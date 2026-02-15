@@ -17,6 +17,9 @@ public partial class FriendsManager : Node
 	[Signal] public delegate void FriendRequestFailedEventHandler(string error);
 	[Signal] public delegate void FriendStatusChangedEventHandler(int userId, bool online);
 	
+	private const string FRIENDS_CACHE_PATH = "user://friends_cache.dat";
+	private const string PENDING_CACHE_PATH = "user://pending_requests_cache.dat";
+	
 	private HttpClient _httpClient;
 	private AccountManager _accountManager;
 	private Array _friendsList = new();
@@ -35,6 +38,9 @@ public partial class FriendsManager : Node
 		_refreshTimer.Start();
 
 		_accountManager.LoginSuccess += OnLoginSuccess;
+		_accountManager.Logout += OnLogout;
+
+		LoadCachedData();
 
 		if (_accountManager.IsLoggedIn())
 		{
@@ -47,11 +53,134 @@ public partial class FriendsManager : Node
 		RefreshFriendsList();
 		RefreshPendingRequests();
 	}
+	
+	private void OnLogout()
+	{
+		SaveCachedData();
+	}
 
 	private void OnPeriodicRefresh()
 	{
 		RefreshFriendsList();
 		RefreshPendingRequests();
+	}
+	
+	private void LoadCachedData()
+	{
+		try
+		{
+			if (FileAccess.FileExists(FRIENDS_CACHE_PATH))
+			{
+				using var file = FileAccess.Open(FRIENDS_CACHE_PATH, FileAccess.ModeFlags.Read);
+				if (file != null)
+				{
+					var encrypted = file.GetAsText();
+					var json = DecryptData(encrypted);
+					if (!string.IsNullOrEmpty(json))
+					{
+						var parser = new Json();
+						if (parser.Parse(json) == Error.Ok)
+						{
+							_friendsList = parser.Data.AsGodotArray();
+							EmitSignal(SignalName.FriendsListUpdated, _friendsList);
+							GD.Print($"[FriendsManager] Loaded {_friendsList.Count} cached friends");
+						}
+					}
+				}
+			}
+			
+			if (FileAccess.FileExists(PENDING_CACHE_PATH))
+			{
+				using var file = FileAccess.Open(PENDING_CACHE_PATH, FileAccess.ModeFlags.Read);
+				if (file != null)
+				{
+					var encrypted = file.GetAsText();
+					var json = DecryptData(encrypted);
+					if (!string.IsNullOrEmpty(json))
+					{
+						var parser = new Json();
+						if (parser.Parse(json) == Error.Ok)
+						{
+							_pendingRequests = parser.Data.AsGodotArray();
+							EmitSignal(SignalName.FriendRequestsUpdated, _pendingRequests);
+							GD.Print($"[FriendsManager] Loaded {_pendingRequests.Count} cached requests");
+						}
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr($"[FriendsManager] Failed to load cached data: {e.Message}");
+		}
+	}
+	
+	private void SaveCachedData()
+	{
+		try
+		{
+			if (_friendsList.Count > 0)
+			{
+				using var file = FileAccess.Open(FRIENDS_CACHE_PATH, FileAccess.ModeFlags.Write);
+				if (file != null)
+				{
+					var json = Json.Stringify(_friendsList);
+					var encrypted = EncryptData(json);
+					file.StoreString(encrypted);
+					GD.Print($"[FriendsManager] Saved {_friendsList.Count} friends to cache");
+				}
+			}
+			
+			if (_pendingRequests.Count > 0)
+			{
+				using var file = FileAccess.Open(PENDING_CACHE_PATH, FileAccess.ModeFlags.Write);
+				if (file != null)
+				{
+					var json = Json.Stringify(_pendingRequests);
+					var encrypted = EncryptData(json);
+					file.StoreString(encrypted);
+					GD.Print($"[FriendsManager] Saved {_pendingRequests.Count} pending requests to cache");
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr($"[FriendsManager] Failed to save cached data: {e.Message}");
+		}
+	}
+	
+	private string EncryptData(string data)
+	{
+		const string key = "GSnebula2025";
+		var result = new StringBuilder();
+		
+		for (int i = 0; i < data.Length; i++)
+		{
+			result.Append((char)(data[i] ^ key[i % key.Length]));
+		}
+		
+		return Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ToString()));
+	}
+	
+	private string DecryptData(string encrypted)
+	{
+		try
+		{
+			var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encrypted));
+			const string key = "GSnebula2025";
+			var result = new StringBuilder();
+			
+			for (int i = 0; i < decoded.Length; i++)
+			{
+				result.Append((char)(decoded[i] ^ key[i % key.Length]));
+			}
+			
+			return result.ToString();
+		}
+		catch
+		{
+			return "";
+		}
 	}
 	
 	public Array GetFriendsList()
@@ -88,6 +217,7 @@ public partial class FriendsManager : Node
 					{
 						_friendsList = result["friends"].AsGodotArray();
 						EmitSignal(SignalName.FriendsListUpdated, _friendsList);
+						SaveCachedData();
 					}
 				}
 			}
@@ -122,6 +252,7 @@ public partial class FriendsManager : Node
 					{
 						_pendingRequests = result["requests"].AsGodotArray();
 						EmitSignal(SignalName.FriendRequestsUpdated, _pendingRequests);
+						SaveCachedData();
 					}
 				}
 			}
@@ -331,9 +462,12 @@ public partial class FriendsManager : Node
 	
 	public override void _ExitTree()
 	{
+		SaveCachedData();
+		
 		if (_accountManager != null)
 		{
 			_accountManager.LoginSuccess -= OnLoginSuccess;
+			_accountManager.Logout -= OnLogout;
 		}
 		if (_refreshTimer != null)
 		{

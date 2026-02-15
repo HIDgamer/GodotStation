@@ -1,46 +1,61 @@
 using Godot;
+using System.Linq;
 
-/// Base tool item data
-[GlobalClass]
-public partial class ToolItem : Item
+public partial class ToolItem : WeaponItem
 {
-	public enum ToolType
+	[Export] public float ToolCooldown = 1.0f;
+	[Export] public float ToolRange = 64.0f;
+	[Export] public float PowerConsumption = 5.0f;
+	[Export] public string[] ValidTargets = {};
+	[Export] public bool CanRepair = false;
+	[Export] public bool CanConstruct = false;
+	[Export] public bool CanScan = false;
+	[Export] public bool CanHack = false;
+	[Export] public float ScanRange = 100.0f;
+	[Export] public float HackChance = 0.5f;
+	
+	public void Initialize()
 	{
-		Wrench,
-		Screwdriver,
-		Cutter,
-		Welder,
-		Multitool,
-		Scanner,
-		Medical,
-		Construction,
-		Utility,
-		Other
+		IsTool = true;
 	}
-
-	[Export] public ToolType Type = ToolType.Utility;
-	[Export] public float UseTime = 0.5f;
-	[Export] public int Durability = -1;
-	[Export] public int DurabilityCost = 1;
-	[Export] public bool RequiresPower = false;
-	[Export] public float PowerCost = 0f;
-	[Export] public bool RequiresTwoHands = false;
-	[Export] public string UseVerb = "use";
-
-	public ToolItem()
+	
+	public bool CanUseTool()
 	{
-		ItemCategory = Category.Tool;
+		if (IsElectronic && CurrentCharge <= 0) return false;
+		return true;
 	}
-
-	public bool CanUse()
+	
+	public void UseToolCharge()
 	{
-		return Durability != 0;
+		if (IsElectronic)
+		{
+			UseCharge(PowerConsumption);
+		}
 	}
-
-	public void SpendDurability(int amount = -1)
+	
+	public bool IsValidTarget(string targetType)
 	{
-		if (Durability < 0) return;
-		int cost = amount < 0 ? DurabilityCost : amount;
-		Durability = Mathf.Max(0, Durability - cost);
+		if (ValidTargets.Length == 0) return true;
+		return ValidTargets.Contains(targetType);
+	}
+	
+	public bool CanRepairObject()
+	{
+		return CanRepair && ToolType == "repair";
+	}
+	
+	public bool CanConstructObject()
+	{
+		return CanConstruct && ToolType == "construction";
+	}
+	
+	public bool CanScanObject()
+	{
+		return CanScan && ToolType == "scanner";
+	}
+	
+	public bool CanHackObject()
+	{
+		return CanHack && ToolType == "hacking";
 	}
 }
