@@ -27,27 +27,22 @@ public partial class EntitySpawner : Node2D
 		_randomizeButton = GetNode<Button>("EntitySpawnerWindow/VBox/RandomizeButton");
 		_statusLabel = GetNode<Label>("EntitySpawnerWindow/VBox/StatusLabel");
 		
-		// Populate dropdown
 		foreach (var mobType in _mobTypes)
 		{
 			_mobTypeDropdown.AddItem(mobType);
 		}
 		
-		// Connect signals
 		_spawnButton.Pressed += OnSpawnButtonPressed;
 		_randomizeButton.Pressed += OnRandomizeButtonPressed;
 		
-		// Connect spawn signal to GameManager
 		SpawnMob += OnSpawnMobRequested;
 		
-		// Connect close button if it exists
 		_closeButton = GetNodeOrNull<Button>("EntitySpawnerWindow/VBox/CloseButton");
 		if (_closeButton != null)
 		{
 			_closeButton.Pressed += OnCloseButtonPressed;
 		}
 		
-		// Hide by default
 		Visible = false;
 	}
 	
@@ -56,7 +51,6 @@ public partial class EntitySpawner : Node2D
 		var mobType = _mobTypeDropdown.Text;
 		var characterData = GenerateRandomCharacterData(mobType);
 		
-		// EntitySpawner doesn't need mouse position - it spawns based on GameManager instructions
 		EmitSignal(SignalName.SpawnMob, Vector2.Zero, characterData);
 		_statusLabel.Text = $"Status: Spawned {mobType}";
 	}
@@ -72,13 +66,23 @@ public partial class EntitySpawner : Node2D
 		{
 			if (Multiplayer.IsServer())
 			{
-				_gameManager.RequestSpawnMob(position, characterData);
+				var world = GetTree().GetFirstNodeInGroup("World");
+				if (world != null)
+				{
+					Vector2 spawnPos = position == Vector2.Zero ? new Vector2(2 * 32, 2 * 32) : position;
+					int mobId = _gameManager.GetUniqueMobId();
+					_gameManager.SpawnPlayer(mobId, spawnPos, characterData);
+					_statusLabel.Text = $"Status: Spawned {characterData["mob_type"]} at {spawnPos}";
+				}
+				else
+				{
+					_statusLabel.Text = "Status: Error - World not found";
+				}
 			}
 			else
 			{
-				_gameManager.RpcId(1, "RequestSpawnMob", position, characterData);
+				_statusLabel.Text = "Status: Error - Can only spawn on server";
 			}
-			_statusLabel.Text = $"Status: Requested spawn of {characterData["mob_type"]} at {position}";
 		}
 		else
 		{

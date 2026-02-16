@@ -73,6 +73,13 @@ func _ready() -> void:
 	ingame_timer.timeout.connect(_on_ingame_timer_timeout)
 	add_child(ingame_timer)
 
+	var debug_timer = Timer.new()
+	debug_timer.name = "DebugTimer"
+	debug_timer.wait_time = 2.0
+	debug_timer.autostart = true
+	debug_timer.timeout.connect(_on_debug_timer_timeout)
+	add_child(debug_timer)
+
 	_setup_tab_buttons()
 	_setup_admin_buttons()
 	_setup_info_buttons()
@@ -84,15 +91,11 @@ func _ready() -> void:
 	if GameManager.has_signal("players_updated"):
 		GameManager.players_updated.connect(update_status_info)
 	
-	# Set up lobby UI normally
-	# If this is a late join, the GameStarted signal will trigger transition
 	_on_tab_pressed("Status")
 	update_lobby_timer()
 	
-	# Debug: Check game state at end of _ready
 	print("[Communications] At end of _ready:")
 	
-	# Check each item safely
 	if GameManager == null:
 		print("  - ERROR: GameManager is NULL!")
 	else:
@@ -641,6 +644,33 @@ func _on_late_joiner_transitioned() -> void:
 	lobby_subviewport.set_process(false)
 	_transition_to_game()
 	print("  - Late joiner transition complete")
+
+func _on_debug_timer_timeout() -> void:
+	var gm_is_running = false
+	var current_game_state = "Unknown"
+	
+	if GameManager != null and GameManager.has_method("IsGameRunning"):
+		gm_is_running = GameManager.call("IsGameRunning")
+	
+	if GameManager != null and GameManager.has_method("GetCurrentGameState"):
+		var state_int = GameManager.call("GetCurrentGameState")
+		match state_int:
+			0: current_game_state = "Menu"
+			1: current_game_state = "Lobby" 
+			2: current_game_state = "Playing"
+			3: current_game_state = "Hosting"
+			_: current_game_state = "Unknown (%s)" % state_int
+	
+	var ui_state = "Lobby" if not game_started else "Game"
+	var game_state = "Lobby" if not gm_is_running else "Running"
+	var timestamp = Time.get_time_string_from_system()
+	
+	print("[Communications] Game Status Debug - UI State: %s (%s), Game State: %s (%s), Manager State: %s - Time: %s" % [
+		ui_state, game_started,
+		game_state, gm_is_running, 
+		current_game_state,
+		timestamp
+	])
 
 @rpc("authority", "call_local", "reliable")
 func _sync_video_to_all_peers(path: String) -> void:

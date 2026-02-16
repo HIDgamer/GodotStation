@@ -25,6 +25,8 @@ public partial class FriendsManager : Node
 	private Array _friendsList = new();
 	private Array _pendingRequests = new();
 	private Godot.Timer _refreshTimer;
+	private WebSocketPeer _webSocket;
+	private bool _wsConnected = false;
 	
 	public override void _Ready()
 	{
@@ -52,17 +54,165 @@ public partial class FriendsManager : Node
 	{
 		RefreshFriendsList();
 		RefreshPendingRequests();
+		ConnectWebSocket();
 	}
 	
 	private void OnLogout()
 	{
 		SaveCachedData();
+		DisconnectWebSocket();
 	}
 
 	private void OnPeriodicRefresh()
 	{
 		RefreshFriendsList();
 		RefreshPendingRequests();
+	}
+	
+	private async void ConnectWebSocket()
+	{
+		if (!_accountManager.IsLoggedIn())
+			return;
+			
+		if (_wsConnected)
+			return;
+		
+		try
+		{
+			_webSocket = new WebSocketPeer();
+			
+			// WebSocket URL - replace http with ws
+			var wsUrl = ApiUrl.Replace("https://", "wss://").Replace("http://", "ws://");
+			var token = _accountManager.GetAuthToken();
+			
+			// Connect to WebSocket endpoint with token as query parameter
+			var fullWsUrl = $"{wsUrl}/ws/friends?token={Uri.EscapeDataString(token)}";
+			
+			var error = _webSocket.ConnectToUrl(fullWsUrl);
+			
+			if (error != Error.Ok)
+			{
+				GD.PrintErr($"[FriendsManager] Failed to initiate WebSocket connection: {error}");
+				return;
+			}
+			
+			// Wait for connection
+			for (int i = 0; i < 50; i++) // 5 second timeout
+			{
+				await Task.Delay(100);
+				_webSocket.Poll();
+				
+				var state = _webSocket.GetReadyState();
+				if (state == WebSocketPeer.State.Open)
+				{
+					_wsConnected = true;
+					GD.Print("[FriendsManager] WebSocket connected successfully");
+					return;
+				}
+				else if (state == WebSocketPeer.State.Closed)
+				{
+					GD.PrintErr("[FriendsManager] WebSocket connection failed");
+					return;
+				}
+			}
+			
+			GD.PrintErr("[FriendsManager] WebSocket connection timeout");
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr($"[FriendsManager] WebSocket connection error: {e.Message}");
+		}
+	}
+	
+	private void DisconnectWebSocket()
+	{
+		if (_webSocket != null)
+		{
+			_webSocket.Close();
+			_webSocket = null;
+			_wsConnected = false;
+			GD.Print("[FriendsManager] WebSocket disconnected");
+		}
+	}
+	
+	public override void _Process(double delta)
+	{
+		if (_webSocket != null && _wsConnected)
+		{
+			_webSocket.Poll();
+			
+			var state = _webSocket.GetReadyState();
+			
+			if (state == WebSocketPeer.State.Open)
+			{
+				while (_webSocket.GetAvailablePacketCount() > 0)
+				{
+					var packet = _webSocket.GetPacket();
+					var message = Encoding.UTF8.GetString(packet);
+					ProcessWebSocketMessage(message);
+				}
+			}
+			else if (state == WebSocketPeer.State.Closed)
+			{
+				_wsConnected = false;
+				GD.Print("[FriendsManager] WebSocket connection lost, attempting to reconnect...");
+				
+				// Try to reconnect after a delay
+				if (_accountManager.IsLoggedIn())
+				{
+					CallDeferred(MethodName.ConnectWebSocket);
+				}
+			}
+		}
+	}
+	
+	private void ProcessWebSocketMessage(string message)
+	{
+		try
+		{
+			var parser = new Json();
+			if (parser.Parse(message) == Error.Ok)
+			{
+				var data = parser.Data.AsGodotDictionary();
+				
+				if (data.ContainsKey("type"))
+				{
+					var type = data["type"].ToString();
+					
+					switch (type)
+					{
+						case "friend_status":
+							if (data.ContainsKey("user_id") && data.ContainsKey("online"))
+							{
+								var userId = data["user_id"].AsInt32();
+								var online = data["online"].AsBool();
+								OnFriendStatusUpdate(userId, online);
+							}
+							break;
+							
+						case "friend_request":
+							// New friend request received
+							RefreshPendingRequests();
+							break;
+							
+						case "friend_added":
+							// Friend request was accepted
+							RefreshFriendsList();
+							RefreshPendingRequests();
+							break;
+							
+						case "friend_removed":
+							// Friend was removed
+							RefreshFriendsList();
+							break;
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr($"[FriendsManager] Error processing WebSocket message: {e.Message}");
+		}
 	}
 	
 	private void LoadCachedData()
@@ -408,10 +558,13 @@ public partial class FriendsManager : Node
 	
 	public void OnFriendStatusUpdate(int userId, bool online)
 	{
-		EmitSignal(SignalName.FriendStatusChanged, userId, online);
+		GD.Print($"[FriendsManager] Friend {userId} is now {(online ? "online" : "offline")}");
 		
-		foreach (Dictionary friend in _friendsList)
+		// Update the friend in the cached list
+		bool found = false;
+		for (int i = 0; i < _friendsList.Count; i++)
 		{
+			var friend = _friendsList[i].AsGodotDictionary();
 			Variant v = friend["id"];
 
 			int friendId = v.VariantType switch
@@ -425,8 +578,20 @@ public partial class FriendsManager : Node
 			if (friendId == userId)
 			{
 				friend["online"] = online;
+				_friendsList[i] = friend;
+				found = true;
 				break;
 			}
+		}
+		
+		if (found)
+		{
+			// Emit both signals
+			EmitSignal(SignalName.FriendStatusChanged, userId, online);
+			EmitSignal(SignalName.FriendsListUpdated, _friendsList);
+			
+			// Save the updated cache
+			SaveCachedData();
 		}
 	}
 	
@@ -463,6 +628,7 @@ public partial class FriendsManager : Node
 	public override void _ExitTree()
 	{
 		SaveCachedData();
+		DisconnectWebSocket();
 		
 		if (_accountManager != null)
 		{

@@ -2,6 +2,9 @@ using Godot;
 using Godot.Collections;
 using System;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 public partial class GameManager : Node
 {
@@ -241,296 +244,135 @@ public partial class GameManager : Node
 			{ "port", port }
 		};
 		
-		_lobbyManager.RegisterServer(serverInfo);
-	}
-
-	public void UpdatePlayerCount()
-	{
-		if (_isHosting || _isConnected)
-		{
-			PlayerCount = Multiplayer.GetPeers().Length + 1;
-			EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
-			GD.Print($"[GameManager] Player count: {PlayerCount}/{MaxPlayers}");
-		}
-	}
-
-	public void JoinGame(string address, int port = -1)
-	{
-		if (port == -1) port = DefaultPort;
-		if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
-		{
-			GD.PrintErr($"[GameManager] Invalid join port: {port}. Expected {MIN_NETWORK_PORT}-{MAX_NETWORK_PORT}");
-			EmitSignal(SignalName.ConnectionFailed);
-			return;
-		}
-		
-		_peer = new ENetMultiplayerPeer();
-		var error = _peer.CreateClient(address, port);
-		
-		if (error == Error.Ok)
-		{
-			Multiplayer.MultiplayerPeer = _peer;
-			var timeoutTimer = new Timer { WaitTime = 5.0f, OneShot = true };
-			timeoutTimer.Timeout += OnJoinTimeout;
-			AddChild(timeoutTimer);
-			timeoutTimer.Start();
-		}
-		else
-		{
-			GD.PrintErr($"Failed to create client: {error}");
-			EmitSignal(SignalName.ConnectionFailed);
-		}
-	}
-
-	public void JoinGameLate(string address, int port = -1)
-	{
-		if (port == -1) port = DefaultPort;
-		if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
-		{
-			GD.PrintErr($"[GameManager] Invalid join port: {port}. Expected {MIN_NETWORK_PORT}-{MAX_NETWORK_PORT}");
-			EmitSignal(SignalName.ConnectionFailed);
-			return;
-		}
-		
-		_peer = new ENetMultiplayerPeer();
-		var error = _peer.CreateClient(address, port);
-		
-		if (error == Error.Ok)
-		{
-			Multiplayer.MultiplayerPeer = _peer;
-			var timeoutTimer = new Timer { WaitTime = 5.0f, OneShot = true };
-			timeoutTimer.Timeout += OnJoinTimeout;
-			AddChild(timeoutTimer);
-			timeoutTimer.Start();
-			
-			// Request game state sync
-			RpcId(1, MethodName.RequestGameStateSync);
-		}
-		else
-		{
-			GD.PrintErr($"Failed to create client: {error}");
-			EmitSignal(SignalName.ConnectionFailed);
-		}
-	}
-
-	public void LeaveGame()
-	{
-		if (Multiplayer.MultiplayerPeer != null)
-		{
-			Multiplayer.MultiplayerPeer.Close();
-			Multiplayer.MultiplayerPeer = null;
-		}
-		
-		if (_lobbyManager != null && _isHosting)
-		{
-			_lobbyManager.UnregisterServer();
-		}
-		
-		CleanupLobbyTimers();
-		ResetSessionState();
-		SetGameState(GameState.Menu);
-		
-		GD.Print("[GameManager] Left game");
-		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
-	}
-
-	public void BackToLobby()
-	{
-		LeaveGame();
-		var tree = GetTree();
-		if (tree == null) return;
-		if (tree.CurrentScene != null && tree.CurrentScene.SceneFilePath == MainLobbyScenePath) return;
-		tree.ChangeSceneToFile(MainLobbyScenePath);
-	}
-
-	private void CleanupLobbyTimers()
-	{
-		if (_lobbyUpdateTimer != null)
-		{
-			_lobbyUpdateTimer.Timeout -= UpdateLobbyTime;
-			_lobbyUpdateTimer.Stop();
-			_lobbyUpdateTimer.QueueFree();
-			_lobbyUpdateTimer = null;
-		}
-
-		if (_lobbyTimer != null)
-		{
-			_lobbyTimer.Timeout -= OnLobbyTimeout;
-			_lobbyTimer.Stop();
-			_lobbyTimer.QueueFree();
-			_lobbyTimer = null;
-		}
-	}
-
-	private void ResetSessionState()
-	{
-		_gameStarted = false;
-		_isHosting = false;
-		_isConnected = false;
-		LobbyTimerPaused = false;
-		LobbyTimeLeft = 300.0f;
-		PlayerCount = 0;
-		IngameTime = 0.0f;
-		CurrentVideoUid = "";
-		CurrentMediaType = "";
-		CurrentMediaPath = "";
-		CurrentMediaLoops = 0;
-		CurrentMediaVolume = 0.5f;
-		_connectedPeers.Clear();
-		_playerNames.Clear();
-		_peerCharacters.Clear();
-		_connectionAttempts.Clear();
-		_messageTimestamps.Clear();
-	}
-
-	private void OnJoinTimeout()
-	{
-		if (!Multiplayer.HasMultiplayerPeer() || Multiplayer.GetUniqueId() == 0)
-		{
-			GD.PrintErr("Failed to connect: No server found");
-			_peer.Close();
-			Multiplayer.MultiplayerPeer = null;
-			EmitSignal(SignalName.ConnectionFailed);
-		}
+		_lobbyManager.Call("RegisterServer", serverInfo);
 	}
 
 	private void SetupLobbyTimer()
 	{
-		CleanupLobbyTimers();
-		CurrentVideoUid = GetRandomVideo();
-		LobbyTimeLeft = 300.0f;
-		
-		_lobbyTimer = new Timer { Name = "LobbyTimer", WaitTime = LobbyTimeLeft, OneShot = true, Paused = LobbyTimerPaused };
-		_lobbyTimer.Timeout += OnLobbyTimeout;
+		_lobbyTimer = new Timer();
+		_lobbyTimer.WaitTime = LobbyTimeLeft;
+		_lobbyTimer.OneShot = true;
+		_lobbyTimer.Timeout += OnLobbyTimerTimeout;
 		AddChild(_lobbyTimer);
 		_lobbyTimer.Start();
 
-		_lobbyUpdateTimer = new Timer { Name = "LobbyUpdateTimer", WaitTime = 1.0f, Autostart = true };
-		_lobbyUpdateTimer.Timeout += UpdateLobbyTime;
+		_lobbyUpdateTimer = new Timer();
+		_lobbyUpdateTimer.WaitTime = 1.0f;
+		_lobbyUpdateTimer.Timeout += UpdateLobbyTimer;
 		AddChild(_lobbyUpdateTimer);
-
-		if (Multiplayer.IsServer() && !string.IsNullOrEmpty(CurrentVideoUid))
-			Rpc(MethodName.BroadcastMediaSync, "video", CurrentVideoUid, 0, 0.5f);
+		_lobbyUpdateTimer.Start();
 	}
 
-	private void UpdateLobbyTime()
+	private void UpdateLobbyTimer()
 	{
-		if (_lobbyTimer != null && !_lobbyTimer.IsStopped())
+		if (_lobbyTimer != null && !_lobbyTimer.IsStopped() && !LobbyTimerPaused)
 		{
 			LobbyTimeLeft = (float)_lobbyTimer.TimeLeft;
-			if (Multiplayer.IsServer())
-				Rpc(MethodName.SyncLobbyStateToAll, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
+			EmitSignal(SignalName.PlayersUpdated);
 		}
 	}
 
-	private void OnLobbyTimeout()
+	private void OnLobbyTimerTimeout()
 	{
-		if (Multiplayer.IsServer())
+		if (_gameStarted) return;
+		
+		GD.Print("[GameManager] Lobby timer expired");
+		EmitSignal(SignalName.LobbyTimeout);
+		StartGame();
+	}
+
+	public void DelayLobby(float additionalTime = 60.0f)
+	{
+		if (!Multiplayer.IsServer()) return;
+		if (_gameStarted) return;
+		
+		LobbyTimeLeft += additionalTime;
+		LobbyTimerPaused = false;
+		
+		if (_lobbyTimer != null)
 		{
-			LobbyTimeLeft = 0.0f;
-			EmitSignal(SignalName.LobbyTimeout);
-			Rpc(MethodName.SyncLobbyStateToAll, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
+			_lobbyTimer.Stop();
+			_lobbyTimer.WaitTime = LobbyTimeLeft;
+			_lobbyTimer.Start();
 		}
-	}
-
-	private Node GetWorld()
-	{
-		var worlds = GetTree().GetNodesInGroup("World");
-		return worlds.Count > 0 ? worlds[0] : null;
+		
+		Rpc(MethodName.SyncLobbyState, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
+		GD.Print($"[GameManager] Lobby delayed by {additionalTime} seconds. New time: {LobbyTimeLeft}");
 	}
 
 	public async void StartGame()
 	{
-		if (Multiplayer.IsServer())
+		if (!Multiplayer.IsServer()) return;
+		if (_gameStarted) return;
+		
+		GD.Print($"[GameManager] StartGame called on server");
+		_gameStarted = true;
+		LobbyTimerPaused = false;
+		
+		if (_lobbyTimer != null)
 		{
-			GD.Print($"[GameManager] StartGame called on server");
-			_gameStarted = true;
-			LobbyTimerPaused = false;
-			_lobbyTimer?.Stop();
-			SetGameState(GameState.Playing);
-			EmitSignal(SignalName.GameStarted);
-			
-			var world = GetWorld();
-			if (world != null)
-			{
-				foreach (var child in world.GetChildren())
-				{
-					if (int.TryParse(child.Name, out _))
-						child.QueueFree();
-				}
-				
-				var spawnPositions = new Vector2[] {
-					new(2 * 32, 2 * 32),
-					new(3 * 32, 3 * 32),
-					new(1 * 32, 3 * 32),
-					new(3 * 32, 3 * 32)
-				};
-				
-				var wm = world.GetNodeOrNull("WorldManager");
-				if (wm != null)
-				{
-					foreach (var pos in spawnPositions)
-					{
-						var cell = new Vector2I(Mathf.FloorToInt(pos.X / 32.0f), Mathf.FloorToInt(pos.Y / 32.0f));
-						wm.Call("UpdateTileRpc", cell, "floor");
-					}
-				}
-				// Modified spawner - here
-				
-				await ToSignal(GetTree(), "process_frame");
-				//Count the connected peers to list/wait for.
-				var spawnIndex = 0;
-				var SpawnArray = _connectedPeers.ToArray();
-				var PlayersReadyNow = SpawnArray.Count();
-				// use up to 15 groups for spawning in frames but never use more than there are players to avoid frames with "null" in the spawn array
-				var TotalFrames = Mathf.Min(15, PlayersReadyNow);
-				var SpawnPerFrame = Mathf.CeilToInt(PlayersReadyNow / (float)TotalFrames);
-				var SpawnedThisFrame = 0;
-				foreach (var peerId in SpawnArray)
-				{
-					
-					if (peerId > 0)
-					{
-						var spawnPos = spawnPositions[spawnIndex % spawnPositions.Length];	
-						SpawnPlayer(peerId, spawnPos);
-						spawnIndex++;
-						SpawnedThisFrame++;
-
-						if (SpawnedThisFrame >= SpawnPerFrame)
-						{
-							SpawnedThisFrame = 0;
-							await ToSignal(GetTree(), "process_frame");
-						}
-						
-					}
-				}
-			}
-			
-			Rpc(MethodName.ClientStartGame);
+			_lobbyTimer.Stop();
+			LobbyTimeLeft = 0;
 		}
-	}
-
-	private void SpawnPlayer(int peerId, Vector2 position)
-	{
+		
+		SetGameState(GameState.Playing);
+		EmitSignal(SignalName.GameStarted);
+		
 		var world = GetWorld();
-		if (world == null || PlayerScene == null) return;
-		
-		var player = PlayerScene.Instantiate();
-		player.Name = peerId.ToString();
-		player.Set("Position", position);
-		
-		if (_peerCharacters.ContainsKey(peerId))
+		if (world != null)
 		{
-			var charData = _peerCharacters[peerId];
-			if (charData.ContainsKey("name"))
+			foreach (var child in world.GetChildren())
 			{
-				var playerName = (string)charData["name"];
-				if (!string.IsNullOrEmpty(playerName))
-					player.Call("SetPlayerName", playerName);
+				if (int.TryParse(child.Name, out _))
+					child.QueueFree();
+			}
+			
+			var spawnPositions = new Vector2[] {
+				new(2 * 32, 2 * 32),
+				new(3 * 32, 3 * 32),
+				new(1 * 32, 3 * 32),
+				new(3 * 32, 3 * 32)
+			};
+			
+			var wm = world.GetNodeOrNull("WorldManager");
+			if (wm != null)
+			{
+				foreach (var pos in spawnPositions)
+				{
+					var cell = new Vector2I(Mathf.FloorToInt(pos.X / 32.0f), Mathf.FloorToInt(pos.Y / 32.0f));
+					wm.Call("UpdateTileRpc", cell, "floor");
+				}
+			}
+			
+			await ToSignal(GetTree(), "process_frame");
+			
+			var spawnIndex = 0;
+			var SpawnArray = _connectedPeers.ToArray();
+			var PlayersReadyNow = SpawnArray.Count();
+			var TotalFrames = Mathf.Min(15, PlayersReadyNow);
+			var SpawnPerFrame = Mathf.CeilToInt(PlayersReadyNow / (float)TotalFrames);
+			var SpawnedThisFrame = 0;
+			
+			foreach (var peerId in SpawnArray)
+			{
+				if (peerId > 0)
+				{
+					var spawnPos = spawnPositions[spawnIndex % spawnPositions.Length];	
+					SpawnPlayer(peerId, spawnPos);
+					spawnIndex++;
+					SpawnedThisFrame++;
+
+					if (SpawnedThisFrame >= SpawnPerFrame)
+					{
+						SpawnedThisFrame = 0;
+						await ToSignal(GetTree(), "process_frame");
+					}
+				}
 			}
 		}
 		
-		world.AddChild(player, true);
+		Rpc(MethodName.ClientStartGame);
+		EmitSignal(SignalName.PlayersUpdated);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
@@ -542,9 +384,33 @@ public partial class GameManager : Node
 		EmitSignal(SignalName.GameStarted);
 	}
 
+	public void JoinGame(string address, int port = -1)
+	{
+		if (port == -1) port = DefaultPort;
+		if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
+		{
+			GD.PrintErr($"[GameManager] Invalid join port: {port}. Expected {MIN_NETWORK_PORT}-{MAX_NETWORK_PORT}");
+			return;
+		}
+		
+		_peer = new ENetMultiplayerPeer();
+		var error = _peer.CreateClient(address, port);
+		
+		if (error == Error.Ok)
+		{
+			Multiplayer.MultiplayerPeer = _peer;
+			GD.Print($"[GameManager] Connecting to {address}:{port}...");
+		}
+		else
+		{
+			GD.PrintErr($"[GameManager] Failed to create client: {error}");
+			EmitSignal(SignalName.ConnectionFailed);
+		}
+	}
+
 	private void OnPeerConnected(long id)
 	{
-		var peerId = (int)id;
+		int peerId = (int)id;
 		
 		if (!ValidateConnectionRate(peerId))
 		{
@@ -563,8 +429,9 @@ public partial class GameManager : Node
 		
 		if (Multiplayer.IsServer())
 		{
-			Rpc(MethodName.SyncLobbyStateToAll, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
+			Rpc(MethodName.SyncLobbyState, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
 			RpcId(peerId, MethodName.SyncIngameTime, IngameTime);
+			
 			if (!string.IsNullOrEmpty(CurrentMediaType) && !string.IsNullOrEmpty(CurrentMediaPath))
 			{
 				RpcId(peerId, MethodName.BroadcastMediaSync, CurrentMediaType, CurrentMediaPath, CurrentMediaLoops, CurrentMediaVolume);
@@ -575,230 +442,149 @@ public partial class GameManager : Node
 				if (kvp.Key != peerId)
 					RpcId(peerId, MethodName.SyncPlayerAppearance, kvp.Key, kvp.Value);
 			}
+			
 			UpdatePlayerCount();
 		}
-	}
-
-	private void OnPeerDisconnected(long id)
-	{
-		var peerId = (int)id;
-		_connectedPeers.Remove(peerId);
-		_playerNames.Remove(peerId);
-		_peerCharacters.Remove(peerId);
-		_messageTimestamps.Remove(peerId);
-		_connectionAttempts.Remove(peerId);
 		
-		PlayerCount = _connectedPeers.Count;
-		
-		GD.Print($"[GameManager] Peer {id} disconnected. Remaining players: {PlayerCount}");
-		EmitSignal(SignalName.PlayerLeft, peerId);
-		EmitSignal(SignalName.PlayersUpdated);
-		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
-		
-		if (Multiplayer.IsServer())
+		if (_gameStarted && Multiplayer.IsServer())
 		{
-			var world = GetWorld();
-			if (world != null)
-			{
-				var playerNode = world.GetNodeOrNull(peerId.ToString());
-				playerNode?.QueueFree();
-			}
-			UpdatePlayerCount();
+			GD.Print($"[GameManager] Late joiner {peerId} connected");
+			CallDeferred(MethodName.HandleLateJoiner, peerId);
 		}
-	}
-
-	private void OnConnectedToServer()
-	{
-		GD.Print("[GameManager] Successfully connected to server");
-		_isConnected = true;
-		
-		GetTree().ChangeSceneToFile(CommunicationsSceneUid);
-		SetGameState(GameState.Lobby);
-		
-		UpdatePlayerCount();
-		
-		var myId = Multiplayer.GetUniqueId();
-		var playerData = new Dictionary();
-		
-		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
-		if (prefManager != null)
+		else if (!Multiplayer.IsServer())
 		{
-			playerData = (Dictionary)prefManager.Call("get_character_data");
-			playerData["peer_id"] = myId;
-			
-			var playerName = playerData.ContainsKey("name") ? (string)playerData["name"] : $"Player {myId}";
-			if (string.IsNullOrEmpty(playerName))
-				playerName = $"Player {myId}";
-			_playerNames[myId] = playerName;
-			
-			_peerCharacters[myId] = playerData;
-			prefManager.Call("set_peer_character_data", myId, playerData);
+			return;
 		}
 		else
 		{
-			GD.PrintErr("[GameManager] PreferenceManager not found during connection");
-			_playerNames[myId] = $"Player {myId}";
-			_peerCharacters[myId] = new Dictionary { { "name", $"Player {myId}" }, { "peer_id", myId } };
+			CallDeferred(MethodName.SyncNewPeerCharacterData, peerId);
 		}
+	}
+
+	private void SyncNewPeerCharacterData(int peerId)
+	{
+		if (!Multiplayer.IsServer()) return;
 		
-		RpcId(1, MethodName.ReceivePlayerAppearance, myId, playerData);
-	}
-
-	private void OnConnectionFailed()
-	{
-		GD.PrintErr("[GameManager] Connection to server failed");
-		Multiplayer.MultiplayerPeer = null;
-		EmitSignal(SignalName.ConnectionFailed);
-	}
-
-	private void OnServerDisconnected()
-	{
-		GD.Print("[GameManager] Disconnected from server");
-		BackToLobby();
+		foreach (var kvp in _peerCharacters)
+		{
+			if (kvp.Key != peerId)
+			{
+				RpcId(peerId, MethodName.ReceiveCharacterData, kvp.Key, kvp.Value);
+			}
+		}
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ReceivePlayerAppearance(int peerId, Dictionary playerData)
+	private void RegisterCharacterData(int peerId, Dictionary characterData)
 	{
 		if (!Multiplayer.IsServer()) return;
 		if (!ValidateRpcSender(peerId)) return;
 		
-		_peerCharacters[peerId] = playerData;
+		_peerCharacters[peerId] = characterData;
 		
-		if (playerData.ContainsKey("name"))
+		if (characterData.ContainsKey("name"))
 		{
-			var playerName = (string)playerData["name"];
-			if (!string.IsNullOrEmpty(playerName))
-				_playerNames[peerId] = playerName;
+			_playerNames[peerId] = characterData["name"].ToString();
+		}
+		
+		Rpc(MethodName.ReceiveCharacterData, peerId, characterData);
+		GD.Print($"[GameManager] Registered character data for peer {peerId}");
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void ReceiveCharacterData(int peerId, Dictionary characterData)
+	{
+		_peerCharacters[peerId] = characterData;
+		
+		if (characterData.ContainsKey("name"))
+		{
+			_playerNames[peerId] = characterData["name"].ToString();
 		}
 		
 		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
 		if (prefManager != null)
 		{
-			prefManager.Call("set_peer_character_data", peerId, playerData);
+			prefManager.Call("set_peer_character_data", peerId, characterData);
+		}
+		
+		GD.Print($"[GameManager] Received character data for peer {peerId}");
+	}
+
+	public Dictionary GetPeerCharacterData(int peerId)
+	{
+		return _peerCharacters.ContainsKey(peerId) ? _peerCharacters[peerId] : new Dictionary();
+	}
+
+	public void SetPeerCharacterData(int peerId, Dictionary characterData)
+	{
+		_peerCharacters[peerId] = characterData;
+		
+		if (characterData.ContainsKey("name"))
+		{
+			_playerNames[peerId] = characterData["name"].ToString();
+		}
+		
+		if (Multiplayer.IsServer())
+		{
+			Rpc(MethodName.ReceiveCharacterData, peerId, characterData);
 		}
 		else
 		{
-			GD.PrintErr("[GameManager] PreferenceManager not found in ReceivePlayerAppearance");
-		}
-		
-		Rpc(MethodName.SyncPlayerAppearance, peerId, playerData);
-		
-		if (_gameStarted)
-		{
-			var world = GetWorld();
-			if (world != null)
-			{
-				var existingPlayer = world.GetNodeOrNull(peerId.ToString());
-				if (existingPlayer != null)
-				{
-					var spriteSystem = existingPlayer.GetNodeOrNull("SpriteSystem");
-					spriteSystem?.Call("ReloadAppearance");
-					
-					if (playerData.ContainsKey("name"))
-					{
-						var playerName = (string)playerData["name"];
-						if (!string.IsNullOrEmpty(playerName))
-							existingPlayer.Call("SetPlayerName", playerName);
-					}
-				}
-				else
-				{
-					// Late joiner - spawn them in the game
-					SpawnLateJoiner(peerId, playerData);
-				}
-			}
+			RpcId(1, MethodName.RegisterCharacterData, peerId, characterData);
 		}
 	}
 
-	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequestGameStateSync()
+	public void PushLocalAppearanceUpdate()
+	{
+		var peerId = Multiplayer.GetUniqueId();
+		if (peerId <= 0) peerId = 1;
+		
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		if (prefManager != null)
+		{
+			var characterData = (Dictionary)prefManager.Call("get_character_data");
+			SetPeerCharacterData(peerId, characterData);
+		}
+	}
+
+	private void HandleLateJoiner(int peerId)
 	{
 		if (!Multiplayer.IsServer()) return;
-		var requesterId = Multiplayer.GetRemoteSenderId();
-		if (requesterId <= 0) return;
 		
-		// Send current game state to late joiner
-		RpcId(requesterId, MethodName.SendGameStateSync, _gameStarted, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid, CurrentMediaType, CurrentMediaPath, CurrentMediaLoops, CurrentMediaVolume, IngameTime);
+		GD.Print($"[GameManager] Handling late joiner: {peerId}");
 		
-		// Send all player appearances
-		foreach (var kvp in _peerCharacters)
-		{
-			RpcId(requesterId, MethodName.SyncPlayerAppearance, kvp.Key, kvp.Value);
-		}
+		RpcId(peerId, MethodName.TransitionLateJoinerToGame);
 		
-		// Send current player count
-		RpcId(requesterId, MethodName.SyncPlayerCount, PlayerCount);
-		
-		// If game is running, send world state and transition late joiner to game
-		if (_gameStarted)
-		{
-			SendWorldStateToPlayer(requesterId);
-			RpcId(requesterId, MethodName.TransitionLateJoinerToGame);
-		}
-	}
-
-	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SendGameStateSync(bool gameStarted, float lobbyTimeLeft, bool lobbyTimerPaused, string videoUid, string mediaType, string mediaPath, int mediaLoops, float mediaVolume, float ingameTime)
-	{
-		_gameStarted = gameStarted;
-		LobbyTimeLeft = lobbyTimeLeft;
-		LobbyTimerPaused = lobbyTimerPaused;
-		CurrentVideoUid = videoUid;
-		CurrentMediaType = mediaType;
-		CurrentMediaPath = mediaPath;
-		CurrentMediaLoops = mediaLoops;
-		CurrentMediaVolume = mediaVolume;
-		IngameTime = ingameTime;
-		
-		if (gameStarted)
-		{
-			SetGameState(GameState.Playing);
-			// Emit GameStarted signal immediately for late joiners
-			EmitSignal(SignalName.GameStarted);
-		}
-		else
-		{
-			SetGameState(GameState.Lobby);
-			SetupLobbyTimer();
-		}
-	}
-
-	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SyncPlayerCount(int count)
-	{
-		PlayerCount = count;
-		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
-	}
-
-	private void SpawnLateJoiner(int peerId, Dictionary playerData)
-	{
-		var world = GetWorld();
-		if (world == null || PlayerScene == null) return;
-		
-		// Find a safe spawn position
 		var spawnPos = FindSafeSpawnPosition();
+		RpcId(peerId, MethodName.ConfirmSpawn, spawnPos);
 		
-		var player = PlayerScene.Instantiate();
-		player.Name = peerId.ToString();
-		player.Set("Position", spawnPos);
+		var characterData = _peerCharacters.ContainsKey(peerId) ? _peerCharacters[peerId] : null;
+		CallDeferred(MethodName.SpawnPlayerForLateJoiner, peerId, spawnPos, characterData);
 		
-		if (playerData.ContainsKey("name"))
+		RpcId(peerId, MethodName.SendChatMessage, 0, "System", "The round has started, please choose a role and late-join", "IC");
+	}
+
+	private async void SpawnPlayerForLateJoiner(int peerId, Vector2 spawnPos, Dictionary characterData)
+	{
+		await ToSignal(GetTree(), "process_frame");
+		await ToSignal(GetTree(), "process_frame");
+		
+		var world = GetWorld();
+		if (world == null)
 		{
-			var playerName = (string)playerData["name"];
-			if (!string.IsNullOrEmpty(playerName))
-				player.Call("SetPlayerName", playerName);
+			GD.PrintErr("[GameManager] World not found for late joiner spawn");
+			return;
 		}
 		
-		world.AddChild(player, true);
+		GD.Print($"[GameManager] Spawning late joiner {peerId} at {spawnPos}");
+		SpawnPlayer(peerId, spawnPos, characterData);
 		
-		// Send spawn confirmation to the player
-		RpcId(peerId, MethodName.ConfirmSpawn, spawnPos);
+		await ToSignal(GetTree(), "process_frame");
+		SendWorldStateToPlayer(peerId);
 	}
 
 	private Vector2 FindSafeSpawnPosition()
 	{
-		// Try to find a safe position near existing players
 		var world = GetWorld();
 		if (world == null) return new Vector2(2 * 32, 2 * 32);
 		
@@ -813,12 +599,10 @@ public partial class GameManager : Node
 		
 		if (existingPlayers.Count > 0)
 		{
-			// Spawn near the last player
 			var lastPlayerPos = existingPlayers[existingPlayers.Count - 1];
 			return lastPlayerPos + new Vector2(64, 64);
 		}
 		
-		// Default spawn positions
 		var spawnPositions = new Vector2[] {
 			new(2 * 32, 2 * 32),
 			new(3 * 32, 3 * 32),
@@ -865,14 +649,12 @@ public partial class GameManager : Node
 			}
 		}
 		
-		// Send world items
 		SendWorldItemsToPlayer(playerId);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void SendPlayerState(int playerId, Vector2 position, float rotation)
 	{
-		// This is called on the late joiner's client to sync other players' states
 		var world = GetWorld();
 		if (world == null) return;
 		
@@ -889,7 +671,6 @@ public partial class GameManager : Node
 		var world = GetWorld();
 		if (world == null) return;
 		
-		// Send all world items to the late joiner
 		foreach (var child in world.GetChildren())
 		{
 			if (child is WorldItem worldItem)
@@ -902,69 +683,134 @@ public partial class GameManager : Node
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void SendWorldItem(string itemId, Vector2 position, int quantity)
 	{
-		// This is called on the late joiner's client to sync world items
 		var world = GetWorld();
 		if (world == null) return;
 		
-		// Create the item for the late joiner
-		var itemScene = GD.Load<PackedScene>($"res://Scenes/Items/{itemId}.tscn");
-		if (itemScene != null)
-		{
-			var item = itemScene.Instantiate<WorldItem>();
-			item.ItemId = itemId;
-			item.GlobalPosition = position;
-			item.Quantity = quantity;
-			world.AddChild(item, true);
-		}
+		var worldItemScene = GD.Load<PackedScene>("res://Scenes/WorldItem.tscn");
+		if (worldItemScene == null) return;
+		
+		var worldItem = worldItemScene.Instantiate<WorldItem>();
+		worldItem.ItemId = itemId;
+		worldItem.GlobalPosition = position;
+		worldItem.Quantity = quantity;
+		world.AddChild(worldItem);
 	}
 
-	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SyncPlayerAppearance(int peerId, Dictionary playerData)
+	private void OnPeerDisconnected(long id)
 	{
-		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
-		if (prefManager != null)
+		int peerId = (int)id;
+		GD.Print($"[GameManager] Peer {peerId} disconnected");
+		_connectedPeers.Remove(peerId);
+		_playerNames.Remove(peerId);
+		_peerCharacters.Remove(peerId);
+		
+		if (Multiplayer.IsServer())
 		{
-			prefManager.Call("set_peer_character_data", peerId, playerData);
-		}
-		else
-		{
-			GD.PrintErr("[GameManager] PreferenceManager not found in SyncPlayerAppearance");
+			PlayerCount = Math.Max(1, PlayerCount - 1);
+			EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
+			EmitSignal(SignalName.PlayersUpdated);
 		}
 		
-		if (playerData.ContainsKey("name"))
-		{
-			var playerName = (string)playerData["name"];
-			if (!string.IsNullOrEmpty(playerName))
-				_playerNames[peerId] = playerName;
-		}
+		EmitSignal(SignalName.PlayerLeft, peerId);
 		
-		CallDeferred(MethodName.ApplyAppearanceDeferred, peerId, playerData);
-	}
-
-	private void ApplyAppearanceDeferred(int peerId, Dictionary playerData)
-	{
 		var world = GetWorld();
 		if (world != null)
 		{
-			var player = world.GetNodeOrNull(peerId.ToString());
-			if (player != null)
+			var playerNode = world.GetNodeOrNull(peerId.ToString());
+			if (playerNode != null)
 			{
-				var spriteSystem = player.GetNodeOrNull("SpriteSystem");
-				if (spriteSystem != null)
-					spriteSystem.Call("ReloadAppearance");
-					
-				if (playerData.ContainsKey("name"))
-				{
-					var playerName = (string)playerData["name"];
-					if (!string.IsNullOrEmpty(playerName))
-						player.Call("SetPlayerName", playerName);
-				}
-			}
-			else
-			{
-				GetTree().CreateTimer(0.1).Timeout += () => ApplyAppearanceDeferred(peerId, playerData);
+				playerNode.QueueFree();
+				GD.Print($"[GameManager] Removed player node for disconnected peer {peerId}");
 			}
 		}
+	}
+
+	private void OnConnectedToServer()
+	{
+		int peerId = Multiplayer.GetUniqueId();
+		GD.Print($"[GameManager] Connected to server with peer ID: {peerId}");
+		_isConnected = true;
+		_connectedPeers.Add(peerId);
+		
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		if (prefManager != null)
+		{
+			var characterData = (Dictionary)prefManager.Call("get_character_data");
+			if (!characterData.ContainsKey("peer_id"))
+				characterData["peer_id"] = peerId;
+			
+			_peerCharacters[peerId] = characterData;
+			prefManager.Call("set_peer_character_data", peerId, characterData);
+			
+			RpcId(1, MethodName.RegisterCharacterData, peerId, characterData);
+		}
+		
+		SetGameState(GameState.Lobby);
+	}
+
+	private void OnConnectionFailed()
+	{
+		GD.PrintErr("[GameManager] Connection to server failed");
+		EmitSignal(SignalName.ConnectionFailed);
+		_isConnected = false;
+		LeaveGame();
+	}
+
+	private void OnServerDisconnected()
+	{
+		GD.Print("[GameManager] Disconnected from server");
+		_isConnected = false;
+		_gameStarted = false;
+		LeaveGame();
+		GetTree().ChangeSceneToFile(MainLobbyScenePath);
+	}
+
+	public void LeaveGame()
+	{
+		GD.Print("[GameManager] Leaving game");
+		
+		if (_lobbyManager != null && _isHosting)
+		{
+			_lobbyManager.Call("UnregisterServer");
+		}
+		
+		if (_peer != null && _peer.GetConnectionStatus() != MultiplayerPeer.ConnectionStatus.Disconnected)
+		{
+			_peer.Close();
+		}
+		
+		Multiplayer.MultiplayerPeer = null;
+		
+		_connectedPeers.Clear();
+		_playerNames.Clear();
+		_peerCharacters.Clear();
+		_gameStarted = false;
+		_isHosting = false;
+		_isConnected = false;
+		PlayerCount = 0;
+		
+		if (_lobbyTimer != null)
+		{
+			_lobbyTimer.Stop();
+			_lobbyTimer.QueueFree();
+			_lobbyTimer = null;
+		}
+		
+		if (_lobbyUpdateTimer != null)
+		{
+			_lobbyUpdateTimer.Stop();
+			_lobbyUpdateTimer.QueueFree();
+			_lobbyUpdateTimer = null;
+		}
+		
+		SetGameState(GameState.Menu);
+		GD.Print("[GameManager] Game left successfully");
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SendChatMessage(int senderPeerId, string senderName, string message, string mode = "IC")
+	{
+		EmitSignal(SignalName.ChatMessageReceived, senderPeerId, senderName, message, mode);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -973,109 +819,96 @@ public partial class GameManager : Node
 		IngameTime = time;
 	}
 
-	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SendChatMessage(int senderPeerId, string senderName, string message, string mode = "IC")
-	{
-		if (Multiplayer.IsServer())
-		{
-			if (!ValidateRpcSender(senderPeerId) || !ValidateMessageRate(senderPeerId))
-				return;
-			
-			message = message.Trim();
-			if (string.IsNullOrEmpty(message) || message.Length > MAX_MESSAGE_LENGTH)
-				return;
-			
-			var actualName = _playerNames.ContainsKey(senderPeerId) ? _playerNames[senderPeerId] : $"Player {senderPeerId}";
-			Rpc(MethodName.BroadcastChatMessage, senderPeerId, actualName, message, mode);
-		}
-	}
-
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void BroadcastChatMessage(int senderPeerId, string senderName, string message, string mode)
+	private void SyncPlayerAppearance(int peerId, Dictionary playerData)
 	{
-		EmitSignal(SignalName.ChatMessageReceived, senderPeerId, senderName, message, mode);
-	}
-
-	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SyncLobbyStateToAll(float timeLeft, bool paused, string videoUid)
-	{
-		LobbyTimeLeft = timeLeft;
-		LobbyTimerPaused = paused;
-		CurrentVideoUid = videoUid;
-		EmitSignal(SignalName.LobbyStateSynced, timeLeft, paused, videoUid);
-	}
-
-	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void BroadcastMediaSync(string type, string path, int loops, float volume)
-	{
-		CurrentMediaType = type;
-		CurrentMediaPath = path;
-		CurrentMediaLoops = loops;
-		CurrentMediaVolume = volume;
-		if (string.Equals(type, "music", StringComparison.OrdinalIgnoreCase))
+		_peerCharacters[peerId] = playerData;
+		
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		if (prefManager != null)
 		{
-			CurrentMusicName = System.IO.Path.GetFileName(path);
+			prefManager.Call("set_peer_character_data", peerId, playerData);
 		}
-		EmitSignal(SignalName.MediaSyncReceived, type, path, loops, volume);
-	}
-
-	public void SyncMedia(string type, string path, int loops = 0, float volume = 0.5f)
-	{
-		if (Multiplayer.IsServer())
+		
+		if (playerData.ContainsKey("name"))
 		{
-			Rpc(MethodName.BroadcastMediaSync, type, path, loops, volume);
+			var playerName = (string)playerData["name"];
+			if (!string.IsNullOrEmpty(playerName))
+				_playerNames[peerId] = playerName;
 		}
-	}
-
-	public void ToggleLobbyPause()
-	{
-		if (!Multiplayer.IsServer()) return;
-		if (_lobbyTimer == null) return;
-		LobbyTimerPaused = !LobbyTimerPaused;
-		_lobbyTimer.Paused = LobbyTimerPaused;
-		Rpc(MethodName.SyncLobbyStateToAll, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
-	}
-
-	public void ForceStartFromLobby()
-	{
-		if (!Multiplayer.IsServer()) return;
-		if (_gameStarted) return;
-		StartGame();
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequestCurrentVideo()
+	private void RequestSendChat(int senderPeerId, string message, string mode = "IC")
 	{
 		if (!Multiplayer.IsServer()) return;
-		var requesterId = Multiplayer.GetRemoteSenderId();
-		if (requesterId <= 0) return;
-		if (!string.IsNullOrEmpty(CurrentVideoUid))
+		if (!ValidateRpcSender(senderPeerId)) return;
+		if (!ValidateChatMessage(senderPeerId, message)) return;
+		
+		SendChatFromPlayer(senderPeerId, message, mode);
+	}
+
+	private bool ValidateRpcSender(int claimedSenderId)
+	{
+		int actualSenderId = Multiplayer.GetRemoteSenderId();
+		
+		if (actualSenderId != claimedSenderId)
 		{
-			RpcId(requesterId, MethodName.ReceiveVideoSync, CurrentVideoUid, 0.0f);
+			GD.PrintErr($"[GameManager] RPC sender mismatch! Claimed: {claimedSenderId}, Actual: {actualSenderId}");
+			return false;
 		}
+		
+		return true;
+	}
+
+	private bool ValidateChatMessage(int peerId, string message)
+	{
+		if (string.IsNullOrWhiteSpace(message) || message.Length > MAX_MESSAGE_LENGTH)
+			return false;
+		
+		long currentTime = (long)Time.GetTicksMsec();
+		
+		if (!_messageTimestamps.ContainsKey(peerId))
+			_messageTimestamps[peerId] = new System.Collections.Generic.List<long>();
+		
+		var timestamps = _messageTimestamps[peerId];
+		timestamps.RemoveAll(t => currentTime - t > 10000);
+		
+		if (timestamps.Count >= MAX_MESSAGES_PER_10_SECONDS)
+		{
+			GD.PrintErr($"[GameManager] Peer {peerId} exceeded message rate limit");
+			return false;
+		}
+		
+		if (timestamps.Count > 0 && currentTime - timestamps[timestamps.Count - 1] < MESSAGE_COOLDOWN_MS)
+		{
+			GD.PrintErr($"[GameManager] Peer {peerId} sending messages too quickly");
+			return false;
+		}
+		
+		timestamps.Add(currentTime);
+		return true;
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ReceiveVideoSync(string videoUid, float positionSeconds)
+	private void SyncLobbyState(float timeLeft, bool paused, string videoUid)
 	{
-		CurrentVideoUid = videoUid;
-		if (!string.IsNullOrEmpty(videoUid))
-			EmitSignal(SignalName.MediaSyncReceived, "video", videoUid, 0, 0.5f);
-	}
-
-	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SyncStatusInfo(string mapName, string gamemode, int currentPlayers, string musicName = "", float timeLeft = -1.0f, bool paused = false)
-	{
-		if (!string.IsNullOrEmpty(mapName))
-			CurrentMap = mapName;
-		if (!string.IsNullOrEmpty(gamemode))
-			Gamemode = gamemode;
-		PlayerCount = currentPlayers;
-		if (!string.IsNullOrEmpty(musicName))
-			CurrentMusicName = musicName;
-		if (timeLeft >= 0.0f)
+		if (_lobbyTimer != null && !_gameStarted)
+		{
+			_lobbyTimer.Stop();
+			_lobbyTimer.WaitTime = timeLeft;
+			if (!paused)
+				_lobbyTimer.Start();
+			else
+				_lobbyTimer.Paused = true;
+			
+			CurrentVideoUid = videoUid;
+		}
+		
+		if (timeLeft > 0)
 			LobbyTimeLeft = timeLeft;
 		LobbyTimerPaused = paused;
+		EmitSignal(SignalName.LobbyStateSynced, timeLeft, paused, videoUid);
 		EmitSignal(SignalName.PlayersUpdated);
 		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
 	}
@@ -1096,7 +929,7 @@ public partial class GameManager : Node
 
 	public void SendChatFromPlayer(int senderPeerId, string message, string mode = "IC")
 	{
-		var senderName = _playerNames.ContainsKey(senderPeerId) ? _playerNames[senderPeerId] : $"Player {senderPeerId}";
+		var senderName = GetPlayerNameForMode(senderPeerId, mode);
 		Rpc(MethodName.SendChatMessage, senderPeerId, senderName, message, mode);
 	}
 
@@ -1115,248 +948,215 @@ public partial class GameManager : Node
 
 	private bool ValidateConnectionRate(int id)
 	{
-		var currentTime = (long)Time.GetTicksMsec();
-		if (_connectionAttempts.TryGetValue(id, out var lastAttempt))
+		long currentTime = (long)Time.GetTicksMsec();
+		const long TIME_WINDOW_MS = 60000;
+		
+		if (_connectionAttempts.ContainsKey(id))
 		{
-			if (currentTime - lastAttempt < 1000)
+			long lastAttempt = _connectionAttempts[id];
+			if (currentTime - lastAttempt < TIME_WINDOW_MS)
+			{
 				return false;
+			}
 		}
+		
 		_connectionAttempts[id] = currentTime;
 		return true;
 	}
 
-	private bool ValidateRpcSender(int senderId)
+	public void SendLocalChatMessage(string message, string mode = "IC")
 	{
-		var remote = Multiplayer.GetRemoteSenderId();
-		if (remote == 0 && senderId == Multiplayer.GetUniqueId())
-			return true;
-		return remote == senderId;
-	}
-
-	private bool ValidateMessageRate(int peerId)
-	{
-		var currentTime = (long)Time.GetTicksMsec();
-		if (!_messageTimestamps.ContainsKey(peerId))
-			_messageTimestamps[peerId] = new System.Collections.Generic.List<long>();
+		int peerId = Multiplayer.GetUniqueId();
+		if (peerId == 0) peerId = 1;
 		
-		var timestamps = _messageTimestamps[peerId];
-		
-		if (timestamps.Count > 0 && currentTime - timestamps[timestamps.Count - 1] < MESSAGE_COOLDOWN_MS)
-			return false;
-		
-		timestamps.RemoveAll(t => currentTime - t >= 10000);
-		
-		if (timestamps.Count >= MAX_MESSAGES_PER_10_SECONDS)
-			return false;
-		
-		timestamps.Add(currentTime);
-		return true;
-	}
-
-	public Dictionary GetPeerCharacterData(int peerId)
-	{
-		return _peerCharacters.ContainsKey(peerId) ? _peerCharacters[peerId] : new Dictionary();
-	}
-
-	public void SetPeerCharacterData(int peerId, Dictionary data)
-	{
-		_peerCharacters[peerId] = data;
-	}
-
-	public void PushLocalAppearanceUpdate()
-	{
-		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
-		if (prefManager == null)
-			return;
-
-		var myId = Multiplayer.GetUniqueId();
-		if (myId <= 0)
-			myId = 1;
-
-		var playerData = (Dictionary)prefManager.Call("get_character_data");
-		if (playerData == null || playerData.Count == 0)
-			return;
-
-		playerData["peer_id"] = myId;
-		_peerCharacters[myId] = playerData;
-		prefManager.Call("set_peer_character_data", myId, playerData);
-
-		if (playerData.ContainsKey("name"))
-		{
-			var playerName = playerData["name"].ToString();
-			if (string.IsNullOrWhiteSpace(playerName))
-				playerName = $"Player {myId}";
-			_playerNames[myId] = playerName;
-		}
-
-		if (!Multiplayer.HasMultiplayerPeer())
-			return;
-
 		if (Multiplayer.IsServer())
 		{
-			Rpc(MethodName.SyncPlayerAppearance, myId, playerData);
-			CallDeferred(MethodName.ApplyAppearanceDeferred, myId, playerData);
+			if (!ValidateChatMessage(peerId, message)) return;
+			SendChatFromPlayer(peerId, message, mode);
 		}
 		else
 		{
-			RpcId(1, MethodName.ReceivePlayerAppearance, myId, playerData);
+			RpcId(1, MethodName.RequestSendChat, peerId, message, mode);
 		}
 	}
-
-	public Godot.Collections.Array GetSlotNames()
+	private string GetPlayerNameForMode(int peerId, string mode)
 	{
-		var names = new Godot.Collections.Array();
-		for (int i = 0; i < SLOT_COUNT; i++)
+		if (mode == "OOC" || mode == "LOOC")
 		{
-			var data = LoadSlot(i);
-			if (data.Count > 0 && data.ContainsKey("name"))
-				names.Add((string)data["name"]);
-			else
-				names.Add($"Slot {i + 1}");
-		}
-		return names;
-	}
-
-	public Dictionary LoadSlot(int slot)
-	{
-		var dir = _charactersDirOverride ?? CharactersDir;
-		var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		foreach (var letter in letters)
-		{
-			var charData = LoadCharacter(letter.ToString(), slot);
-			if (charData.Count > 0)
-				return charData;
-		}
-		
-		var otherData = LoadCharacter("Other", slot);
-		if (otherData.Count > 0)
-			return otherData;
-		
-		return new Dictionary();
-	}
-
-	public void SaveSlot(int slot, Dictionary characterData)
-	{
-		var name = characterData.ContainsKey("name") ? (string)characterData["name"] : "Unnamed";
-		if (string.IsNullOrEmpty(name))
-			name = "Unnamed";
-		var firstLetter = name.Substring(0, 1).ToUpper();
-		if (firstLetter.Length == 0 || !char.IsLetter(firstLetter[0]))
-			firstLetter = "Other";
-		SaveCharacter(firstLetter, slot, characterData);
-	}
-
-	private Dictionary LoadCharacter(string letter, int slot)
-	{
-		var folderPath = (_charactersDirOverride ?? CharactersDir) + letter + "/";
-		if (!DirAccess.DirExistsAbsolute(folderPath))
-			return new Dictionary();
-		
-		using var dir = DirAccess.Open(folderPath);
-		if (dir == null)
-			return new Dictionary();
-		
-		dir.ListDirBegin();
-		var fileName = dir.GetNext();
-		while (!string.IsNullOrEmpty(fileName))
-		{
-			if (fileName.EndsWith($"_slot{slot}.json"))
+			var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
+			if (accountManager != null && accountManager.IsLoggedIn())
 			{
-				var filePath = folderPath + fileName;
-				using var file = FileAccess.Open(filePath, FileAccess.ModeFlags.Read);
-				if (file != null)
-				{
-					var jsonString = file.GetAsText();
-					var json = new Json();
-					if (json.Parse(jsonString) == Error.Ok)
-					{
-						dir.ListDirEnd();
-						var data = json.Data.AsGodotDictionary();
-						if (!data.ContainsKey("name"))
-							data["name"] = fileName.Replace($"_slot{slot}.json", "");
-						return data;
-					}
-				}
+				var discordTag = accountManager.GetDiscordTag();
+				if (!string.IsNullOrEmpty(discordTag))
+					return discordTag;
 			}
-			fileName = dir.GetNext();
 		}
-		dir.ListDirEnd();
-		return new Dictionary();
-	}
-
-	private void SaveCharacter(string letter, int slot, Dictionary characterData)
-	{
-		letter = letter.Substring(0, 1).ToUpper();
-		if (letter.Length == 0 || !char.IsLetter(letter[0]))
-			letter = "Other";
 		
-		var folderPath = (_charactersDirOverride ?? CharactersDir) + letter + "/";
-		if (!DirAccess.DirExistsAbsolute(folderPath))
+		var charData = GetPeerCharacterData(peerId);
+		if (charData.ContainsKey("name"))
 		{
-			var error = DirAccess.MakeDirRecursiveAbsolute(folderPath);
-			if (error != Error.Ok)
-				return;
+			var playerName = (string)charData["name"];
+			if (!string.IsNullOrEmpty(playerName))
+				return playerName;
 		}
 		
-		characterData["_slot"] = slot;
-		characterData["_saved_at"] = Time.GetDatetimeStringFromSystem();
-		
-		var safeName = characterData.ContainsKey("name") ? ((string)characterData["name"]).Replace("/", "_").Replace("\\", "_") : "Unnamed";
-		var filePath = folderPath + safeName + $"_slot{slot}.json";
-		var jsonString = Json.Stringify(characterData, "\t");
-		using var file = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
-		if (file != null)
-			file.StoreString(jsonString);
+		if (_playerNames.ContainsKey(peerId))
+			return _playerNames[peerId];
+			
+		return $"Player {peerId}";
 	}
-
-	public const int SLOT_COUNT = 10;
-	
-	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	public async void RequestSpawnItem(string itemScenePath, Vector2 position, int quantity = 1)
+	public string GetPlayerName(int peerId)
 	{
-		if (!Multiplayer.IsServer()) return;
-		
-		var scene = GD.Load<PackedScene>(itemScenePath);
-		if (scene == null) return;
-		
-		var worlds = GetTree().GetNodesInGroup("World");
-		if (worlds.Count == 0) return;
-		
-		var world = worlds[0];
-		var item = scene.Instantiate<WorldItem>();
-		item.Quantity = quantity;
-		item.PrepareSpawn(position);
-		world.AddChild(item, true);
-		await ToSignal(GetTree(), "process_frame");
-		item.InitAtPosition(position);
-	}
-
-	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	public async void RequestSpawnMob(Vector2 position, Dictionary characterData)
-	{
-		if (!Multiplayer.IsServer()) return;
-		
-		var playerScene = GD.Load<PackedScene>("uid://cj25bsb3ooj62");
-		if (playerScene == null) return;
-		
-		var worlds = GetTree().GetNodesInGroup("World");
-		if (worlds.Count == 0) return;
-		
-		var world = worlds[0];
-		var player = playerScene.Instantiate();
-		
-		// Grid-align the position
-		var gridX = Mathf.FloorToInt(position.X / 32) * 32 + 16;
-		var gridY = Mathf.FloorToInt(position.Y / 32) * 32 + 16;
-		var spawnPos = new Vector2(gridX, gridY);
-		
-		// Generate random character data if none provided
-		if (characterData == null || characterData.Count == 0)
+		if (!IsGameRunning())
 		{
-			characterData = GenerateRandomCharacterData();
+			var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
+			if (accountManager != null && accountManager.IsLoggedIn())
+			{
+				var discordTag = accountManager.GetDiscordTag();
+				if (!string.IsNullOrEmpty(discordTag))
+					return discordTag;
+			}
 		}
 		
-		// Use the character data's name if provided, otherwise generate a proper name
+		var charData = GetPeerCharacterData(peerId);
+		if (charData.ContainsKey("name"))
+		{
+			var playerName = (string)charData["name"];
+			if (!string.IsNullOrEmpty(playerName))
+				return playerName;
+		}
+		
+		if (_playerNames.ContainsKey(peerId))
+			return _playerNames[peerId];
+			
+		return $"Player {peerId}";
+	}
+
+	public void RefreshPlayerName()
+	{
+		int peerId = Multiplayer.GetUniqueId();
+		if (peerId == 0) peerId = 1;
+		
+		var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
+		if (accountManager != null && accountManager.IsLoggedIn())
+		{
+			var discordTag = accountManager.GetDiscordTag();
+			if (!string.IsNullOrEmpty(discordTag))
+			{
+				_playerNames[peerId] = discordTag;
+				GD.Print($"[GameManager] Refreshed player name to: {discordTag}");
+			}
+		}
+	}
+
+	private Node GetWorld()
+	{
+		var world = GetTree().GetFirstNodeInGroup("World");
+		if (world != null) return world;
+		
+		var communications = GetTree().Root.GetNodeOrNull<Control>("Communications");
+		if (communications == null) return null;
+		
+		var subviewport = communications.GetNodeOrNull<SubViewportContainer>("HSplitContainer/SubViewportContainer");
+		if (subviewport == null) return null;
+		
+		var viewport = subviewport.GetNodeOrNull<SubViewport>("SubViewport");
+		if (viewport == null || viewport.GetChildCount() == 0) return null;
+		
+		return viewport.GetChild(0);
+	}
+
+	public void SpawnAllPlayers()
+	{
+		if (!Multiplayer.IsServer())
+		{
+			GD.PrintErr("[GameManager] SpawnAllPlayers can only be called on server");
+			return;
+		}
+		
+		GD.Print("[GameManager] Spawning all players...");
+		var world = GetWorld();
+		
+		if (world == null)
+		{
+			GD.PrintErr("[GameManager] World not found! Cannot spawn players.");
+			return;
+		}
+		
+		var spawnPositions = new Vector2[] {
+			new(2 * 32, 2 * 32),
+			new(3 * 32, 3 * 32),
+			new(1 * 32, 3 * 32),
+			new(3 * 32, 1 * 32)
+		};
+		
+		int spawnIndex = 0;
+		foreach (int peerId in _connectedPeers)
+		{
+			var spawnPos = spawnPositions[spawnIndex % spawnPositions.Length];
+			SpawnPlayer(peerId, spawnPos);
+			spawnIndex++;
+		}
+	}
+
+	private void SpawnPlayer(int peerId, Vector2 position)
+	{
+		var world = GetWorld();
+		if (world == null || PlayerScene == null) return;
+		
+		var player = PlayerScene.Instantiate();
+		player.Name = peerId.ToString();
+		player.Set("Position", position);
+		
+		if (_peerCharacters.ContainsKey(peerId))
+		{
+			var charData = _peerCharacters[peerId];
+			if (charData.ContainsKey("name"))
+			{
+				var playerName = (string)charData["name"];
+				if (!string.IsNullOrEmpty(playerName))
+					_playerNames[peerId] = playerName;
+			}
+		}
+		
+		world.AddChild(player, true);
+	}
+
+	public async void SpawnPlayer(int peerId, Vector2 spawnPos, Dictionary characterData = null)
+	{
+		if (!Multiplayer.IsServer())
+		{
+			GD.PrintErr("[GameManager] SpawnPlayer can only be called on server");
+			return;
+		}
+		
+		var world = GetWorld();
+		if (world == null)
+		{
+			GD.PrintErr("[GameManager] World not found!");
+			return;
+		}
+		
+		var existingPlayer = world.GetNodeOrNull(peerId.ToString());
+		if (existingPlayer != null)
+		{
+			GD.Print($"[GameManager] Player {peerId} already exists, skipping spawn");
+			return;
+		}
+		
+		if (PlayerScene == null)
+		{
+			GD.PrintErr("[GameManager] PlayerScene is null!");
+			return;
+		}
+		
+		var player = PlayerScene.Instantiate();
+		if (player == null)
+		{
+			GD.PrintErr("[GameManager] Failed to instantiate player scene!");
+			return;
+		}
+		
 		string mobName = "DebugMob_" + GetUniqueMobId();
 		if (characterData != null && characterData.ContainsKey("name"))
 		{
@@ -1367,13 +1167,10 @@ public partial class GameManager : Node
 		player.Name = mobName;
 		player.Set("Position", spawnPos);
 		
-		// Apply character data if provided
 		if (characterData != null && characterData.Count > 0)
 		{
-			// Store character data for the mob
 			player.Set("CharacterData", characterData);
 			
-			// Set player name if provided
 			if (characterData.ContainsKey("name"))
 			{
 				var playerName = (string)characterData["name"];
@@ -1385,7 +1182,6 @@ public partial class GameManager : Node
 		world.AddChild(player, true);
 		await ToSignal(GetTree(), "process_frame");
 		
-		// Initialize the mob properly
 		if (player.HasMethod("Initialize"))
 			player.Call("Initialize");
 	}
@@ -1512,9 +1308,276 @@ public partial class GameManager : Node
 	}
 
 	private int _mobIdCounter = 1000;
-	private int GetUniqueMobId()
+	public int GetUniqueMobId()
 	{
 		return _mobIdCounter++;
+	}
+
+	public void UpdatePlayerCount()
+	{
+		if (_isHosting || _isConnected)
+		{
+			PlayerCount = Multiplayer.GetPeers().Length + 1;
+			EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
+			GD.Print($"[GameManager] Player count: {PlayerCount}/{MaxPlayers}");
+		}
+	}
+
+	public void SyncMedia(string type, string path, int loops = 0, float volume = 0.5f)
+	{
+		if (Multiplayer.IsServer())
+		{
+			Rpc(MethodName.BroadcastMediaSync, type, path, loops, volume);
+		}
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void BroadcastMediaSync(string type, string path, int loops, float volume)
+	{
+		CurrentMediaType = type;
+		CurrentMediaPath = path;
+		CurrentMediaLoops = loops;
+		CurrentMediaVolume = volume;
+		if (string.Equals(type, "music", StringComparison.OrdinalIgnoreCase))
+		{
+			CurrentMusicName = System.IO.Path.GetFileName(path);
+		}
+		EmitSignal(SignalName.MediaSyncReceived, type, path, loops, volume);
+	}
+
+	public void ToggleLobbyPause()
+	{
+		if (!Multiplayer.IsServer()) return;
+		if (_lobbyTimer == null) return;
+		LobbyTimerPaused = !LobbyTimerPaused;
+		_lobbyTimer.Paused = LobbyTimerPaused;
+		Rpc(MethodName.SyncLobbyState, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
+	}
+
+	public void ForceStartFromLobby()
+	{
+		if (!Multiplayer.IsServer()) return;
+		if (_gameStarted) return;
+		StartGame();
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void RequestCurrentVideo()
+	{
+		if (!Multiplayer.IsServer()) return;
+		var requesterId = Multiplayer.GetRemoteSenderId();
+		if (requesterId <= 0) return;
+		if (!string.IsNullOrEmpty(CurrentVideoUid))
+		{
+			RpcId(requesterId, MethodName.ReceiveVideoSync, CurrentVideoUid, 0.0f);
+		}
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void ReceiveVideoSync(string videoUid, float positionSeconds)
+	{
+		CurrentVideoUid = videoUid;
+		if (!string.IsNullOrEmpty(videoUid))
+			EmitSignal(SignalName.MediaSyncReceived, "video", videoUid, 0, 0.5f);
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SyncStatusInfo(string mapName, string gamemode, int currentPlayers, string musicName = "", float timeLeft = -1.0f, bool paused = false)
+	{
+		if (!string.IsNullOrEmpty(mapName))
+			CurrentMap = mapName;
+		if (!string.IsNullOrEmpty(gamemode))
+			Gamemode = gamemode;
+		PlayerCount = currentPlayers;
+		if (!string.IsNullOrEmpty(musicName))
+			CurrentMusicName = musicName;
+		if (timeLeft >= 0.0f)
+			LobbyTimeLeft = timeLeft;
+		LobbyTimerPaused = paused;
+		EmitSignal(SignalName.PlayersUpdated);
+		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
+	}
+
+	public const string CHARACTERS_DIR = "user://characters/";
+	public const int SLOT_COUNT = 10;
+
+	public Dictionary LoadSlot(int slot)
+	{
+		var dir = _charactersDirOverride ?? CHARACTERS_DIR;
+		var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		
+		foreach (char letter in letters)
+		{
+			var folderPath = $"{dir}{letter}/";
+			if (!DirAccess.DirExistsAbsolute(folderPath))
+				continue;
+				
+			var dirAccess = DirAccess.Open(folderPath);
+			if (dirAccess == null)
+				continue;
+				
+			dirAccess.ListDirBegin();
+			string fileName = dirAccess.GetNext();
+			
+			while (fileName != "")
+			{
+				if (fileName.EndsWith($"_slot{slot}.json"))
+				{
+					var filePath = folderPath + fileName;
+					if (FileAccess.FileExists(filePath))
+					{
+						using var file = FileAccess.Open(filePath, FileAccess.ModeFlags.Read);
+						if (file != null)
+						{
+							var jsonString = file.GetAsText();
+							var json = new Json();
+							if (json.Parse(jsonString) == Error.Ok)
+							{
+								dirAccess.ListDirEnd();
+								return json.Data.AsGodotDictionary();
+							}
+						}
+					}
+				}
+				fileName = dirAccess.GetNext();
+			}
+			dirAccess.ListDirEnd();
+		}
+		
+		var otherFolder = $"{dir}Other/";
+		if (DirAccess.DirExistsAbsolute(otherFolder))
+		{
+			var dirAccess = DirAccess.Open(otherFolder);
+			if (dirAccess != null)
+			{
+				dirAccess.ListDirBegin();
+				string fileName = dirAccess.GetNext();
+				
+				while (fileName != "")
+				{
+					if (fileName.EndsWith($"_slot{slot}.json"))
+					{
+						var filePath = otherFolder + fileName;
+						if (FileAccess.FileExists(filePath))
+						{
+							using var file = FileAccess.Open(filePath, FileAccess.ModeFlags.Read);
+							if (file != null)
+							{
+								var jsonString = file.GetAsText();
+								var json = new Json();
+								if (json.Parse(jsonString) == Error.Ok)
+								{
+									dirAccess.ListDirEnd();
+									return json.Data.AsGodotDictionary();
+								}
+							}
+						}
+					}
+					fileName = dirAccess.GetNext();
+				}
+				dirAccess.ListDirEnd();
+			}
+		}
+		
+		return new Dictionary();
+	}
+
+	public void SaveSlot(int slot, Dictionary characterData)
+	{
+		var data = characterData.Duplicate();
+		data["_slot"] = slot;
+		
+		var name = data.ContainsKey("name") ? data["name"].ToString() : "Unnamed";
+		if (string.IsNullOrEmpty(name))
+			name = "Unnamed";
+			
+		var firstLetter = name.Substring(0, 1).ToUpper();
+		if (firstLetter.Length == 0 || !char.IsLetter(firstLetter[0]))
+			firstLetter = "Other";
+			
+		SaveCharacter(firstLetter, slot, data);
+	}
+
+	public void SaveCharacter(string letter, int slot, Dictionary characterData)
+	{
+		var dir = _charactersDirOverride ?? CHARACTERS_DIR;
+		var folderPath = $"{dir}{letter}/";
+		
+		if (!DirAccess.DirExistsAbsolute(folderPath))
+			DirAccess.MakeDirRecursiveAbsolute(folderPath);
+		
+		var name = characterData.ContainsKey("name") ? characterData["name"].ToString() : "Unnamed";
+		if (string.IsNullOrEmpty(name))
+			name = "Unnamed";
+			
+		var sanitizedName = name.Replace(" ", "_").Replace("/", "_").Replace("\\", "_");
+		var fileName = $"{sanitizedName}_slot{slot}.json";
+		var filePath = folderPath + fileName;
+		
+		var existingFiles = new System.Collections.Generic.List<string>();
+		var dirAccess = DirAccess.Open(folderPath);
+		if (dirAccess != null)
+		{
+			dirAccess.ListDirBegin();
+			string file = dirAccess.GetNext();
+			while (file != "")
+			{
+				if (file.EndsWith($"_slot{slot}.json") && file != fileName)
+					existingFiles.Add(folderPath + file);
+				file = dirAccess.GetNext();
+			}
+			dirAccess.ListDirEnd();
+		}
+		
+		foreach (var oldFile in existingFiles)
+		{
+			DirAccess.RemoveAbsolute(oldFile);
+		}
+		
+		using var saveFile = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
+		if (saveFile != null)
+		{
+			var jsonString = Json.Stringify(characterData);
+			saveFile.StoreString(jsonString);
+			GD.Print($"[GameManager] Character saved to {filePath}");
+		}
+	}
+
+	public Dictionary load_player_prefs()
+	{
+		var prefsPath = (_charactersDirOverride ?? CHARACTERS_DIR) + "player_prefs.json";
+		
+		if (FileAccess.FileExists(prefsPath))
+		{
+			using var file = FileAccess.Open(prefsPath, FileAccess.ModeFlags.Read);
+			if (file != null)
+			{
+				var jsonString = file.GetAsText();
+				var json = new Json();
+				if (json.Parse(jsonString) == Error.Ok)
+				{
+					return json.Data.AsGodotDictionary();
+				}
+			}
+		}
+		
+		return new Dictionary();
+	}
+
+	public void save_player_prefs(Dictionary prefs)
+	{
+		var dir = _charactersDirOverride ?? CHARACTERS_DIR;
+		if (!DirAccess.DirExistsAbsolute(dir))
+			DirAccess.MakeDirRecursiveAbsolute(dir);
+			
+		var prefsPath = dir + "player_prefs.json";
+		
+		using var file = FileAccess.Open(prefsPath, FileAccess.ModeFlags.Write);
+		if (file != null)
+		{
+			var jsonString = Json.Stringify(prefs);
+			file.StoreString(jsonString);
+		}
 	}
 
 	public override void _ExitTree()

@@ -178,8 +178,8 @@ func get_player_name() -> String:
 		var char_data = pref_manager.get_character_data()
 		if char_data and char_data.has("name"):
 			return char_data["name"]
-	
-	return "Player " + str(multiplayer.get_unique_id())
+	var tag = AccountManager.GetDiscordTag();
+	return tag
 
 func show_input() -> void:
 	popup_centered()
