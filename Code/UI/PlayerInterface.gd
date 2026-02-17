@@ -40,40 +40,44 @@ var clothing_slots: Dictionary = {}
 var current_limb: String = "right_hand"
 
 func _ready() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	if get_tree() == null:
+		return
+
 	equipment_section.visible = false
 	lhighlight.visible = true
 	rhighlight.visible = false
-
 	visible = false
 
-	await get_tree().process_frame
-	await get_tree().process_frame
+	var tree = get_tree()
+	if tree == null:
+		return
 
-	var mobs = get_tree().get_nodes_in_group("Mob")
+	var mobs = tree.get_nodes_in_group("Mob")
 	for mob in mobs:
 		if mob.is_multiplayer_authority():
 			player = mob
 			break
 
 	if not player:
-		print("[PlayerInterface] No local player found yet, will retry")
-		await get_tree().create_timer(0.5).timeout
-		mobs = get_tree().get_nodes_in_group("Mob")
+		await tree.create_timer(0.5).timeout
+		tree = get_tree()
+		if tree == null:
+			return
+		mobs = tree.get_nodes_in_group("Mob")
 		for mob in mobs:
 			if mob.is_multiplayer_authority():
 				player = mob
 				break
 
 	if not player:
-		print("[PlayerInterface] Still no local player, hiding UI")
 		return
 
-	# Only show PUI for local player (authority)
 	if not player.is_multiplayer_authority():
-		print("[PlayerInterface] This is not the local player, hiding UI")
 		return
 
-	print("[PlayerInterface] Found local player: ", player.name)
 	visible = true
 	inventory = player.get_node_or_null("Inventory")
 	interaction = player.get_node_or_null("InteractionComponent")
@@ -81,16 +85,12 @@ func _ready() -> void:
 	if inventory:
 		if not inventory.InventoryChanged.is_connected(_update_ui):
 			inventory.InventoryChanged.connect(_update_ui)
-	else:
-		print("[PlayerInterface] Warning: Inventory not found for player ", player.name)
 
 	if interaction:
 		if not interaction.HandSwitched.is_connected(_on_hand_switched):
 			interaction.HandSwitched.connect(_on_hand_switched)
 		if not interaction.LimbSelected.is_connected(_on_limb_selected):
 			interaction.LimbSelected.connect(_on_limb_selected)
-	else:
-		print("[PlayerInterface] Warning: InteractionComponent not found for player ", player.name)
 
 	equipment_button.pressed.connect(func(): equipment_section.visible = !equipment_section.visible)
 	lhand.pressed.connect(func(): _switch_hand(0))
@@ -101,7 +101,6 @@ func _ready() -> void:
 	_setup_limb_selector()
 	_setup_status_effects()
 	_update_ui()
-	
 	_update_limb_selection_visuals("right_hand")
 
 	tree_exiting.connect(_cleanup_signals)
