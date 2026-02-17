@@ -452,32 +452,22 @@ public partial class GameManager : Node
 		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
 	}
 	
-	private void ReconnectRoundParticipant(int newPeerId, int accountId)
+	public void ReconnectRoundParticipant(int peerId, int accountId)
 	{
-		if (!Multiplayer.IsServer()) return;
+		if (!_roundParticipants.ContainsKey(accountId))
+			return;
 
-		var (savedPos, savedJob, savedData, nodeName) = _roundParticipants[accountId];
-		GD.Print($"[GameManager] Reconnecting account {accountId} as peer {newPeerId} at {savedPos}, job {savedJob}");
+		var (savedPos, savedJob, savedData, oldName) = _roundParticipants[accountId];
 
-		// Update peer mapping tables and character data before SpawnPlayer reads them.
-		_peerToAccount[newPeerId] = accountId;
-		_accountToPeer[accountId] = newPeerId;
-		_peerCharacters[newPeerId] = savedData;
-		_playerNames[newPeerId] = savedData.ContainsKey("name") ? savedData["name"].ToString() : $"Player{newPeerId}";
-
-		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
-		if (prefManager != null && prefManager.HasMethod("set_peer_character_data"))
-			prefManager.Call("set_peer_character_data", newPeerId, savedData);
-
-		// Remove the idle preserved node. It was added with add_child (not MultiplayerSpawner)
-		// so clients never received it — no need to sync its removal.
 		var world = GetTree().GetFirstNodeInGroup("World");
-		var idleNode = world?.GetNodeOrNull<Node2D>(nodeName);
-		idleNode?.QueueFree();
+		var oldNode = world?.GetNodeOrNull<Node2D>(oldName);
+		oldNode?.QueueFree();
 
-		// SpawnPlayer uses the normal MultiplayerSpawner path that every client understands.
-		// savedPos puts them back where they left off, savedData restores appearance.
-		SpawnPlayer(newPeerId, savedPos, savedJob);
+		_peerCharacters[peerId] = savedData;
+
+		SpawnPlayer(peerId, savedPos, savedJob);
+
+		_roundParticipants[accountId] = (savedPos, savedJob, savedData, peerId.ToString());
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -502,16 +492,13 @@ public partial class GameManager : Node
 	private void OnPeerDisconnected(long id)
 	{
 		var peerId = (int)id;
-		GD.Print($"[GameManager] Player {peerId} disconnected");
-		
 		_connectedPeers.Remove(peerId);
 		_lateJoiners.Remove(peerId);
 		PlayerCount = _connectedPeers.Count;
 
 		int accountId = _peerToAccount.ContainsKey(peerId) ? _peerToAccount[peerId] : 0;
 		_peerToAccount.Remove(peerId);
-		if (accountId > 0)
-			_accountToPeer.Remove(accountId);
+		if (accountId > 0) _accountToPeer.Remove(accountId);
 
 		if (_roundInProgress && accountId > 0 && _roundParticipants.ContainsKey(accountId))
 		{
@@ -521,25 +508,20 @@ public partial class GameManager : Node
 			{
 				var savedPos = playerNode.GlobalPosition;
 				var savedJob = _roundParticipants[accountId].job;
-				// Prefer the most recent peerCharacters data so appearance is preserved on reconnect.
 				var savedData = _peerCharacters.ContainsKey(peerId) ? _peerCharacters[peerId] : _roundParticipants[accountId].charData;
+
 				_roundParticipants[accountId] = (savedPos, savedJob, savedData, peerId.ToString());
 
 				playerNode.Set("disconnected_peer", true);
 
-				var inputNode = playerNode.GetNodeOrNull("InputComponent")
-					?? playerNode.GetNodeOrNull("PlayerInput")
-					?? playerNode.GetNodeOrNull("InputHandler");
-				if (inputNode != null)
-				{
-					inputNode.ProcessMode = ProcessModeEnum.Disabled;
-				}
+				var inputNode = playerNode.GetNodeOrNull("InputComponent") 
+								?? playerNode.GetNodeOrNull("PlayerInput") 
+								?? playerNode.GetNodeOrNull("InputHandler");
 
-				// Stay Sleeping so the character looks limp and unresponsive.
-				// HelpUp() will refuse to wake them while disconnected_peer is true.
+				if (inputNode != null) inputNode.ProcessMode = ProcessModeEnum.Disabled;
+
 				var stateSystem = playerNode.GetNodeOrNull<MobStateSystem>("MobStateSystem");
 				stateSystem?.SetState(MobState.Sleeping);
-				GD.Print($"[GameManager] Preserved disconnected account {accountId} at {savedPos} as {savedJob} (sleeping)");
 			}
 		}
 		else
@@ -554,7 +536,7 @@ public partial class GameManager : Node
 
 		_peerCharacters.Remove(peerId);
 		_playerNames.Remove(peerId);
-		
+
 		EmitSignal(SignalName.PlayerLeft, peerId);
 		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
 	}
@@ -621,7 +603,6 @@ public partial class GameManager : Node
 
 		if (_roundInProgress && accountId > 0 && _roundParticipants.ContainsKey(accountId))
 		{
-			GD.Print($"[GameManager] RegisterPlayer: account {accountId} reconnecting as peer {peerId}");
 			ReconnectRoundParticipant(peerId, accountId);
 			var reconnectName = _playerNames.ContainsKey(peerId) ? _playerNames[peerId] : $"Player{peerId}";
 			var reconnectData = _peerCharacters.ContainsKey(peerId) ? _peerCharacters[peerId] : new Dictionary();
@@ -647,21 +628,20 @@ public partial class GameManager : Node
 			RpcId(peerId, MethodName.NotifyLateJoiner);
 			Rpc(MethodName.BroadcastPlayerJoined, peerId, playerName);
 			EmitSignal(SignalName.PlayersUpdated);
-			GD.Print($"[GameManager] Late joiner detected: peer {peerId}, account {accountId}");
 			return;
 		}
 
 		var name = characterData.ContainsKey("name") ? (string)characterData["name"] : $"Player{peerId}";
 		_playerNames[peerId] = name;
-		
+
 		if (!characterData.ContainsKey("peer_id"))
 			characterData["peer_id"] = peerId;
 		_peerCharacters[peerId] = characterData;
-		
+
 		var pref = GetNodeOrNull<Node>("/root/PreferenceManager");
 		if (pref != null && pref.HasMethod("set_peer_character_data"))
 			pref.Call("set_peer_character_data", peerId, characterData);
-		
+
 		RpcId(peerId, MethodName.SyncLobbyState, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
 		Rpc(MethodName.BroadcastPlayerJoined, peerId, name);
 		EmitSignal(SignalName.PlayersUpdated);
@@ -1131,10 +1111,29 @@ public partial class GameManager : Node
 	public void SpawnPlayer(int peerId, Vector2 position, string jobName)
 	{
 		if (!Multiplayer.IsServer()) return;
-		
+
+		var world = GetTree().GetFirstNodeInGroup("World");
+		if (world == null) return;
+
+		var existing = world.GetNodeOrNull<Node2D>(peerId.ToString());
+		if (existing != null)
+		{
+			existing.SetMultiplayerAuthority(peerId);
+			existing.ProcessMode = ProcessModeEnum.Inherit;
+			var stateSystem = existing.GetNodeOrNull<MobStateSystem>("MobStateSystem");
+			stateSystem?.SetState(MobState.Standing);
+
+			int accountId = _peerToAccount.ContainsKey(peerId) ? _peerToAccount[peerId] : 0;
+			if (accountId > 0 && _roundParticipants.ContainsKey(accountId))
+				_roundParticipants[accountId] = (existing.GlobalPosition, jobName, _peerCharacters[peerId], peerId.ToString());
+
+			RpcId(peerId, MethodName.ClientSpawnConfirmed, peerId, existing.GlobalPosition, jobName, _peerCharacters[peerId]);
+			return;
+		}
+
 		var playerInstance = PlayerScene.Instantiate<Node2D>();
 		playerInstance.Name = peerId.ToString();
-		
+
 		var characterData = _peerCharacters.ContainsKey(peerId) ? _peerCharacters[peerId] : new Dictionary();
 		characterData["job"] = jobName;
 		if (!characterData.ContainsKey("peer_id"))
@@ -1146,25 +1145,21 @@ public partial class GameManager : Node
 		else if (playerInstance.Get("character_data").VariantType != Variant.Type.Nil)
 			playerInstance.Set("character_data", characterData);
 
-		var world = GetTree().GetFirstNodeInGroup("World");
-		if (world != null)
-		{
-			world.CallDeferred("add_child", playerInstance);
-			playerInstance.Set("global_position", position);
-		}
+		world.CallDeferred("add_child", playerInstance);
+		playerInstance.Set("global_position", position);
 
-		int accountId = _peerToAccount.ContainsKey(peerId) ? _peerToAccount[peerId] : 0;
-		if (accountId > 0)
-			_roundParticipants[accountId] = (position, jobName, characterData, peerId.ToString());
+		int accId = _peerToAccount.ContainsKey(peerId) ? _peerToAccount[peerId] : 0;
+		if (accId > 0)
+			_roundParticipants[accId] = (position, jobName, characterData, peerId.ToString());
 
 		if (peerId == Multiplayer.GetUniqueId())
 			ClientSpawnConfirmed(peerId, position, jobName, characterData);
 		else
 			RpcId(peerId, MethodName.ClientSpawnConfirmed, peerId, position, jobName, characterData);
-		
+
 		if (_lateJoiners.Contains(peerId))
 			_lateJoiners.Remove(peerId);
-		
+
 		GD.Print($"[GameManager] Spawned player {peerId} as {jobName} at {position}");
 	}
 	
