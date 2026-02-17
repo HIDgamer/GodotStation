@@ -40,7 +40,7 @@ func _ready() -> void:
 
 			GameManager.SyncMedia("video", random_screensaver, 0, 0.5)
 		else:
-			GameManager.rpc_id(1, "RequestCurrentVideo")
+			_request_video_when_ready.call_deferred()
 
 	audio_player.finished.connect(_on_audio_finished)
 	GameManager.MediaSyncReceived.connect(load_media)
@@ -51,6 +51,12 @@ func _ready() -> void:
 		GameManager.LobbyStateSynced.connect(_on_lobby_state_synced)
 
 	_animate_lobby_entrance()
+
+func _request_video_when_ready() -> void:
+	if multiplayer.multiplayer_peer != null and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+		GameManager.rpc_id(1, "RequestCurrentVideo")
+	else:
+		multiplayer.connected_to_server.connect(func(): GameManager.rpc_id(1, "RequestCurrentVideo"), CONNECT_ONE_SHOT)
 
 func _on_audio_finished() -> void:
 	if current_loops < music_loops:

@@ -31,16 +31,19 @@ extends Control
 @onready var music_options_popup: PopupPanel = $MusicOptionsPopup
 @onready var admin_spawn_popup: Window = $AdminSpawnPopup
 @onready var audio_manager: Node = $/root/AudioManager
+@onready var late_join_ui: Control = $LateJoinLobbyUI
 var text_input_instance = null
 var music_loops: int = 1
 var music_volume: float = 0.5
 var current_music_name: String = "None"
 var ingame_time: float = 0.0
 var game_started: bool = false
+var late_joiner_detected: bool = false
 
 var current_tab: String = ""
 
 func _ready() -> void:
+	add_to_group("Communications")
 	print("[Communications] _ready() called at ", Time.get_ticks_msec())
 	print("[Communications] multiplayer.is_server() = ", multiplayer.is_server())
 	print("[Communications] multiplayer.get_unique_id() = ", multiplayer.get_unique_id())
@@ -114,6 +117,66 @@ func _ready() -> void:
 		print("  - game_subviewport exists: YES, visible = ", game_subviewport.visible)
 	else:
 		print("  - game_subviewport exists: NO")
+
+func _on_late_joiner_transitioned(peer_id: int) -> void:
+	print("[Communications] Late joiner ", peer_id, " has spawned into the game")
+	
+	if peer_id == multiplayer.get_unique_id():
+		print("[Communications] This is me! Finalizing late join transition")
+		_finalize_late_join_transition()
+
+func _finalize_late_join_transition() -> void:
+	print("[Communications] Finalizing late join transition")
+	
+	if late_join_ui:
+		late_join_ui.visible = false
+	
+	if lobby_subviewport:
+		lobby_subviewport.visible = false
+		lobby_subviewport.set_process(false)
+		lobby_subviewport.set_physics_process(false)
+		print("[Communications] Lobby viewport hidden")
+	
+	if game_subviewport:
+		game_subviewport.visible = true
+		game_subviewport.set_process(true)
+		game_subviewport.set_physics_process(true)
+		print("[Communications] Game viewport shown")
+	
+	await get_tree().process_frame
+	
+	var subviewport: SubViewport = game_subviewport.get_node_or_null("SubViewport") as SubViewport
+	if subviewport and subviewport.get_child_count() > 0:
+		var world: Node = subviewport.get_child(0)
+		world.set_process(true)
+		world.set_physics_process(true)
+		subviewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+		print("[Communications] World enabled for late join")
+	
+	game_started = true
+	timer_label.text = ""
+	_hide_server_round_controls()
+	
+	var ingame_timer = get_node_or_null("IngameTimer")
+	if ingame_timer:
+		if ingame_timer.is_stopped():
+			ingame_timer.start()
+		print("[Communications] Ingame timer started")
+	
+	print("[Communications] Late join transition finalized")
+
+func show_late_join_ui() -> void:
+	if late_join_ui:
+		late_join_ui.visible = true
+		late_join_ui.mouse_filter = Control.MOUSE_FILTER_STOP
+		late_joiner_detected = true
+		print("[Communications] Late join UI shown")
+	else:
+		print("[Communications] ERROR: late_join_ui node not found at $LateJoinLobbyUI")
+
+func send_system_message(message: String) -> void:
+	if has_method("AddChatMessage"):
+		AddChatMessage(message, "System", "System")
 
 func _connect_gm_signal(signal_names: Array, target_callable: Callable) -> bool:
 	for signal_name in signal_names:
@@ -328,10 +391,26 @@ func _on_lobby_timer_timeout() -> void:
 	if multiplayer.is_server():
 		GameManager.ForceStartFromLobby()
 
+func _on_game_started() -> void:
+	print("[Communications] _on_game_started() called at ", Time.get_ticks_msec())
+	print("  - game_started before: ", game_started)
+	print("  - GameManager.IsGameRunning(): ", GameManager.IsGameRunning())
+	
+	var is_late_joiner = false
+	if GameManager.has_method("IsLateJoiner"):
+		is_late_joiner = GameManager.call("IsLateJoiner", multiplayer.get_unique_id())
+		print("  - Is late joiner: ", is_late_joiner)
+	
+	if is_late_joiner:
+		print("[Communications] This peer is a late joiner, UI will be shown separately")
+		return
+	
+	_transition_to_game()
+	print("  - game_started after: ", game_started)
+
 func _transition_to_game() -> void:
 	print("[Communications] _transition_to_game() called at ", Time.get_ticks_msec())
 	
-	# Verify we have the nodes
 	if not lobby_subviewport:
 		push_error("[Communications] lobby_subviewport is NULL! Path: $HSplitContainer/SubViewportContainer2")
 		print("  - ERROR: lobby_subviewport node not found!")
@@ -346,17 +425,14 @@ func _transition_to_game() -> void:
 	print("  - BEFORE: game_subviewport.visible = ", game_subviewport.visible)
 	print("  - BEFORE: game_started = ", game_started)
 	
-	# Hide lobby
 	lobby_subviewport.visible = false
 	lobby_subviewport.set_process(false)
 	lobby_subviewport.set_physics_process(false)
 	
-	# Show game
 	game_subviewport.visible = true
 	game_subviewport.set_process(true)
 	game_subviewport.set_physics_process(true)
 	
-	# Force update to ensure visibility change takes effect
 	await get_tree().process_frame
 	
 	print("  - AFTER setting visibility: lobby visible = ", lobby_subviewport.visible)
@@ -367,7 +443,6 @@ func _transition_to_game() -> void:
 		var world: Node = subviewport.get_child(0)
 		world.set_process(true)
 		world.set_physics_process(true)
-		# Enable proper updates for the game viewport
 		subviewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 		print("  - World found and enabled: ", world.name)
 	else:
@@ -387,6 +462,22 @@ func _transition_to_game() -> void:
 	print("  - FINAL: game_started = ", game_started)
 	print("  - FINAL: lobby visible = ", lobby_subviewport.visible)
 	print("  - FINAL: game visible = ", game_subviewport.visible)
+
+func _on_lobby_state_synced(time_left: float, paused: bool, _video_uid: String) -> void:
+	if lobby_timer:
+		lobby_timer.start(time_left)
+		lobby_timer.paused = paused
+	update_status_info()
+
+func _hide_server_round_controls() -> void:
+	var start_btn: Button = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/StartButton
+	var delay_btn: Button = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/DelayButton
+	if start_btn:
+		start_btn.visible = false
+		start_btn.disabled = true
+	if delay_btn:
+		delay_btn.visible = false
+		delay_btn.disabled = true
 
 func _on_admin_music_pressed() -> void:
 	if audio_manager:
@@ -485,6 +576,30 @@ func _on_media_selected(type: String, path: String) -> void:
 
 	GameManager.SyncMedia(type, synced_path, music_loops if type == "music" else 0, music_volume if type == "music" else 0.5)
 
+func _on_media_sync_received(type: String, path: String, loops: int, volume: float) -> void:
+	if path == "":
+		return
+
+	var lobby_viewport: SubViewport = lobby_subviewport.get_node_or_null("SubViewport") as SubViewport
+	if not lobby_viewport:
+		return
+	
+	if lobby_viewport.get_child_count() == 0:
+		return
+	
+	var lobby: Node = lobby_viewport.get_child(0)
+	if not lobby:
+		return
+	
+	if "load_media" in lobby:
+		if type == "music":
+			lobby.load_media(type, path, loops, volume)
+		else:
+			lobby.load_media(type, path)
+		if type == "music":
+			var path_parts = path.split("/")
+			current_music_name = path_parts[-1] if path_parts.size() > 0 else "Unknown"
+
 func _input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed("text") and text_input_instance:
 		if text_input_instance.visible:
@@ -542,6 +657,8 @@ func _add_chat_message(sender: String, message: String, mode: String = "IC") -> 
 			formatted_text = "[color=#FFB6C1][LOOC] %s: %s[/color]" % [sender, message]
 		"ME":
 			formatted_text = "[i]*%s %s*[/i]" % [sender, message]
+		"System":
+			formatted_text = "[color=#00FF00]> SYSTEM: %s[/color]" % [message]
 		_:
 			formatted_text = "[%s]: %s" % [sender, message]
 	
@@ -588,62 +705,6 @@ func sync_player_position_and_rotation(player_id: int, pos: Vector2, rot: float)
 		GameManager.rpc_id(1, "SyncPlayerTransform", player_id, pos, rot)
 	else:
 		GameManager.rpc("SyncPlayerTransform", player_id, pos, rot)
-
-func _on_game_started() -> void:
-	print("[Communications] _on_game_started() called at ", Time.get_ticks_msec())
-	print("  - game_started before: ", game_started)
-	print("  - GameManager.IsGameRunning(): ", GameManager.IsGameRunning())
-	_transition_to_game()
-	print("  - game_started after: ", game_started)
-
-func _on_lobby_state_synced(time_left: float, paused: bool, _video_uid: String) -> void:
-	if lobby_timer:
-		lobby_timer.start(time_left)
-		lobby_timer.paused = paused
-	update_status_info()
-
-func _hide_server_round_controls() -> void:
-	var start_btn: Button = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/StartButton
-	var delay_btn: Button = $HSplitContainer/CommunicationsPanel/VSplitContainer/Tabview/ServerButtons/DelayButton
-	if start_btn:
-		start_btn.visible = false
-		start_btn.disabled = true
-	if delay_btn:
-		delay_btn.visible = false
-		delay_btn.disabled = true
-
-func _on_media_sync_received(type: String, path: String, loops: int, volume: float) -> void:
-	if path == "":
-		return
-
-	var lobby_viewport: SubViewport = lobby_subviewport.get_node_or_null("SubViewport") as SubViewport
-	if not lobby_viewport:
-		return
-	
-	if lobby_viewport.get_child_count() == 0:
-		return
-	
-	var lobby: Node = lobby_viewport.get_child(0)
-	if not lobby:
-		return
-	
-	if "load_media" in lobby:
-		if type == "music":
-			lobby.load_media(type, path, loops, volume)
-		else:
-			lobby.load_media(type, path)
-		if type == "music":
-			var path_parts = path.split("/")
-			current_music_name = path_parts[-1] if path_parts.size() > 0 else "Unknown"
-
-func _on_late_joiner_transitioned() -> void:
-	print("[Communications] _on_late_joiner_transitioned() called at ", Time.get_ticks_msec())
-	print("  - This is the LateJoinerTransitioned signal handler")
-	# Ensure lobby is properly hidden for late joiners
-	lobby_subviewport.visible = false
-	lobby_subviewport.set_process(false)
-	_transition_to_game()
-	print("  - Late joiner transition complete")
 
 func _on_debug_timer_timeout() -> void:
 	var gm_is_running = false

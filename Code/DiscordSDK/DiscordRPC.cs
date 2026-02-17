@@ -305,7 +305,7 @@ public partial class DiscordRPC : Node
 		);
 	}
 
-	public void SetInGame(string serverName, int currentPlayers, int maxPlayers, string mapName = null, string characterClass = null, int characterLevel = 0)
+	public void SetInGame(string serverName, int currentPlayers, int maxPlayers, string mapName, string characterClass, int characterLevel = 0)
 	{
 		var mode = string.IsNullOrWhiteSpace(characterClass) ? "In Match" : characterClass;
 		var server = string.IsNullOrWhiteSpace(serverName) ? "Unknown Server" : serverName;
@@ -313,10 +313,20 @@ public partial class DiscordRPC : Node
 			state: $"{currentPlayers}/{maxPlayers} players",
 			details: $"{server} - {mode}",
 			largeImage: "godotstation",
-			largeText: mapName ?? "Unknown Map",
+			largeText: string.IsNullOrWhiteSpace(mapName) ? "Unknown Map" : mapName,
 			smallImage: !string.IsNullOrWhiteSpace(characterClass) ? "godotstation512" : null,
 			smallText: !string.IsNullOrWhiteSpace(characterClass) ? characterClass : null
 		);
+	}
+
+	public void SetInGame(string serverName, int currentPlayers, int maxPlayers, string mapName)
+	{
+		SetInGame(serverName, currentPlayers, maxPlayers, mapName, null, 0);
+	}
+
+	public void SetInGame(string serverName, int currentPlayers, int maxPlayers)
+	{
+		SetInGame(serverName, currentPlayers, maxPlayers, null, null, 0);
 	}
 
 	public void SetHosting(string serverName, int currentPlayers, int maxPlayers)

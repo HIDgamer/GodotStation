@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://dx25f1c373c3" path="res://Scenes/UI/MusicOptionsPopup.tscn" id="5_new"]
 [ext_resource type="PackedScene" uid="uid://cqsisjme86v7t" path="res://Scenes/UI/AdminSpawnPopup.tscn" id="6_spawn"]
 [ext_resource type="Theme" uid="uid://c8ckvl2v7xge" path="res://Assets/Themes/SciFiTheme.tres" id="6_theme"]
+[ext_resource type="PackedScene" uid="uid://oe04epmutypr" path="res://Scenes/UI/LateJoinLobbyUI.tscn" id="10_yv6a1"]
 [ext_resource type="Texture2D" uid="uid://dca55vfaclhk4" path="res://Assets/Effects/Particles/flare_32x32.png" id="space_particles"]
 
 [sub_resource type="Gradient" id="Gradient_space"]
@@ -103,8 +104,8 @@ grow_vertical = 2
 theme_override_colors/touch_dragger_color = Color(0.26293245, 0.26293245, 0.26293245, 1)
 theme_override_colors/touch_dragger_pressed_color = Color(0.06053035, 0.06053035, 0.060530342, 1)
 theme_override_colors/touch_dragger_hover_color = Color(0.26293245, 0.26293245, 0.26293245, 1)
-split_offsets = PackedInt32Array(175)
-split_offset = 175
+split_offsets = PackedInt32Array(386)
+split_offset = 386
 metadata/_edit_use_anchors_ = true
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="HSplitContainer" unique_id=972693736]
@@ -135,7 +136,7 @@ stretch = true
 disable_3d = true
 handle_input_locally = false
 canvas_item_default_texture_filter = 0
-size = Vector2i(1129, 1080)
+size = Vector2i(1340, 1080)
 size_2d_override_stretch = true
 render_target_update_mode = 4
 
@@ -571,3 +572,15 @@ vertical_scroll_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/CommunicationsPanel/VSplitContainer/Chat" unique_id=338239976]
 layout_mode = 2
+
+[node name="LateJoinLobbyUI" parent="." unique_id=912100902 instance=ExtResource("10_yv6a1")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = -1.0
+offset_right = 1341.0
+offset_bottom = 1080.0
+grow_horizontal = 1
+grow_vertical = 1
+mouse_filter = 0

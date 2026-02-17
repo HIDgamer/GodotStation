@@ -207,32 +207,12 @@ public partial class CollisionManager : Node
 	
 	private bool HandleGrabCollision(Mob actor, Mob target, Vector2I targetTile)
 	{
-		var actorTile = GetTileCoords(actor.Position);
-		var targetCurrentTile = GetTileCoords(target.Position);
-		
-		var actorSpriteSystem = actor.GetNodeOrNull<SpriteSystem>("SpriteSystem");
-		var actorFacing = actorSpriteSystem?.Direction ?? 0;
-		
-		Vector2I behindTile = actorTile;
-		switch (actorFacing)
-		{
-			case 0: behindTile = actorTile + Vector2I.Down; break;
-			case 1: behindTile = actorTile + Vector2I.Up; break;
-			case 2: behindTile = actorTile + Vector2I.Left; break;
-			case 3: behindTile = actorTile + Vector2I.Right; break;
-		}
-		
-		if (IsWalkable(behindTile))
-		{
-			var direction = behindTile - targetCurrentTile;
-			return HandleMovement(actor, target, direction, "grab");
-		}
-		return false;
+		return HandleHelpCollision(actor, target, targetTile);
 	}
 	
 	private bool HandleHarmCollision(Mob actor, Mob target, Vector2I targetTile)
 	{
-		return true;
+		return HandleHelpCollision(actor, target, targetTile);
 	}
 	
 	

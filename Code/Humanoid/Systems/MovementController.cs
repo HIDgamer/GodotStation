@@ -466,11 +466,25 @@ public partial class MovementController : Node2D, IMobSystem
 		}
 		else
 		{
-			// For non-authority clients, just update local sprites based on network data
 			_sprites.Call("SetDirection", _facing);
 			_sprites.Call("SetState", state);
 			_sprites.Call("SetPeeking", _isPeeking);
 		}
+	}
+	public void SetNetworkFacing(int direction)
+	{
+		_facing = direction;
+		_lastFacing = direction;
+	}
+	public void SetNetworkState(string state)
+	{
+		_isMoving = (state == "walking");
+		_lastState = state;
+	}
+	public void SetNetworkPeeking(bool peeking)
+	{
+		_isPeeking = peeking;
+		_lastPeeking = peeking;
 	}
 	
 	private void BroadcastTransform()

@@ -25,8 +25,17 @@ public partial class NetworkManager : Node
 		Multiplayer.PeerDisconnected += OnPeerLeft;
 	}
 
+	public override void _ExitTree()
+	{
+		Cleanup();
+	}
+
 	public override void _Process(double delta)
 	{
+		// Skip processing if multiplayer peer is not set up yet
+		if (Multiplayer.MultiplayerPeer == null)
+			return;
+		
 		foreach (var kvp in _states)
 		{
 			if (kvp.Key == Multiplayer.GetUniqueId())
@@ -87,12 +96,17 @@ public partial class NetworkManager : Node
 
 	private void OnPeerLeft(long id)
 	{
-		_states.Remove((int)id);
-		_lastSync.Remove((int)id);
+		var peerId = (int)id;
+		_states.Remove(peerId);
+		_lastSync.Remove(peerId);
 	}
 
 	public void SyncTransform(int peerId, Vector2 position, float rotation)
 	{
+		// Skip if multiplayer peer is not set up
+		if (Multiplayer.MultiplayerPeer == null)
+			return;
+			
 		if (!Multiplayer.IsServer() && peerId != Multiplayer.GetUniqueId())
 			return;
 		
@@ -102,6 +116,9 @@ public partial class NetworkManager : Node
 
 	public void SyncDirection(int peerId, int direction)
 	{
+		if (Multiplayer.MultiplayerPeer == null)
+			return;
+			
 		if (!Multiplayer.IsServer() && peerId != Multiplayer.GetUniqueId())
 			return;
 		
@@ -110,6 +127,9 @@ public partial class NetworkManager : Node
 
 	public void SyncState(int peerId, string state)
 	{
+		if (Multiplayer.MultiplayerPeer == null)
+			return;
+			
 		if (!Multiplayer.IsServer() && peerId != Multiplayer.GetUniqueId())
 			return;
 		
@@ -118,6 +138,9 @@ public partial class NetworkManager : Node
 
 	public void SyncPeeking(int peerId, bool peeking)
 	{
+		if (Multiplayer.MultiplayerPeer == null)
+			return;
+			
 		if (!Multiplayer.IsServer() && peerId != Multiplayer.GetUniqueId())
 			return;
 		
@@ -126,6 +149,9 @@ public partial class NetworkManager : Node
 
 	public void SyncMouseTarget(int peerId, Vector2 target)
 	{
+		if (Multiplayer.MultiplayerPeer == null)
+			return;
+			
 		if (!Multiplayer.IsServer() && peerId != Multiplayer.GetUniqueId())
 			return;
 		
@@ -134,6 +160,9 @@ public partial class NetworkManager : Node
 
 	public void SyncHeadFrame(int peerId, int frame)
 	{
+		if (Multiplayer.MultiplayerPeer == null)
+			return;
+			
 		if (!Multiplayer.IsServer() && peerId != Multiplayer.GetUniqueId())
 			return;
 		
@@ -142,6 +171,9 @@ public partial class NetworkManager : Node
 
 	public void SyncGrabbedPosition(int peerId, Vector2 position)
 	{
+		if (Multiplayer.MultiplayerPeer == null)
+			return;
+			
 		if (!Multiplayer.IsServer() && peerId != Multiplayer.GetUniqueId())
 			return;
 
@@ -165,7 +197,10 @@ public partial class NetworkManager : Node
 			return;
 		
 		GetOrCreateState(peerId).Direction = direction;
-		GetPlayer(peerId)?.GetNodeOrNull("SpriteSystem")?.Call("SetDirection", direction);
+		var player = GetPlayer(peerId);
+		player?.GetNodeOrNull("SpriteSystem")?.Call("SetDirection", direction);
+		// Keep MovementController's facing field in sync so it doesn't get read as stale.
+		player?.GetNodeOrNull<MovementController>("MovementController")?.SetNetworkFacing(direction);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -175,7 +210,9 @@ public partial class NetworkManager : Node
 			return;
 		
 		GetOrCreateState(peerId).AnimState = state;
-		GetPlayer(peerId)?.GetNodeOrNull("SpriteSystem")?.Call("SetState", state);
+		var player = GetPlayer(peerId);
+		player?.GetNodeOrNull("SpriteSystem")?.Call("SetState", state);
+		player?.GetNodeOrNull<MovementController>("MovementController")?.SetNetworkState(state);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -185,7 +222,9 @@ public partial class NetworkManager : Node
 			return;
 		
 		GetOrCreateState(peerId).Peeking = peeking;
-		GetPlayer(peerId)?.GetNodeOrNull("SpriteSystem")?.Call("SetPeeking", peeking);
+		var player = GetPlayer(peerId);
+		player?.GetNodeOrNull("SpriteSystem")?.Call("SetPeeking", peeking);
+		player?.GetNodeOrNull<MovementController>("MovementController")?.SetNetworkPeeking(peeking);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Unreliable)]

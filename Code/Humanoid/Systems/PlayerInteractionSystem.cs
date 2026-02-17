@@ -701,21 +701,32 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	}
 
 	private void UpdatePullerSpeed()
-	{
-		var movement = _owner.GetNodeOrNull<MovementController>("MovementController");
-		if (movement == null) return;
-
-		if (_pullingTarget == null)
 		{
-			movement.SetInteractionSpeedMultiplier(1.0f);
-			return;
-		}
+			var movement = _owner.GetNodeOrNull<MovementController>("MovementController");
+			if (movement == null) return;
 
-		if (_grabLevel >= GrabLevel.Aggressive)
-			movement.SetInteractionSpeedMultiplier(0.35f);
-		else
-			movement.SetInteractionSpeedMultiplier(1.0f);
-	}
+			if (_pullingTarget == null)
+			{
+				movement.SetInteractionSpeedMultiplier(1.0f);
+				return;
+			}
+
+			if (_grabLevel >= GrabLevel.Aggressive)
+			{
+				var targetState = _pullingTarget.GetNodeOrNull<MobStateSystem>("MobStateSystem");
+				bool targetIsProne = targetState != null &&
+					(targetState.GetState() == MobState.Prone || targetState.GetState() == MobState.Sleeping);
+
+				if (targetIsProne)
+					movement.SetInteractionSpeedMultiplier(1.0f);
+				else
+					movement.SetInteractionSpeedMultiplier(0.35f);
+			}
+			else
+			{
+				movement.SetInteractionSpeedMultiplier(1.0f);
+			}
+		}
 
 	private bool CanInteract()
 	{

@@ -70,8 +70,9 @@ public partial class EntitySpawner : Node2D
 				if (world != null)
 				{
 					Vector2 spawnPos = position == Vector2.Zero ? new Vector2(2 * 32, 2 * 32) : position;
-					int mobId = _gameManager.GetUniqueMobId();
-					_gameManager.SpawnPlayer(mobId, spawnPos, characterData);
+					int mobId = Multiplayer.GetUniqueId();
+					string jobName = "Civilian";
+					_gameManager.SpawnPlayer(mobId, spawnPos, jobName);
 					_statusLabel.Text = $"Status: Spawned {characterData["mob_type"]} at {spawnPos}";
 				}
 				else

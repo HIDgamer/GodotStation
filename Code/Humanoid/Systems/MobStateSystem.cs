@@ -57,16 +57,17 @@ public partial class MobStateSystem : Node, IMobSystem
 			Rpc(MethodName.SyncState, (int)newState, duration);
 	}
 	
-	// Special method for help intent to help prone players up
 	public void HelpUp()
 	{
-		if (_state == MobState.Prone)
-		{
-			SetState(MobState.Standing);
-		}
+		if (_state != MobState.Prone && _state != MobState.Sleeping)
+			return;
+
+		if (_owner.Get("disconnected_peer").AsBool())
+			return;
+
+		SetState(MobState.Standing);
 	}
 	
-	// Special method for grab intent to force prone
 	public void ForceProne()
 	{
 		if (_state != MobState.Standing)
@@ -75,12 +76,10 @@ public partial class MobStateSystem : Node, IMobSystem
 		SetState(MobState.Prone);
 	}
 	
-	// Special method for disarm intent to keep stunned state
 	public void SetStunned(float duration)
 	{
 		if (_state == MobState.Prone)
 		{
-			// If already prone, stay prone but add stun duration
 			_stateDuration = duration;
 			_stateTimer = 0f;
 		}
