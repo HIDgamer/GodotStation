@@ -40,12 +40,6 @@ var clothing_slots: Dictionary = {}
 var current_limb: String = "right_hand"
 
 func _ready() -> void:
-	await get_tree().process_frame
-	await get_tree().process_frame
-
-	if get_tree() == null:
-		return
-
 	equipment_section.visible = false
 	lhighlight.visible = true
 	rhighlight.visible = false

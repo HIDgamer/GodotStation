@@ -300,18 +300,21 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		if (!Multiplayer.IsServer()) return;
 		if (_pullingTarget == null) return;
 		
-		var targetInteraction = _pullingTarget.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
-		if (targetInteraction != null)
+		if (IsInstanceValid(_pullingTarget))
 		{
-			targetInteraction._pulledBy = null;
-			targetInteraction.Rpc(nameof(ClearPulledByRpc));
-			_pullingTarget.DisableMovement = false;
-		}
-		
-		if (_grabLevel == GrabLevel.Fireman)
-		{
-			var targetState = _pullingTarget.GetNodeOrNull<MobStateSystem>("MobStateSystem");
-			targetState?.SetState(MobState.Standing);
+			var targetInteraction = _pullingTarget.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
+			if (targetInteraction != null)
+			{
+				targetInteraction._pulledBy = null;
+				targetInteraction.Rpc(nameof(ClearPulledByRpc));
+				_pullingTarget.DisableMovement = false;
+			}
+			
+			if (_grabLevel == GrabLevel.Fireman)
+			{
+				var targetState = _pullingTarget.GetNodeOrNull<MobStateSystem>("MobStateSystem");
+				targetState?.SetState(MobState.Standing);
+			}
 		}
 		
 		var activeSlot = _inventory.GetActiveHand() == 0 ? "left_hand" : "right_hand";

@@ -274,6 +274,11 @@ public partial class NetworkManager : Node
 		return _states[peerId];
 	}
 
+	public Vector2? GetLastKnownPosition(int peerId)
+	{
+		return _states.TryGetValue(peerId, out var state) ? state.Position : null;
+	}
+
 	private Node GetPlayer(int peerId)
 	{
 		var world = GetTree().GetFirstNodeInGroup("World");
