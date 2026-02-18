@@ -10,6 +10,8 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	private GrabLevel _grabLevel = GrabLevel.None;
 	private GrabItem _grabItem;
 	private float _nextInteractionTime;
+
+	private const float CHOKE_NORTH_OFFSET = -8f;
 	
 	private GridSystem _gridSystem;
 	private SkillComponent _skillSystem;
@@ -55,6 +57,11 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		if (_pullingTarget != null && _gridSystem != null && _grabLevel == GrabLevel.Fireman)
 		{
 			UpdateFiremanCarryPosition();
+		}
+
+		if (_pullingTarget != null && _grabLevel == GrabLevel.Choke)
+		{
+			UpdateChokePosition();
 		}
 		
 		if (_pulledBy != null)
@@ -305,6 +312,27 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 			var targetInteraction = _pullingTarget.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
 			if (targetInteraction != null)
 			{
+				// Choke (and aggressive) hold the target at a raw pixel offset from the
+				// puller (e.g. 8 px north).  Snap back to the nearest grid tile centre
+				// before releasing so the mob does not remain visually displaced.
+				// Broadcast the corrected position and update the NetworkManager cache
+				// on the server immediately so all peers resume interpolation from the
+				// right location — this also fixes the host-as-victim case where the
+				// host's own transform broadcasts would otherwise anchor the stale offset.
+				if (_grabLevel == GrabLevel.Choke || _grabLevel == GrabLevel.Aggressive)
+				{
+					var snappedPos = _gridSystem != null
+						? _gridSystem.GridToWorld(_gridSystem.WorldToGrid(_pullingTarget.GlobalPosition))
+						: _pullingTarget.GlobalPosition;
+
+					_pullingTarget.GlobalPosition = snappedPos;
+					Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetPath(), snappedPos);
+
+					if (int.TryParse(_pullingTarget.Name, out int tPeerId))
+						GetNodeOrNull<NetworkManager>("/root/NetworkManager")
+							?.UpdatePositionCache(tPeerId, snappedPos);
+				}
+
 				targetInteraction._pulledBy = null;
 				targetInteraction.Rpc(nameof(ClearPulledByRpc));
 				_pullingTarget.DisableMovement = false;
@@ -408,6 +436,24 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		_pullingTarget.GlobalPosition = _owner.GlobalPosition + offset;
 		
 		Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetPath(), _pullingTarget.GlobalPosition);
+	}
+
+	private void UpdateChokePosition()
+	{
+		if (!Multiplayer.IsServer()) return;
+		if (_pullingTarget == null) return;
+
+		var targetPos = _owner.GlobalPosition + new Vector2(0, CHOKE_NORTH_OFFSET);
+		if (_pullingTarget.GlobalPosition == targetPos) return;
+
+		_pullingTarget.GlobalPosition = targetPos;
+		Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetPath(), targetPos);
+
+		if (int.TryParse(_pullingTarget.Name, out int targetPeerId))
+		{
+			var nm = _owner.GetNodeOrNull<NetworkManager>("/root/NetworkManager");
+			nm?.UpdatePositionCache(targetPeerId, targetPos);
+		}
 	}
 	
 	private Vector2 GetCarryOffset()
@@ -537,6 +583,9 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		}
 		_pullingTarget = null;
 		_grabLevel = GrabLevel.None;
+		// Reset the interaction-speed multiplier on every peer so the puller is not
+		// permanently stuck at half speed after releasing an aggressive / choke grab.
+		UpdatePullerSpeed();
 		EmitSignal(SignalName.StoppedPulling);
 	}
 	
@@ -572,6 +621,16 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	{
 		_pulledBy = null;
 		_owner.DisableMovement = false;
+
+		// NetworkManager's cached position for this mob went stale while it was being
+		// pulled (interpolation was suppressed via ShouldSkipInterpolation).  Without
+		// this update, interpolation resumes toward the pre-pull cached position and
+		// the mob visually snaps backward.
+		if (int.TryParse(_owner.Name, out int peerId))
+		{
+			var nm = _owner.GetNodeOrNull<NetworkManager>("/root/NetworkManager");
+			nm?.UpdatePositionCache(peerId, _owner.GlobalPosition);
+		}
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -704,32 +763,31 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	}
 
 	private void UpdatePullerSpeed()
+	{
+		var movement = _owner.GetNodeOrNull<MovementController>("MovementController");
+		if (movement == null) return;
+
+		if (_pullingTarget == null)
 		{
-			var movement = _owner.GetNodeOrNull<MovementController>("MovementController");
-			if (movement == null) return;
-
-			if (_pullingTarget == null)
-			{
-				movement.SetInteractionSpeedMultiplier(1.0f);
-				return;
-			}
-
-			if (_grabLevel >= GrabLevel.Aggressive)
-			{
-				var targetState = _pullingTarget.GetNodeOrNull<MobStateSystem>("MobStateSystem");
-				bool targetIsProne = targetState != null &&
-					(targetState.GetState() == MobState.Prone || targetState.GetState() == MobState.Sleeping);
-
-				if (targetIsProne)
-					movement.SetInteractionSpeedMultiplier(1.0f);
-				else
-					movement.SetInteractionSpeedMultiplier(0.35f);
-			}
-			else
-			{
-				movement.SetInteractionSpeedMultiplier(1.0f);
-			}
+			movement.SetInteractionSpeedMultiplier(1.0f);
+			return;
 		}
+
+		if (_grabLevel >= GrabLevel.Aggressive)
+		{
+			// Always slow the puller when aggressively grabbing or choking.
+			// Previously this was conditional on targetIsProne, but Aggressive grab
+			// immediately sets the target Prone — so targetIsProne was always true
+			// and puller speed went back to 1.0f while target crawled at 0.5f,
+			// causing CheckForGripLoss to fire almost immediately.
+			// 0.5f matches the target's Prone speed so both move at the same rate.
+			movement.SetInteractionSpeedMultiplier(0.5f);
+		}
+		else
+		{
+			movement.SetInteractionSpeedMultiplier(1.0f);
+		}
+	}
 
 	private bool CanInteract()
 	{

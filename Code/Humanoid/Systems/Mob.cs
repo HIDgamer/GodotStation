@@ -258,6 +258,63 @@ public partial class Mob : CharacterBody2D
 			spriteSystem.ApplyAppearanceWithData(playerData);
 		}
 	}
+
+	/// <summary>
+	/// Called by GameManager on spawn and reconnect to apply character data.
+	/// Also re-evaluates multiplayer authority and camera ownership, which is
+	/// necessary after a node rename (reconnect) because _EnterTree does not re-run.
+	/// </summary>
+	public void ApplyCharacterData(Godot.Collections.Dictionary charData)
+	{
+		if (charData != null && charData.Count > 0)
+		{
+			var charName = charData.ContainsKey("name") ? charData["name"].ToString() : "Player " + Name;
+			SetPlayerName(charName);
+			ApplyAppearance(charData);
+		}
+
+		// Re-evaluate authority in case the node was renamed after _EnterTree.
+		// This is the critical fix for reconnecting players.
+		RefreshAuthority();
+	}
+
+	/// <summary>
+	/// Re-reads the node name as a peer ID, re-sets multiplayer authority, and
+	/// enables or disables the camera accordingly. Safe to call at any time.
+	/// </summary>
+	public void RefreshAuthority()
+	{
+		// Re-derive authority from the current node name (may differ after a rename).
+		if (int.TryParse(Name, out int peerId))
+			SetMultiplayerAuthority(peerId);
+
+		var isAuthority = IsMultiplayerAuthority();
+
+		// Find or create the camera.
+		var camera = GetNodeOrNull<Camera2D>("PlayerCameraSetup");
+		if (isAuthority && camera == null)
+		{
+			camera = new Camera2D { Name = "PlayerCameraSetup", Zoom = new Vector2(3, 3) };
+			AddChild(camera);
+		}
+
+		if (camera != null)
+		{
+			camera.Enabled = isAuthority;
+			if (isAuthority)
+				camera.MakeCurrent();
+		}
+
+		// Re-enable processing for all IMobSystems on the local (authority) mob.
+		if (isAuthority)
+		{
+			foreach (var system in _systems)
+			{
+				if (system is Node sysNode)
+					sysNode.ProcessMode = ProcessModeEnum.Inherit;
+			}
+		}
+	}
 	
 	public string GetPlayerName()
 	{

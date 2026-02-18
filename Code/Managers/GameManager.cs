@@ -560,10 +560,8 @@ public partial class GameManager : Node
 					inputNode.ProcessMode = ProcessModeEnum.Disabled;
 					GD.Print($"[GameManager] Disabled input node '{inputNode.Name}' on peer {peerId}'s mob.");
 				}
-				else
-				{
-					GD.PrintErr($"[GameManager] WARNING: No input node found on peer {peerId}'s mob (tried InputComponent, PlayerInput, InputHandler).");
-				}
+				// Note: Mob.cs handles input directly via IsMultiplayerAuthority() so no
+				// separate input node exists – MobStateSystem.Sleeping handles the freeze.
 
 				var stateSystem = playerNode.GetNodeOrNull<MobStateSystem>("MobStateSystem");
 				if (stateSystem != null)
@@ -829,9 +827,18 @@ public partial class GameManager : Node
 		playerNode.SetMultiplayerAuthority(newPeerId);
 		GD.Print($"[GameManager] Node renamed and authority assigned to peer {newPeerId}.");
 
-		// Now that the rename is live, the old peer-ID alias in _peerCharacters is no longer needed.
+		// Now that the old alias is cleaned up, remove it.
 		if (int.TryParse(sleepingNodeName, out var oldAliasId) && oldAliasId != newPeerId)
 			_peerCharacters.Remove(oldAliasId);
+
+		// Re-sync any active pull relationship so the reconnecting client knows it is
+		// being pulled (or is pulling someone), and all other clients get updated NodePaths.
+		var reconnectedInteraction = playerNode.GetNodeOrNull<Node>("PlayerInteractionSystem");
+		if (reconnectedInteraction != null && reconnectedInteraction.HasMethod("ResyncPullStateAfterRename"))
+		{
+			GD.Print($"[GameManager] Resyncing pull state for reconnected peer {newPeerId}.");
+			reconnectedInteraction.Call("ResyncPullStateAfterRename", newPeerId);
+		}
 
 		var inputNode = playerNode.GetNodeOrNull("InputComponent")
 			?? playerNode.GetNodeOrNull("PlayerInput")
@@ -841,10 +848,7 @@ public partial class GameManager : Node
 			inputNode.ProcessMode = ProcessModeEnum.Inherit;
 			GD.Print($"[GameManager] Re-enabled input node '{inputNode.Name}' on peer {newPeerId}'s mob.");
 		}
-		else
-		{
-			GD.PrintErr($"[GameManager] WARNING: No input node found on reconnected mob for peer {newPeerId}.");
-		}
+		// Note: Mob.cs handles input via IsMultiplayerAuthority() – no separate input node exists.
 
 		var stateSystem = playerNode.GetNodeOrNull<MobStateSystem>("MobStateSystem");
 		if (stateSystem != null)
@@ -866,13 +870,17 @@ public partial class GameManager : Node
 		EmitSignal(SignalName.PlayersUpdated);
 
 		GD.Print($"[GameManager] Scheduling ClientReconnectConfirmed for peer {newPeerId} in 0.35s.");
+		// Capture position NOW before the client gains authority and starts sending
+		// movement updates that would interpolate the server node away from this spot.
+		var spawnPosition = playerNode.GlobalPosition;
+		GD.Print($"[GameManager] Captured authoritative spawn position: {spawnPosition}");
 		var confirmTimer = GetTree().CreateTimer(0.35);
 		confirmTimer.Timeout += () =>
 		{
 			if (IsInstanceValid(playerNode))
 			{
-				GD.Print($"[GameManager] Timer fired: sending ClientReconnectConfirmed to peer {newPeerId} at {playerNode.GlobalPosition}.");
-				RpcId(newPeerId, MethodName.ClientReconnectConfirmed, newPeerId, playerNode.GlobalPosition, savedData);
+				GD.Print($"[GameManager] Timer fired: sending ClientReconnectConfirmed to peer {newPeerId} at {spawnPosition}.");
+				RpcId(newPeerId, MethodName.ClientReconnectConfirmed, newPeerId, spawnPosition, savedData);
 			}
 			else
 			{
@@ -908,7 +916,12 @@ public partial class GameManager : Node
 		if (playerNode != null && IsInstanceValid(playerNode))
 		{
 			playerNode.Name = newPeerId.ToString();
-			GD.Print($"[GameManager] Node rename applied on this client: '{oldName}' -> '{newPeerId}'.");
+			// Set authority immediately on the client side so IsMultiplayerAuthority()
+			// is correct for the 0.35s window before ClientReconnectConfirmed arrives.
+			// Without this the reconnecting client's mob stays non-authoritative and
+			// the camera/input remain disabled.
+			playerNode.SetMultiplayerAuthority(newPeerId);
+			GD.Print($"[GameManager] Node rename applied on this client: '{oldName}' -> '{newPeerId}'. Authority set to {newPeerId}.");
 		}
 		else
 		{
@@ -948,27 +961,20 @@ public partial class GameManager : Node
 			playerNode.GlobalPosition = position;
 			GD.Print($"[GameManager] Local mob warped to server position {position}.");
 
+			// ApplyCharacterData handles appearance, re-evaluates IsMultiplayerAuthority(),
+			// re-enables the camera and all IMobSystems.  This is the single call that
+			// restores full control to the reconnecting player.
 			if (playerNode.HasMethod("ApplyCharacterData"))
 			{
 				playerNode.Call("ApplyCharacterData", charData);
-				GD.Print($"[GameManager] ApplyCharacterData called on local mob for peer {peerId}.");
+				GD.Print($"[GameManager] ApplyCharacterData called on local mob for peer {peerId} – camera and input restored.");
 			}
 			else
 			{
-				GD.PrintErr($"[GameManager] WARNING: Player node '{peerId}' missing ApplyCharacterData method.");
-			}
-
-			var inputNode = playerNode.GetNodeOrNull("InputComponent")
-				?? playerNode.GetNodeOrNull("PlayerInput")
-				?? playerNode.GetNodeOrNull("InputHandler");
-			if (inputNode != null)
-			{
-				inputNode.ProcessMode = ProcessModeEnum.Inherit;
-				GD.Print($"[GameManager] Re-enabled input node on local mob for peer {peerId}.");
-			}
-			else
-			{
-				GD.PrintErr($"[GameManager] WARNING: No input node found on local mob for peer {peerId} in ClientReconnectConfirmed.");
+				// Fallback: at minimum try to re-assert authority and enable the camera.
+				GD.PrintErr($"[GameManager] WARNING: Player node '{peerId}' missing ApplyCharacterData – calling RefreshAuthority as fallback.");
+				if (playerNode.HasMethod("RefreshAuthority"))
+					playerNode.Call("RefreshAuthority");
 			}
 
 			var stateSystem = playerNode.GetNodeOrNull<MobStateSystem>("MobStateSystem");

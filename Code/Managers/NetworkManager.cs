@@ -279,6 +279,17 @@ public partial class NetworkManager : Node
 		return _states.TryGetValue(peerId, out var state) ? state.Position : null;
 	}
 
+	/// <summary>
+	/// Directly updates the position cache for a peer without sending any RPC or
+	/// moving the node.  Call this when a mob's position is changed externally
+	/// (e.g. pull/grab release) so interpolation resumes from the correct location
+	/// rather than snapping back to a stale pre-pull cached value.
+	/// </summary>
+	public void UpdatePositionCache(int peerId, Vector2 position)
+	{
+		GetOrCreateState(peerId).Position = position;
+	}
+
 	private Node GetPlayer(int peerId)
 	{
 		var world = GetTree().GetFirstNodeInGroup("World");

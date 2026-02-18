@@ -24,6 +24,8 @@ func _ready() -> void:
 	deselect()
 
 func _on_send(new_text: String = "") -> void:
+	if _pending_send_lock:
+		return
 	var text: String = new_text if new_text != "" else line_edit.text.strip_edges()
 	if text == "" or text.length() > 200:
 		line_edit.text = ""
