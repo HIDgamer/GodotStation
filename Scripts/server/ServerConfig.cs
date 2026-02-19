@@ -8,7 +8,7 @@ public partial class ServerConfig : Node
     public string Map            { get; private set; } = "DDome";
     public string Gamemode       { get; private set; } = "PVE";
     public string BackendUrl     { get; private set; } = "https://godotstation.duckdns.org";
-    public string ServerToken    { get; private set; } = "";
+    public string ServerToken    { get; private set; } = "c04401b51965b2d2f9b7a266bfa36f6a36841d7d7a157c2ef72a93377e531a8ac54597eb0aa4de89047235084a82db33961005640a61108e4f0423b0133619c8";
     public string Password       { get; private set; } = "";
     public bool   IsPublic       { get; private set; } = true;
     public string Description    { get; private set; } = "";
@@ -25,19 +25,22 @@ public partial class ServerConfig : Node
         GD.Print($"[ServerConfig] Name={ServerName} Port={Port} MaxPlayers={MaxPlayers} Map={Map} Gamemode={Gamemode} Public={IsPublic}");
     }
 
-    private void LoadFromEnvironment()
-    {
-        ServerName  = Env("SERVER_NAME",     "GodotStation Server");
-        Port        = EnvInt("SERVER_PORT",  7777);
-        MaxPlayers  = EnvInt("MAX_PLAYERS",  64);
-        Map         = Env("SERVER_MAP",      "LV-624");
-        Gamemode    = Env("SERVER_GAMEMODE", "Survival");
-        BackendUrl  = Env("BACKEND_URL",     "https://godotstation.duckdns.org");
-        ServerToken = Env("SERVER_TOKEN",    "");
-        Password    = Env("SERVER_PASSWORD", "");
-        Description = Env("SERVER_DESCRIPTION", "");
-        IsPublic    = Env("SERVER_PUBLIC",   "true").ToLower() == "true";
-    }
+private void LoadFromEnvironment()
+{
+    ServerName  = Env("SERVER_NAME",      ServerName); 
+    Port        = EnvInt("SERVER_PORT",   Port); 
+    MaxPlayers  = EnvInt("MAX_PLAYERS",   MaxPlayers);
+    Map         = Env("SERVER_MAP",       Map);
+    Gamemode    = Env("SERVER_GAMEMODE",  Gamemode);
+    BackendUrl  = Env("BACKEND_URL",      BackendUrl);
+    ServerToken = Env("SERVER_TOKEN",     ServerToken);
+    Password    = Env("SERVER_PASSWORD",  Password);
+    Description = Env("SERVER_DESCRIPTION", Description);
+    
+    var pubEnv = System.Environment.GetEnvironmentVariable("SERVER_PUBLIC");
+    if (!string.IsNullOrEmpty(pubEnv))
+        IsPublic = pubEnv.ToLower() == "true";
+}
 
     private void LoadFromFile(string path)
     {
