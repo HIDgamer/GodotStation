@@ -21,7 +21,14 @@ public partial class ServerRegistrar : Node
 
     public override void _Ready()
     {
-        _config     = GetNode<ServerConfig>("/root/ServerConfig");
+        _config = GetNodeOrNull<ServerConfig>("/root/ServerConfig");
+        
+        if (_config == null)
+        {
+            GD.PrintErr("[ServerRegistrar] CRITICAL: ServerConfig not found.");
+            return;
+        }
+
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
 
         if (!string.IsNullOrEmpty(_config.ServerToken))
@@ -39,12 +46,16 @@ public partial class ServerRegistrar : Node
 
     public async Task<bool> Register()
     {
+        if (_config == null || _httpClient == null) return false;
+
         try
         {
             var payload = BuildRegistrationPayload();
             var content = new StringContent(Json.Stringify(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_config.BackendUrl}/api/servers/register", content);
-            var body     = await response.Content.ReadAsStringAsync();
+            var url = $"{_config.BackendUrl?.TrimEnd('/')}/api/servers/register";
+            
+            var response = await _httpClient.PostAsync(url, content);
+            var body = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
@@ -62,7 +73,7 @@ public partial class ServerRegistrar : Node
             }
 
             var result = parser.Data.AsGodotDictionary();
-            _serverId   = result.ContainsKey("server_id") ? result["server_id"].ToString() : Guid.NewGuid().ToString();
+            _serverId = result.ContainsKey("server_id") ? result["server_id"].ToString() : Guid.NewGuid().ToString();
             _registered = true;
 
             _heartbeatTimer.Start();
@@ -77,7 +88,6 @@ public partial class ServerRegistrar : Node
             return false;
         }
     }
-
     public void UpdatePlayerCount(int count)
     {
         _currentPlayers = count;
@@ -134,13 +144,13 @@ public partial class ServerRegistrar : Node
     {
         return new Godot.Collections.Dictionary
         {
-            { "name",             _config.ServerName },
-            { "port",             _config.Port },
-            { "max_players",      _config.MaxPlayers },
-            { "map",              _config.Map },
-            { "gamemode",         _config.Gamemode },
-            { "description",      _config.Description },
-            { "is_public",        _config.IsPublic },
+            { "name",               _config.ServerName ?? "Unknown Server" },
+            { "port",               _config.Port },
+            { "max_players",        _config.MaxPlayers },
+            { "map",                _config.Map ?? "Default" },
+            { "gamemode",           _config.Gamemode ?? "Default" },
+            { "description",        _config.Description ?? "" },
+            { "is_public",          _config.IsPublic },
             { "password_protected", !string.IsNullOrEmpty(_config.Password) }
         };
     }

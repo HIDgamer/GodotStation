@@ -1,7 +1,4 @@
-# UIAnimationHelper - Reusable animation utilities for sci-fi UI elements.
-# Provides smooth tweening effects for buttons, panels, and interactive elements.
-# Static utility class - no Node instantiation required.
-
+extends Node
 class_name UIAnimationHelper
 
 const BUTTON_HOVER_DURATION: float = 0.2

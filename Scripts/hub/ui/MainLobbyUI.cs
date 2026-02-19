@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public partial class AudioManager : Node { }
 
-public partial class Hub : Control
+public partial class MainLobbyUI : Control
 {
 	private AccountManager _accountManager;
 	private LobbyManager _lobbyManager;
