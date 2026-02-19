@@ -34,7 +34,7 @@ jobs:
             artifact: server-build
 
     container:
-      image: barichello/godot-ci:mono-4.6
+      image: barichello/godot-ci:mono-4.6.1
 
     steps:
       - name: Checkout repository
@@ -56,11 +56,11 @@ jobs:
 
       - name: Install Godot Mono Export Templates
         run: |
-          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
+          mkdir -p /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
           wget --quiet --tries=3 --retry-connrefused \
             https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
           unzip -q Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
-          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono/
+          mv templates/* /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono/
           rm Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
 
       - name: Build ${{ matrix.platform }}
