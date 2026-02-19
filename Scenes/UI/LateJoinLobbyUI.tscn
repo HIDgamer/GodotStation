@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://oe04epmutypr"]
+[gd_scene format=3 uid="uid://bmru1ghm2bf16"]
 
-[ext_resource type="Script" uid="uid://btf0mg3rn6v87" path="res://Code/UI/LateJoinLobbyUI.cs" id="1"]
+[ext_resource type="Script" uid="uid://dypi8pniee12u" path="res://Scripts/hub/ui/MainLobbyUI.cs" id="1"]
 
 [sub_resource type="Shader" id="cctv_scanline_shader"]
 code = "shader_type canvas_item;
@@ -89,7 +89,7 @@ border_width_top = 2
 border_width_right = 2
 border_color = Color(0, 1, 0, 1)
 
-[node name="LateJoinLobbyUI" type="Control" unique_id=912100902 node_paths=PackedStringArray("PreRoundPanel", "LateJoinPanel", "StatusLabel", "CharacterNameLabel", "ReadyButton", "UnreadyButton", "PreferencesButton", "ObserveButton", "ReadyCountLabel", "TimerLabel", "JobTabs", "JoinButton", "SelectedJobLabel", "JobDescriptionLabel", "ManifestLabel")]
+[node name="LateJoinLobbyUI" type="Control" unique_id=912100902]
 material = SubResource("cctv_scanline_material")
 layout_mode = 3
 anchors_preset = 15
@@ -99,21 +99,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1")
-PreRoundPanel = NodePath("PreRoundPanel")
-LateJoinPanel = NodePath("LateJoinPanel")
-StatusLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/StatusLabel")
-CharacterNameLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/CharacterNameLabel")
-ReadyButton = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/ReadyButtons/ReadyButton")
-UnreadyButton = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/ReadyButtons/UnreadyButton")
-PreferencesButton = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/PreferencesButton")
-ObserveButton = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/ActionButtons/ObserveButton")
-ReadyCountLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/ReadyCountLabel")
-TimerLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/TimerLabel")
-JobTabs = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/JobTabs")
-JoinButton = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/ActionButtons/JoinButton")
-SelectedJobLabel = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/SelectedJobLabel")
-JobDescriptionLabel = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/JobDescriptionScroll/JobDescriptionLabel")
-ManifestLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/ManifestLabel")
 
 [node name="PreRoundPanel" type="PanelContainer" parent="." unique_id=984523842]
 unique_name_in_owner = true

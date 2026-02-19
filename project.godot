@@ -12,7 +12,8 @@ config_version=5
 
 config/name="GodotStation"
 config/version="8.0"
-run/main_scene="res://Scenes/UI/MainLobbyUI.tscn"
+run/main_scene="res://Scenes/hub/Hub.tscn"
+run/main_scene.dedicated_server="res://Scenes/server/ServerMain.tscn"
 config/custom_user_dir_name="GodotStation"
 config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 config/icon="res://Assets/Icons/Ico/UACMGS_64x64.ico"
@@ -20,24 +21,23 @@ config/windows_native_icon="res://Assets/Icons/Ico/UACMGS_64x64.ico"
 
 [autoload]
 
-DiscordRpc="*uid://cnp3wqsieuvec"
-GameManager="*res://Code/Managers/GameManager.cs"
-NetworkManager="*res://Code/Managers/NetworkManager.cs"
-PreferenceManager="*uid://d3g3w1dnurm7d"
-ClothingManager="*uid://dlaw2wc7mqgkl"
-ItemInteraction="*uid://dv2jut8ydri1b"
+NetworkManager="*uid://bxnn4umwqgsh0"
+DedicatedServer="*uid://dyd7sa3fqqhog"
+ServerConfig="*uid://tmcewk1dmmcq"
+ServerRegistrar="*uid://dixcl5r4gbymb"
 AccountManager="*uid://cofns7fxjsw7w"
 ChatManager="*uid://b84aodt84aoa6"
 FriendsManager="*uid://ccrh0k7heyjtg"
 LobbyManager="*uid://re6e2r8pxsqb"
-Scheduler="*res://Code/Utils/Scheduler.cs"
-SchedulerManager="*res://Code/Utils/SchedulerManager.cs"
-FrameUpdateManager="*uid://p0pk420rgj5x"
+PreferenceManager="*uid://d3g3w1dnurm7d"
 BatchManager="*uid://da6x635f4wi22"
-ProfilingManager="*uid://riffik71i8f0"
-AutoUpdater="*uid://vm225n504f3a"
-AudioManager="*uid://cjrhh8cdfh0l6"
+ClothingManager="*uid://dlaw2wc7mqgkl"
+FrameUpdateManager="*uid://p0pk420rgj5x"
+GameManager="*uid://cg8fpugtc6a87"
+ItemPoolManager="*uid://did2sg0d8fute"
 JobManager="*uid://dngmawvmcwkkl"
+ProfilingManager="*uid://riffik71i8f0"
+AudioManager="*uid://cjrhh8cdfh0l6"
 
 [display]
 
@@ -75,9 +75,9 @@ exclude_filter="*.import,*.tmp,*.bak,*.cache"
 folder_colors={
 "res://Addons/": "red",
 "res://Assets/": "orange",
-"res://Code/": "gray",
 "res://Godot Doc/": "teal",
 "res://Scenes/": "blue",
+"res://Scripts/": "gray",
 "res://Sound/": "purple"
 }
 
@@ -145,47 +145,12 @@ intent_harm={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":52,"key_label":0,"unicode":52,"location":0,"echo":false,"script":null)
 ]
 }
-intent_disarm={
+zoom_in={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":50,"key_label":0,"unicode":50,"location":0,"echo":false,"script":null)
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":45,"key_label":0,"unicode":45,"location":0,"echo":false,"script":null)
 ]
 }
-text={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":84,"key_label":0,"unicode":116,"location":0,"echo":false,"script":null)
-]
-}
-throw={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":82,"key_label":0,"unicode":114,"location":0,"echo":false,"script":null)
-]
-}
-pull={
-"deadzone": 0.2,
-"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":true,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":false,"double_click":false,"script":null)
-]
-}
-run={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":75,"key_label":0,"unicode":107,"location":0,"echo":false,"script":null)
-]
-}
-pickup={
-"deadzone": 0.2,
-"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":0.0,"button_index":1,"canceled":false,"pressed":false,"double_click":false,"script":null)
-]
-}
-drop={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":81,"key_label":0,"unicode":113,"location":0,"echo":false,"script":null)
-]
-}
-quick_pickup={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":70,"key_label":0,"unicode":102,"location":0,"echo":false,"script":null)
-]
-}
-debug_short_circuit={
+zoom_out={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":61,"key_label":0,"unicode":61,"location":0,"echo":false,"script":null)
 ]
@@ -233,7 +198,7 @@ cock_weapon={
 }
 go_prone={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":true,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":82,"key_label":0,"unicode":82,"location":0,"echo":false,"script":null)
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":true,"keycode":0,"physical_keycode":82,"key_label":0,"unicode":82,"location":0,"echo":false,"script":null)
 ]
 }
 quick_unload={
@@ -309,6 +274,7 @@ firewall_checked=true
 
 2d/run_on_separate_thread=true
 2d/physics_engine="Rapier2D"
+2d/physics_engine.dedicated_server="GodotPhysics2D"
 common/physics_interpolation=true
 
 [rendering]

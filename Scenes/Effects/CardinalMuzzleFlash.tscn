@@ -1,8 +1,0 @@
-[gd_scene format=3 uid="uid://dwg0383li37to"]
-
-[ext_resource type="Script" path="res://Code/Effects/CardinalMuzzleFlash.cs" id="1_muzzle"]
-
-[node name="CardinalMuzzleFlash" type="Node2D"]
-script = ExtResource("1_muzzle")
-
-AnimationDuration = 0.06

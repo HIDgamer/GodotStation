@@ -12,7 +12,6 @@ on:
 env:
   GODOT_VERSION: 4.6
   EXPORT_NAME: GodotStation
-  UPDATE_SERVER: "godotstation.duckdns.org"
 
 jobs:
   build:
@@ -20,8 +19,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows, linux]
-    
+        include:
+          - platform: windows
+            preset: "Windows Desktop"
+            output: "GodotStation.exe"
+            artifact: windows-build
+          - platform: linux
+            preset: "Linux/X11"
+            output: "GodotStation.x86_64"
+            artifact: linux-build
+          - platform: server
+            preset: "Dedicated Server"
+            output: "GodotStation.server"
+            artifact: server-build
+
     container:
       image: barichello/godot-ci:mono-4.6
 
@@ -43,36 +54,24 @@ jobs:
       - name: Install Godot Mono Export Templates
         run: |
           mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
-          wget --quiet --tries=3 --retry-connrefused https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
+          wget --quiet --tries=3 --retry-connrefused \
+            https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
           unzip -q Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
           mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono/
           rm Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
 
-      - name: Build Godot Project
+      - name: Build ${{ matrix.platform }}
         run: |
           mkdir -p build/${{ matrix.platform }}
-          
-          if [ "${{ matrix.platform }}" = "windows" ]; then
-            PRESET_NAME="Windows Desktop"
-            OUTPUT_FILE="build/windows/$EXPORT_NAME.exe"
-          else
-            PRESET_NAME="Linux/X11"
-            OUTPUT_FILE="build/linux/$EXPORT_NAME.x86_64"
-          fi
+          OUTPUT="build/${{ matrix.platform }}/${{ matrix.output }}"
+          godot --headless --verbose --export-release "${{ matrix.preset }}" "$OUTPUT"
+          chmod +x "$OUTPUT" || true
+          echo "${GITHUB_REF_NAME}" > build/${{ matrix.platform }}/version.txt
 
-          echo "Building $PRESET_NAME -> $OUTPUT_FILE"
-          godot --headless --verbose --export-release "$PRESET_NAME" "$OUTPUT_FILE"
-          
-          if [ "${{ matrix.platform }}" = "linux" ]; then
-            chmod +x "$OUTPUT_FILE"
-          fi
-          
-          echo "${GITHUB_REF_NAME}" > $(dirname "$OUTPUT_FILE")/version.txt
-
-      - name: Upload build artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.platform }}-build
+          name: ${{ matrix.artifact }}
           path: build/${{ matrix.platform }}/
 
   create-release:
@@ -81,40 +80,33 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
+    outputs:
+      tag: ${{ github.ref_name }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Prepare Release Info
-        id: release_info
-        run: |
-          echo "REL_DATE=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
-          echo "SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)" >> $GITHUB_OUTPUT
-
       - name: Zip builds and create manifest
         run: |
           cd artifacts/windows-build && zip -r ../../GodotStation-Windows.zip . && cd ../..
-          cd artifacts/linux-build && zip -r ../../GodotStation-Linux.zip . && cd ../..
+          cd artifacts/linux-build   && zip -r ../../GodotStation-Linux.zip . && cd ../..
+          cd artifacts/server-build  && zip -r ../../GodotStation-Server-Linux.zip . && cd ../..
 
           WIN_SIZE=$(stat -c%s GodotStation-Windows.zip)
           LIN_SIZE=$(stat -c%s GodotStation-Linux.zip)
-          VERSION="${GITHUB_REF_NAME#v}" 
+          SRV_SIZE=$(stat -c%s GodotStation-Server-Linux.zip)
+          VERSION="${GITHUB_REF_NAME#v}"
 
           cat > version-manifest.json << EOF
           {
             "version": "$VERSION",
             "build_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "platforms": {
-              "windows": {
-                "url": "https://github.com/$GITHUB_REPOSITORY/releases/download/${GITHUB_REF_NAME}/GodotStation-Windows.zip",
-                "size": $WIN_SIZE
-              },
-              "linux": {
-                "url": "https://github.com/$GITHUB_REPOSITORY/releases/download/${GITHUB_REF_NAME}/GodotStation-Linux.zip",
-                "size": $LIN_SIZE
-              }
+              "windows": { "url": "https://github.com/$GITHUB_REPOSITORY/releases/download/${GITHUB_REF_NAME}/GodotStation-Windows.zip", "size": $WIN_SIZE },
+              "linux":   { "url": "https://github.com/$GITHUB_REPOSITORY/releases/download/${GITHUB_REF_NAME}/GodotStation-Linux.zip", "size": $LIN_SIZE },
+              "server":  { "url": "https://github.com/$GITHUB_REPOSITORY/releases/download/${GITHUB_REF_NAME}/GodotStation-Server-Linux.zip", "size": $SRV_SIZE }
             }
           }
           EOF
@@ -125,24 +117,8 @@ jobs:
           files: |
             GodotStation-Windows.zip
             GodotStation-Linux.zip
+            GodotStation-Server-Linux.zip
             version-manifest.json
-          body: |
-            ## GodotStation ${{ github.ref_name }}
-            
-            **Release Date:** ${{ steps.release_info.outputs.REL_DATE }}
-            
-            **Commit:** ${{ steps.release_info.outputs.SHORT_SHA }}
-            
-            ---
-            
-            ### Downloads
-            - 🪟 **Windows:** GodotStation-Windows.zip
-            - 🐧 **Linux:** GodotStation-Linux.zip
-            
-            ### Installation
-            1. Download the appropriate file for your platform
-            2. Extract the archive
-            3. Run the executable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -152,7 +128,7 @@ jobs:
           name: version-manifest
           path: version-manifest.json
 
-  deploy-manifest:
+  deploy-manifest-to-game:
     needs: create-release
     runs-on: ubuntu-latest
     steps:
@@ -162,24 +138,67 @@ jobs:
           name: version-manifest
           path: .
 
-      - name: Deploy manifest to Oracle server
+      - name: Deploy manifest to GAME server (Autoupdater)
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.ORACLE_IP }}
+          host: ${{ secrets.GAME_IP }}
           username: ubuntu
-          key: ${{ secrets.ORACLE_SSH_KEY }}
+          key: ${{ secrets.GAME_SSH_KEY }}
           port: 22
           source: "version-manifest.json"
           target: "/var/www/godotstation/updates/"
-          strip_components: 0
 
-      - name: Verify deployment
+  deploy-dedicated-server-to-oracle:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to NEW Oracle VM
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.ORACLE_IP }}
           username: ubuntu
           key: ${{ secrets.ORACLE_SSH_KEY }}
+          port: 22
           script: |
-            echo "Verifying deployment at /var/www/godotstation/updates/"
-            ls -lh /var/www/godotstation/updates/version-manifest.json
-            cat /var/www/godotstation/updates/version-manifest.json
+            set -e
+            TAG="${{ needs.create-release.outputs.tag }}"
+            REPO="${{ github.repository }}"
+            DEPLOY_DIR="/home/ubuntu/godotstation"
+            BACKUP_DIR="$DEPLOY_DIR/backups"
+            BINARY_NAME="GodotStationServer.x86_64"
+            PCK_NAME="GodotStationServer.pck"
+            ASSET_URL="https://github.com/${REPO}/releases/download/${TAG}/GodotStation-Server-Linux.zip"
+
+            mkdir -p "$BACKUP_DIR"
+
+            echo "Authenticating with Panel on 8087..."
+            curl -sf -X POST \
+              -H "Content-Type: application/json" \
+              -d '{"password":"${{ secrets.PANEL_PASSWORD }}"}' \
+              http://localhost:8087/api/login \
+              -c /tmp/gs_cookies.txt || true
+
+            echo "Stopping server..."
+            curl -sf -X POST http://localhost:8087/api/stop -b /tmp/gs_cookies.txt || true
+            sleep 3
+
+            if [ -f "$DEPLOY_DIR/$BINARY_NAME" ]; then
+              cp "$DEPLOY_DIR/$BINARY_NAME" "$BACKUP_DIR/$BINARY_NAME.bak"
+              cp "$DEPLOY_DIR/$PCK_NAME"    "$BACKUP_DIR/$PCK_NAME.bak" 2>/dev/null || true
+            fi
+
+            echo "Downloading and Extracting Update..."
+            cd /tmp
+            wget -q "$ASSET_URL" -O server_update.zip
+            unzip -q -o server_update.zip -d /tmp/gs_extract
+
+            cp /tmp/gs_extract/GodotStation.server "$DEPLOY_DIR/$BINARY_NAME"
+            cp /tmp/gs_extract/GodotStation.pck    "$DEPLOY_DIR/$PCK_NAME" 2>/dev/null || true
+            chmod +x "$DEPLOY_DIR/$BINARY_NAME"
+
+            echo "Starting server..."
+            curl -sf -X POST http://localhost:8087/api/start -b /tmp/gs_cookies.txt || true
+            
+            echo "${TAG}" > "$DEPLOY_DIR/version.txt"
+            rm -rf /tmp/gs_extract /tmp/server_update.zip /tmp/gs_cookies.txt
+            echo "Deployment Complete."

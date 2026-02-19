@@ -1,8 +1,9 @@
 [gd_resource type="Resource" format=3 uid="uid://boudeydxfcjl5"]
 
-[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Code/Items/Clothing/ClothingItem.cs" id="1"]
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/ClothingItem.cs" id="1"]
 [ext_resource type="Texture2D" uid="uid://b74arayyael0e" path="res://Assets/Icons/Items/Clothing/Suits/MA_Light.png" id="1_nqnsl"]
 [ext_resource type="Texture2D" uid="uid://cfyjh0bw2rnjd" path="res://Assets/Icons/Clothing/Suit/MA_Light.png" id="2"]
+
 
 [resource]
 script = ExtResource("1")

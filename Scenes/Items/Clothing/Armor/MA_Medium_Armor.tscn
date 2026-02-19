@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://vcq5pgy5hx6q"]
 
-[ext_resource type="Script" uid="uid://ckwi8k8gijdah" path="res://Code/Items/Generic/WorldItem.cs" id="1"]
-[ext_resource type="Script" uid="uid://ekv8cu6056mq" path="res://Code/Sprites/ItemSpriteSystem.cs" id="2"]
+[ext_resource type="Script" uid="uid://ckwi8k8gijdah" path="res://Scripts/game/WorldItem.cs" id="1"]
+[ext_resource type="Script" uid="uid://ekv8cu6056mq" path="res://Scripts/game/ItemSpriteSystem.cs" id="2"]
 [ext_resource type="Texture2D" uid="uid://b1lrrnh4ouqp5" path="res://Assets/Icons/Items/Clothing/Suits/MA_Medium.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://ctn0s1qnsrj8x" path="res://Assets/Icons/Clothing/Suit/MA_Medium.png" id="5"]
-[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Code/Items/Clothing/ClothingItem.cs" id="6"]
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/ClothingItem.cs" id="6"]
+
 
 [sub_resource type="Resource" id="Resource_clothing"]
 script = ExtResource("6")

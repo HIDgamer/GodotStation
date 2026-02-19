@@ -1,14 +1,14 @@
-[gd_scene format=3 uid="uid://bjnqqapnkk8uq"]
+[gd_scene format=3 uid="uid://b3tq3r4tt4oxs"]
 
-[ext_resource type="Script" uid="uid://ciye5i2sfknc8" path="res://Code/UI/Communications.gd" id="1"]
+[ext_resource type="Script" path="res://Code/UI/Communications.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://dible6m71p44g" path="res://Scenes/Maps/DDome.tscn" id="2_80s8t"]
-[ext_resource type="PackedScene" uid="uid://2oufqaxsmbt8" path="res://Scenes/UI/TextInput.tscn" id="2_cma0f"]
-[ext_resource type="PackedScene" uid="uid://cv8q6pw1npm8x" path="res://Scenes/UI/Lobby.tscn" id="3_f6lmg"]
-[ext_resource type="PackedScene" uid="uid://d7w0aj1ldenk" path="res://Scenes/UI/MediaPopup.tscn" id="4_new"]
-[ext_resource type="PackedScene" uid="uid://dx25f1c373c3" path="res://Scenes/UI/MusicOptionsPopup.tscn" id="5_new"]
-[ext_resource type="PackedScene" uid="uid://cqsisjme86v7t" path="res://Scenes/UI/AdminSpawnPopup.tscn" id="6_spawn"]
+[ext_resource type="PackedScene" uid="uid://2oufqaxsmbt8" path="res://Scenes/game/ui/TextInput.tscn" id="4_yv6a1"]
+[ext_resource type="PackedScene" uid="uid://d7w0aj1ldenk" path="res://Scenes/hub/MediaPopup.tscn" id="5_ftfan"]
+[ext_resource type="PackedScene" uid="uid://dx25f1c373c3" path="res://Scenes/hub/MusicOptionsPopup.tscn" id="6_ivc1v"]
 [ext_resource type="Theme" uid="uid://c8ckvl2v7xge" path="res://Assets/Themes/SciFiTheme.tres" id="6_theme"]
-[ext_resource type="PackedScene" uid="uid://oe04epmutypr" path="res://Scenes/UI/LateJoinLobbyUI.tscn" id="10_yv6a1"]
+[ext_resource type="PackedScene" uid="uid://cqsisjme86v7t" path="res://Scenes/game/ui/AdminSpawnPopup.tscn" id="7_3xh1n"]
+[ext_resource type="PackedScene" uid="uid://cv8q6pw1npm8x" path="res://Scenes/hub/Lobby.tscn" id="9_us0h7"]
+[ext_resource type="PackedScene" uid="uid://bmru1ghm2bf16" path="res://Scenes/UI/LateJoinLobbyUI.tscn" id="10_yv6a1"]
 [ext_resource type="Texture2D" uid="uid://dca55vfaclhk4" path="res://Assets/Effects/Particles/flare_32x32.png" id="space_particles"]
 
 [sub_resource type="Gradient" id="Gradient_space"]
@@ -83,16 +83,16 @@ color = Color(0.6, 0.8, 1, 0.3)
 wait_time = 300.0
 one_shot = true
 
-[node name="TextInput" parent="." unique_id=1312627650 instance=ExtResource("2_cma0f")]
+[node name="TextInput" parent="." unique_id=2119155533 instance=ExtResource("4_yv6a1")]
 
-[node name="MediaPopup" parent="." unique_id=1543915549 instance=ExtResource("4_new")]
+[node name="MediaPopup" parent="." unique_id=48795004 instance=ExtResource("5_ftfan")]
 visible = false
 
-[node name="MusicOptionsPopup" parent="." unique_id=1215126127 instance=ExtResource("5_new")]
+[node name="MusicOptionsPopup" parent="." unique_id=546190391 instance=ExtResource("6_ivc1v")]
 size = Vector2i(411, 200)
 visible = false
 
-[node name="AdminSpawnPopup" parent="." unique_id=1215126128 instance=ExtResource("6_spawn")]
+[node name="AdminSpawnPopup" parent="." unique_id=850792991 instance=ExtResource("7_3xh1n")]
 
 [node name="HSplitContainer" type="HSplitContainer" parent="." unique_id=601914485]
 layout_mode = 1
@@ -140,7 +140,7 @@ size = Vector2i(1340, 1080)
 size_2d_override_stretch = true
 render_target_update_mode = 4
 
-[node name="Lobby" parent="HSplitContainer/SubViewportContainer2/SubViewport" unique_id=1720103413 instance=ExtResource("3_f6lmg")]
+[node name="Lobby" parent="HSplitContainer/SubViewportContainer2/SubViewport" unique_id=159048036 instance=ExtResource("9_us0h7")]
 
 [node name="CommunicationsPanel" type="VBoxContainer" parent="HSplitContainer" unique_id=1859401179]
 custom_minimum_size = Vector2(400, 0)

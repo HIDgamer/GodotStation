@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cnnqbl8k2mbvo"]
 
-[ext_resource type="Script" uid="uid://c6yikr7dlwf0j" path="res://Code/Sprites/SpriteSystem.cs" id="1_mxu2l"]
+[ext_resource type="Script" uid="uid://c6yikr7dlwf0j" path="res://Scripts/game/SpriteSystem.cs" id="1_mxu2l"]
+
 
 [node name="SpriteSystem" type="Node2D" unique_id=488627550]
 script = ExtResource("1_mxu2l")
