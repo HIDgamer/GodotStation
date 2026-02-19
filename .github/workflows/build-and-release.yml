@@ -30,7 +30,7 @@ jobs:
             artifact: linux-build
           - platform: server
             preset: "Linux Dedicated Server"
-            output: "GodotStationServer"
+            output: "GodotStationServer.x86_64"
             artifact: server-build
 
     container:
