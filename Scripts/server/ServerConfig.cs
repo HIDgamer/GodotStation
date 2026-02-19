@@ -8,7 +8,7 @@ public partial class ServerConfig : Node
     public string Map            { get; private set; } = "DDome";
     public string Gamemode       { get; private set; } = "PVE";
     public string BackendUrl     { get; private set; } = "https://godotstation.duckdns.org";
-    public string ServerToken    { get; private set; } = "c04401b51965b2d2f9b7a266bfa36f6a36841d7d7a157c2ef72a93377e531a8ac54597eb0aa4de89047235084a82db33961005640a61108e4f0423b0133619c8";
+    public string ServerToken    { get; private set; } = "c04401b51965b2d2fh9b7a266bfa36f6a36841d7d7a157c2ef72a93377e531a8ac54597eb0aa4de89047235084a82db33961005640a61108e4f0423b0133619c8";
     public string Password       { get; private set; } = "";
     public bool   IsPublic       { get; private set; } = true;
     public string Description    { get; private set; } = "";

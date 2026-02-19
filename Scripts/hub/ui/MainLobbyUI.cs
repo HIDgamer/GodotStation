@@ -2,8 +2,6 @@ using Godot;
 using Godot.Collections;
 using System.Collections.Generic;
 
-public partial class AudioManager : Node { }
-
 public partial class MainLobbyUI : Control
 {
 	private AccountManager _accountManager;
@@ -140,54 +138,7 @@ public partial class MainLobbyUI : Control
 		if (FriendRequestsList != null) FriendRequestsList.ItemActivated += OnFriendRequestActivated;
 		if (ChatFriendsList != null) ChatFriendsList.ItemSelected += OnChatFriendSelected;
 		if (TabContainer != null) TabContainer.TabChanged += OnLobbyTabChanged;
-		
-		// Add hover sounds for buttons
-		AddHoverSounds();
 	}
-	
-	// Audio helper methods
-	private void PlayUIClick()
-	{
-		var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
-		if (audioManager != null)
-			audioManager.Call("play_ui_click");
-	}
-	
-	private void PlayUIMenuSelection()
-	{
-		var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
-		if (audioManager != null)
-			audioManager.Call("play_ui_menu_selection");
-	}
-	
-	private void PlayUIHover()
-	{
-		var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
-		if (audioManager != null)
-			audioManager.Call("play_ui_hover");
-	}
-	
-	private void AddHoverSounds()
-	{
-		// Add hover sounds to main buttons
-		if (DiscordLoginButton != null)
-			DiscordLoginButton.MouseEntered += PlayUIHover;
-		if (LogoutButton != null)
-			LogoutButton.MouseEntered += PlayUIHover;
-		if (RefreshServersButton != null)
-			RefreshServersButton.MouseEntered += PlayUIHover;
-		if (JoinServerButton != null)
-			JoinServerButton.MouseEntered += PlayUIHover;
-		if (HostServerButton != null)
-			HostServerButton.MouseEntered += PlayUIHover;
-		if (AddFriendButton != null)
-			AddFriendButton.MouseEntered += PlayUIHover;
-		if (RemoveFriendButton != null)
-			RemoveFriendButton.MouseEntered += PlayUIHover;
-		if (SendMessageButton != null)
-			SendMessageButton.MouseEntered += PlayUIHover;
-	}
-	
 	private void ShowLogin()
 	{
 		StopServerAutoRefresh();
