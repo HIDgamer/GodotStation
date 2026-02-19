@@ -21,15 +21,15 @@ jobs:
       matrix:
         include:
           - platform: windows
-            preset: "Windows Desktop"
+            preset: "Windows Desktop Client"
             output: "GodotStation.exe"
             artifact: windows-build
           - platform: linux
-            preset: "Linux/X11"
+            preset: "Linux Client"
             output: "GodotStation.x86_64"
             artifact: linux-build
           - platform: server
-            preset: "Dedicated Server"
+            preset: "Linux Dedicated Server"
             output: "GodotStation.server"
             artifact: server-build
 
