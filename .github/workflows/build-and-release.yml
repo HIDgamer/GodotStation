@@ -14,6 +14,10 @@ env:
   EXPORT_NAME: GodotStation
 
 jobs:
+
+  # ============================================================
+  # BUILD — Compile and export all three platform targets
+  # ============================================================
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -48,13 +52,13 @@ jobs:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
 
-      - name: Dotnet Restore
+      - name: Restore .NET dependencies
         run: dotnet restore
 
-      - name: Dotnet Build
+      - name: Build .NET assembly
         run: dotnet build --no-restore
 
-      - name: Install Godot Mono Export Templates
+      - name: Install Godot Mono export templates
         run: |
           mkdir -p /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
           wget --quiet --tries=3 --retry-connrefused \
@@ -63,7 +67,7 @@ jobs:
           mv templates/* /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono/
           rm Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
 
-      - name: Build ${{ matrix.platform }}
+      - name: Export ${{ matrix.platform }}
         run: |
           mkdir -p build/${{ matrix.platform }}
           OUTPUT="build/${{ matrix.platform }}/${{ matrix.output }}"
@@ -84,6 +88,10 @@ jobs:
           name: ${{ matrix.artifact }}
           path: build/${{ matrix.platform }}/
 
+  # ============================================================
+  # RELEASE — Zip artifacts and publish a GitHub release
+  # Only runs on tag pushes
+  # ============================================================
   create-release:
     needs: build
     runs-on: ubuntu-latest
@@ -92,13 +100,14 @@ jobs:
       contents: write
     outputs:
       tag: ${{ github.ref_name }}
+
     steps:
-      - name: Download all artifacts
+      - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Verify server artifact contents
+      - name: Verify server binary exists
         run: |
           echo "=== Server build contents ==="
           ls -la artifacts/server-build/
@@ -107,7 +116,13 @@ jobs:
             exit 1
           fi
 
-      - name: Zip builds and create manifest
+      - name: Get build metadata
+        id: meta
+        run: |
+          echo "date=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Zip platform builds and generate version manifest
         run: |
           cd artifacts/windows-build && zip -r ../../GodotStation-Windows.zip . && cd ../..
           cd artifacts/linux-build   && zip -r ../../GodotStation-Linux.zip . && cd ../..
@@ -133,6 +148,20 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          body: |
+            ## GodotStation ${{ github.ref_name }}
+            **Release Date:** ${{ steps.meta.outputs.date }}
+            **Commit:** `${{ steps.meta.outputs.short_sha }}`
+
+            ### Downloads
+            - 🪟 **Windows:** GodotStation-Windows.zip
+            - 🐧 **Linux:** GodotStation-Linux.zip
+            - 🖥️ **Server:** GodotStation-Server-Linux.zip
+
+            ### Installation
+            1. Download the appropriate file for your platform
+            2. Extract the archive
+            3. Run the executable
           files: |
             GodotStation-Windows.zip
             GodotStation-Linux.zip
@@ -147,17 +176,22 @@ jobs:
           name: version-manifest
           path: version-manifest.json
 
+  # ============================================================
+  # DEPLOY MANIFEST — Push version manifest to the game server
+  # for the auto-updater
+  # ============================================================
   deploy-manifest-to-game:
     needs: create-release
     runs-on: ubuntu-latest
+
     steps:
-      - name: Download manifest artifact
+      - name: Download version manifest
         uses: actions/download-artifact@v4
         with:
           name: version-manifest
           path: .
 
-      - name: Deploy manifest to GAME server (Autoupdater)
+      - name: Upload manifest to game server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.GAME_IP }}
@@ -167,9 +201,14 @@ jobs:
           source: "version-manifest.json"
           target: "/var/www/godotstation/updates/"
 
+  # ============================================================
+  # DEPLOY SERVER — Pull and install the new build on the
+  # Oracle dedicated server VM
+  # ============================================================
   deploy-dedicated-server-to-oracle:
     needs: create-release
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy to Oracle VM
         uses: appleboy/ssh-action@master
@@ -181,6 +220,7 @@ jobs:
           script: |
             sudo apt-get install -y unzip 2>/dev/null || true
             set -e
+
             TAG="${{ needs.create-release.outputs.tag }}"
             REPO="${{ github.repository }}"
             DEPLOY_DIR="/home/ubuntu/godotstation"
@@ -195,6 +235,7 @@ jobs:
 
             mkdir -p "$BACKUP_DIR"
 
+            # ── Stop ───────────────────────────────────────────────────────
             echo "=== Stopping server (deploying tag: $TAG) ==="
             curl -sf -X POST \
               -H "Content-Type: application/json" \
@@ -203,12 +244,14 @@ jobs:
             curl -sf -X POST "$PANEL_URL/api/stop" -b /tmp/gs_deploy.txt || true
             sleep 3
 
+            # ── Backup ─────────────────────────────────────────────────────
             if [ -f "$DEPLOY_DIR/$BINARY_NAME" ]; then
               echo "=== Backing up current build ==="
               cp "$DEPLOY_DIR/$BINARY_NAME" "$BACKUP_DIR/$BINARY_NAME.bak"
               cp "$DEPLOY_DIR/$PCK_NAME"    "$BACKUP_DIR/$PCK_NAME.bak" 2>/dev/null || true
             fi
 
+            # ── Wipe ───────────────────────────────────────────────────────
             echo "=== Removing old binaries ==="
             rm -fv "$DEPLOY_DIR/$BINARY_NAME"
             rm -fv "$DEPLOY_DIR/$PCK_NAME"
@@ -216,6 +259,7 @@ jobs:
             rm -fv "$DEPLOY_DIR/GodotStation.pck"
             rm -fv "$DEPLOY_DIR/GodotStation.server"
 
+            # ── Download ───────────────────────────────────────────────────
             echo "=== Downloading $ASSET_URL ==="
             rm -rf /tmp/gs_extract /tmp/server_update.zip
             wget -q "$ASSET_URL" -O /tmp/server_update.zip
@@ -224,6 +268,7 @@ jobs:
             echo "=== Zip contents ==="
             ls -la /tmp/gs_extract/
 
+            # ── Validate ───────────────────────────────────────────────────
             if [ ! -f "/tmp/gs_extract/$BINARY_IN_ZIP" ]; then
               echo "ERROR: '$BINARY_IN_ZIP' not found. Restoring backup."
               [ -f "$BACKUP_DIR/$BINARY_NAME.bak" ] && cp "$BACKUP_DIR/$BINARY_NAME.bak" "$DEPLOY_DIR/$BINARY_NAME"
@@ -242,6 +287,7 @@ jobs:
               exit 1
             fi
 
+            # ── Install ────────────────────────────────────────────────────
             echo "=== Installing new build ==="
             cp "/tmp/gs_extract/$BINARY_IN_ZIP" "$DEPLOY_DIR/$BINARY_NAME"
             cp "/tmp/gs_extract/$PCK_IN_ZIP"    "$DEPLOY_DIR/$PCK_NAME"
@@ -253,6 +299,10 @@ jobs:
               cp -r "/tmp/gs_extract/$DATA_DIR_IN_ZIP" "$DEPLOY_DIR/"
             fi
 
+            echo "=== Installed files ==="
+            ls -lh "$DEPLOY_DIR/$BINARY_NAME" "$DEPLOY_DIR/$PCK_NAME"
+
+            # ── Start ──────────────────────────────────────────────────────
             echo "=== Starting server ==="
             curl -sf -X POST "$PANEL_URL/api/start" -b /tmp/gs_deploy.txt || true
 
