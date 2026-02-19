@@ -30,7 +30,7 @@ jobs:
             artifact: linux-build
           - platform: server
             preset: "Linux Dedicated Server"
-            output: "GodotStation.server"
+            output: "GodotStationServer"
             artifact: server-build
 
     container:
@@ -51,6 +51,9 @@ jobs:
       - name: Dotnet Restore
         run: dotnet restore
 
+      - name: Dotnet Build
+        run: dotnet build --no-restore --configuration Release
+
       - name: Install Godot Mono Export Templates
         run: |
           mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
@@ -65,6 +68,13 @@ jobs:
           mkdir -p build/${{ matrix.platform }}
           OUTPUT="build/${{ matrix.platform }}/${{ matrix.output }}"
           godot --headless --verbose --export-release "${{ matrix.preset }}" "$OUTPUT"
+
+          if [ ! -f "$OUTPUT" ]; then
+            echo "ERROR: Export did not produce: $OUTPUT"
+            ls -la build/${{ matrix.platform }}/
+            exit 1
+          fi
+
           chmod +x "$OUTPUT" || true
           echo "${GITHUB_REF_NAME}" > build/${{ matrix.platform }}/version.txt
 
@@ -87,6 +97,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Verify server artifact contents
+        run: |
+          echo "=== Server build contents ==="
+          ls -la artifacts/server-build/
+          if [ ! -f "artifacts/server-build/GodotStation.x86_64" ]; then
+            echo "ERROR: Server binary missing from artifact."
+            exit 1
+          fi
 
       - name: Zip builds and create manifest
         run: |
@@ -152,7 +171,20 @@ jobs:
     needs: create-release
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to NEW Oracle VM
+      - name: Checkout repository (to get scripts/deploy.sh)
+        uses: actions/checkout@v4
+
+      - name: Copy deploy script to Oracle VM
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ORACLE_IP }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          port: 22
+          source: "scripts/deploy.sh"
+          target: "/home/ubuntu/"
+
+      - name: Run clean deploy on Oracle VM
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.ORACLE_IP }}
@@ -160,45 +192,8 @@ jobs:
           key: ${{ secrets.ORACLE_SSH_KEY }}
           port: 22
           script: |
-            set -e
-            TAG="${{ needs.create-release.outputs.tag }}"
-            REPO="${{ github.repository }}"
-            DEPLOY_DIR="/home/ubuntu/godotstation"
-            BACKUP_DIR="$DEPLOY_DIR/backups"
-            BINARY_NAME="GodotStationServer.x86_64"
-            PCK_NAME="GodotStationServer.pck"
-            ASSET_URL="https://github.com/${REPO}/releases/download/${TAG}/GodotStation-Server-Linux.zip"
-
-            mkdir -p "$BACKUP_DIR"
-
-            echo "Authenticating with Panel on 8087..."
-            curl -sf -X POST \
-              -H "Content-Type: application/json" \
-              -d '{"password":"${{ secrets.PANEL_PASSWORD }}"}' \
-              http://localhost:8087/api/login \
-              -c /tmp/gs_cookies.txt || true
-
-            echo "Stopping server..."
-            curl -sf -X POST http://localhost:8087/api/stop -b /tmp/gs_cookies.txt || true
-            sleep 3
-
-            if [ -f "$DEPLOY_DIR/$BINARY_NAME" ]; then
-              cp "$DEPLOY_DIR/$BINARY_NAME" "$BACKUP_DIR/$BINARY_NAME.bak"
-              cp "$DEPLOY_DIR/$PCK_NAME"    "$BACKUP_DIR/$PCK_NAME.bak" 2>/dev/null || true
-            fi
-
-            echo "Downloading and Extracting Update..."
-            cd /tmp
-            wget -q "$ASSET_URL" -O server_update.zip
-            unzip -q -o server_update.zip -d /tmp/gs_extract
-
-            cp /tmp/gs_extract/GodotStation.server "$DEPLOY_DIR/$BINARY_NAME"
-            cp /tmp/gs_extract/GodotStation.pck    "$DEPLOY_DIR/$PCK_NAME" 2>/dev/null || true
-            chmod +x "$DEPLOY_DIR/$BINARY_NAME"
-
-            echo "Starting server..."
-            curl -sf -X POST http://localhost:8087/api/start -b /tmp/gs_cookies.txt || true
-            
-            echo "${TAG}" > "$DEPLOY_DIR/version.txt"
-            rm -rf /tmp/gs_extract /tmp/server_update.zip /tmp/gs_cookies.txt
-            echo "Deployment Complete."
+            chmod +x /home/ubuntu/scripts/deploy.sh
+            bash /home/ubuntu/scripts/deploy.sh \
+              "${{ needs.create-release.outputs.tag }}" \
+              "${{ github.repository }}" \
+              "${{ secrets.PANEL_PASSWORD }}"
