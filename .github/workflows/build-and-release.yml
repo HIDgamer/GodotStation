@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  GODOT_VERSION: 4.6
+  GODOT_VERSION: 4.6.1
   EXPORT_NAME: GodotStation
 
 jobs:
@@ -52,7 +52,7 @@ jobs:
         run: dotnet restore
 
       - name: Dotnet Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore
 
       - name: Install Godot Mono Export Templates
         run: |
