@@ -179,6 +179,7 @@ jobs:
           key: ${{ secrets.ORACLE_SSH_KEY }}
           port: 22
           script: |
+            sudo apt-get install -y unzip 2>/dev/null || true
             set -e
             TAG="${{ needs.create-release.outputs.tag }}"
             REPO="${{ github.repository }}"
