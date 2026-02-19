@@ -22,17 +22,16 @@ public partial class ServerRegistrar : Node
     public override void _Ready()
     {
         _config = GetNodeOrNull<ServerConfig>("/root/ServerConfig");
-        
+
         if (_config == null)
         {
             GD.PrintErr("[ServerRegistrar] CRITICAL: ServerConfig not found.");
             return;
         }
 
+        // Token is NOT added here — ServerConfig.LoadFromEnvironment() may not have
+        // run yet at this point. The token is added per-request in Register() instead.
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-
-        if (!string.IsNullOrEmpty(_config.ServerToken))
-            _httpClient.DefaultRequestHeaders.Add("X-Server-Token", _config.ServerToken);
 
         _heartbeatTimer = new Timer
         {
@@ -52,10 +51,18 @@ public partial class ServerRegistrar : Node
         {
             var payload = BuildRegistrationPayload();
             var content = new StringContent(Json.Stringify(payload), Encoding.UTF8, "application/json");
-            var url = $"{_config.BackendUrl?.TrimEnd('/')}/api/servers/register";
-            
-            var response = await _httpClient.PostAsync(url, content);
-            var body = await response.Content.ReadAsStringAsync();
+            var url     = $"{_config.BackendUrl?.TrimEnd('/')}/api/servers/register";
+
+            // Read the token at request time so ServerConfig is guaranteed to have
+            // loaded its environment overrides before we send the header.
+            using var request = new System.Net.Http.HttpRequestMessage(
+                System.Net.Http.HttpMethod.Post, url);
+            request.Content = content;
+            if (!string.IsNullOrEmpty(_config.ServerToken))
+                request.Headers.Add("X-Server-Token", _config.ServerToken);
+
+            var response = await _httpClient.SendAsync(request);
+            var body     = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
@@ -73,7 +80,7 @@ public partial class ServerRegistrar : Node
             }
 
             var result = parser.Data.AsGodotDictionary();
-            _serverId = result.ContainsKey("server_id") ? result["server_id"].ToString() : Guid.NewGuid().ToString();
+            _serverId   = result.ContainsKey("server_id") ? result["server_id"].ToString() : Guid.NewGuid().ToString();
             _registered = true;
 
             _heartbeatTimer.Start();
@@ -88,6 +95,7 @@ public partial class ServerRegistrar : Node
             return false;
         }
     }
+
     public void UpdatePlayerCount(int count)
     {
         _currentPlayers = count;
@@ -104,7 +112,12 @@ public partial class ServerRegistrar : Node
         {
             var payload = new Godot.Collections.Dictionary { { "server_id", _serverId } };
             var content = new StringContent(Json.Stringify(payload), Encoding.UTF8, "application/json");
-            await _httpClient.PostAsync($"{_config.BackendUrl}/api/servers/deregister", content);
+            using var request = new System.Net.Http.HttpRequestMessage(
+                System.Net.Http.HttpMethod.Post, $"{_config.BackendUrl}/api/servers/deregister");
+            request.Content = content;
+            if (!string.IsNullOrEmpty(_config.ServerToken))
+                request.Headers.Add("X-Server-Token", _config.ServerToken);
+            await _httpClient.SendAsync(request);
             GD.Print("[ServerRegistrar] Deregistered from backend.");
         }
         catch (Exception e)
@@ -124,8 +137,14 @@ public partial class ServerRegistrar : Node
                 { "server_id",       _serverId },
                 { "current_players", _currentPlayers }
             };
-            var content  = new StringContent(Json.Stringify(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_config.BackendUrl}/api/servers/heartbeat", content);
+            var content = new StringContent(Json.Stringify(payload), Encoding.UTF8, "application/json");
+            using var request = new System.Net.Http.HttpRequestMessage(
+                System.Net.Http.HttpMethod.Post, $"{_config.BackendUrl}/api/servers/heartbeat");
+            request.Content = content;
+            if (!string.IsNullOrEmpty(_config.ServerToken))
+                request.Headers.Add("X-Server-Token", _config.ServerToken);
+
+            var response = await _httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
             {
