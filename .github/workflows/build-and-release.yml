@@ -56,7 +56,7 @@ jobs:
         run: dotnet restore
 
       - name: Build .NET assembly
-        run: dotnet build --no-restore
+        run: dotnet build --no-restore --no-incremental
 
       - name: Install Godot Mono export templates
         run: |
