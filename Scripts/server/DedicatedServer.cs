@@ -28,9 +28,18 @@ public partial class DedicatedServer : Node
     private readonly Dictionary<int, PlayerInfo> _players = new();
 
     public int PlayerCount => _players.Count;
+    public bool IsActiveServer { get; private set; }
 
     public override async void _Ready()
     {
+        if (!ShouldRunDedicatedRuntime())
+        {
+            IsActiveServer = false;
+            return;
+        }
+
+        IsActiveServer = true;
+
         _config = GetNode<ServerConfig>("/root/ServerConfig");
         _registrar = GetNode<ServerRegistrar>("/root/ServerRegistrar");
         _jobManager = GetNodeOrNull<JobManager>("/root/JobManager");
@@ -77,6 +86,22 @@ public partial class DedicatedServer : Node
             gameManager.StartDedicatedLobby();
         else
             GD.PrintErr("[DedicatedServer] GameManager not found; dedicated lobby did not start.");
+    }
+
+    private static bool ShouldRunDedicatedRuntime()
+    {
+        if (OS.HasFeature("dedicated_server"))
+            return true;
+
+        if (string.Equals(DisplayServer.GetName(), "headless", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var args = OS.GetCmdlineArgs();
+        for (int i = 0; i < args.Length; i++)
+            if (args[i] == "--headless")
+                return true;
+
+        return false;
     }
 
     private void OnPeerConnected(long id)
@@ -240,7 +265,8 @@ public partial class DedicatedServer : Node
 
     public override void _ExitTree()
     {
-        _registrar?.Deregister();
+        if (IsActiveServer)
+            _registrar?.Deregister();
         _httpClient?.Dispose();
     }
 }

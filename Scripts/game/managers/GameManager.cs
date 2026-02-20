@@ -90,7 +90,7 @@ public partial class GameManager : Node
         new(StringComparer.OrdinalIgnoreCase)
         {
             { "uid://dible6m71p44g", "res://Scenes/Maps/DDome.tscn" },
-            { "uid://bfswxq626edux", "res://Scenes/Maps/Hadley's_Hope.tscn" }
+			{ "uid://bfswxq626edux", "res://Scenes/Maps/Hadley's_Hope.tscn" }
         };
 
     private LobbyManager _lobbyManager;
@@ -114,7 +114,7 @@ public partial class GameManager : Node
     [Signal] public delegate void LateJoinerTransitionedEventHandler(int peerId);
     [Signal] public delegate void RoundEndedEventHandler();
 
-    public const string CHARACTERS_DIR = "user://characters/";
+	public const string CHARACTERS_DIR = "user://characters/";
     public const int SLOT_COUNT = 10;
     private string _charactersDirOverride = null;
 
@@ -133,7 +133,7 @@ public partial class GameManager : Node
 
     public ServerPrivileges.ServerRole GetPeerRole(int peerId)
     {
-        var tag = _peerToDiscordTag.ContainsKey(peerId) ? _peerToDiscordTag[peerId] : "";
+		var tag = _peerToDiscordTag.ContainsKey(peerId) ? _peerToDiscordTag[peerId] : "";
         return GetPlayerRole(tag);
     }
 
@@ -147,13 +147,13 @@ public partial class GameManager : Node
 
     public override void _Ready()
     {
-        GD.Print("[GameManager] _Ready called.");
+		GD.Print("[GameManager] _Ready called.");
 
-        PlayerScene = GD.Load<PackedScene>("uid://cj25bsb3ooj62");
+		PlayerScene = GD.Load<PackedScene>("uid://cj25bsb3ooj62");
         if (PlayerScene == null)
-            PlayerScene = GD.Load<PackedScene>("res://Scenes/Characters/Human.tscn");
+			PlayerScene = GD.Load<PackedScene>("res://Scenes/Characters/Human.tscn");
         if (PlayerScene == null)
-            GD.PrintErr("[GameManager] CRITICAL: PlayerScene failed to load.");
+			GD.PrintErr("[GameManager] CRITICAL: PlayerScene failed to load.");
 
         Multiplayer.PeerConnected      += OnPeerConnected;
         Multiplayer.PeerDisconnected   += OnPeerDisconnected;
@@ -164,32 +164,33 @@ public partial class GameManager : Node
         var args = OS.GetCmdlineArgs();
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == "--profile" && i + 1 < args.Length)
+			if (args[i] == "--profile" && i + 1 < args.Length)
             {
-                _charactersDirOverride = $"user://characters_{args[i + 1]}/";
-                GD.Print($"[GameManager] Profile override active: {_charactersDirOverride}");
+				_charactersDirOverride = $"user://characters_{args[i + 1]}/";
+				GD.Print($"[GameManager] Profile override active: {_charactersDirOverride}");
                 break;
             }
         }
 
         EnsureCharactersDirectory();
 
-        _lobbyManager = GetNodeOrNull<LobbyManager>("/root/LobbyManager");
+		_lobbyManager = GetNodeOrNull<LobbyManager>("/root/LobbyManager");
 
         // Detect dedicated server mode.
-        _dedicatedServer  = GetNodeOrNull<DedicatedServer>("/root/DedicatedServer");
+        var dedicatedNode = GetNodeOrNull<DedicatedServer>("/root/DedicatedServer");
+        _dedicatedServer = (dedicatedNode != null && dedicatedNode.IsActiveServer) ? dedicatedNode : null;
         _serverPrivileges = GetNodeOrNull<ServerPrivileges>("/root/ServerPrivileges");
         if (_dedicatedServer != null)
         {
             _dedicatedServer.PlayerAuthenticated += OnDedicatedPlayerAuthenticated;
             _dedicatedServer.PlayerAuthFailed    += OnDedicatedPlayerAuthFailed;
             ApplyDedicatedServerConfig();
-            GD.Print("[GameManager] Dedicated server detected â€” auth gate active.");
+			GD.Print("[GameManager] Dedicated server detected â€” auth gate active.");
         }
 
         InitializeLateJoinSystem();
 
-        var discord = GetNodeOrNull<Node>("/root/DiscordRpc");
+		var discord = GetNodeOrNull<Node>("/root/DiscordRpc");
         GameStateChanged += (stateInt) =>
         {
             var state = (GameState)stateInt;
@@ -197,28 +198,28 @@ public partial class GameManager : Node
             switch (state)
             {
                 case GameState.Lobby:
-                    if (discord.HasMethod("SetInLobby")) discord.Call("SetInLobby");
+					if (discord.HasMethod("SetInLobby")) discord.Call("SetInLobby");
                     break;
                 case GameState.Playing:
-                    if (discord.HasMethod("SetInGame")) discord.Call("SetInGame", ServerName, PlayerCount, MaxPlayers);
+					if (discord.HasMethod("SetInGame")) discord.Call("SetInGame", ServerName, PlayerCount, MaxPlayers);
                     break;
                 case GameState.Hosting:
-                    if (discord.HasMethod("SetHosting")) discord.Call("SetHosting", ServerName, PlayerCount, MaxPlayers);
+					if (discord.HasMethod("SetHosting")) discord.Call("SetHosting", ServerName, PlayerCount, MaxPlayers);
                     break;
             }
         };
 
-        GD.Print("[GameManager] _Ready complete.");
+		GD.Print("[GameManager] _Ready complete.");
     }
 
     private void InitializeLateJoinSystem()
     {
-        _jobManager = GetNodeOrNull<JobManager>("/root/JobManager");
+		_jobManager = GetNodeOrNull<JobManager>("/root/JobManager");
         if (_jobManager == null)
         {
             _jobManager = new JobManager();
-            _jobManager.Name = "JobManager";
-            GetTree().Root.CallDeferred("add_child", _jobManager);
+			_jobManager.Name = "JobManager";
+			GetTree().Root.CallDeferred("add_child", _jobManager);
         }
     }
 
@@ -241,7 +242,7 @@ public partial class GameManager : Node
 
         if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
         {
-            GD.PrintErr($"[GameManager] Invalid host port: {port}.");
+			GD.PrintErr($"[GameManager] Invalid host port: {port}.");
             return;
         }
 
@@ -249,7 +250,7 @@ public partial class GameManager : Node
         var error = _peer.CreateServer(port, MaxPlayers, ENET_CHANNEL_COUNT);
         if (error != Error.Ok)
         {
-            GD.PrintErr($"[GameManager] Failed to create server on port {port}: {error}");
+			GD.PrintErr($"[GameManager] Failed to create server on port {port}: {error}");
             return;
         }
 
@@ -259,26 +260,26 @@ public partial class GameManager : Node
         _connectedPeers.Add(1);
         _isHosting = true;
 
-        var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
         if (prefManager != null)
         {
-            var playerData = (Dictionary)prefManager.Call("get_character_data");
-            var hostName = playerData.ContainsKey("name") ? (string)playerData["name"] : "Host";
-            if (string.IsNullOrEmpty(hostName)) hostName = "Host";
+			var playerData = (Dictionary)prefManager.Call("get_character_data");
+			var hostName = playerData.ContainsKey("name") ? (string)playerData["name"] : "Host";
+			if (string.IsNullOrEmpty(hostName)) hostName = "Host";
             _playerNames[1] = hostName;
-            if (!playerData.ContainsKey("peer_id")) playerData["peer_id"] = 1;
+			if (!playerData.ContainsKey("peer_id")) playerData["peer_id"] = 1;
             _peerCharacters[1] = playerData;
-            if (prefManager.HasMethod("set_peer_character_data"))
-                prefManager.Call("set_peer_character_data", 1, playerData);
+			if (prefManager.HasMethod("set_peer_character_data"))
+				prefManager.Call("set_peer_character_data", 1, playerData);
         }
         else
         {
-            _playerNames[1] = "Host";
-            _peerCharacters[1] = new Dictionary { { "name", "Host" }, { "peer_id", 1 } };
+			_playerNames[1] = "Host";
+			_peerCharacters[1] = new Dictionary { { "name", "Host" }, { "peer_id", 1 } };
         }
 
-        var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
-        var hostTag = accountManager?.GetDiscordTag() ?? "";
+		var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
+		var hostTag = accountManager?.GetDiscordTag() ?? "";
         if (!string.IsNullOrEmpty(hostTag))
         {
             _peerToDiscordTag[1] = hostTag;
@@ -295,16 +296,16 @@ public partial class GameManager : Node
     private void RegisterWithLobby(int port)
     {
         if (_lobbyManager == null) return;
-        _lobbyManager.Call("RegisterServer", new Dictionary
+		_lobbyManager.Call("RegisterServer", new Dictionary
         {
-            { "name",              string.IsNullOrEmpty(ServerName) ? "GodotStation Server" : ServerName },
-            { "description",       ServerDescription },
-            { "password_protected", PasswordProtected },
-            { "map",               CurrentMap },
-            { "gamemode",          Gamemode },
-            { "max_players",       MaxPlayers },
-            { "current_players",   PlayerCount },
-            { "port",              port }
+			{ "name",              string.IsNullOrEmpty(ServerName) ? "GodotStation Server" : ServerName },
+			{ "description",       ServerDescription },
+			{ "password_protected", PasswordProtected },
+			{ "map",               CurrentMap },
+			{ "gamemode",          Gamemode },
+			{ "max_players",       MaxPlayers },
+			{ "current_players",   PlayerCount },
+			{ "port",              port }
         });
     }
 
@@ -342,7 +343,7 @@ public partial class GameManager : Node
 
         if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
         {
-            GD.PrintErr($"[GameManager] Invalid join port: {port}.");
+			GD.PrintErr($"[GameManager] Invalid join port: {port}.");
             EmitSignal(SignalName.ConnectionFailed);
             return;
         }
@@ -358,15 +359,15 @@ public partial class GameManager : Node
         }
         else
         {
-            GD.PrintErr($"[GameManager] Failed to create ENet client for {address}:{port}: {error}");
+			GD.PrintErr($"[GameManager] Failed to create ENet client for {address}:{port}: {error}");
             EmitSignal(SignalName.ConnectionFailed);
         }
     }
 
     public void LeaveGame()
     {
-        GD.Print("[GameManager] LeaveGame called.");
-        _lobbyManager?.Call("UnregisterServer");
+		GD.Print("[GameManager] LeaveGame called.");
+		_lobbyManager?.Call("UnregisterServer");
         if (_lobbyTimer != null && !_lobbyTimer.IsStopped()) _lobbyTimer.Stop();
         _peer?.Close();
         Multiplayer.MultiplayerPeer = null;
@@ -422,7 +423,7 @@ public partial class GameManager : Node
 
     public void EndRound()
     {
-        GD.Print($"[GameManager] EndRound. isServer={Multiplayer.IsServer()} roundInProgress={_roundInProgress}");
+		GD.Print($"[GameManager] EndRound. isServer={Multiplayer.IsServer()} roundInProgress={_roundInProgress}");
         if (!Multiplayer.IsServer() || !_roundInProgress) return;
 
         _roundInProgress = false;
@@ -453,7 +454,7 @@ public partial class GameManager : Node
             foreach (var kvp in _peerCharacters)
             {
                 if (kvp.Key == peerId) continue;
-                var cachedName = _playerNames.ContainsKey(kvp.Key) ? _playerNames[kvp.Key] : $"Player{kvp.Key}";
+				var cachedName = _playerNames.ContainsKey(kvp.Key) ? _playerNames[kvp.Key] : $"Player{kvp.Key}";
                 RpcId(peerId, MethodName.BroadcastPlayerJoinedWithData, kvp.Key, cachedName, kvp.Value);
             }
         }
@@ -471,7 +472,7 @@ public partial class GameManager : Node
         _pendingAuth.Remove(peerId);
         PlayerCount = _connectedPeers.Count;
 
-        var discordTag = _peerToDiscordTag.ContainsKey(peerId) ? _peerToDiscordTag[peerId] : "";
+		var discordTag = _peerToDiscordTag.ContainsKey(peerId) ? _peerToDiscordTag[peerId] : "";
         _peerToDiscordTag.Remove(peerId);
         if (!string.IsNullOrEmpty(discordTag)) _discordTagToPeer.Remove(discordTag);
 
@@ -481,7 +482,7 @@ public partial class GameManager : Node
 
         if (isRoundParticipant)
         {
-            var world = GetTree().GetFirstNodeInGroup("World");
+			var world = GetTree().GetFirstNodeInGroup("World");
             var playerNode = world?.GetNodeOrNull<Node2D>(peerId.ToString());
 
             if (playerNode == null)
@@ -494,11 +495,11 @@ public partial class GameManager : Node
                 if (_jobManager != null)
                 {
                     var job = _jobManager.GetAssignedJob(peerId);
-                    if (!string.IsNullOrEmpty(job)) charData["job"] = job;
+					if (!string.IsNullOrEmpty(job)) charData["job"] = job;
                 }
                 _sleepingMobData[discordTag] = charData;
 
-                var stateSystem = playerNode.GetNodeOrNull<MobStateSystem>("MobStateSystem");
+				var stateSystem = playerNode.GetNodeOrNull<MobStateSystem>("MobStateSystem");
                 stateSystem?.SetState(MobState.Sleeping);
                 _sleepingMobs[discordTag] = peerId.ToString();
             }
@@ -506,7 +507,7 @@ public partial class GameManager : Node
         else
         {
             _jobManager?.UnassignPeer(peerId);
-            var world = GetTree().GetFirstNodeInGroup("World");
+			var world = GetTree().GetFirstNodeInGroup("World");
             var playerNode = world?.GetNodeOrNull<Node2D>(peerId.ToString());
             playerNode?.QueueFree();
         }
@@ -522,25 +523,25 @@ public partial class GameManager : Node
     {
         _isConnected = true;
         var peerId = Multiplayer.GetUniqueId();
-        GD.Print($"[GameManager] OnConnectedToServer: peer ID = {peerId}");
+		GD.Print($"[GameManager] OnConnectedToServer: peer ID = {peerId}");
 
         _connectedPeers.Add(peerId);
 
-        var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
-        var discordTag = accountManager?.GetDiscordTag() ?? "";
-        var token      = accountManager?.GetAuthToken()  ?? "";
+		var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
+		var discordTag = accountManager?.GetDiscordTag() ?? "";
+		var token      = accountManager?.GetAuthToken()  ?? "";
 
-        var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
+		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
         if (prefManager != null)
         {
-            var playerData = (Dictionary)prefManager.Call("get_character_data");
-            if (!playerData.ContainsKey("peer_id")) playerData["peer_id"] = peerId;
+			var playerData = (Dictionary)prefManager.Call("get_character_data");
+			if (!playerData.ContainsKey("peer_id")) playerData["peer_id"] = peerId;
 
             // Determine preferred job from role priorities.
-            string preferredJob = "";
-            if (playerData.ContainsKey("role_priorities"))
+			string preferredJob = "";
+			if (playerData.ContainsKey("role_priorities"))
             {
-                var priorities = playerData["role_priorities"].AsGodotDictionary();
+				var priorities = playerData["role_priorities"].AsGodotDictionary();
                 preferredJob = DeterminePreferredJob(priorities);
             }
 
@@ -549,7 +550,7 @@ public partial class GameManager : Node
         }
         else
         {
-            GD.PrintErr("[GameManager] PreferenceManager not found â€” RegisterPlayer not sent.");
+			GD.PrintErr("[GameManager] PreferenceManager not found â€” RegisterPlayer not sent.");
         }
 
         RpcId(1, MethodName.RequestCurrentVideo);
@@ -557,7 +558,7 @@ public partial class GameManager : Node
 
     private void OnConnectionFailed()
     {
-        GD.PrintErr("[GameManager] OnConnectionFailed.");
+		GD.PrintErr("[GameManager] OnConnectionFailed.");
         EmitSignal(SignalName.ConnectionFailed);
         _isConnected = false;
         Multiplayer.MultiplayerPeer = null;
@@ -565,7 +566,7 @@ public partial class GameManager : Node
 
     private void OnServerDisconnected()
     {
-        GD.PrintErr("[GameManager] OnServerDisconnected â€” returning to menu.");
+		GD.PrintErr("[GameManager] OnServerDisconnected â€” returning to menu.");
         _isConnected = false;
         _gameStarted = false;
         _roundInProgress = false;
@@ -589,7 +590,7 @@ public partial class GameManager : Node
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     private void RegisterPlayer(int peerId, string discordTag, Dictionary characterData,
-                                string token = "", string preferredJob = "")
+								string token = "", string preferredJob = "")
     {
         if (!Multiplayer.IsServer()) return;
 
@@ -597,7 +598,7 @@ public partial class GameManager : Node
         var actualSender = Multiplayer.GetRemoteSenderId();
         if (actualSender != peerId)
         {
-            GD.PrintErr($"[GameManager] RegisterPlayer sender mismatch: claimed={peerId} actual={actualSender}. Rejecting.");
+			GD.PrintErr($"[GameManager] RegisterPlayer sender mismatch: claimed={peerId} actual={actualSender}. Rejecting.");
             return;
         }
 
@@ -608,12 +609,12 @@ public partial class GameManager : Node
             {
                 // Already authenticated (e.g., re-registration after reconnect).
                 var username = _dedicatedServer.GetPlayerUsername(peerId);
-                if (!string.IsNullOrEmpty(username)) characterData["name"] = username;
-                characterData["job"] = _dedicatedServer.GetPlayerJob(peerId);
+				if (!string.IsNullOrEmpty(username)) characterData["name"] = username;
+				characterData["job"] = _dedicatedServer.GetPlayerJob(peerId);
             }
             else
             {
-                GD.Print($"[GameManager] Peer {peerId} registering â€” queueing for auth verification.");
+				GD.Print($"[GameManager] Peer {peerId} registering â€” queueing for auth verification.");
                 _pendingAuth[peerId] = (discordTag, characterData, token, preferredJob);
                 _dedicatedServer.BeginAuth(peerId, token, preferredJob);
                 return;
@@ -630,28 +631,28 @@ public partial class GameManager : Node
 
         if (!_pendingAuth.TryGetValue(peerId, out var pending))
         {
-            GD.PrintErr($"[GameManager] OnDedicatedPlayerAuthenticated: no pending registration for peer {peerId}.");
+			GD.PrintErr($"[GameManager] OnDedicatedPlayerAuthenticated: no pending registration for peer {peerId}.");
             return;
         }
         _pendingAuth.Remove(peerId);
 
         if (!_connectedPeers.Contains(peerId))
         {
-            GD.Print($"[GameManager] Peer {peerId} disconnected during auth. Skipping.");
+			GD.Print($"[GameManager] Peer {peerId} disconnected during auth. Skipping.");
             return;
         }
 
         var (tag, charData, _, _) = pending;
         // Trust backend username over what the client sent.
-        charData["name"] = username;
-        charData["job"]  = assignedJob;
+		charData["name"] = username;
+		charData["job"]  = assignedJob;
 
         ProcessPlayerRegistration(peerId, tag, charData);
     }
 
     private void OnDedicatedPlayerAuthFailed(int peerId, string reason)
     {
-        GD.PrintErr($"[GameManager] Auth failed for peer {peerId}: {reason}");
+		GD.PrintErr($"[GameManager] Auth failed for peer {peerId}: {reason}");
         _pendingAuth.Remove(peerId);
         // DedicatedServer already kicks the peer, but clean up our state.
         _connectedPeers.Remove(peerId);
@@ -662,7 +663,7 @@ public partial class GameManager : Node
 
     private void ProcessPlayerRegistration(int peerId, string discordTag, Dictionary characterData)
     {
-        var charName = characterData.ContainsKey("name") ? (string)characterData["name"] : "(unknown)";
+		var charName = characterData.ContainsKey("name") ? (string)characterData["name"] : "(unknown)";
 		GD.Print($"[GameManager] ProcessPlayerRegistration: peer={peerId} tag='{discordTag}' name='{charName}' roundInProgress={_roundInProgress}");
 
         if (!string.IsNullOrEmpty(discordTag))
@@ -1286,7 +1287,7 @@ public partial class GameManager : Node
 		if (PlayerScene == null)
 		{
 			PlayerScene = GD.Load<PackedScene>("uid://cj25bsb3ooj62") ??
-			              GD.Load<PackedScene>("res://Scenes/Characters/Human.tscn");
+						  GD.Load<PackedScene>("res://Scenes/Characters/Human.tscn");
 		}
 		if (PlayerScene == null)
 		{
@@ -1420,7 +1421,7 @@ public partial class GameManager : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Unreliable)]
     private void ReceivePlayerTransform(int playerId, Vector2 position, float rotation)
     {
-        var world  = GetTree().GetFirstNodeInGroup("World");
+		var world  = GetTree().GetFirstNodeInGroup("World");
         var player = world?.GetNodeOrNull<Node2D>(playerId.ToString());
         if (player != null)
         {
@@ -1435,7 +1436,7 @@ public partial class GameManager : Node
         var actualSenderId = Multiplayer.GetRemoteSenderId();
         if (actualSenderId != claimedSenderId)
         {
-            GD.PrintErr($"[GameManager] RPC sender mismatch: claimed={claimedSenderId} actual={actualSenderId}. Rejecting.");
+			GD.PrintErr($"[GameManager] RPC sender mismatch: claimed={claimedSenderId} actual={actualSenderId}. Rejecting.");
             return false;
         }
         return true;
@@ -1466,7 +1467,7 @@ public partial class GameManager : Node
             if (_jobManager != null)
             {
                 var job = _jobManager.GetAssignedJob(peerId);
-                if (!string.IsNullOrEmpty(job)) data["job"] = job;
+				if (!string.IsNullOrEmpty(job)) data["job"] = job;
             }
             return data;
         }
@@ -1478,11 +1479,11 @@ public partial class GameManager : Node
 
     public void SetPeerCharacterData(int peerId, Dictionary characterData)
     {
-        if (!characterData.ContainsKey("peer_id")) characterData["peer_id"] = peerId;
+		if (!characterData.ContainsKey("peer_id")) characterData["peer_id"] = peerId;
         _peerCharacters[peerId] = characterData;
-        if (characterData.ContainsKey("name"))
+		if (characterData.ContainsKey("name"))
         {
-            var name = characterData["name"].ToString();
+			var name = characterData["name"].ToString();
             if (!string.IsNullOrEmpty(name)) _playerNames[peerId] = name;
         }
     }
@@ -1491,7 +1492,7 @@ public partial class GameManager : Node
     public void set_peer_character_data(int peerId, Dictionary characterData) => SetPeerCharacterData(peerId, characterData);
 
     public string GetDiscordTagForPeer(int peerId) =>
-        _peerToDiscordTag.TryGetValue(peerId, out var tag) ? tag : "";
+		_peerToDiscordTag.TryGetValue(peerId, out var tag) ? tag : "";
 
     public int GetPeerForDiscordTag(string discordTag) =>
         _discordTagToPeer.TryGetValue(discordTag, out var peer) ? peer : 0;
@@ -1510,19 +1511,19 @@ public partial class GameManager : Node
     public Dictionary LoadSlot(int slot)
     {
         var dir     = _charactersDirOverride ?? CHARACTERS_DIR;
-        var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         foreach (char letter in letters)
         {
-            var folderPath = $"{dir}{letter}/";
+			var folderPath = $"{dir}{letter}/";
             if (!DirAccess.DirExistsAbsolute(folderPath)) continue;
             var dirAccess = DirAccess.Open(folderPath);
             if (dirAccess == null) continue;
             dirAccess.ListDirBegin();
             string fileName = dirAccess.GetNext();
-            while (fileName != "")
+			while (fileName != "")
             {
-                if (fileName.EndsWith($"_slot{slot}.json"))
+				if (fileName.EndsWith($"_slot{slot}.json"))
                 {
                     var filePath = folderPath + fileName;
                     if (FileAccess.FileExists(filePath))
@@ -1544,7 +1545,7 @@ public partial class GameManager : Node
             dirAccess.ListDirEnd();
         }
 
-        var otherFolder = $"{dir}Other/";
+		var otherFolder = $"{dir}Other/";
         if (DirAccess.DirExistsAbsolute(otherFolder))
         {
             var dirAccess = DirAccess.Open(otherFolder);
@@ -1552,9 +1553,9 @@ public partial class GameManager : Node
             {
                 dirAccess.ListDirBegin();
                 string fileName = dirAccess.GetNext();
-                while (fileName != "")
+				while (fileName != "")
                 {
-                    if (fileName.EndsWith($"_slot{slot}.json"))
+					if (fileName.EndsWith($"_slot{slot}.json"))
                     {
                         var filePath = otherFolder + fileName;
                         if (FileAccess.FileExists(filePath))
@@ -1584,24 +1585,24 @@ public partial class GameManager : Node
     {
         var names   = new Godot.Collections.Array<string>();
         var dir     = _charactersDirOverride ?? CHARACTERS_DIR;
-        var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         for (int slot = 0; slot < SLOT_COUNT; slot++)
         {
-            string found = "";
+			string found = "";
             foreach (char letter in letters)
             {
-                var folderPath = $"{dir}{letter}/";
+				var folderPath = $"{dir}{letter}/";
                 if (!DirAccess.DirExistsAbsolute(folderPath)) continue;
                 var dirAccess = DirAccess.Open(folderPath);
                 if (dirAccess == null) continue;
                 dirAccess.ListDirBegin();
                 string fileName = dirAccess.GetNext();
-                while (fileName != "")
+				while (fileName != "")
                 {
-                    if (fileName.EndsWith($"_slot{slot}.json"))
+					if (fileName.EndsWith($"_slot{slot}.json"))
                     {
-                        found = $"Slot {slot + 1}: {fileName.Replace($"_slot{slot}.json", "").Replace("_", " ")}";
+						found = $"Slot {slot + 1}: {fileName.Replace($"_slot{slot}.json", "").Replace("_", " ")}";
                         dirAccess.ListDirEnd();
                         goto NextSlot;
                     }
@@ -1610,7 +1611,7 @@ public partial class GameManager : Node
                 dirAccess.ListDirEnd();
             }
 
-            var otherFolder = $"{dir}Other/";
+			var otherFolder = $"{dir}Other/";
             if (DirAccess.DirExistsAbsolute(otherFolder))
             {
                 var dirAccess = DirAccess.Open(otherFolder);
@@ -1618,11 +1619,11 @@ public partial class GameManager : Node
                 {
                     dirAccess.ListDirBegin();
                     string fileName = dirAccess.GetNext();
-                    while (fileName != "")
+					while (fileName != "")
                     {
-                        if (fileName.EndsWith($"_slot{slot}.json"))
+						if (fileName.EndsWith($"_slot{slot}.json"))
                         {
-                            found = $"Slot {slot + 1}: {fileName.Replace($"_slot{slot}.json", "").Replace("_", " ")}";
+							found = $"Slot {slot + 1}: {fileName.Replace($"_slot{slot}.json", "").Replace("_", " ")}";
                             dirAccess.ListDirEnd();
                             goto NextSlot;
                         }
@@ -1633,7 +1634,7 @@ public partial class GameManager : Node
             }
 
             NextSlot:
-            names.Add(string.IsNullOrEmpty(found) ? $"Slot {slot + 1}: [Empty]" : found);
+			names.Add(string.IsNullOrEmpty(found) ? $"Slot {slot + 1}: [Empty]" : found);
         }
 
         return names;
@@ -1642,25 +1643,25 @@ public partial class GameManager : Node
     public void SaveSlot(int slot, Dictionary characterData)
     {
         var data = characterData.Duplicate();
-        data["_slot"] = slot;
-        var name = data.ContainsKey("name") ? data["name"].ToString() : "Unnamed";
-        if (string.IsNullOrEmpty(name)) name = "Unnamed";
+		data["_slot"] = slot;
+		var name = data.ContainsKey("name") ? data["name"].ToString() : "Unnamed";
+		if (string.IsNullOrEmpty(name)) name = "Unnamed";
         var firstLetter = name.Substring(0, 1).ToUpper();
-        if (firstLetter.Length == 0 || !char.IsLetter(firstLetter[0])) firstLetter = "Other";
+		if (firstLetter.Length == 0 || !char.IsLetter(firstLetter[0])) firstLetter = "Other";
         SaveCharacter(firstLetter, slot, data);
     }
 
     public void SaveCharacter(string letter, int slot, Dictionary characterData)
     {
         var dir        = _charactersDirOverride ?? CHARACTERS_DIR;
-        var folderPath = $"{dir}{letter}/";
+		var folderPath = $"{dir}{letter}/";
         if (!DirAccess.DirExistsAbsolute(folderPath))
             DirAccess.MakeDirRecursiveAbsolute(folderPath);
 
-        var name = characterData.ContainsKey("name") ? characterData["name"].ToString() : "Unnamed";
-        if (string.IsNullOrEmpty(name)) name = "Unnamed";
-        var sanitizedName = name.Replace(" ", "_").Replace("/", "_").Replace("\\", "_");
-        var fileName      = $"{sanitizedName}_slot{slot}.json";
+		var name = characterData.ContainsKey("name") ? characterData["name"].ToString() : "Unnamed";
+		if (string.IsNullOrEmpty(name)) name = "Unnamed";
+		var sanitizedName = name.Replace(" ", "_").Replace("/", "_").Replace("\\", "_");
+		var fileName      = $"{sanitizedName}_slot{slot}.json";
         var filePath      = folderPath + fileName;
 
         var dirAccess = DirAccess.Open(folderPath);
@@ -1669,9 +1670,9 @@ public partial class GameManager : Node
             dirAccess.ListDirBegin();
             string file      = dirAccess.GetNext();
             var toDelete     = new System.Collections.Generic.List<string>();
-            while (file != "")
+			while (file != "")
             {
-                if (file.EndsWith($"_slot{slot}.json") && file != fileName)
+				if (file.EndsWith($"_slot{slot}.json") && file != fileName)
                     toDelete.Add(folderPath + file);
                 file = dirAccess.GetNext();
             }
@@ -1686,7 +1687,7 @@ public partial class GameManager : Node
 
     public Dictionary load_player_prefs()
     {
-        var prefsPath = (_charactersDirOverride ?? CHARACTERS_DIR) + "player_prefs.json";
+		var prefsPath = (_charactersDirOverride ?? CHARACTERS_DIR) + "player_prefs.json";
         if (FileAccess.FileExists(prefsPath))
         {
             using var file = FileAccess.Open(prefsPath, FileAccess.ModeFlags.Read);
@@ -1705,7 +1706,7 @@ public partial class GameManager : Node
         var dir = _charactersDirOverride ?? CHARACTERS_DIR;
         if (!DirAccess.DirExistsAbsolute(dir))
             DirAccess.MakeDirRecursiveAbsolute(dir);
-        var prefsPath = dir + "player_prefs.json";
+		var prefsPath = dir + "player_prefs.json";
         using var file = FileAccess.Open(prefsPath, FileAccess.ModeFlags.Write);
         file?.StoreString(Json.Stringify(prefs));
     }

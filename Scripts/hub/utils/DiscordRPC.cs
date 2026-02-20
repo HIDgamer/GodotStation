@@ -65,6 +65,12 @@ public partial class DiscordRPC : Node
 
 	public override void _Ready()
 	{
+		if (OS.HasFeature("dedicated_server") ||
+			string.Equals(DisplayServer.GetName(), "headless", StringComparison.OrdinalIgnoreCase))
+		{
+			return;
+		}
+
 		if (!Enabled)
 		{
 			GD.Print("[DiscordRPC] Disabled in settings");

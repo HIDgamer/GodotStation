@@ -30,6 +30,7 @@ ZIPFILE="/tmp/gs_update_$$.zip"
 BINARY_IN_ZIP="GodotStationServer.x86_64"
 PCK_IN_ZIP="GodotStationServer.pck"
 DATA_DIR_IN_ZIP="data_GodotStation_linuxbsd_x86_64"
+ADDONS_DIR_IN_ZIP="Addons"
 
 BINARY_NAME="GodotStationServer.x86_64"
 PCK_NAME="GodotStationServer.pck"
@@ -109,6 +110,12 @@ if [ -d "$EXTRACT/$DATA_DIR_IN_ZIP" ]; then
   echo "=== Installing Mono data folder ==="
   rm -rf "$DEPLOY_DIR/$DATA_DIR_IN_ZIP"
   cp -r  "$EXTRACT/$DATA_DIR_IN_ZIP" "$DEPLOY_DIR/"
+fi
+
+if [ -d "$EXTRACT/$ADDONS_DIR_IN_ZIP" ]; then
+  echo "=== Installing addons folder ==="
+  rm -rf "$DEPLOY_DIR/$ADDONS_DIR_IN_ZIP"
+  cp -r "$EXTRACT/$ADDONS_DIR_IN_ZIP" "$DEPLOY_DIR/"
 fi
 
 echo "=== Installed ==="

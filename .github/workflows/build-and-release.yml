@@ -79,6 +79,13 @@ jobs:
             exit 1
           fi
 
+          # Keep Rapier addon files next to the dedicated server export.
+          # Some panel/runtime setups require GDExtension files on disk.
+          if [ "${{ matrix.platform }}" = "server" ]; then
+            mkdir -p build/${{ matrix.platform }}/Addons
+            cp -r Addons/godot-rapier2d build/${{ matrix.platform }}/Addons/
+          fi
+
           chmod +x "$OUTPUT" || true
           echo "${GITHUB_REF_NAME}" > build/${{ matrix.platform }}/version.txt
 

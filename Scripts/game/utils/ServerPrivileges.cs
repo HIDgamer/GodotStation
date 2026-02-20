@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 public partial class ServerPrivileges : Node
 {
@@ -14,22 +15,22 @@ public partial class ServerPrivileges : Node
     }
 
     private readonly Dictionary<string, ServerRole> _roles = new(StringComparer.OrdinalIgnoreCase);
-    private string _privilegesPath = "/home/ubuntu/godotstation/privileges.json";
+    private string _privilegesPath = "";
 
     public override void _Ready()
     {
-        // Allow path override via environment variable.
-        var envPath = System.Environment.GetEnvironmentVariable("PRIVILEGES_PATH");
-        if (!string.IsNullOrEmpty(envPath))
-            _privilegesPath = envPath;
-
-        // Only relevant on dedicated server - bail out quietly on clients.
-        var config = GetNodeOrNull<ServerConfig>("/root/ServerConfig");
-        if (config == null)
+        if (!ShouldRunInThisRuntime())
         {
             SetProcess(false);
             return;
         }
+
+        _privilegesPath = Path.Combine(System.Environment.CurrentDirectory, "privileges.json");
+
+        // Allow path override via environment variable.
+        var envPath = System.Environment.GetEnvironmentVariable("PRIVILEGES_PATH");
+        if (!string.IsNullOrEmpty(envPath))
+            _privilegesPath = envPath;
 
         Load();
     }
@@ -63,7 +64,7 @@ public partial class ServerPrivileges : Node
     {
         _roles.Clear();
 
-        if (!FileAccess.FileExists(_privilegesPath) &&
+        if (!Godot.FileAccess.FileExists(_privilegesPath) &&
             !System.IO.File.Exists(_privilegesPath))
         {
             GD.PrintErr($"[ServerPrivileges] File not found: {_privilegesPath}");
@@ -76,9 +77,9 @@ public partial class ServerPrivileges : Node
         {
             string raw;
             // Try Godot virtual FS first, fall back to system IO.
-            if (FileAccess.FileExists(_privilegesPath))
+            if (Godot.FileAccess.FileExists(_privilegesPath))
             {
-                using var fa = FileAccess.Open(_privilegesPath, FileAccess.ModeFlags.Read);
+                using var fa = Godot.FileAccess.Open(_privilegesPath, Godot.FileAccess.ModeFlags.Read);
                 raw = fa.GetAsText();
             }
             else
@@ -138,6 +139,9 @@ public partial class ServerPrivileges : Node
 ";
         try
         {
+            var dir = Path.GetDirectoryName(_privilegesPath);
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
             System.IO.File.WriteAllText(_privilegesPath, template);
             GD.Print($"[ServerPrivileges] Wrote default template to {_privilegesPath}");
         }
@@ -145,5 +149,16 @@ public partial class ServerPrivileges : Node
         {
             GD.PrintErr($"[ServerPrivileges] Could not write default file: {e.Message}");
         }
+    }
+
+    private static bool ShouldRunInThisRuntime()
+    {
+        if (OS.HasFeature("dedicated_server"))
+            return true;
+
+        if (string.Equals(DisplayServer.GetName(), "headless", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
     }
 }
