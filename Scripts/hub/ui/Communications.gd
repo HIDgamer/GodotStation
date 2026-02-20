@@ -189,16 +189,37 @@ func _setup_tab_buttons() -> void:
 	var tab_container: HBoxContainer = $HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox
 	for button in tab_container.get_children():
 		button.connect("pressed", Callable(self, "_on_tab_pressed").bind(button.name))
-		if not multiplayer.is_server() and (button.name == "Admin" or button.name == "Server" or button.name == "Tickets"):
-			button.visible = false
 	left_arrow.connect("pressed", Callable(self, "_on_left_arrow_pressed"))
 	right_arrow.connect("pressed", Callable(self, "_on_right_arrow_pressed"))
+	_refresh_admin_visibility()
 
 func _restrict_admin_visibility() -> void:
+	_refresh_admin_visibility()
+
+func _local_has_admin_privileges() -> bool:
+	if multiplayer.is_server():
+		return true
+	if GameManager == null:
+		return false
+	if GameManager.has_method("LocalPlayerCanStartGame"):
+		return bool(GameManager.call("LocalPlayerCanStartGame"))
+	if GameManager.has_method("GetPeerRole"):
+		var role = int(GameManager.call("GetPeerRole", multiplayer.get_unique_id()))
+		return role >= 2
+	return false
+
+func _refresh_admin_visibility() -> void:
+	var can_admin := _local_has_admin_privileges()
+
+	var tab_container: HBoxContainer = $HSplitContainer/CommunicationsPanel/VBoxContainer/TabsContainer/TabScroll/TabHBox
+	for button in tab_container.get_children():
+		if button.name == "Admin" or button.name == "Server" or button.name == "Tickets":
+			button.visible = can_admin
+
 	if admin_buttons:
-		admin_buttons.visible = multiplayer.is_server()
+		admin_buttons.visible = can_admin and current_tab == "Admin"
 	if server_buttons:
-		server_buttons.visible = multiplayer.is_server()
+		server_buttons.visible = can_admin and current_tab == "Server"
 
 func _setup_info_buttons() -> void:
 	for button in $HSplitContainer/CommunicationsPanel/VBoxContainer/InfoContainer/InfoScroll/InfoHBox.get_children():
@@ -261,14 +282,14 @@ func _on_tab_pressed(tab_name: String) -> void:
 	status_info.visible = false
 	server_buttons.visible = false
 	preferences_buttons.visible = false
-	if tab_name == "Admin" and multiplayer.is_server():
+	if tab_name == "Admin" and _local_has_admin_privileges():
 		wip_label.visible = false
 		admin_buttons.visible = true
 	elif tab_name == "Status":
 		wip_label.visible = false
 		status_info.visible = true
 		update_status_info()
-	elif tab_name == "Server" and multiplayer.is_server():
+	elif tab_name == "Server" and _local_has_admin_privileges():
 		wip_label.visible = false
 		server_buttons.visible = true
 	elif tab_name == "Preferences":
@@ -311,6 +332,7 @@ func _load_world_map() -> void:
 func _on_status_timer_timeout() -> void:
 	if not is_inside_tree():
 		return
+	_refresh_admin_visibility()
 	if current_tab == "Status" and status_info.visible:
 		update_status_info()
 	if multiplayer.is_server() and _is_network_ready_for_rpc():
@@ -321,10 +343,12 @@ func _is_network_ready_for_rpc() -> bool:
 		return false
 	if not multiplayer or not multiplayer.has_multiplayer_peer():
 		return false
-	if multiplayer.is_server():
-		return true
 	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
-	return peer != null and peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED
+	if peer == null:
+		return false
+	if not (peer is ENetMultiplayerPeer):
+		return false
+	return peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED
 
 func update_lobby_timer() -> void:
 	if lobby_timer:
@@ -544,7 +568,7 @@ func _on_delay_pressed() -> void:
 		return
 	if audio_manager:
 		audio_manager.play_ui_click()
-	if multiplayer.is_server() and _is_network_ready_for_rpc():
+	if _is_network_ready_for_rpc():
 		GameManager.ToggleLobbyPause()
 
 func _on_start_pressed() -> void:
@@ -552,7 +576,7 @@ func _on_start_pressed() -> void:
 		return
 	if audio_manager:
 		audio_manager.play_ui_click()
-	if multiplayer.is_server() and _is_network_ready_for_rpc():
+	if _is_network_ready_for_rpc():
 		GameManager.ForceStartFromLobby()
 
 func _on_preference_pressed() -> void:

@@ -27,20 +27,31 @@ public partial class ServerPrivileges : Node
 
         _privilegesPath = Path.Combine(System.Environment.CurrentDirectory, "privileges.json");
 
-        // Allow path override via environment variable.
-        var envPath = System.Environment.GetEnvironmentVariable("PRIVILEGES_PATH");
-        if (!string.IsNullOrEmpty(envPath))
-            _privilegesPath = envPath;
+	        // Allow path override via environment variable.
+	        var envPath = System.Environment.GetEnvironmentVariable("PRIVILEGES_PATH");
+	        if (!string.IsNullOrEmpty(envPath))
+	            _privilegesPath = envPath;
 
-        Load();
-    }
+	        _privilegesPath = NormalizePrivilegesPath(_privilegesPath);
+
+	        Load();
+	    }
 
     // Public API.
 
     public ServerRole GetRole(string discordTag)
     {
-        if (string.IsNullOrEmpty(discordTag)) return ServerRole.None;
-        return _roles.TryGetValue(discordTag.Trim(), out var role) ? role : ServerRole.None;
+        if (string.IsNullOrEmpty(discordTag))
+            return ServerRole.None;
+
+        if (TryGetRole(discordTag, out var role))
+            return role;
+
+        var hashIndex = discordTag.IndexOf('#');
+        if (hashIndex > 0 && TryGetRole(discordTag[..hashIndex], out role))
+            return role;
+
+        return ServerRole.None;
     }
 
     public bool IsOwnerOrHost(string discordTag)
@@ -102,7 +113,7 @@ public partial class ServerPrivileges : Node
 
             GD.Print($"[ServerPrivileges] Loaded {_roles.Count} privileged user(s) from {_privilegesPath}");
             foreach (var kv in _roles)
-                GD.Print($"  {kv.Key} → {kv.Value}");
+                GD.Print($"  {kv.Key} -> {kv.Value}");
         }
         catch (Exception e)
         {
@@ -122,10 +133,30 @@ public partial class ServerPrivileges : Node
         {
             var tag = item.ToString().Trim();
             if (string.IsNullOrEmpty(tag)) continue;
-            // Higher roles win if a tag is listed in multiple categories.
-            if (!_roles.TryGetValue(tag, out var existing) || existing < role)
-                _roles[tag] = role;
+
+            RegisterRoleAlias(tag, role);
+
+            var hashIndex = tag.IndexOf('#');
+            if (hashIndex > 0)
+                RegisterRoleAlias(tag[..hashIndex], role);
         }
+    }
+
+    private bool TryGetRole(string key, out ServerRole role)
+    {
+        var normalized = key.Trim();
+        return _roles.TryGetValue(normalized, out role);
+    }
+
+    private void RegisterRoleAlias(string key, ServerRole role)
+    {
+        var normalized = key.Trim();
+        if (string.IsNullOrEmpty(normalized))
+            return;
+
+        // Higher roles win if an identity appears in multiple categories.
+        if (!_roles.TryGetValue(normalized, out var existing) || existing < role)
+            _roles[normalized] = role;
     }
 
     private void WriteDefaultFile()
@@ -151,14 +182,40 @@ public partial class ServerPrivileges : Node
         }
     }
 
-    private static bool ShouldRunInThisRuntime()
-    {
-        if (OS.HasFeature("dedicated_server"))
-            return true;
+	    private static bool ShouldRunInThisRuntime()
+	    {
+	        if (OS.HasFeature("dedicated_server"))
+	            return true;
 
-        if (string.Equals(DisplayServer.GetName(), "headless", StringComparison.OrdinalIgnoreCase))
-            return true;
+	        if (string.Equals(DisplayServer.GetName(), "headless", StringComparison.OrdinalIgnoreCase))
+	            return true;
 
-        return false;
-    }
+	        var args = OS.GetCmdlineArgs();
+	        for (int i = 0; i < args.Length; i++)
+	            if (args[i] == "--headless")
+	                return true;
+
+	        return false;
+	    }
+
+	    private static string NormalizePrivilegesPath(string path)
+	    {
+	        if (string.IsNullOrWhiteSpace(path))
+	            return path;
+
+	        var normalized = path.Trim();
+	        if (!string.Equals(OS.GetName(), "Windows", StringComparison.OrdinalIgnoreCase))
+	        {
+	            normalized = normalized.Replace('\\', '/');
+	            if (normalized.Length >= 3 &&
+	                char.IsLetter(normalized[0]) &&
+	                normalized[1] == ':' &&
+	                normalized[2] == '/')
+	            {
+	                normalized = normalized[2..];
+	            }
+	        }
+
+	        return normalized;
+	    }
 }

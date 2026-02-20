@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://65fg0lmyurrp"]
 
-[ext_resource type="Script" uid="uid://0xsknwexd85n" path="res://Scripts/game/EntitySpawner.cs" id="1"]
+[ext_resource type="Script" uid="uid://0xsknwexd85n" path="res://Scripts/game/ui/EntitySpawner.cs" id="1"]
 
 
 [sub_resource type="Gradient" id="Gradient_bg"]
@@ -123,7 +123,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 20
-text = "◈ ENTITY SPAWNER ◈"
+text = "â—ˆ ENTITY SPAWNER â—ˆ"
 horizontal_alignment = 1
 
 [node name="HSeparator1" type="HSeparator" parent="EntitySpawnerWindow/VBox" unique_id=1041193422]
@@ -158,11 +158,11 @@ horizontal_alignment = 1
 
 [node name="SpawnButton" type="Button" parent="EntitySpawnerWindow/VBox" unique_id=1407238559]
 layout_mode = 2
-text = "▸ Spawn Mob"
+text = "â–¸ Spawn Mob"
 
 [node name="RandomizeButton" type="Button" parent="EntitySpawnerWindow/VBox" unique_id=507195573]
 layout_mode = 2
-text = "◈ Randomize Appearnce"
+text = "â—ˆ Randomize Appearnce"
 
 [node name="HSeparator3" type="HSeparator" parent="EntitySpawnerWindow/VBox" unique_id=141348129]
 layout_mode = 2

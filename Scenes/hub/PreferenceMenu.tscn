@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="5_68nub"]
 [ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="6_66526"]
 [ext_resource type="Texture2D" uid="uid://d21rtk51ceh2s" path="res://Assets/UI/Interface/Slider01.png" id="7_68nub"]
-[ext_resource type="Script" uid="uid://cl40yo6h8ajrh" path="res://Scripts/hub/PreferenceMenu.gd" id="9_script"]
+[ext_resource type="Script" uid="uid://cl40yo6h8ajrh" path="res://Scripts/hub/ui/PreferenceMenu.gd" id="9_script"]
 [ext_resource type="Texture2D" uid="uid://dca55vfaclhk4" path="res://Assets/Effects/Particles/flare_32x32.png" id="space_particles"]
 
 [sub_resource type="Gradient" id="Gradient_space"]
@@ -166,14 +166,14 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Left" type="Button" parent="PreviewBackground/HBoxContainer" unique_id=471287946]
 layout_mode = 2
-text = "«"
+text = "Â«"
 icon = ExtResource("6_66526")
 flat = true
 icon_alignment = 1
 
 [node name="Right" type="Button" parent="PreviewBackground/HBoxContainer" unique_id=1885067396]
 layout_mode = 2
-text = "»"
+text = "Â»"
 icon = ExtResource("6_66526")
 flat = true
 icon_alignment = 1

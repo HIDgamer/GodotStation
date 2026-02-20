@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://oe04epmutypr"]
 
-[ext_resource type="Script" uid="uid://btf0mg3rn6v87" path="res://Scripts/game/LateJoinLobbyUI.cs" id="1"]
+[ext_resource type="Script" uid="uid://btf0mg3rn6v87" path="res://Scripts/game/ui/LateJoinLobbyUI.cs" id="1"]
 
 [sub_resource type="Shader" id="cctv_scanline_shader"]
 code = "shader_type canvas_item;
@@ -146,7 +146,7 @@ theme_override_constants/separation = 10
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0, 1)
 theme_override_font_sizes/font_size = 24
-text = "█████ STATION TERMINAL v2.4.1 █████"
+text = "â–ˆâ–ˆâ–ˆâ–ˆâ–ˆ STATION TERMINAL v2.4.1 â–ˆâ–ˆâ–ˆâ–ˆâ–ˆ"
 horizontal_alignment = 1
 
 [node name="HSeparator1" type="HSeparator" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=546122770]
@@ -291,7 +291,7 @@ theme_override_constants/separation = 10
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0, 1)
 theme_override_font_sizes/font_size = 20
-text = "█████ LATE JOIN - ROLE SELECTION █████"
+text = "â–ˆâ–ˆâ–ˆâ–ˆâ–ˆ LATE JOIN - ROLE SELECTION â–ˆâ–ˆâ–ˆâ–ˆâ–ˆ"
 horizontal_alignment = 1
 
 [node name="HSeparator1" type="HSeparator" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=982563244]
