@@ -84,7 +84,7 @@ public partial class MedicalSystem : Node, IMobSystem, ISchedulable
 	{
 		_isProcessing = false;
 		
-		// Unregister from scheduler
+		// Unregister from scheduler.
 		if (_scheduler != null)
 		{
 			_scheduler.Unregister(this);

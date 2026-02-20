@@ -36,7 +36,7 @@ func _on_slot_selected(slot: int) -> void:
 		populate_slots()  # Refresh names if saved
 	elif action_mode == "load":
 		preference_manager.load_from_slot(slot)
-		# Emit signal or notify menu to reload UI
+		# Emit signal or notify menu to reload ui.
 		get_parent().load_character_data()
 	hide()
 

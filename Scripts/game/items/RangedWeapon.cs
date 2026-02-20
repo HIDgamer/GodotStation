@@ -30,7 +30,7 @@ public partial class RangedWeapon : WeaponItem
 	{
 		if (!CanFire()) return;
 		
-		// Create projectile
+		// Create projectile.
 		if (!string.IsNullOrEmpty(ProjectileScene))
 		{
 			var projectileScene = GD.Load<PackedScene>(ProjectileScene);
@@ -39,11 +39,11 @@ public partial class RangedWeapon : WeaponItem
 				var projectile = projectileScene.Instantiate<Node2D>();
 				projectile.Position = position;
 				
-				// Add spread
+				// Add spread.
 				var spreadAngle = (GD.Randf() - 0.5f) * Spread;
 				var finalDirection = direction.Rotated(spreadAngle);
 				
-				// Set projectile properties
+				// Set projectile properties.
 				if (projectile.HasMethod("SetVelocity"))
 				{
 					projectile.Call("SetVelocity", finalDirection * ProjectileSpeed);
@@ -57,7 +57,7 @@ public partial class RangedWeapon : WeaponItem
 					projectile.Call("SetPenetration", Penetration);
 				}
 				
-				// Add to scene
+				// Add to scene.
 				if (parentScene != null)
 				{
 					parentScene.AddChild(projectile);

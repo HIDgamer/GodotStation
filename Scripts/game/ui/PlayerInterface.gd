@@ -108,8 +108,8 @@ func _input(event: InputEvent) -> void:
 			if throw_button and throw_button.visible:
 				var throw_rect = Rect2(throw_button.position - throw_button.texture.get_size() / 2, throw_button.texture.get_size())
 				if throw_rect.has_point(local_pos):
-					# Let InteractionComponent handle throw toggle
-					# Just don't consume the input here
+					# Let interactioncomponent handle throw toggle.
+					# Just don't consume the input here.
 					return
 			
 			if pull_button and pull_button.visible:
@@ -367,7 +367,7 @@ func _setup_status_effects() -> void:
 			fire_system.FireStateChanged.connect(_update_status_effects)
 			fire_system.FireStacksChanged.connect(_update_status_effects)
 
-func _update_status_effects() -> void:
+func _update_status_effects(_arg1 = null, _arg2 = null, _arg3 = null) -> void:
 	if not player or not is_node_ready():
 		return
 	
@@ -436,7 +436,7 @@ func _update_status_effects() -> void:
 		status_sprite.frame = status_frame
 
 func _on_intent_button_pressed(button_name: String) -> void:
-	if not interaction:
+	if not player:
 		return
 	
 	var intent_map = {
@@ -448,7 +448,12 @@ func _on_intent_button_pressed(button_name: String) -> void:
 	
 	if intent_map.has(button_name):
 		var new_intent = intent_map[button_name]
-		interaction.SetIntent(new_intent)
+		var intent_system = player.get_node_or_null("IntentSystem")
+		if intent_system:
+			if intent_system.has_method("SetIntent"):
+				intent_system.call("SetIntent", new_intent)
+			elif intent_system.has_method("set_intent"):
+				intent_system.call("set_intent", new_intent)
 		_update_intent_visuals(new_intent)
 
 func _update_intent_visuals(current_intent: Intent) -> void:

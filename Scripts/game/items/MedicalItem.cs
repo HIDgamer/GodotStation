@@ -1,6 +1,5 @@
 using Godot;
 
-/// Base medical item data
 [GlobalClass]
 public partial class MedicalItem : ConsumableItem
 {

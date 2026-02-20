@@ -1,6 +1,5 @@
 using Godot;
 
-/// Named visual state for an item (e.g. loaded, empty, half_full)
 [GlobalClass]
 public partial class ItemSpriteState : Resource
 {
@@ -14,7 +13,7 @@ public partial class ItemSpriteState : Resource
 	[Export] public int InHandHframes = 0;
 	[Export] public int InHandVframes = 0;
 	
-	// Frame selection properties - specify which frame to use from sprite sheets
+	// Frame selection properties - specify which frame to use from sprite sheets.
 	[Export] public int IconFrame = 0;
 	[Export] public int InHandLeftFrame = 0;
 	[Export] public int InHandRightFrame = 0;

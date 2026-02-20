@@ -309,10 +309,22 @@ func _load_world_map() -> void:
 		push_error("Communications: No world child found in SubViewport")
 
 func _on_status_timer_timeout() -> void:
+	if not is_inside_tree():
+		return
 	if current_tab == "Status" and status_info.visible:
 		update_status_info()
-	if multiplayer.is_server():
+	if multiplayer.is_server() and _is_network_ready_for_rpc():
 		broadcast_status_to_peers()
+
+func _is_network_ready_for_rpc() -> bool:
+	if not is_inside_tree():
+		return false
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return false
+	if multiplayer.is_server():
+		return true
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	return peer != null and peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED
 
 func update_lobby_timer() -> void:
 	if lobby_timer:
@@ -528,15 +540,19 @@ func _on_build_mode_pressed() -> void:
 		build_mode.show()
 
 func _on_delay_pressed() -> void:
+	if not is_inside_tree():
+		return
 	if audio_manager:
 		audio_manager.play_ui_click()
-	if multiplayer.is_server():
+	if multiplayer.is_server() and _is_network_ready_for_rpc():
 		GameManager.ToggleLobbyPause()
 
 func _on_start_pressed() -> void:
+	if not is_inside_tree():
+		return
 	if audio_manager:
 		audio_manager.play_ui_click()
-	if multiplayer.is_server():
+	if multiplayer.is_server() and _is_network_ready_for_rpc():
 		GameManager.ForceStartFromLobby()
 
 func _on_preference_pressed() -> void:
@@ -623,6 +639,8 @@ func _get_player_name(peer_id: int) -> String:
 	return "Player " + str(peer_id)
 
 func _on_message_sent(message: String, mode: String) -> void:
+	if not _is_network_ready_for_rpc():
+		return
 	var peer_id: int = multiplayer.get_unique_id()
 	GameManager.SendChatFromPlayer(peer_id, message, mode)
 
@@ -697,7 +715,7 @@ func _show_chat_bubble_for_player(peer_id: int, message: String, mode: String = 
 		player.call("ShowChatBubble", message, mode, false)
 
 func broadcast_status_to_peers() -> void:
-	if multiplayer.is_server():
+	if multiplayer.is_server() and _is_network_ready_for_rpc():
 		GameManager.rpc("SyncStatusInfo", GameManager.CurrentMap, GameManager.Gamemode, GameManager.PlayerCount, current_music_name, GameManager.LobbyTimeLeft, GameManager.LobbyTimerPaused)
 
 func sync_player_position_and_rotation(player_id: int, pos: Vector2, rot: float) -> void:

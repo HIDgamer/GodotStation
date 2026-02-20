@@ -42,12 +42,12 @@ public partial class SchedulerManager : Node
 		
 		if (Scheduler != null)
 		{
-			// Configure scheduler
+			// Configure scheduler.
 			Scheduler.MaxUpdatesPerFrame = MaxUpdatesPerFrame;
 			Scheduler.TargetFrameRate = TargetFrameRate;
 			Scheduler.EnableDebugLogging = EnableDebugLogging;
 			
-			// Connect to scheduler signals
+			// Connect to scheduler signals.
 			Scheduler.SchedulerUpdateStarted += OnSchedulerUpdateStarted;
 			Scheduler.SchedulerUpdateCompleted += OnSchedulerUpdateCompleted;
 			Scheduler.ItemRegistered += OnItemRegistered;
@@ -96,7 +96,7 @@ public partial class SchedulerManager : Node
 	
 	private void OnSchedulerUpdateStarted(int updateCount)
 	{
-		// Removed debug print as requested
+		// Removed debug print as requested.
 	}
 	
 	private void OnSchedulerUpdateCompleted(int processedCount)

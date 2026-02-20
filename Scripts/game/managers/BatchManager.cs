@@ -50,7 +50,7 @@ public partial class BatchManager : Node
 		
 		if (batch.AddUpdate(update))
 		{
-			// Only register the batch wrapper, not individual updates
+			// Only register the batch wrapper, not individual updates.
 			if (!batch.IsRegistered)
 			{
 				_frameUpdateManager.RegisterCheapUpdate(batch);
@@ -72,7 +72,7 @@ public partial class BatchManager : Node
 		{
 			batch.RemoveUpdate(update);
 			
-			// Unregister batch if empty
+			// Unregister batch if empty.
 			if (batch.UpdateCount == 0 && batch.IsRegistered)
 			{
 				_frameUpdateManager.UnregisterCheapUpdate(batch);
@@ -123,7 +123,7 @@ public partial class BatchManager : Node
 	{
 		if (EnableSpatialBatching)
 		{
-			// Try to get spatial information from the update object
+			// Try to get spatial information from the update object.
 			if (update is Node node && node.GetParent() is Node parentNode)
 			{
 				return $"spatial_{parentNode.GetPath()}";
@@ -137,7 +137,7 @@ public partial class BatchManager : Node
 		
 		if (EnablePriorityBatching)
 		{
-			// Try to get priority information
+			// Try to get priority information.
 			if (update is ISchedulable schedulable)
 			{
 				return $"priority_{schedulable.Priority}";
@@ -154,19 +154,19 @@ public partial class BatchManager : Node
 		_frameCounter++;
 		int processedThisFrame = 0;
 		
-		// Process batches in round-robin fashion
+		// Process batches in round-robin fashion.
 		for (int i = 0; i < MaxBatchesPerFrame && processedThisFrame < _batches.Count; i++)
 		{
 			var batch = _batches[_currentBatchIndex];
 			
 			if (batch.IsRegistered && batch.UpdateCount > 0)
 			{
-				// Process this batch's updates for this frame
+				// Process this batch's updates for this frame.
 				batch.ProcessFrame((float)delta, _frameCounter);
 				processedThisFrame++;
 			}
 			
-			// Move to next batch
+			// Move to next batch.
 			_currentBatchIndex = (_currentBatchIndex + 1) % _batches.Count;
 		}
 		
@@ -214,13 +214,13 @@ public class UpdateBatch : IFrameUpdate
 	
 	public void Update(float delta)
 	{
-		// This method is called by FrameUpdateManager but we handle the actual processing
-		// in ProcessFrame to control how many updates we do per frame
+		// This method is called by frameupdatemanager but we handle the actual processing.
+		// In processframe to control how many updates we do per frame.
 	}
 	
 	public void ProcessFrame(float delta, int frameCounter)
 	{
-		// Process a subset of updates this frame to distribute load
+		// Process a subset of updates this frame to distribute load.
 		int updatesToProcess = Math.Min(BatchSize, _updates.Count - _currentUpdateIndex);
 		
 		for (int i = 0; i < updatesToProcess; i++)
@@ -235,7 +235,7 @@ public class UpdateBatch : IFrameUpdate
 			_currentUpdateIndex = (_currentUpdateIndex + 1) % _updates.Count;
 		}
 		
-		// Reset for next frame if we've processed all updates
+		// Reset for next frame if we've processed all updates.
 		if (_currentUpdateIndex == 0)
 		{
 			_updatesProcessedThisFrame = 0;

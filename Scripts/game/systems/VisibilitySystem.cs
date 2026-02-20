@@ -14,7 +14,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 	[Export] public bool SchedulerUpdateOnRegister = false;
 	[Export] public bool EnableDebugLogging = false;
 	
-	// GPU optimization settings
+	// Gpu optimization settings.
 	[Export] public int TextureScale = 2;
 	[Export] public bool EnableFogSystem = true; // Master toggle - disable completely if GPU struggling
 	[Export] public bool EnableFogAnimation = true; // Disable for static fog (saves GPU)
@@ -27,7 +27,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 	private Vector2I _mapMin;
 	private readonly HashSet<string> _blockingMaterials = new() { "wall" };
 	private const int TileSize = 32;
-	// Note: TextureScale is now an exported property, removed the const
+	// Note: TextureScale is now an exported property, removed the const.
 	private Mob _cachedPlayer;
 	private bool _isProcessingGrid;
 	private Scheduler _scheduler;
@@ -40,7 +40,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 		{
 			_gridSystem.ScanCompleted += OnGridScanCompleted;
 			
-			// Process existing grid if available
+			// Process existing grid if available.
 			if (_gridSystem.Grid?.Count > 0)
 				OnGridScanCompleted(_gridSystem.Grid);
 		}
@@ -84,10 +84,10 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 
 		try
 		{
-			// Process grid on background thread
+			// Process grid on background thread.
 			var result = await Task.Run(() => ProcessGrid(grid));
 			
-			// Apply result on main thread
+			// Apply result on main thread.
 			if (IsInstanceValid(this))
 			{
 				ApplyGridResult(result.mapMin, result.width, result.height, result.wallTexture);
@@ -106,7 +106,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 	private (Vector2I mapMin, int width, int height, Image wallTexture) ProcessGrid(
 		Godot.Collections.Dictionary<Vector2I, string> grid)
 	{
-		// Calculate map bounds
+		// Calculate map bounds.
 		var mapMin = new Vector2I(int.MaxValue, int.MaxValue);
 		var mapMax = new Vector2I(int.MinValue, int.MinValue);
 		
@@ -121,7 +121,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 		int width = mapMax.X - mapMin.X + 1;
 		int height = mapMax.Y - mapMin.Y + 1;
 
-		// Extract wall positions
+		// Extract wall positions.
 		var wallData = new List<Vector2I>(grid.Count / 4);
 		foreach (var kvp in grid)
 		{
@@ -129,7 +129,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 				wallData.Add(kvp.Key);
 		}
 
-		// Generate wall texture
+		// Generate wall texture.
 		var wallTexture = GenerateWallTexture(wallData, mapMin, width, height, TextureScale);
 		return (mapMin, width, height, wallTexture);
 	}
@@ -138,7 +138,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 	{
 		_mapMin = mapMin;
 		
-		// Update or create wall texture
+		// Update or create wall texture.
 		if (_wallImageTexture != null)
 		{
 			_wallImageTexture.Update(wallTexture);
@@ -148,13 +148,13 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 			_wallImageTexture = ImageTexture.CreateFromImage(wallTexture);
 		}
 
-		// Initialize fog material and rect if needed
+		// Initialize fog material and rect if needed.
 		if (_fogMaterial == null)
 		{
 			InitializeFogSystem(width, height);
 		}
 		
-		// Update shader parameters
+		// Update shader parameters.
 		_fogMaterial.SetShaderParameter("wall_texture", _wallImageTexture);
 		_fogMaterial.SetShaderParameter("map_min", _mapMin);
 		_fogMaterial.SetShaderParameter("map_size", new Vector2I(width * TextureScale, height * TextureScale));
@@ -163,21 +163,21 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 
 	private void InitializeFogSystem(int width, int height)
 	{
-		// Clean up old rect if exists
+		// Clean up old rect if exists.
 		if (_fogRect != null)
 			_fogRect.QueueFree();
 
-		// Load shader
+		// Load shader.
 		var shader = GD.Load<Shader>("uid://uyl8otyabpn6");
 		_fogMaterial = new ShaderMaterial { Shader = shader };
 		
-		// Set shader parameters
+		// Set shader parameters.
 		_fogMaterial.SetShaderParameter("view_range", ViewRange);
 		_fogMaterial.SetShaderParameter("tile_scale", TextureScale);
 		_fogMaterial.SetShaderParameter("fog_intensity", FogIntensity);
 		_fogMaterial.SetShaderParameter("fog_speed", FogSpeed);
 
-		// Create fog rect overlay
+		// Create fog rect overlay.
 		_fogRect = new ColorRect
 		{
 			Material = _fogMaterial,
@@ -194,7 +194,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 		var texture = Image.CreateEmpty(width * scale, height * scale, false, Image.Format.R8);
 		texture.Fill(Colors.Black);
 
-		// Mark wall pixels
+		// Mark wall pixels.
 		foreach (var cell in wallData)
 		{
 			int baseX = (cell.X - mapMin.X) * scale;
@@ -214,17 +214,17 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 
 	public override void _Process(double delta)
 	{
-		// Master toggle - skip all processing if fog is disabled
+		// Master toggle - skip all processing if fog is disabled.
 		if (!EnableFogSystem || _fogMaterial == null)
 			return;
 
-		// Cache player reference
+		// Cache player reference.
 		if (_cachedPlayer == null || !IsInstanceValid(_cachedPlayer))
 		{
 			_cachedPlayer = FindPlayerMob();
 		}
 
-		// Update player position EVERY frame for smooth fog movement (original behavior)
+		// Update player position EVERY frame for smooth fog movement (original behavior).
 		if (_cachedPlayer != null)
 		{
 			_fogMaterial.SetShaderParameter("player_position", _cachedPlayer.GlobalPosition);
@@ -233,11 +233,11 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 	
 	public void ScheduledUpdate(float delta, WorldSnapshot snapshot)
 	{
-		// Skip if fog system is disabled or animation is disabled
+		// Skip if fog system is disabled or animation is disabled.
 		if (!EnableFogSystem || !EnableFogAnimation || _fogMaterial == null)
 			return;
 		
-		// Update time parameter for fog animation every call (every 0.5s)
+		// Update time parameter for fog animation every call (every 0.5s).
 		var currentTime = Time.GetUnixTimeFromSystem();
 		_fogMaterial.SetShaderParameter("time", currentTime);
 		_lastTimeUpdate = currentTime;
@@ -260,7 +260,7 @@ public partial class VisibilitySystem : Node2D, ISchedulable
 		if (_gridSystem != null)
 			_gridSystem.ScanCompleted -= OnGridScanCompleted;
 		
-		// Unregister from scheduler
+		// Unregister from scheduler.
 		if (_scheduler != null)
 		{
 			_scheduler.Unregister(this);

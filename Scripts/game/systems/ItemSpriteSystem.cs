@@ -126,29 +126,29 @@ public partial class ItemSpriteSystem : Node2D
 		
 		if (totalFrames <= 1)
 		{
-			// No frames, return full texture
+			// No frames, return full texture.
 			return IconTexture;
 		}
 		
-		// Create an AtlasTexture to extract a single frame
+		// Create an atlastexture to extract a single frame.
 		var atlas = new AtlasTexture();
 		atlas.Atlas = IconTexture;
 		
-		// Calculate frame position in the spritesheet
+		// Calculate frame position in the spritesheet.
 		int hframes = Mathf.Max(1, IconHframes);
 		int vframes = Mathf.Max(1, IconVframes);
 		targetFrame = Mathf.Clamp(targetFrame, 0, totalFrames - 1);
 		
-		// Get the texture size
+		// Get the texture size.
 		var textureSize = IconTexture.GetSize();
 		float frameWidth = textureSize.X / hframes;
 		float frameHeight = textureSize.Y / vframes;
 		
-		// Calculate which frame row/col
+		// Calculate which frame row/col.
 		int col = targetFrame % hframes;
 		int row = targetFrame / hframes;
 		
-		// Set the region for this frame
+		// Set the region for this frame.
 		atlas.Region = new Rect2(col * frameWidth, row * frameHeight, frameWidth, frameHeight);
 		
 		return atlas;
@@ -175,7 +175,7 @@ public partial class ItemSpriteSystem : Node2D
 		if (!_overlaySprites.TryGetValue(overlayId, out var sprites)) return;
 		sprites.Enabled = enabled;
 		
-		// Apply frame settings when overlay is toggled
+		// Apply frame settings when overlay is toggled.
 		if (enabled)
 		{
 			var overlay = Overlays.FirstOrDefault(o => o != null && o.OverlayId == overlayId);
@@ -221,7 +221,7 @@ public partial class ItemSpriteSystem : Node2D
 		_inHandLeftSprite.Vframes = vframes;
 		_inHandRightSprite.Vframes = vframes;
 		
-		// Apply frame settings from state
+		// Apply frame settings from state.
 		ApplyFrameSettings(_iconSprite, state?.IconFrame ?? 0);
 		ApplyFrameSettings(_inHandLeftSprite, state?.InHandLeftFrame ?? 0);
 		ApplyFrameSettings(_inHandRightSprite, state?.InHandRightFrame ?? 0);
@@ -293,7 +293,7 @@ public partial class ItemSpriteSystem : Node2D
 	{
 		if (sprite == null) return;
 		
-		// Apply frame setting if valid
+		// Apply frame setting if valid.
 		if (frame >= 0)
 		{
 			int totalFrames = sprite.Hframes * sprite.Vframes;
@@ -305,9 +305,6 @@ public partial class ItemSpriteSystem : Node2D
 	}
 	
 	
-	/// <summary>
-	/// Sync the in-hand sprite frame with the character's hand animation
-	/// </summary>
 	public void SyncInHandFrame(int frame)
 	{
 		if (_inHandLeftSprite != null)

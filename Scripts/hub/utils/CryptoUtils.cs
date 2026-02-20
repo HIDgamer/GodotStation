@@ -30,7 +30,7 @@ public static class CryptoUtils
 			GD.PrintErr($"[CryptoUtils] Failed to load machine key: {e.Message}");
 		}
 
-		// Generate a fresh cryptographically random machine key
+		// Generate a fresh cryptographically random machine key.
 		var newKey = System.Security.Cryptography.RandomNumberGenerator.GetBytes(KeyBytes);
 		try
 		{
@@ -84,7 +84,7 @@ public static class CryptoUtils
 		}
 		catch
 		{
-			// Decryption failure = tampered data, wrong machine, or corrupt file
+			// Decryption failure = tampered data, wrong machine, or corrupt file.
 			return "";
 		}
 	}

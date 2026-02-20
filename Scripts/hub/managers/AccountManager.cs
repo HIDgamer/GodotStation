@@ -92,7 +92,7 @@ public partial class AccountManager : Node
 		return false;
 	}
 
-	// ── Token persistence (AES-256-GCM, machine-local key) ────────────────────
+	// Token persistence (AES-256-GCM, machine-local key).
 
 	private void SaveToken(string token)
 	{
@@ -148,7 +148,7 @@ public partial class AccountManager : Node
 		}
 	}
 
-	// ── Token rotation (called by LobbyManager when server pushes a new token) ──
+	// Token rotation (called by LobbyManager when server pushes a new token).
 
 	public void UpdateToken(string newToken)
 	{
@@ -164,7 +164,7 @@ public partial class AccountManager : Node
 		EmitSignal(SignalName.TokenRotated, newToken);
 	}
 
-	// ── Public accessors ───────────────────────────────────────────────────────
+	// Public accessors.
 
 	public bool IsLoggedIn() => !string.IsNullOrEmpty(_authToken);
 	public string GetAuthToken() => _authToken;
@@ -206,7 +206,7 @@ public partial class AccountManager : Node
 		return "";
 	}
 
-	// ── Discord OAuth flow ─────────────────────────────────────────────────────
+	// Discord oauth flow.
 
 	public void StartDiscordLogin()
 	{
@@ -279,7 +279,7 @@ public partial class AccountManager : Node
 			_authToken = result["token"].ToString();
 			SaveToken(_authToken);
 
-			// Verify token and load user data
+			// Verify token and load user data.
 			bool valid = await VerifyToken(_authToken);
 			if (valid)
 			{
@@ -305,7 +305,7 @@ public partial class AccountManager : Node
 		}
 	}
 
-	// ── Logout ─────────────────────────────────────────────────────────────────
+	// Logout.
 
 	public event Action LoggedOutSuccess;
 
@@ -326,7 +326,7 @@ public partial class AccountManager : Node
 	}
 }
 
-// ── Local HTTP callback server ─────────────────────────────────────────────────
+// Local http callback server.
 
 public partial class HttpServer : Node
 {
@@ -391,7 +391,7 @@ public partial class HttpServer : Node
 				return;
 			}
 
-			// Cap incoming request to 8 KB — we only need a short GET with query params
+			// Cap incoming request to 8 kb - we only need a short get with query params.
 			int bytesAvailable = Math.Min(connection.GetAvailableBytes(), 8192);
 			var result = connection.GetData(bytesAvailable);
 			Error readError = (Error)(long)result[0];
@@ -425,7 +425,7 @@ public partial class HttpServer : Node
 							{
 								string key = Uri.UnescapeDataString(kv[0]);
 								string value = Uri.UnescapeDataString(kv[1]);
-								// Never log the code or token values
+								// Never log the code or token values.
 								query[key] = value;
 							}
 						}
@@ -433,7 +433,7 @@ public partial class HttpServer : Node
 
 					CallDeferred(MethodName.EmitRequestSignal, path, query);
 
-					// Success page — no token/code values are written here
+					// Success page - no token/code values are written here.
 					string body = @"<!DOCTYPE html>
 <html>
 <head>
@@ -462,7 +462,7 @@ public partial class HttpServer : Node
 						"Content-Type: text/html; charset=utf-8\r\n" +
 						"Content-Length: " + bodyBytes.Length + "\r\n" +
 						"Connection: close\r\n" +
-						// Prevent the browser from caching or leaking the code via Referer
+						// Prevent the browser from caching or leaking the code via referer.
 						"Cache-Control: no-store\r\n" +
 						"Referrer-Policy: no-referrer\r\n" +
 						"\r\n";

@@ -1,6 +1,5 @@
 using Godot;
 
-/// Consumable item that can be eaten/drunk
 [GlobalClass]
 public partial class ConsumableItem : Item
 {

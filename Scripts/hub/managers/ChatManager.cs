@@ -32,7 +32,7 @@ public partial class ChatManager : Node
 		_chatHistories.Clear();
 	}
 	
-	// Send a chat message to a friend
+	// Send a chat message to a friend.
 	public async void SendMessage(int receiverId, string message)
 	{
 		if (!_accountManager.IsLoggedIn())
@@ -140,7 +140,7 @@ public partial class ChatManager : Node
 		}
 	}
 	
-	// Get cached chat history
+	// Get cached chat history.
 	public Array GetChatHistory(int friendId)
 	{
 		if (_chatHistories.ContainsKey(friendId))

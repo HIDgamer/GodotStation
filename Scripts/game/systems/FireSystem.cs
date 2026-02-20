@@ -9,7 +9,7 @@ public partial class FireSystem : Node, IMobSystem, ISchedulable
 	[Export] public float FireResistance = 0.0f;
 	[Export] public float WaterExtinguishRate = 5.0f;
 	
-	// Scheduler configuration
+	// Scheduler configuration.
 	[Export] public float SchedulerUpdateInterval = 1.0f; // Update every 1 second
 	[Export] public int SchedulerPriority = 7; // Medium-high priority
 	[Export] public bool SchedulerUpdateOnRegister = false;
@@ -71,7 +71,7 @@ public partial class FireSystem : Node, IMobSystem, ISchedulable
 	{
 		_isProcessing = false;
 		
-		// Unregister from scheduler
+		// Unregister from scheduler.
 		if (_scheduler != null)
 		{
 			_scheduler.Unregister(this);
@@ -88,14 +88,14 @@ public partial class FireSystem : Node, IMobSystem, ISchedulable
 	
 	private void UpdateFire(float delta)
 	{
-		// Decay fire stacks over time
+		// Decay fire stacks over time.
 		if (_fireStacks > 0)
 		{
 			_fireStacks = Mathf.Max(0, _fireStacks - FireStackDecayRate * delta);
 			EmitSignal(SignalName.FireStacksChanged, _fireStacks);
 		}
 		
-		// Check if we should be on fire
+		// Check if we should be on fire.
 		bool shouldBeOnFire = _fireStacks > 0;
 		if (_isOnFire != shouldBeOnFire)
 		{
@@ -112,7 +112,7 @@ public partial class FireSystem : Node, IMobSystem, ISchedulable
 			}
 		}
 		
-		// Apply fire damage over time
+		// Apply fire damage over time.
 		if (_isOnFire)
 		{
 			ApplyFireDamage();
@@ -206,7 +206,7 @@ public partial class FireSystem : Node, IMobSystem, ISchedulable
 	public float GetFireStacks() => _fireStacks;
 	public float GetMaxFireStacks() => MaxFireStacks;
 	
-	// ISchedulable interface implementation
+	// Ischedulable interface implementation.
 	public string SchedulerId => _mob?.GetPlayerName() + "_FireSystem" ?? "Unknown_FireSystem";
 	public float UpdateInterval => SchedulerUpdateInterval;
 	public int Priority => SchedulerPriority;

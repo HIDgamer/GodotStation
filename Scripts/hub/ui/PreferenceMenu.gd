@@ -86,7 +86,7 @@ func _ready() -> void:
 	load_slot_button.pressed.connect(_on_load_slot_pressed)
 	reload_slot_button.pressed.connect(_on_reload_slot_pressed)
 	
-	# Add hover sounds to buttons
+	# Add hover sounds to buttons.
 	add_hover_sounds()
 
 func add_hover_sounds() -> void:

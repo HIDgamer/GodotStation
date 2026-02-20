@@ -130,7 +130,7 @@ public partial class SpriteSystem : Node2D
 			var diffuseTexture = LoadTexture(partName, "base");
 			if (diffuseTexture != null)
 			{
-				// Check if we have a cached CanvasTexture for this part
+				// Check if we have a cached canvastexture for this part.
 				string canvasCacheKey = $"{partName}_canvas";
 				CanvasTexture canvasTexture;
 				
@@ -140,14 +140,14 @@ public partial class SpriteSystem : Node2D
 				}
 				else
 				{
-					// Create new CanvasTexture with optional normal map
+					// Create new canvastexture with optional normal map.
 					canvasTexture = new CanvasTexture
 					{
 						DiffuseTexture = diffuseTexture,
 						NormalTexture = EnableNormalMaps ? LoadTexture(partName, "normal") : null
 					};
 					
-					// Cache it if we have room
+					// Cache it if we have room.
 					if (_canvasTextureCache.Count < MaxCacheSize)
 					{
 						_canvasTextureCache[canvasCacheKey] = canvasTexture;
@@ -206,7 +206,7 @@ public partial class SpriteSystem : Node2D
 		{
 			_textureCache[cacheKey] = texture;
 			
-			// Track texture memory usage
+			// Track texture memory usage.
 			if (_profilingManager != null)
 			{
 				var textureSize = texture.GetSize();

@@ -6,18 +6,24 @@ using HttpClient = System.Net.Http.HttpClient;
 
 public partial class DedicatedServer : Node
 {
+    [Signal] public delegate void PlayerAuthenticatedEventHandler(int peerId, int userId, string username, string assignedJob);
+    [Signal] public delegate void PlayerAuthFailedEventHandler(int peerId, string reason);
+
     private sealed class PlayerInfo
     {
-        public int    UserId;
-        public string Username    = "";
-        public string Job         = "";
-        public bool   Authenticated;
+        public int UserId;
+        public string Username = "";
+        public string Job = "";
+        public bool Authenticated;
     }
 
-    private ServerConfig    _config;
+    private const int EnetChannelCount = 2;
+
+    private ServerConfig _config;
     private ServerRegistrar _registrar;
-    private JobManager      _jobManager;
-    private HttpClient      _httpClient;
+    private JobManager _jobManager;
+    private ServerPrivileges _privileges;
+    private HttpClient _httpClient;
 
     private readonly Dictionary<int, PlayerInfo> _players = new();
 
@@ -25,16 +31,28 @@ public partial class DedicatedServer : Node
 
     public override async void _Ready()
     {
-        _config    = GetNode<ServerConfig>("/root/ServerConfig");
+        _config = GetNode<ServerConfig>("/root/ServerConfig");
         _registrar = GetNode<ServerRegistrar>("/root/ServerRegistrar");
         _jobManager = GetNodeOrNull<JobManager>("/root/JobManager");
+        _privileges = GetNodeOrNull<ServerPrivileges>("/root/ServerPrivileges");
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
 
+        _config?.EnsureLoaded();
+
+        if (string.IsNullOrEmpty(_config.ServerToken))
+        {
+            GD.PrintErr("[DedicatedServer] WARNING: SERVER_TOKEN is empty.");
+            GD.PrintErr("[DedicatedServer] Backend registration will be rejected (401: No token provided).");
+            GD.PrintErr("[DedicatedServer] Set SERVER_TOKEN (or SERVER_API_KEY) in env/.env and restart.");
+            GD.PrintErr("[DedicatedServer] Server will continue running unregistered.");
+        }
+
+        // Wait so other autoloads complete _Ready first.
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
         var peer = new ENetMultiplayerPeer();
-        var err  = peer.CreateServer(_config.Port, _config.MaxPlayers);
+        var err = peer.CreateServer(_config.Port, _config.MaxPlayers, EnetChannelCount);
 
         if (err != Error.Ok)
         {
@@ -43,29 +61,36 @@ public partial class DedicatedServer : Node
             return;
         }
 
-        Multiplayer.MultiplayerPeer    = peer;
-        Multiplayer.PeerConnected      += OnPeerConnected;
-        Multiplayer.PeerDisconnected   += OnPeerDisconnected;
+        Multiplayer.MultiplayerPeer = peer;
+        Multiplayer.PeerConnected += OnPeerConnected;
+        Multiplayer.PeerDisconnected += OnPeerDisconnected;
 
-        GD.Print($"[DedicatedServer] '{_config.ServerName}' listening on :{_config.Port} (max {_config.MaxPlayers})");
+        GD.Print($"[DedicatedServer] '{_config.ServerName}' listening on :{_config.Port} (max {_config.MaxPlayers}, channels {EnetChannelCount})");
+        GD.Print($"[DedicatedServer] Backend: {_config.BackendUrl}");
 
         var registered = await _registrar.Register();
         if (!registered)
             GD.PrintErr("[DedicatedServer] Backend registration failed. Running unregistered.");
+
+        var gameManager = GetNodeOrNull<GameManager>("/root/GameManager");
+        if (gameManager != null)
+            gameManager.StartDedicatedLobby();
+        else
+            GD.PrintErr("[DedicatedServer] GameManager not found; dedicated lobby did not start.");
     }
 
     private void OnPeerConnected(long id)
     {
         var peerId = (int)id;
         _players[peerId] = new PlayerInfo { Authenticated = false };
-        GD.Print($"[DedicatedServer] Peer {peerId} connected — awaiting auth.");
+        GD.Print($"[DedicatedServer] Peer {peerId} connected; awaiting auth.");
 
         var timer = GetTree().CreateTimer(10.0, false);
         timer.Timeout += () =>
         {
             if (_players.TryGetValue(peerId, out var info) && !info.Authenticated)
             {
-                GD.Print($"[DedicatedServer] Peer {peerId} auth timeout. Kicking.");
+                GD.Print($"[DedicatedServer] Peer {peerId} auth timeout; kicking.");
                 KickPeer(peerId);
             }
         };
@@ -83,64 +108,56 @@ public partial class DedicatedServer : Node
         }
     }
 
-    [Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void AuthenticateRpc(string token, string preferredJob)
+    public void BeginAuth(int peerId, string token, string preferredJob)
     {
-        var peerId = Multiplayer.GetRemoteSenderId();
-        if (!_players.ContainsKey(peerId)) return;
-        if (_players[peerId].Authenticated) return;
-
-        CallDeferred(MethodName.RunAuthentication, peerId, token, preferredJob);
+        if (!_players.ContainsKey(peerId))
+        {
+            GD.PrintErr($"[DedicatedServer] BeginAuth for unknown peer {peerId}; ignoring.");
+            return;
+        }
+        if (_players[peerId].Authenticated)
+        {
+            GD.Print($"[DedicatedServer] Peer {peerId} is already authenticated.");
+            return;
+        }
+        RunAuthentication(peerId, token, preferredJob);
     }
 
     private async void RunAuthentication(int peerId, string token, string preferredJob)
     {
-        if (!_players.ContainsKey(peerId)) return;
-
-        var (valid, userId, username) = await VerifyTokenWithBackend(token);
-
-        if (!valid)
-        {
-            GD.Print($"[DedicatedServer] Peer {peerId} auth rejected (invalid token).");
-            RpcId(peerId, MethodName.ReceiveAuthResult, false, "");
-            await Task.Delay(500);
-            KickPeer(peerId);
+        if (!_players.ContainsKey(peerId))
             return;
-        }
+
+        var (valid, userId, username) = await VerifyToken(token);
 
         if (!_players.ContainsKey(peerId))
             return;
 
-        string assignedJob = AssignJob(peerId, preferredJob);
+        if (!valid)
+        {
+            GD.Print($"[DedicatedServer] Peer {peerId} auth rejected (invalid token).");
+            KickPeer(peerId);
+            EmitSignal(SignalName.PlayerAuthFailed, peerId, "Invalid token");
+            return;
+        }
+
+        var assignedJob = AssignJob(peerId, preferredJob);
 
         _players[peerId] = new PlayerInfo
         {
-            UserId        = userId,
-            Username      = username,
-            Job           = assignedJob,
+            UserId = userId,
+            Username = username,
+            Job = assignedJob,
             Authenticated = true
         };
 
         _registrar.UpdatePlayerCount(_players.Count);
-        GD.Print($"[DedicatedServer] Authenticated: {username} (peer {peerId}) → job: {assignedJob}");
+        GD.Print($"[DedicatedServer] Authenticated {username} (peer {peerId}) -> {assignedJob}");
 
-        RpcId(peerId, MethodName.ReceiveAuthResult, true, assignedJob);
+        EmitSignal(SignalName.PlayerAuthenticated, peerId, userId, username, assignedJob);
     }
 
-    [Rpc(MultiplayerApi.RpcMode.Authority, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    private void ReceiveAuthResult(bool success, string assignedJob) { }
-
-    private string AssignJob(int peerId, string preferred)
-    {
-        if (_jobManager == null) return preferred;
-
-        if (!string.IsNullOrEmpty(preferred) && _jobManager.AssignJob(peerId, preferred))
-            return preferred;
-
-        return _jobManager.AssignJobByPriority(peerId, new Godot.Collections.Dictionary());
-    }
-
-    private async Task<(bool valid, int userId, string username)> VerifyTokenWithBackend(string token)
+    public async Task<(bool valid, int userId, string username)> VerifyToken(string token)
     {
         try
         {
@@ -149,18 +166,21 @@ public partial class DedicatedServer : Node
             req.Headers.Add("Authorization", $"Bearer {token}");
 
             var response = await _httpClient.SendAsync(req);
-            if (!response.IsSuccessStatusCode) return (false, 0, "");
+            if (!response.IsSuccessStatusCode)
+                return (false, 0, "");
 
-            var body   = await response.Content.ReadAsStringAsync();
+            var body = await response.Content.ReadAsStringAsync();
             var parser = new Json();
-            if (parser.Parse(body) != Error.Ok) return (false, 0, "");
+            if (parser.Parse(body) != Error.Ok)
+                return (false, 0, "");
 
             var result = parser.Data.AsGodotDictionary();
-            if (!result.ContainsKey("user")) return (false, 0, "");
+            if (!result.ContainsKey("user"))
+                return (false, 0, "");
 
-            var user     = result["user"].AsGodotDictionary();
-            int userId   = user.ContainsKey("id")       ? user["id"].AsInt32()         : 0;
-            string uname = user.ContainsKey("username") ? user["username"].ToString()  : "";
+            var user = result["user"].AsGodotDictionary();
+            int userId = user.ContainsKey("id") ? user["id"].AsInt32() : 0;
+            string uname = user.ContainsKey("username") ? user["username"].ToString() : "";
             return (true, userId, uname);
         }
         catch (Exception e)
@@ -170,12 +190,18 @@ public partial class DedicatedServer : Node
         }
     }
 
-    private void KickPeer(int peerId)
+    private string AssignJob(int peerId, string preferred)
     {
-        _players.Remove(peerId);
-        if (Multiplayer.MultiplayerPeer is ENetMultiplayerPeer enet)
-            enet.DisconnectPeer(peerId);
+        if (_jobManager == null)
+            return preferred;
+
+        if (!string.IsNullOrEmpty(preferred) && _jobManager.AssignJob(peerId, preferred))
+            return preferred;
+
+        return _jobManager.AssignJobByPriority(peerId, new Godot.Collections.Dictionary());
     }
+
+    public string AssignJobForPeer(int peerId, string preferredJob) => AssignJob(peerId, preferredJob);
 
     public bool IsAuthenticated(int peerId) =>
         _players.TryGetValue(peerId, out var p) && p.Authenticated;
@@ -192,8 +218,24 @@ public partial class DedicatedServer : Node
     public IReadOnlyDictionary<int, string> GetAllUsernames()
     {
         var map = new Dictionary<int, string>();
-        foreach (var kv in _players) map[kv.Key] = kv.Value.Username;
+        foreach (var kv in _players)
+            map[kv.Key] = kv.Value.Username;
         return map;
+    }
+
+    public void UpdatePlayerCount(int count) => _registrar.UpdatePlayerCount(count);
+
+    private void KickPeer(int peerId)
+    {
+        _players.Remove(peerId);
+        if (Multiplayer.MultiplayerPeer is ENetMultiplayerPeer enet)
+            enet.DisconnectPeer(peerId);
+    }
+
+    public async void Deregister()
+    {
+        _registrar?.Deregister();
+        await Task.CompletedTask;
     }
 
     public override void _ExitTree()

@@ -4,32 +4,32 @@ using System.Collections.Generic;
 
 public enum SkillType
 {
-    // Medical Skills
+    // Medical Skills.
     Medical = 0,
     Surgery = 1,
     
-    // Science Skills
+    // Science Skills.
     Research = 2,
     
-    // Engineering Skills
+    // Engineering skills.
     Engineer = 3,
     Construction = 4,
     
-    // Combat Skills
+    // Combat Skills.
     CQC = 5,
     SpecWeapons = 6,
     
-    // Specialized Skills
+    // Specialized skills.
     Powerloader = 7,
     Intel = 8,
     Police = 9,
     JTAC = 10,
     Vehicle = 11,
     
-    // Support Skills
+    // Support Skills.
     FiremanCarry = 12,
     
-    // Maximum skill count
+    // Maximum skill count.
     MaxSkills = 13
 }
 
@@ -60,7 +60,7 @@ public partial class SkillComponent : Node
 
     private void InitializeSkills()
     {
-        // Initialize all skills to level 0
+        // Initialize all skills to level 0.
         foreach (SkillType skill in Enum.GetValues(typeof(SkillType)))
         {
             if (skill != SkillType.MaxSkills)
@@ -191,13 +191,13 @@ public partial class SkillComponent : Node
         return GetSkillLevel(skill) >= minimumLevel;
     }
 
-    // Skill-based checks for interactions
+    // Skill-based checks for interactions.
     public bool CheckCQCAttack(SkillType attackerSkill, SkillType defenderSkill)
     {
         int attackerLevel = GetSkillLevel(attackerSkill);
         int defenderLevel = GetSkillLevel(defenderSkill);
         
-        // Base chance based on skill difference
+        // Base chance based on skill difference.
         int skillDiff = attackerLevel - defenderLevel;
         float baseChance = 0.5f + (skillDiff * 0.1f);
         baseChance = Mathf.Clamp(baseChance, 0.1f, 0.9f);
@@ -248,7 +248,7 @@ public partial class SkillComponent : Node
 
     public void ApplyCharacterTraits(Godot.Collections.Dictionary characterData)
     {
-        // Apply skill boosts based on character traits
+        // Apply skill boosts based on character traits.
         if (characterData.ContainsKey("traits"))
         {
             var traits = (Godot.Collections.Array)characterData["traits"];

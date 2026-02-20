@@ -312,12 +312,12 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 			var targetInteraction = _pullingTarget.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
 			if (targetInteraction != null)
 			{
-				// Choke (and aggressive) hold the target at a raw pixel offset from the
-				// puller (e.g. 8 px north).  Snap back to the nearest grid tile centre
+				// Choke (and aggressive) hold the target at a raw pixel offset from the.
+				// puller (e.g. 8 px north). Snap back to the nearest grid tile centre.
 				// before releasing so the mob does not remain visually displaced.
-				// Broadcast the corrected position and update the NetworkManager cache
-				// on the server immediately so all peers resume interpolation from the
-				// right location — this also fixes the host-as-victim case where the
+				// Broadcast the corrected position and update the networkmanager cache.
+				// On the server immediately so all peers resume interpolation from the.
+				// Right location - this also fixes the host-as-victim case where the.
 				// host's own transform broadcasts would otherwise anchor the stale offset.
 				if (_grabLevel == GrabLevel.Choke || _grabLevel == GrabLevel.Aggressive)
 				{
@@ -583,7 +583,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		}
 		_pullingTarget = null;
 		_grabLevel = GrabLevel.None;
-		// Reset the interaction-speed multiplier on every peer so the puller is not
+		// Reset the interaction-speed multiplier on every peer so the puller is not.
 		// permanently stuck at half speed after releasing an aggressive / choke grab.
 		UpdatePullerSpeed();
 		EmitSignal(SignalName.StoppedPulling);
@@ -596,7 +596,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		EmitSignal(SignalName.GrabLevelChanged, level);
 		UpdatePullerSpeed();
 		
-		// Update UI button to show current grab level
+		// Update ui button to show current grab level.
 		UpdatePUIGrabSprite(level - 1);
 	}
 	
@@ -622,9 +622,9 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		_pulledBy = null;
 		_owner.DisableMovement = false;
 
-		// NetworkManager's cached position for this mob went stale while it was being
-		// pulled (interpolation was suppressed via ShouldSkipInterpolation).  Without
-		// this update, interpolation resumes toward the pre-pull cached position and
+		// NetworkManager's cached position for this mob went stale while it was being.
+		// pulled (interpolation was suppressed via ShouldSkipInterpolation). Without.
+		// this update, interpolation resumes toward the pre-pull cached position and.
 		// the mob visually snaps backward.
 		if (int.TryParse(_owner.Name, out int peerId))
 		{
@@ -776,9 +776,9 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		if (_grabLevel >= GrabLevel.Aggressive)
 		{
 			// Always slow the puller when aggressively grabbing or choking.
-			// Previously this was conditional on targetIsProne, but Aggressive grab
-			// immediately sets the target Prone — so targetIsProne was always true
-			// and puller speed went back to 1.0f while target crawled at 0.5f,
+			// Previously this was conditional on targetIsProne, but Aggressive grab.
+			// Immediately sets the target prone - so targetisprone was always true.
+			// and puller speed went back to 1.0f while target crawled at 0.5f,.
 			// causing CheckForGripLoss to fire almost immediately.
 			// 0.5f matches the target's Prone speed so both move at the same rate.
 			movement.SetInteractionSpeedMultiplier(0.5f);
@@ -840,10 +840,10 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		_grabItem.InHandLeftFrame = frame;
 		_grabItem.InHandRightFrame = frame;
 		
-		// Update the UI button
+		// Update the ui button.
 		UpdatePUIGrabSprite(frame);
 		
-		// Start frame cycling animation for grabbing
+		// Start frame cycling animation for grabbing.
 		StartGrabAnimation(frame);
 	}
 	
@@ -851,8 +851,8 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	{
 		if (_grabItem == null) return;
 		
-		// Create a tween to cycle through frames for grabbing animation
-		// Use the owner node to manage the tween since GrabItem might not be a Node
+		// Create a tween to cycle through frames for grabbing animation.
+		// Use the owner node to manage the tween since grabitem might not be a node.
 		var tween = _owner.GetNodeOrNull<Tween>("GrabAnimation");
 		if (tween != null)
 		{
@@ -862,7 +862,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		tween = GetTree().CreateTween();
 		tween.SetLoops();
 		
-		// Cycle through frames for grabbing animation
+		// Cycle through frames for grabbing animation.
 		tween.TweenProperty(_grabItem, "icon_frame", baseFrame + 1, 0.2f);
 		tween.TweenProperty(_grabItem, "icon_frame", baseFrame + 2, 0.2f);
 		tween.TweenProperty(_grabItem, "icon_frame", baseFrame, 0.2f);

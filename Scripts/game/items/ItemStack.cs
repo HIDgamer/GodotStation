@@ -1,6 +1,5 @@
 using Godot;
 
-/// Represents a stack of items in inventory
 public partial class ItemStack
 {
 	public Item ItemData { get; private set; }

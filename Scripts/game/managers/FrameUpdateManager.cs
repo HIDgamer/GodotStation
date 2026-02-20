@@ -23,10 +23,10 @@ public partial class FrameUpdateManager : Node
 	{
 		if (_cheapUpdates.Count == 0) return;
 		
-		// Process pending additions/removals
+		// Process pending additions/removals.
 		ProcessPendingChanges();
 		
-		// Update cheap operations
+		// Update cheap operations.
 		int processedCount = 0;
 		for (int i = 0; i < _cheapUpdates.Count && i < MaxCheapUpdatesPerFrame; i++)
 		{
@@ -83,7 +83,7 @@ public partial class FrameUpdateManager : Node
 	
 	private void ProcessPendingChanges()
 	{
-		// Add new updates
+		// Add new updates.
 		foreach (var update in _updatesToAdd)
 		{
 			if (!_cheapUpdates.Contains(update))
@@ -95,7 +95,7 @@ public partial class FrameUpdateManager : Node
 		}
 		_updatesToAdd.Clear();
 		
-		// Remove updates
+		// Remove updates.
 		foreach (var update in _updatesToRemove)
 		{
 			_cheapUpdates.Remove(update);

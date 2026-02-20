@@ -219,7 +219,7 @@ public partial class Mob : CharacterBody2D
 		}
 		else
 		{
-			var bubbleScene = GD.Load<PackedScene>("res://Scenes/UI/ChatBubble.tscn");
+			var bubbleScene = GD.Load<PackedScene>("res://Scenes/game/interface/ChatBubble.tscn");
 			if (bubbleScene != null)
 			{
 				var bubble = bubbleScene.Instantiate<Node2D>();
@@ -259,11 +259,6 @@ public partial class Mob : CharacterBody2D
 		}
 	}
 
-	/// <summary>
-	/// Called by GameManager on spawn and reconnect to apply character data.
-	/// Also re-evaluates multiplayer authority and camera ownership, which is
-	/// necessary after a node rename (reconnect) because _EnterTree does not re-run.
-	/// </summary>
 	public void ApplyCharacterData(Godot.Collections.Dictionary charData)
 	{
 		if (charData != null && charData.Count > 0)
@@ -278,10 +273,6 @@ public partial class Mob : CharacterBody2D
 		RefreshAuthority();
 	}
 
-	/// <summary>
-	/// Re-reads the node name as a peer ID, re-sets multiplayer authority, and
-	/// enables or disables the camera accordingly. Safe to call at any time.
-	/// </summary>
 	public void RefreshAuthority()
 	{
 		// Re-derive authority from the current node name (may differ after a rename).

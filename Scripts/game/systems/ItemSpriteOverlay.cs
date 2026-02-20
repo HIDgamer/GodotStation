@@ -1,6 +1,5 @@
 using Godot;
 
-/// Optional overlay that can be toggled (e.g. knife inserted, battery attached)
 [GlobalClass]
 public partial class ItemSpriteOverlay : Resource
 {
@@ -13,7 +12,7 @@ public partial class ItemSpriteOverlay : Resource
 	[Export] public int ZIndex = 1;
 	[Export] public Vector2 Offset = Vector2.Zero;
 	
-	// Frame selection properties - specify which frame to use from sprite sheets
+	// Frame selection properties - specify which frame to use from sprite sheets.
 	[Export] public int IconFrame = 0;
 	[Export] public int InHandLeftFrame = 0;
 	[Export] public int InHandRightFrame = 0;

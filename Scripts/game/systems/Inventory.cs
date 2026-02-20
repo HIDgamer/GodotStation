@@ -313,8 +313,8 @@ public partial class Inventory : Node, IMobSystem
 			if (item is GrabItem grabItem)
 			{
 				GD.Print($"[Inventory] GrabItem equipped to slot {slot} - no separate sprite needed");
-				// GrabItem doesn't need a separate sprite system - the grab animation
-				// is handled by the character's existing animation system
+				// GrabItem doesn't need a separate sprite system - the grab animation.
+				// is handled by the character's existing animation system.
 				return;
 			}
 			

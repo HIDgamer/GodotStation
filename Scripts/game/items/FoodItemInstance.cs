@@ -3,7 +3,7 @@ public partial class FoodItemInstance : Node, ISchedulable
 {
 	[Export] public FoodItem FoodData;
 	
-	// Scheduler configuration
+	// Scheduler configuration.
 	[Export] public float SchedulerUpdateInterval = 1.0f; // Update every 1 second
 	[Export] public int SchedulerPriority = 3; // Low priority
 	[Export] public bool SchedulerUpdateOnRegister = false;
@@ -77,7 +77,7 @@ public partial class FoodItemInstance : Node, ISchedulable
 	
 	public void Cleanup()
 	{
-		// Unregister from scheduler
+		// Unregister from scheduler.
 		if (_scheduler != null)
 		{
 			_scheduler.Unregister(this);

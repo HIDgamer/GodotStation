@@ -40,14 +40,14 @@ private Dictionary<string, NodeCount> _nodeCounts = new(); // New: Track node co
 		{
 			GD.Print("[ProfilingManager] Profiling enabled");
 			
-			// Connect to scheduler signals for monitoring
+			// Connect to scheduler signals for monitoring.
 			if (_scheduler != null)
 			{
 				_scheduler.SchedulerUpdateStarted += OnSchedulerUpdateStarted;
 				_scheduler.SchedulerUpdateCompleted += OnSchedulerUpdateCompleted;
 			}
 			
-			// Connect to frame update manager signals
+			// Connect to frame update manager signals.
 			if (_frameUpdateManager != null)
 			{
 				_frameUpdateManager.FrameUpdateStatsUpdated += OnFrameUpdateStatsUpdated;
@@ -67,7 +67,7 @@ private Dictionary<string, NodeCount> _nodeCounts = new(); // New: Track node co
 			_reportTimer = 0f;
 		}
 		
-		// Check for performance alerts
+		// Check for performance alerts.
 		CheckPerformanceAlerts();
 	}
 	
@@ -91,7 +91,7 @@ public void ResetStats()
 	_nodeCounts.Clear();
 }
 
-// New methods for resource monitoring
+// New methods for resource monitoring.
 public void AddResourceUsage(string resourceName, float usage, string unit = "MB")
 {
 	if (!_resourceUsage.ContainsKey(resourceName))
@@ -132,7 +132,7 @@ public Dictionary<string, NodeCount> GetNodeCounts() => _nodeCounts;
 	{
 		_currentStats.SchedulerUpdateCompleted(processedCount);
 		
-		// Track system-specific stats
+		// Track system-specific stats.
 		if (_scheduler != null)
 		{
 			var registeredCount = _scheduler.GetRegisteredCount();
@@ -141,7 +141,7 @@ public Dictionary<string, NodeCount> GetNodeCounts() => _nodeCounts;
 			_currentStats.TotalRegisteredItems = registeredCount;
 			_currentStats.TotalPendingUpdates = pendingUpdates;
 			
-			// Calculate skip/delay rates
+			// Calculate skip/delay rates.
 			if (registeredCount > 0)
 			{
 				float skipRate = (float)(registeredCount - processedCount) / registeredCount;
@@ -159,7 +159,7 @@ public Dictionary<string, NodeCount> GetNodeCounts() => _nodeCounts;
 	{
 		_currentStats.FrameUpdateStats(updateCount, frameTime);
 		
-		// Track batch stats if available
+		// Track batch stats if available.
 		if (_batchManager != null)
 		{
 			_currentStats.TotalBatches = _batchManager.GetTotalBatches();
@@ -170,16 +170,16 @@ public Dictionary<string, NodeCount> GetNodeCounts() => _nodeCounts;
 	
 private void GenerateReport()
 {
-	// Calculate averages
+	// Calculate averages.
 	_currentStats.CalculateAverages();
 	
-	// Generate performance insights
+	// Generate performance insights.
 	var insights = GeneratePerformanceInsights();
 	
-	// Generate detailed resource report
+	// Generate detailed resource report.
 	var resourceReport = GenerateResourceReport();
 	
-	// Log performance report
+	// Log performance report.
 	GD.Print($"[ProfilingManager] PERFORMANCE REPORT:");
 	GD.Print($"  Time: {DateTime.Now.ToString("HH:mm:ss")}");
 	GD.Print($"");
@@ -202,7 +202,7 @@ private string GenerateResourceReport()
 {
 	var report = new System.Text.StringBuilder();
 	
-	// System resource usage
+	// System resource usage.
 	if (_resourceUsage.Count > 0)
 	{
 		foreach (var kvp in _resourceUsage)
@@ -213,7 +213,7 @@ private string GenerateResourceReport()
 		}
 	}
 	
-	// Node counts
+	// Node counts.
 	if (_nodeCounts.Count > 0)
 	{
 		report.AppendLine($"    - NODE COUNTS:");
@@ -225,7 +225,7 @@ private string GenerateResourceReport()
 		}
 	}
 	
-	// Overall node count
+	// Overall node count.
 	var totalNodes = CountNodes(GetTree().Root);
 	report.AppendLine($"    - TOTAL NODES: {totalNodes}");
 	
@@ -266,7 +266,7 @@ private void CheckPerformanceAlerts()
 	var registeredCount = _scheduler.GetRegisteredCount();
 	var pendingUpdates = _scheduler.GetPendingUpdates();
 	
-	// Check skip threshold
+	// Check skip threshold.
 	if (pendingUpdates > SkipThresholdAlert)
 	{
 		var alert = new PerformanceAlert
@@ -280,7 +280,7 @@ private void CheckPerformanceAlerts()
 		AddAlert(alert);
 	}
 	
-	// Check memory usage
+	// Check memory usage.
 	if (EnableMemoryMonitoring)
 	{
 		var memoryUsage = OS.GetStaticMemoryUsage() / (1024.0f * 1024.0f); // MB
@@ -298,13 +298,13 @@ private void CheckPerformanceAlerts()
 		}
 	}
 	
-	// Check resource usage alerts
+	// Check resource usage alerts.
 	if (EnableDetailedResourceMonitoring)
 	{
 		CheckResourceUsageAlerts();
 	}
 	
-	// Check node count alerts
+	// Check node count alerts.
 	if (EnableNodeCountMonitoring)
 	{
 		CheckNodeCountAlerts();
@@ -317,7 +317,7 @@ private void CheckResourceUsageAlerts()
 	{
 		var resource = kvp.Value;
 		
-		// Alert on high resource usage
+		// Alert on high resource usage.
 		if (resource.CurrentUsage > 100)
 		{
 			var alert = new PerformanceAlert
@@ -337,7 +337,7 @@ private void CheckResourceUsageAlerts()
 {
 	var totalNodes = CountNodes(GetTree().Root);
 	
-	// Alert on too many nodes
+	// Alert on too many nodes.
 	if (totalNodes > 10000)
 	{
 		var alert = new PerformanceAlert
@@ -354,7 +354,7 @@ private void CheckResourceUsageAlerts()
 
 private void CheckGPUMemoryUsage()
 {
-	// Check for high texture memory usage
+	// Check for high texture memory usage.
 	if (_resourceUsage.ContainsKey("TextureMemory"))
 	{
 		var textureUsage = _resourceUsage["TextureMemory"];
@@ -372,7 +372,7 @@ private void CheckGPUMemoryUsage()
 		}
 	}
 	
-	// Check for too many textures
+	// Check for too many textures.
 	var textureCount = 0;
 	foreach (var kvp in _resourceUsage)
 	{
@@ -451,13 +451,13 @@ public class ProfilingStats
 	
 	public void SchedulerUpdateStarted(int updateCount)
 	{
-		// Track start time if needed
+		// Track start time if needed.
 	}
 	
 	public void SchedulerUpdateCompleted(int processedCount)
 	{
 		TotalSchedulerUpdates++;
-		// Calculate time if we had start time tracking
+		// Calculate time if we had start time tracking.
 	}
 	
 	public void FrameUpdateStats(int updateCount, float frameTime)
@@ -466,7 +466,7 @@ public class ProfilingStats
 		TotalFrameTime += frameTime;
 		AverageFrameTime = TotalFrameTime / TotalFrameUpdates;
 		
-		// Track memory usage
+		// Track memory usage.
 		var memoryUsage = OS.GetStaticMemoryUsage() / (1024.0f * 1024.0f);
 		PeakMemoryUsage = Math.Max(PeakMemoryUsage, memoryUsage);
 	}
@@ -503,7 +503,7 @@ public class PerformanceAlert
 	public double Timestamp { get; set; }
 }
 
-// New classes for resource monitoring
+// New classes for resource monitoring.
 public class ResourceUsage
 {
 	public string Name { get; set; }

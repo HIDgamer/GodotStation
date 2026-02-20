@@ -18,6 +18,14 @@ var selected_item_uid: String = ""
 var spawn_mode: bool = false
 var _game_manager: Node = null
 
+func _is_connected_to_server() -> bool:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return false
+	if multiplayer.is_server():
+		return true
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	return peer != null and peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED
+
 func _ready() -> void:
 	close_requested.connect(_on_close)
 	_populate_items()
@@ -92,13 +100,7 @@ func _quick_spawn(item_path: String) -> void:
 		var spawn_pos = Vector2(grid_x, grid_y)
 		print("[AdminSpawn] Spawning at: ", spawn_pos)
 		
-		if _game_manager:
-			if multiplayer.is_server():
-				_game_manager.call("RequestSpawnItem", scene.resource_path, spawn_pos, 1)
-			else:
-				_game_manager.rpc_id(1, "RequestSpawnItem", scene.resource_path, spawn_pos, 1)
-		else:
-			print("[AdminSpawn] GameManager not available")
+		_request_spawn(scene.resource_path, spawn_pos, 1)
 	else:
 		print("[AdminSpawn] Failed to load scene")
 
@@ -126,13 +128,7 @@ func try_spawn_at_position(world_pos: Vector2) -> void:
 		
 		print("[AdminSpawn] Spawning at grid: ", spawn_pos)
 		
-		if _game_manager:
-			if multiplayer.is_server():
-				_game_manager.call("RequestSpawnItem", scene.resource_path, spawn_pos, 1)
-			else:
-				_game_manager.rpc_id(1, "RequestSpawnItem", scene.resource_path, spawn_pos, 1)
-		else:
-			print("[AdminSpawn] GameManager not available")
+		_request_spawn(scene.resource_path, spawn_pos, 1)
 	else:
 		print("[AdminSpawn] Failed to load scene")
 	
@@ -160,8 +156,25 @@ func get_world_mouse_position() -> Vector2:
 						break
 	
 	if camera:
-		# Use unproject_position to properly convert screen coordinates to world coordinates
+		# Use unproject_position to properly convert screen coordinates to world coordinates.
 		return camera.unproject_position(mouse_pos)
 	
 	print("[AdminSpawn] No camera found, using raw mouse position")
 	return mouse_pos
+
+func _request_spawn(scene_path: String, spawn_pos: Vector2, amount: int) -> void:
+	if _game_manager == null:
+		print("[AdminSpawn] GameManager not available")
+		return
+
+	var rpc_name := "RequestSpawnItem" if _game_manager.has_method("RequestSpawnItem") else "request_spawn_item"
+
+	if multiplayer.is_server():
+		if _game_manager.has_method(rpc_name):
+			_game_manager.call(rpc_name, scene_path, spawn_pos, amount)
+		else:
+			print("[AdminSpawn] Spawn method not found on GameManager")
+	elif _is_connected_to_server():
+		_game_manager.rpc_id(1, rpc_name, scene_path, spawn_pos, amount)
+	else:
+		print("[AdminSpawn] Not connected; spawn request skipped")

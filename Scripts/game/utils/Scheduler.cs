@@ -24,7 +24,7 @@ public class WorldSnapshot
 	public readonly float Time;
 	public readonly Dictionary<string, object> Data;
 	
-	// Global data tracking
+	// Global data tracking.
 	public readonly Dictionary<string, object> TileChanges = new();
 	public readonly Dictionary<string, object> AtmosphericData = new();
 	public readonly Dictionary<string, object> PowerNetworkData = new();
@@ -52,7 +52,7 @@ public class WorldSnapshot
 		return Data.ContainsKey(key);
 	}
 	
-	// Tile change tracking
+	// Tile change tracking.
 	public void AddTileChange(string tileKey, object changeData)
 	{
 		TileChanges[tileKey] = changeData;
@@ -78,7 +78,7 @@ public class WorldSnapshot
 		EntityDistribution[region] = count;
 	}
 	
-	// Batch data operations
+	// Batch data operations.
 	public void MergeTileChanges(Dictionary<string, object> changes)
 	{
 		foreach (var change in changes)
@@ -153,7 +153,7 @@ public partial class Scheduler : Node
 		_removalBuffer = new List<string>();
 		_frameTime = 1.0f / (float)TargetFrameRate;
 		
-		// Removed debug print as requested
+		// Removed debug print as requested.
 	}
 	
 	public override void _Process(double delta)
@@ -166,14 +166,14 @@ public partial class Scheduler : Node
 		
 		_timeAccumulator += (float)delta;
 		
-		// Only process if we have time accumulated and items to update
+		// Only process if we have time accumulated and items to update.
 		if (_timeAccumulator >= _frameTime && _priorityQueue.Count > 0)
 		{
 			ProcessScheduledUpdates();
 			_timeAccumulator = 0f;
 		}
 		
-		// Process any pending removals
+		// Process any pending removals.
 		ProcessRemovals();
 	}
 	
@@ -199,7 +199,7 @@ public partial class Scheduler : Node
 		
 		var item = new ScheduledItem(schedulable);
 		
-		// Set initial update time based on UpdateOnRegister
+		// Set initial update time based on updateonregister.
 		if (schedulable.UpdateOnRegister)
 		{
 			item.NextUpdateTime = 0f; // Update immediately
@@ -228,7 +228,7 @@ public partial class Scheduler : Node
 		
 		if (_isUpdating)
 		{
-			// Defer removal if we're currently updating
+			// Defer removal if we're currently updating.
 			if (!_removalBuffer.Contains(schedulerId))
 				_removalBuffer.Add(schedulerId);
 			return;
@@ -266,13 +266,13 @@ public partial class Scheduler : Node
 		var snapshot = CreateSnapshot();
 		var itemsToUpdate = new List<ScheduledItem>();
 		
-		// Collect all items
+		// Collect all items.
 		while (_priorityQueue.Count > 0)
 		{
 			itemsToUpdate.Add(_priorityQueue.Dequeue());
 		}
 		
-		// Update all items
+		// Update all items.
 		foreach (var item in itemsToUpdate)
 		{
 			if (item.Schedulable.IsActive)
@@ -319,12 +319,12 @@ public partial class Scheduler : Node
 		{
 			_updateBuffer.Clear();
 			
-			// Collect items that need updating (up to MaxUpdatesPerFrame)
+			// Collect items that need updating (up to MaxUpdatesPerFrame).
 			while (_updateBuffer.Count < MaxUpdatesPerFrame && _priorityQueue.Count > 0)
 			{
 				var item = _priorityQueue.Peek();
 				
-				// Check if item is due for update and is active
+				// Check if item is due for update and is active.
 				if (item.NextUpdateTime <= snapshot.Time && item.Schedulable.IsActive)
 				{
 					_priorityQueue.Dequeue(); // Remove from queue
@@ -336,7 +336,7 @@ public partial class Scheduler : Node
 				}
 			}
 			
-			// Process collected updates
+			// Process collected updates.
 			foreach (var item in _updateBuffer)
 			{
 				try
@@ -344,24 +344,24 @@ public partial class Scheduler : Node
 					item.Schedulable.ScheduledUpdate(_frameTime, snapshot);
 					processedCount++;
 					
-					// Schedule next update
+					// Schedule next update.
 					item.LastUpdateTime = snapshot.Time;
 					item.NextUpdateTime = snapshot.Time + item.Schedulable.UpdateInterval;
 					
-					// Re-queue if still active
+					// Re-queue if still active.
 					if (item.Schedulable.IsActive)
 						_priorityQueue.Enqueue(item);
 				}
 				catch (Exception e)
 				{
 					GD.PrintErr($"[Scheduler] Error updating {item.Schedulable.SchedulerId}: {e.Message}");
-					// Still re-queue the item to avoid losing it, but log the error
+					// Still re-queue the item to avoid losing it, but log the error.
 					if (item.Schedulable.IsActive)
 						_priorityQueue.Enqueue(item);
 				}
 			}
 			
-			// Handle any items that missed their update window
+			// Handle any items that missed their update window.
 			HandleMissedUpdates(snapshot);
 		}
 		finally
@@ -369,21 +369,21 @@ public partial class Scheduler : Node
 			_isUpdating = false;
 		EmitSignal(SignalName.SchedulerUpdateCompleted, processedCount);
 		
-		// Removed debug print as requested
+		// Removed debug print as requested.
 		}
 	}
 	
 	private void HandleMissedUpdates(WorldSnapshot snapshot)
 	{
-		// Re-queue any items that were skipped due to frame capacity
-		// They will be rescheduled for the next available slot
+		// Re-queue any items that were skipped due to frame capacity.
+		// They will be rescheduled for the next available slot.
 		var tempBuffer = new List<ScheduledItem>();
 		
 		while (_priorityQueue.Count > 0)
 		{
 			var item = _priorityQueue.Peek();
 			
-			// If item was due but not processed, reschedule it
+			// If item was due but not processed, reschedule it.
 			if (item.NextUpdateTime <= snapshot.Time && item.Schedulable.IsActive)
 			{
 				_priorityQueue.Dequeue();
@@ -396,7 +396,7 @@ public partial class Scheduler : Node
 			}
 		}
 		
-		// Re-add rescheduled items to queue
+		// Re-add rescheduled items to queue.
 		foreach (var item in tempBuffer)
 		{
 			_priorityQueue.Enqueue(item);
@@ -407,7 +407,7 @@ public partial class Scheduler : Node
 	{
 		_currentSnapshot = new WorldSnapshot((float)Time.GetUnixTimeFromSystem());
 		
-		// Add global snapshot data
+		// Add global snapshot data.
 		_currentSnapshot.AddData("frameTime", _frameTime);
 		_currentSnapshot.AddData("registeredCount", _registeredItems.Count);
 		_currentSnapshot.AddData("pendingUpdates", _priorityQueue.Count);
@@ -452,15 +452,15 @@ internal class ScheduledItem : IComparable<ScheduledItem>
 		NextUpdateTime = schedulable.UpdateInterval;
 	}
 	
-	// Priority queue ordering: higher priority first, then earlier update time
+	// Priority queue ordering: higher priority first, then earlier update time.
 	public int CompareTo(ScheduledItem other)
 	{
-		// First compare by priority (higher priority first)
+		// First compare by priority (higher priority first).
 		int priorityComparison = other.Schedulable.Priority.CompareTo(Schedulable.Priority);
 		if (priorityComparison != 0)
 			return priorityComparison;
 		
-		// Then compare by next update time
+		// Then compare by next update time.
 		return NextUpdateTime.CompareTo(other.NextUpdateTime);
 	}
 }

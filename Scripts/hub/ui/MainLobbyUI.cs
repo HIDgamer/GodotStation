@@ -624,7 +624,7 @@ private void OnLogoutPressed()
 			string host = GetVal(server, "host_username", "Unknown Host");
 			
 			bool isLocked = server.ContainsKey("password_protected") && (bool)server["password_protected"];
-			string lockedPrefix = isLocked ? "🔒 " : "";
+			string lockedPrefix = isLocked ? "ðŸ”’ " : "";
 			
 			GD.Print($"[Hub] Server: {name}, current_players={currentPlayersStr}, max_players={maxPlayersStr}");
 			
@@ -696,6 +696,14 @@ private void OnLogoutPressed()
 			{ "password_protected", PasswordProtectedCheck?.ButtonPressed ?? false },
 			{ "description", ServerDescInput?.Text ?? "" }
 		};
+
+		_gameManager.ServerName = name;
+		_gameManager.ServerDescription = ServerDescInput?.Text ?? "";
+		_gameManager.PasswordProtected = PasswordProtectedCheck?.ButtonPressed ?? false;
+		_gameManager.CurrentMap = "Station";
+		_gameManager.Gamemode = "default";
+		_gameManager.MaxPlayers = 16;
+		_gameManager.DefaultPort = port;
 		
 		_gameManager.HostGame(port); 
 		

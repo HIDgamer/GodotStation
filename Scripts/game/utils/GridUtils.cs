@@ -2,7 +2,7 @@ using Godot;
 
 public static class GridUtils
 {
-	// Grid cell size - matches the tile size used in the game
+	// Grid cell size - matches the tile size used in the game.
 	public const float CellSize = 32f;
 	
 	public static Vector2I WorldToGrid(Vector2 worldPosition)

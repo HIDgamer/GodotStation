@@ -12,17 +12,17 @@ var new_version: String = ""
 func _ready() -> void:
 	self.hide()
 	
-	# 1. Connect the Window's X button (built-in signal)
+	# 1. Connect the Window's X button (built-in signal).
 	self.close_requested.connect(_on_close_pressed)
 	
-	# 2. Connect your custom buttons (pressed signal)
+	# 2. Connect your custom buttons (pressed signal).
 	download_button.pressed.connect(_on_download_pressed)
 	install_button.pressed.connect(_on_install_pressed)
 	%CloseButton.pressed.connect(_on_close_pressed) # The "Later" button
 
-	# 3. Connect to the C# AutoUpdater
+	# 3. Connect to the C# AutoUpdater.
 	if auto_updater:
-		# Use string names to be safe with C# signals
+		# Use string names to be safe with C# signals.
 		auto_updater.connect("UpdateAvailable", _on_update_available)
 		auto_updater.connect("UpdateDownloadProgress", _on_download_progress)
 		auto_updater.connect("UpdateReadyToInstall", _on_ready_to_install)

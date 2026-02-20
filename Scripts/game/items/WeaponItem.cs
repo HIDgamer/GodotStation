@@ -11,7 +11,7 @@ public partial class WeaponItem : Item
 	[Export] public string AttackAnimation = "melee";
 	[Export] public bool IsTwoHanded = false;
 	
-	// Ranged weapon properties
+	// Ranged weapon properties.
 	[Export] public bool IsRanged = false;
 	[Export] public int MagazineCapacity = 0;
 	[Export] public int CurrentAmmo = 0;
@@ -20,52 +20,52 @@ public partial class WeaponItem : Item
 	[Export] public float Recoil = 0.1f;
 	[Export] public string ProjectileScene = "";
 	
-	// Tool properties
+	// Tool properties.
 	[Export] public virtual bool IsTool { get; set; } = false;
 	[Export] public virtual string ToolType { get; set; } = "";
 	[Export] public virtual float ToolEfficiency { get; set; } = 1.0f;
 	[Export] public virtual string ToolAnimation { get; set; } = "use";
 	
-	// Medical properties
+	// Medical properties.
 	[Export] public virtual bool IsMedical { get; set; } = false;
 	[Export] public virtual float HealingAmount { get; set; } = 0.0f;
 	[Export] public virtual float PainReduction { get; set; } = 0.0f;
 	[Export] public virtual float StabilizeChance { get; set; } = 0.5f;
 	[Export] public virtual string MedicalAnimation { get; set; } = "inject";
 	
-	// Construction properties
+	// Construction properties.
 	[Export] public virtual bool IsConstruction { get; set; } = false;
 	[Export] public virtual float BuildSpeed { get; set; } = 1.0f;
 	[Export] public virtual string ConstructionType { get; set; } = "";
 	[Export] public virtual string ConstructionAnimation { get; set; } = "build";
 	
-	// Electronics properties
+	// Electronics properties.
 	[Export] public virtual bool IsElectronic { get; set; } = false;
 	[Export] public virtual float BatteryCapacity { get; set; } = 100.0f;
 	[Export] public virtual float CurrentCharge { get; set; } = 100.0f;
 	[Export] public virtual string ElectronicFunction { get; set; } = "";
 	[Export] public virtual string ElectronicAnimation { get; set; } = "activate";
 	
-	// Clothing properties
+	// Clothing properties.
 	[Export] public bool IsClothing = false;
 	[Export] public float ProtectionValue = 0.0f;
 	[Export] public float Coverage = 1.0f;
 	[Export] public string ClothingSlot = "uniform";
 	[Export] public string ClothingAnimation = "equip";
 	
-	// Consumable properties
+	// Consumable properties.
 	[Export] public bool IsConsumable = false;
 	[Export] public float ConsumptionTime = 1.0f;
 	[Export] public string ConsumableEffect = "";
 	[Export] public string ConsumableAnimation = "consume";
 	
-	// Special properties
+	// Special properties.
 	[Export] public bool IsThrowable = false;
 	[Export] public float ThrowForce = 200.0f;
 	[Export] public float ThrowRange = 100.0f;
 	[Export] public string ThrowableEffect = "";
 	
-	// Item interactions
+	// Item interactions.
 	public enum InteractionType { None, MeleeAttack, RangedAttack, UseTool, MedicalTreatment, Consume, Equip, Activate }
 	
 	public InteractionType GetInteractionType()

@@ -8,7 +8,7 @@ public partial class FoodItem : Item
 	[Export] public float QualityMultiplier = 1.0f;
 	[Export] public float SpoilTime = 300.0f; // 5 minutes
 	
-	// Runtime properties (not exported)
+	// Runtime properties (not exported).
 	private float _spoilTimer = 0f;
 	private bool _isSpoiled = false;
 	

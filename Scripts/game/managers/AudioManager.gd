@@ -3,11 +3,11 @@ extends Node
 
 static var instance: AudioManager
 
-# Audio buses for volume control
+# Audio buses for volume control.
 const UI_BUS_INDEX: int = 1
 const EFFECTS_BUS_INDEX: int = 2
 
-# Sound effect resources
+# Sound effect resources.
 @onready var ui_confirm: AudioStream = load("res://Sound/UI/SFX_UI_Confirm.ogg")
 @onready var ui_cancel: AudioStream = load("res://Sound/UI/SFX_UI_Cancel.ogg")
 @onready var ui_open_menu: AudioStream = load("res://Sound/UI/SFX_UI_OpenMenu.ogg")
@@ -21,27 +21,27 @@ const EFFECTS_BUS_INDEX: int = 2
 @onready var ui_exit: AudioStream = load("res://Sound/UI/SFX_UI_Exit.ogg")
 @onready var ui_shop: AudioStream = load("res://Sound/UI/SFX_UI_Shop.ogg")
 
-# Hover sound (shorter, lighter sound)
+# Hover sound (shorter, lighter sound).
 @onready var ui_hover: AudioStream = load("res://Sound/UI/SFX_UI_Confirm.ogg")
 
-# Audio players for different types of sounds
+# Audio players for different types of sounds.
 @onready var ui_player: AudioStreamPlayer = get_node_or_null("UIPlayer")
 @onready var hover_player: AudioStreamPlayer = get_node_or_null("HoverPlayer")
 @onready var selection_player: AudioStreamPlayer = get_node_or_null("SelectionPlayer")
 
-# Configuration
+# Configuration.
 var ui_volume_db: float = -10.0
 var hover_volume_db: float = -20.0
 var selection_volume_db: float = -15.0
 
-# Cooldowns to prevent sound spam
+# Cooldowns to prevent sound spam.
 var last_hover_time: float = 0.0
 var hover_cooldown: float = 0.1  # 100ms between hover sounds
 var last_selection_time: float = 0.0
 var selection_cooldown: float = 0.05  # 50ms between selection sounds
 
 func _ready():
-	# Initialize audio players
+	# Initialize audio players.
 	if not has_node("UIPlayer"):
 		var ui_player_node = AudioStreamPlayer.new()
 		ui_player_node.name = "UIPlayer"
@@ -60,17 +60,17 @@ func _ready():
 		add_child(selection_player_node)
 		selection_player = selection_player_node
 	
-	# Set up audio buses
+	# Set up audio buses.
 	ui_player.bus = "UI"
 	hover_player.bus = "UI"
 	selection_player.bus = "UI"
 	
-	# Set initial volumes
+	# Set initial volumes.
 	ui_player.volume_db = ui_volume_db
 	hover_player.volume_db = hover_volume_db
 	selection_player.volume_db = selection_volume_db
 
-# UI Interaction Sounds
+# Ui interaction sounds.
 static func play_ui_click():
 	if instance and instance.ui_player:
 		instance.ui_player.stream = instance.ui_confirm
@@ -107,7 +107,7 @@ static func play_ui_hover():
 			instance.hover_player.play()
 			instance.last_hover_time = current_time
 
-# Item Management Sounds
+# Item management sounds.
 static func play_ui_equip():
 	if instance and instance.ui_player:
 		instance.ui_player.stream = instance.ui_equip
@@ -128,7 +128,7 @@ static func play_chat_message():
 		instance.ui_player.stream = instance.ui_confirm
 		instance.ui_player.play()
 
-# System Sounds
+# System Sounds.
 static func play_ui_pause():
 	if instance and instance.ui_player:
 		instance.ui_player.stream = instance.ui_pause
@@ -149,7 +149,7 @@ static func play_ui_shop():
 		instance.ui_player.stream = instance.ui_shop
 		instance.ui_player.play()
 
-# Volume control methods
+# Volume control methods.
 static func set_ui_volume(volume_db: float):
 	if instance:
 		instance.ui_volume_db = volume_db
@@ -165,7 +165,7 @@ static func get_ui_volume() -> float:
 		return instance.ui_volume_db
 	return -10.0
 
-# Cleanup
+# Cleanup.
 func _exit_tree():
 	if instance == self:
 		instance = null

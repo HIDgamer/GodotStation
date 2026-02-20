@@ -58,7 +58,7 @@ public partial class LobbyManager : Node
 		CallDeferred(MethodName.ConnectWebSocket);
 	}
 
-	// ── WebSocket ─────────────────────────────────────────────────────────────
+	// WebSocket.
 
 	private async void ConnectWebSocket()
 	{
@@ -82,7 +82,7 @@ public partial class LobbyManager : Node
 			var wsUrl = ApiUrl.Replace("http://", "ws://").Replace("https://", "wss://");
 			await _webSocket.ConnectAsync(new System.Uri(wsUrl), _wsCancellation.Token);
 
-			// Auth token goes in the first message, never in the URL
+			// Auth token goes in the first message, never in the URL.
 			var authJson = Json.Stringify(new Dictionary
 			{
 				{ "type",  "auth" },
@@ -112,7 +112,7 @@ public partial class LobbyManager : Node
 
 	private async Task ListenWebSocket()
 	{
-		// Oversized messages are almost certainly malicious — cap at 64 KB
+		// Oversized messages are almost certainly malicious - cap at 64 kb.
 		var buffer = new byte[65536];
 
 		while (_webSocket?.State == WebSocketState.Open && !_wsCancellation.Token.IsCancellationRequested)
@@ -137,7 +137,7 @@ public partial class LobbyManager : Node
 						if (result.MessageType != WebSocketMessageType.Text) break;
 						builder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
 
-						// Hard-stop at 256 KB total to prevent memory exhaustion
+						// Hard-stop at 256 kb total to prevent memory exhaustion.
 						if (builder.Length > 262144)
 						{
 							GD.PrintErr("[LobbyManager] Oversized WS message, dropping");
@@ -183,7 +183,7 @@ public partial class LobbyManager : Node
 					GD.PrintErr("[LobbyManager] WS auth rejected");
 					break;
 
-				// ── Token rotation protocol ─────────────────────────────────────────
+				// Token rotation protocol.
 				
 				case "token_challenge":
 					if (data.ContainsKey("nonce"))
@@ -253,7 +253,7 @@ public partial class LobbyManager : Node
 		}
 	}
 
-	// ── Server registration ───────────────────────────────────────────────────
+	// Server registration.
 
 	public async void RegisterDedicatedServer(string serverName, int port, string map)
 	{
@@ -266,7 +266,7 @@ public partial class LobbyManager : Node
 			return;
 		}
 
-		// ip_address is intentionally omitted — server derives it from the socket
+		// Ip_address is intentionally omitted - server derives it from the socket.
 		var data = new Dictionary
 		{
 			{ "name",           serverName },
@@ -383,8 +383,8 @@ public partial class LobbyManager : Node
 				return;
 			}
 
-			// ip_address is intentionally NOT sent — the server derives it from req.ip.
-			// Sending it from the client would allow any authenticated user to register
+			// ip_address is intentionally NOT sent - the server derives it from req.ip.
+			// Sending it from the client would allow any authenticated user to register.
 			// a server entry pointing at an arbitrary (victim's) IP address.
 			var data = new Dictionary
 			{
@@ -448,7 +448,7 @@ public partial class LobbyManager : Node
 		}
 	}
 
-	// ── Heartbeat ─────────────────────────────────────────────────────────────
+	// Heartbeat.
 
 	private async void SendHeartbeat()
 	{
@@ -505,7 +505,7 @@ public partial class LobbyManager : Node
 		RegisterServerInternal(_lastServerRegistration, true);
 	}
 
-	// ── Unregister / list ─────────────────────────────────────────────────────
+	// Unregister / list.
 
 	public async void UnregisterServer()
 	{
@@ -535,7 +535,7 @@ public partial class LobbyManager : Node
 		}
 	}
 
-	// ── Token rotation response ────────────────────────────────────────────────
+	// Token rotation response.
 	private async void RespondToTokenChallenge(string nonce)
 	{
 		if (_webSocket == null || _webSocket.State != WebSocketState.Open)
@@ -599,7 +599,7 @@ public partial class LobbyManager : Node
 		}
 	}
 
-	// ── Helpers ───────────────────────────────────────────────────────────────
+	// Helpers.
 
 	private static string ParseError(string responseText)
 	{

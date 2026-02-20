@@ -70,7 +70,7 @@ public partial class FriendsManager : Node
 		RefreshPendingRequests();
 	}
 
-	// ── WebSocket ─────────────────────────────────────────────────────────────
+	// WebSocket.
 	private async void ConnectWebSocket()
 	{
 		if (!_accountManager.IsLoggedIn() || _wsConnected) return;
@@ -79,7 +79,7 @@ public partial class FriendsManager : Node
 		{
 			_webSocket = new WebSocketPeer();
 
-			// No ?token= in the URL — token goes in the first message
+			// No ?token= in the URL - token goes in the first message.
 			var wsUrl = ApiUrl.Replace("https://", "wss://").Replace("http://", "ws://");
 			var error = _webSocket.ConnectToUrl(wsUrl);
 
@@ -89,7 +89,7 @@ public partial class FriendsManager : Node
 				return;
 			}
 
-			// Wait up to 5 seconds for the connection to open
+			// Wait up to 5 seconds for the connection to open.
 			for (int i = 0; i < 50; i++)
 			{
 				await Task.Delay(100);
@@ -101,7 +101,7 @@ public partial class FriendsManager : Node
 					_wsConnected = true;
 					_wsAuthenticated = false;
 
-					// Send auth token as the first message — never in the URL
+					// Send auth token as the first message - never in the url.
 					var authMsg = Json.Stringify(new Dictionary
 					{
 						{ "type",  "auth" },
@@ -151,7 +151,7 @@ public partial class FriendsManager : Node
 			{
 				var packet = _webSocket.GetPacket();
 
-				// Reject oversized messages before parsing
+				// Reject oversized messages before parsing.
 				if (packet.Length > 8192)
 				{
 					GD.PrintErr("[FriendsManager] WS message too large, ignored");
@@ -229,7 +229,7 @@ public partial class FriendsManager : Node
 		}
 	}
 
-	// ── Cache (AES-256-GCM via CryptoUtils) ──────────────────────────────────
+	// Cache (AES-256-GCM via CryptoUtils).
 
 	private void LoadCachedData()
 	{
@@ -284,7 +284,7 @@ public partial class FriendsManager : Node
 		}
 	}
 
-	// ── API calls ─────────────────────────────────────────────────────────────
+	// API calls.
 
 	public async void RefreshFriendsList()
 	{
@@ -505,7 +505,7 @@ public partial class FriendsManager : Node
 		}
 	}
 
-	// ── Helpers ───────────────────────────────────────────────────────────────
+	// Helpers.
 
 	public Array GetFriendsList()      => _friendsList;
 	public Array GetPendingRequests()  => _pendingRequests;

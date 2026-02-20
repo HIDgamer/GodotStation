@@ -520,10 +520,10 @@ public partial class MovementController : Node2D, IMobSystem
 	
 	private float GetCurrentSpeedMultiplier()
 	{
-		// NOTE: _speedMod already contains the prone penalty (0.5f) because
-		// MobStateSystem.ApplySpeedModifier calls SetSpeedMultiplier(0.5f) when
-		// entering Prone state.  Do NOT multiply by 0.5 again here or the target
-		// will crawl at 25% speed instead of 50%, making the puller pull away and
+		// NOTE: _speedMod already contains the prone penalty (0.5f) because.
+		// MobStateSystem.ApplySpeedModifier calls SetSpeedMultiplier(0.5f) when.
+		// entering Prone state. Do NOT multiply by 0.5 again here or the target.
+		// will crawl at 25% speed instead of 50%, making the puller pull away and.
 		// immediately triggering CheckForGripLoss.
 		var stateSystem = _mob.GetNodeOrNull<MobStateSystem>("MobStateSystem");
 		if (stateSystem != null && stateSystem.GetState() == MobState.Prone)
@@ -531,7 +531,7 @@ public partial class MovementController : Node2D, IMobSystem
 			var interactionSystem = _mob.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
 			if (interactionSystem?.IsPulling() == true)
 			{
-				// Puller is prone while carrying (e.g. fireman carry while prone) -
+				// Puller is prone while carrying (e.g. fireman carry while prone) -.
 				// apply the heavier carry penalty on top of the base speed.
 				var skillSystem = _mob.GetNodeOrNull<SkillComponent>("SkillComponent");
 				return _speedMod * 0.3f * CalculateCarrySpeedMultiplier(skillSystem);

@@ -1,5 +1,5 @@
-# InventoryWindow - Full inventory management interface
-# Provides drag-and-drop item management, container viewing, and equipment management
+# Inventorywindow - full inventory management interface.
+# Provides drag-and-drop item management, container viewing, and equipment management.
 extends Window
 
 signal item_selected(item: Node)
@@ -24,7 +24,7 @@ var drag_start_index: int = -1
 func _ready() -> void:
 	set_process_input(true)
 	
-	# Connect to inventory events
+	# Connect to inventory events.
 	var player = get_tree().get_first_node_in_group("Player")
 	if player:
 		inventory_system = player.get_node_or_null("InventorySystem")
@@ -39,7 +39,7 @@ func _ready() -> void:
 	_update_inventory_display()
 	_update_equipment_display()
 	
-	# Add hover sounds to inventory tabs
+	# Add hover sounds to inventory tabs.
 	if audio_manager:
 		for i in range(inventory_tab.get_tab_count()):
 			var tab = inventory_tab.get_tab_control(i)
@@ -66,7 +66,7 @@ func _handle_drag_start(event: InputEventMouseButton) -> void:
 			drag_start_slot = clicked_control.get_meta("slot_type", "")
 			drag_start_index = clicked_control.get_meta("slot_index", -1)
 			
-			# Create drag preview
+			# Create drag preview.
 			var preview = TextureRect.new()
 			preview.texture = clicked_control.texture
 			preview.size = clicked_control.size
@@ -106,7 +106,7 @@ func _transfer_item(item, target_slot: String, target_index: int) -> void:
 		audio_manager.play_ui_click()
 	match target_slot:
 		"inventory":
-			# Move from equipment/container to inventory
+			# Move from equipment/container to inventory.
 			if drag_start_slot == "equipment":
 				inventory_system.unequip_item(drag_start_slot)
 				inventory_system.add_item(item)
@@ -118,7 +118,7 @@ func _transfer_item(item, target_slot: String, target_index: int) -> void:
 				inventory_system.add_item(item)
 				
 		"equipment":
-			# Move to equipment slot
+			# Move to equipment slot.
 			if drag_start_slot == "inventory":
 				inventory_system.remove_item(item)
 				inventory_system.equip_item(item, "left_hand")  # Default to left hand
@@ -130,7 +130,7 @@ func _transfer_item(item, target_slot: String, target_index: int) -> void:
 				inventory_system.equip_item(item, "left_hand")
 				
 		"container":
-			# Move to container
+			# Move to container.
 			if drag_start_slot == "inventory":
 				inventory_system.remove_item(item)
 				if current_container:
@@ -145,7 +145,7 @@ func _transfer_item(item, target_slot: String, target_index: int) -> void:
 					current_container.add_item(item)
 					
 		"quick":
-			# Move to quick slot
+			# Move to quick slot.
 			if drag_start_slot == "inventory":
 				inventory_system.remove_item(item)
 				inventory_system.set_quick_slot(item, target_index)
@@ -157,11 +157,11 @@ func _transfer_item(item, target_slot: String, target_index: int) -> void:
 				inventory_system.set_quick_slot(item, target_index)
 
 func _update_inventory_display() -> void:
-	# Clear existing inventory items
+	# Clear existing inventory items.
 	for child in inventory_grid.get_children():
 		child.queue_free()
 	
-	# Add inventory items
+	# Add inventory items.
 	var items = inventory_system.get_all_items()
 	for i in range(items.size()):
 		var item = items[i]
@@ -169,11 +169,11 @@ func _update_inventory_display() -> void:
 		inventory_grid.add_child(slot)
 
 func _update_equipment_display() -> void:
-	# Clear existing equipment
+	# Clear existing equipment.
 	for child in equipment_grid.get_children():
 		child.queue_free()
 	
-	# Add equipment items
+	# Add equipment items.
 	var equipment = inventory_system.get_equipped_items()
 	for slot_name in equipment.keys():
 		var item = equipment[slot_name]
@@ -186,11 +186,11 @@ func _update_container_display() -> void:
 		container_grid.clear()
 		return
 	
-	# Clear existing container items
+	# Clear existing container items.
 	for child in container_grid.get_children():
 		child.queue_free()
 	
-	# Add container items
+	# Add container items.
 	var items = current_container.get_all_items()
 	for i in range(items.size()):
 		var item = items[i]
@@ -204,20 +204,20 @@ func _create_item_slot(item, slot_type: String, slot_index: int, equipment_slot:
 	slot.mouse_filter = Control.MOUSE_FILTER_STOP
 	slot.tooltip_text = item.get_display_name()
 	
-	# Set texture
+	# Set texture.
 	if item.icon:
 		slot.texture = item.icon
 	else:
 		slot.texture = load("uid://pdxoqf3bvtwl")
 	
-	# Add metadata
+	# Add metadata.
 	slot.set_meta("item_data", item)
 	slot.set_meta("slot_type", slot_type)
 	slot.set_meta("slot_index", slot_index)
 	if equipment_slot != "":
 		slot.set_meta("equipment_slot", equipment_slot)
 	
-	# Connect signals
+	# Connect signals.
 	slot.connect("gui_input", _on_slot_input)
 	
 	return slot
@@ -235,7 +235,7 @@ func _show_item_context_menu(item, position: Vector2) -> void:
 	var menu = PopupMenu.new()
 	add_child(menu)
 	
-	# Add common actions
+	# Add common actions.
 	menu.add_item("Use", 1)
 	menu.add_item("Examine", 2)
 	menu.add_item("Drop", 3)

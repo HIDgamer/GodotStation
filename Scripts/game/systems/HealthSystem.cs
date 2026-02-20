@@ -113,7 +113,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 	private float _bleedAccumulator = 0f;
 	private float _toxinAccumulator = 0f;
 	
-	// Status Effects
+	// Status Effects.
 	private Dictionary<StatusEffectType, StatusEffectData> _statusEffects = new();
 	private float _stunnedTime = 0f;
 	private float _knockedDownTime = 0f;
@@ -187,7 +187,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 		
 		_timeSinceLastDamage += delta;
 		
-		// Apply periodic damage based on accumulators
+		// Apply periodic damage based on accumulators.
 		ApplyPeriodicDamage(delta);
 		
 		UpdatePainLevel();
@@ -198,7 +198,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 	
 	private void ApplyPeriodicDamage(float delta)
 	{
-		// Oxygen damage every 1.0 seconds
+		// Oxygen damage every 1.0 seconds.
 		_oxygenAccumulator += delta;
 		if (_oxygenAccumulator >= 1.0f && _currentOxygenDamage > 0)
 		{
@@ -208,7 +208,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 			_oxygenAccumulator = 0f;
 		}
 		
-		// Bleeding damage every 0.5 seconds
+		// Bleeding damage every 0.5 seconds.
 		_bleedAccumulator += delta;
 		if (_bleedAccumulator >= 0.5f && _currentBruteDamage > 0)
 		{
@@ -219,7 +219,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 			_bleedAccumulator = 0f;
 		}
 		
-		// Toxin damage every 1.0 seconds
+		// Toxin damage every 1.0 seconds.
 		_toxinAccumulator += delta;
 		if (_toxinAccumulator >= 1.0f && _currentToxinDamage > 0)
 		{
@@ -230,7 +230,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 			_toxinAccumulator = 0f;
 		}
 		
-		// Natural bleeding stops after some time, then regeneration starts
+		// Natural bleeding stops after some time, then regeneration starts.
 		if (_currentBruteDamage > 0 && _timeSinceLastDamage > RegenDelay)
 		{
 			float regenRate = 0.5f;
@@ -243,7 +243,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 	{
 		_isProcessing = false;
 		
-		// Unregister from scheduler
+		// Unregister from scheduler.
 		if (_scheduler != null)
 		{
 			_scheduler.Unregister(this);
@@ -501,7 +501,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 	}
 	private void UpdateStatusEffects(float delta)
 	{
-		// Update status effect timers
+		// Update status effect timers.
 		if (_stunnedTime > 0) _stunnedTime -= delta;
 		if (_knockedDownTime > 0) _knockedDownTime -= delta;
 		if (_knockedOutTime > 0) _knockedOutTime -= delta;
@@ -524,7 +524,7 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 		var movementController = _mob.GetNodeOrNull<MovementController>("MovementController");
 		if (movementController == null) return;
 
-		// Apply movement effects
+		// Apply movement effects.
 		float speedMultiplier = 1.0f;
 		bool canMove = true;
 		bool canAct = true;
@@ -558,23 +558,23 @@ public partial class HealthSystem : Node, IMobSystem, ISchedulable
 			speedMultiplier = Mathf.Min(speedMultiplier, 0.5f);
 		}
 
-		// Slow
+		// Slow.
 		if (_slowTime > 0)
 		{
 			speedMultiplier = Mathf.Min(speedMultiplier, 0.5f);
 		}
 
-		// Superslow
+		// Superslow.
 		if (_superSlowTime > 0)
 		{
 			speedMultiplier = Mathf.Min(speedMultiplier, 0.25f);
 		}
 
-		// Apply final speed multiplier
+		// Apply final speed multiplier.
 		movementController.SetSpeedMultiplier(speedMultiplier);
 	}
 
-	// Status Effect Application Methods
+	// Status effect application methods.
 	public void Stun(float amount, bool resistable = false)
 	{
 		if (_stunnedTime < amount)

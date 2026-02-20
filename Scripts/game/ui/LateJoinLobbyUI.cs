@@ -120,6 +120,14 @@ public partial class LateJoinLobbyUI : Control
 			_jobManager.JobAvailabilityChanged += RefreshJobList;
 	}
 
+	private bool IsMultiplayerConnected()
+	{
+		var peer = Multiplayer.MultiplayerPeer;
+		if (peer == null) return false;
+		if (Multiplayer.IsServer()) return true;
+		return peer.GetConnectionStatus() == MultiplayerPeer.ConnectionStatus.Connected;
+	}
+
 	private void OnRoundEnded()
 	{
 		_roundStarted = false;
@@ -194,6 +202,13 @@ public partial class LateJoinLobbyUI : Control
 
 	private void OnReadyPressed()
 	{
+		if (!Multiplayer.IsServer() && !IsMultiplayerConnected())
+		{
+			if (StatusLabel != null)
+				StatusLabel.Text = "> ERROR: NOT CONNECTED";
+			return;
+		}
+
 		_isReady = true;
 
 		if (Multiplayer.IsServer())
@@ -204,7 +219,13 @@ public partial class LateJoinLobbyUI : Control
 		}
 		else
 		{
-			RpcId(1, MethodName.ServerSetReady, Multiplayer.GetUniqueId(), true);
+			var rpcErr = RpcId(1, MethodName.ServerSetReady, Multiplayer.GetUniqueId(), true);
+			if (rpcErr != Error.Ok)
+			{
+				_isReady = false;
+				if (StatusLabel != null)
+					StatusLabel.Text = "> ERROR: READY RPC FAILED";
+			}
 		}
 
 		UpdateReadyButtons();
@@ -214,6 +235,13 @@ public partial class LateJoinLobbyUI : Control
 
 	private void OnUnreadyPressed()
 	{
+		if (!Multiplayer.IsServer() && !IsMultiplayerConnected())
+		{
+			if (StatusLabel != null)
+				StatusLabel.Text = "> ERROR: NOT CONNECTED";
+			return;
+		}
+
 		_isReady = false;
 
 		if (Multiplayer.IsServer())
@@ -224,7 +252,9 @@ public partial class LateJoinLobbyUI : Control
 		}
 		else
 		{
-			RpcId(1, MethodName.ServerSetReady, Multiplayer.GetUniqueId(), false);
+			var rpcErr = RpcId(1, MethodName.ServerSetReady, Multiplayer.GetUniqueId(), false);
+			if (rpcErr != Error.Ok && StatusLabel != null)
+				StatusLabel.Text = "> ERROR: UNREADY RPC FAILED";
 		}
 
 		UpdateReadyButtons();
@@ -315,7 +345,12 @@ public partial class LateJoinLobbyUI : Control
 		else
 		{
 			if (_isReady)
-				RpcId(1, MethodName.RequestPriorityAssignment, Multiplayer.GetUniqueId());
+			{
+				if (IsMultiplayerConnected())
+					RpcId(1, MethodName.RequestPriorityAssignment, Multiplayer.GetUniqueId());
+				else
+					ShowLateJoinPhase();
+			}
 			else
 				ShowLateJoinPhase();
 		}
@@ -327,7 +362,12 @@ public partial class LateJoinLobbyUI : Control
 		_roundStarted = true;
 
 		if (_isReady)
-			RpcId(1, MethodName.RequestPriorityAssignment, Multiplayer.GetUniqueId());
+		{
+			if (IsMultiplayerConnected())
+				RpcId(1, MethodName.RequestPriorityAssignment, Multiplayer.GetUniqueId());
+			else
+				ShowLateJoinPhase();
+		}
 		else
 			ShowLateJoinPhase();
 	}
@@ -575,6 +615,15 @@ public partial class LateJoinLobbyUI : Control
 				JoinButton.Disabled = true;
 			if (StatusLabel != null)
 				StatusLabel.Text = $"> REQUESTING ROLE: {jobName.ToUpper()}...";
+
+			if (!IsMultiplayerConnected())
+			{
+				if (StatusLabel != null)
+					StatusLabel.Text = "> ERROR: NOT CONNECTED";
+				if (JoinButton != null)
+					JoinButton.Disabled = false;
+				return;
+			}
 
 			var charData = new Dictionary();
 			var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
