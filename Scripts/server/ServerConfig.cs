@@ -15,10 +15,13 @@ public partial class ServerConfig : Node
 
     private const string ConfigFilePath = "user://server_config.cfg";
 
-    public override void _Ready()
+    public ServerConfig()
     {
         LoadFromEnvironment();
+    }
 
+    public override void _Ready()
+    {
         if (FileAccess.FileExists(ConfigFilePath))
             LoadFromFile(ConfigFilePath);
 
