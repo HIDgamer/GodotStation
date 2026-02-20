@@ -15,19 +15,15 @@ public partial class ServerConfig : Node
 
     private const string ConfigFilePath = "user://server_config.cfg";
 
-    public ServerConfig()
-    {
-        LoadFromEnvironment();
-    }
-
     public override void _Ready()
     {
+        LoadFromEnvironment();
+
         if (FileAccess.FileExists(ConfigFilePath))
             LoadFromFile(ConfigFilePath);
 
         GD.Print($"[ServerConfig] Name={ServerName} Port={Port} MaxPlayers={MaxPlayers} Map={Map} Gamemode={Gamemode} Public={IsPublic}");
     }
-
 private void LoadFromEnvironment()
 {
     ServerName  = Env("SERVER_NAME",      ServerName); 

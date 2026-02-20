@@ -29,7 +29,8 @@ public partial class DedicatedServer : Node
         _registrar = GetNode<ServerRegistrar>("/root/ServerRegistrar");
         _jobManager = GetNodeOrNull<JobManager>("/root/JobManager");
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
-        
+
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
         var peer = new ENetMultiplayerPeer();
