@@ -56,8 +56,6 @@ public partial class GameManager : Node
 	private System.Collections.Generic.Dictionary<string, Dictionary> _sleepingMobData = new();
 	private System.Collections.Generic.HashSet<string> _roundParticipants = new();
 
-	// Tracks peers that have a pending deferred ClientSpawnConfirmed RPC in flight.
-	// Removing a peer cancels the timer callback before it sends the stale RPC.
 	private System.Collections.Generic.HashSet<int> _pendingSpawnConfirm = new();
 
 	private const int MAX_MESSAGES_PER_10_SECONDS = 10;
@@ -65,7 +63,7 @@ public partial class GameManager : Node
 	private const float CHAT_PROXIMITY_RANGE = 500.0f;
 	private const int MIN_NETWORK_PORT = 1024;
 	private const int MAX_NETWORK_PORT = 65535;
-	private const string CommunicationsScenePath = "res://Scenes/UI/Communications.tscn";
+	private const string CommunicationsScenePath = "res://Scenes/hub/Communications.tscn";
 	private const string MainLobbyScenePath = "res://Scenes/hub/Hub.tscn";
 
 	private LobbyManager _lobbyManager;
