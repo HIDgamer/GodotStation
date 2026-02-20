@@ -28,9 +28,6 @@ public partial class ServerRegistrar : Node
             GD.PrintErr("[ServerRegistrar] CRITICAL: ServerConfig not found.");
             return;
         }
-
-        // Token is NOT added here — ServerConfig.LoadFromEnvironment() may not have
-        // run yet at this point. The token is added per-request in Register() instead.
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
 
         _heartbeatTimer = new Timer
@@ -53,8 +50,6 @@ public partial class ServerRegistrar : Node
             var content = new StringContent(Json.Stringify(payload), Encoding.UTF8, "application/json");
             var url     = $"{_config.BackendUrl?.TrimEnd('/')}/api/servers/register";
 
-            // Read the token at request time so ServerConfig is guaranteed to have
-            // loaded its environment overrides before we send the header.
             using var request = new System.Net.Http.HttpRequestMessage(
                 System.Net.Http.HttpMethod.Post, url);
             request.Content = content;
