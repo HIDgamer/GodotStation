@@ -58,7 +58,6 @@ public partial class GameManager : Node
 
 	private System.Collections.Generic.HashSet<int> _pendingSpawnConfirm = new();
 
-	// Null when running in player-hosted mode; set only for active dedicated runtime.
 	private DedicatedServer  _dedicatedServer;
 	private ServerPrivileges _serverPrivileges;
 
@@ -73,8 +72,8 @@ public partial class GameManager : Node
 	private const int MIN_NETWORK_PORT = 1024;
 	private const int MAX_NETWORK_PORT = 65535;
 	private const int ENET_CHANNEL_COUNT = 2;
-	private const string CommunicationsScenePath = "res://Scenes/hub/Communications.tscn";
-	private const string MainLobbyScenePath = "res://Scenes/hub/Hub.tscn";
+	private const string CommunicationsScenePath = "res://Scenes/game/ui/Communications.tscn";
+	private const string MainLobbyScenePath = "res://Scenes/game/ui/Hub.tscn";
 	private const string DefaultDedicatedMapUid = "uid://dible6m71p44g";
 
 	private static readonly System.Collections.Generic.Dictionary<string, string> DedicatedMapAliases =
@@ -93,10 +92,13 @@ public partial class GameManager : Node
 			{ "uid://bfswxq626edux", "res://Scenes/Maps/Hadley's_Hope.tscn" }
 		};
 
-	private LobbyManager _lobbyManager;
 	private JobManager _jobManager;
 	private bool _isHosting = false;
 	private bool _isConnected = false;
+
+	// Discord tag and auth token received from the hub via command-line args.
+	// Populated during ParseHubArguments() which runs at the end of _Ready().
+	private string _hubDiscordTag = "";
 
 	[Signal] public delegate void PlayerJoinedEventHandler(int id);
 	[Signal] public delegate void PlayerLeftEventHandler(int id);
@@ -191,8 +193,6 @@ public partial class GameManager : Node
 
 		EnsureCharactersDirectory();
 
-		_lobbyManager = GetNodeOrNull<LobbyManager>("/root/LobbyManager");
-
 		// Detect dedicated server mode.
 		var dedicatedNode = GetNodeOrNull<DedicatedServer>("/root/DedicatedServer");
 		_dedicatedServer = (dedicatedNode != null && dedicatedNode.IsActiveServer) ? dedicatedNode : null;
@@ -225,6 +225,10 @@ public partial class GameManager : Node
 					break;
 			}
 		};
+
+		// Parse arguments injected by the GS-Nebula launcher (--auth-token, --discord-tag, --join-server).
+		// Must run AFTER multiplayer setup so JoinServerFromHub can safely call into the network layer.
+		ParseHubArguments();
 
 		GD.Print("[GameManager] _Ready complete.");
 	}
@@ -295,35 +299,18 @@ public partial class GameManager : Node
 			_peerCharacters[1] = new Dictionary { { "name", "Host" }, { "peer_id", 1 } };
 		}
 
-		var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
-		var hostTag = accountManager?.GetDiscordTag() ?? "";
-		if (!string.IsNullOrEmpty(hostTag))
+		// Use the discord tag received from the hub at launch.
+		if (!string.IsNullOrEmpty(_hubDiscordTag))
 		{
-			_peerToDiscordTag[1] = hostTag;
-			_discordTagToPeer[hostTag] = 1;
+			_peerToDiscordTag[1] = _hubDiscordTag;
+			_discordTagToPeer[_hubDiscordTag] = 1;
 		}
 
 		SetupLobbyTimer();
-		RegisterWithLobby(port);
+		// Server registration is handled by the GS-Nebula hub — no in-game lobby call needed.
 		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
 		SetGameState(GameState.Lobby);
 		GetTree().ChangeSceneToFile(CommunicationsScenePath);
-	}
-
-	private void RegisterWithLobby(int port)
-	{
-		if (_lobbyManager == null) return;
-		_lobbyManager.Call("RegisterServer", new Dictionary
-		{
-			{ "name",              string.IsNullOrEmpty(ServerName) ? "GodotStation Server" : ServerName },
-			{ "description",       ServerDescription },
-			{ "password_protected", PasswordProtected },
-			{ "map",               CurrentMap },
-			{ "gamemode",          Gamemode },
-			{ "max_players",       MaxPlayers },
-			{ "current_players",   PlayerCount },
-			{ "port",              port }
-		});
 	}
 
 	private void SetupLobbyTimer()
@@ -391,7 +378,7 @@ public partial class GameManager : Node
 	public void LeaveGame()
 	{
 		GD.Print("[GameManager] LeaveGame called.");
-		_lobbyManager?.Call("UnregisterServer");
+		// Server deregistration is handled by the GS-Nebula hub on process exit.
 		if (_lobbyTimer != null && !_lobbyTimer.IsStopped()) _lobbyTimer.Stop();
 		_peer?.Close();
 		Multiplayer.MultiplayerPeer = null;
@@ -572,9 +559,10 @@ public partial class GameManager : Node
 
 		_connectedPeers.Add(peerId);
 
-		var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
-		var discordTag = accountManager?.GetDiscordTag() ?? "";
-		var token      = accountManager?.GetAuthToken()  ?? "";
+		// Discord tag and auth token come from the hub via command-line args —
+		// no AccountManager autoload needed.
+		var discordTag = _hubDiscordTag;
+		var token      = HubAuthToken;
 
 		if (!string.IsNullOrEmpty(discordTag))
 		{
@@ -1878,6 +1866,95 @@ public partial class GameManager : Node
 			names.Add(world.GetChild(i).Name);
 		return names;
 	}
+
+	// ─── GS-Nebula Hub Integration ───────────────────────────────────────────────
+	//
+	// Called at the end of _Ready(). Reads command-line arguments injected by the
+	// GS-Nebula Electron launcher and acts on them:
+	//
+	//   --auth-token <jwt>           → stores HubAuthToken for dedicated server auth handshakes
+	//   --discord-tag <tag>          → stores the player's Discord tag for lobby registration
+	//   --join-server <ip>:<port>    → connects to the target server automatically
+	//
+	// The actual server join is deferred one frame so that all autoloads (including
+	// DedicatedServer) have finished their own _Ready() calls.
+
+	// Token passed from GS-Nebula hub via --auth-token argument.
+	public string HubAuthToken { get; private set; } = "";
+
+	private void ParseHubArguments()
+	{
+		var args = OS.GetCmdlineArgs();
+		GD.Print($"[GameManager] ParseHubArguments: {args.Length} arg(s) received from hub.");
+
+		for (int i = 0; i < args.Length; i++)
+		{
+			// ── Auth token ──────────────────────────────────────────────────────
+			if (args[i] == "--auth-token" && i + 1 < args.Length)
+			{
+				HubAuthToken = args[i + 1];
+				GD.Print("[GameManager] Hub auth token received and stored.");
+				i++;
+				continue;
+			}
+
+			// ── Discord tag ─────────────────────────────────────────────────────
+			if (args[i] == "--discord-tag" && i + 1 < args.Length)
+			{
+				_hubDiscordTag = args[i + 1];
+				GD.Print($"[GameManager] Hub discord tag received: '{_hubDiscordTag}'.");
+				i++;
+				continue;
+			}
+
+			// ── Auto-join server ─────────────────────────────────────────────────
+			if (args[i] == "--join-server" && i + 1 < args.Length)
+			{
+				var raw   = args[i + 1];
+				var parts = raw.Split(':');
+				if (parts.Length == 2 && int.TryParse(parts[1], out int port))
+				{
+					var ip = parts[0];
+					GD.Print($"[GameManager] Hub requesting auto-join → {ip}:{port}");
+					CallDeferred(MethodName.JoinServerFromHub, ip, port);
+				}
+				else
+				{
+					GD.PrintErr($"[GameManager] --join-server value malformed: '{raw}' (expected ip:port)");
+				}
+				i++;
+				continue;
+			}
+		}
+	}
+
+	private void JoinServerFromHub(string ip, int port)
+	{
+		if (port < MIN_NETWORK_PORT || port > MAX_NETWORK_PORT)
+		{
+			GD.PrintErr($"[GameManager] JoinServerFromHub: port {port} out of valid range.");
+			return;
+		}
+
+		GD.Print($"[GameManager] JoinServerFromHub: connecting to {ip}:{port} …");
+
+		var peer = new ENetMultiplayerPeer();
+		var err  = peer.CreateClient(ip, port, ENET_CHANNEL_COUNT);
+
+		if (err != Error.Ok)
+		{
+			GD.PrintErr($"[GameManager] JoinServerFromHub: CreateClient failed — {err}");
+			EmitSignal(SignalName.ConnectionFailed);
+			return;
+		}
+
+		Multiplayer.MultiplayerPeer = peer;
+		_peer        = peer;
+		_isConnected = false;
+		GD.Print("[GameManager] JoinServerFromHub: ENet client peer assigned, awaiting connection confirmation.");
+	}
+
+	// ─── End Hub Integration ─────────────────────────────────────────────────────
 
 	public override void _ExitTree()
 	{

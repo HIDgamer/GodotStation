@@ -1,11 +1,15 @@
-[gd_scene format=3 uid="uid://d7w0aj1ldenk"]
+[gd_scene format=3 uid="uid://dx25f1c373c3"]
 
-[ext_resource type="Script" uid="uid://cjblnvq4fqors" path="res://Scripts/hub/ui/MediaPopup.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://cpebkxb56vou3" path="res://Assets/UI/Interface/MainPanel03.png" id="1_n4ame"]
-[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="2_gtogv"]
-[ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="3_n2u5f"]
-[ext_resource type="Texture2D" uid="uid://curg3eofqypke" path="res://Assets/UI/Interface/Button15.png" id="5_fmqn0"]
-[ext_resource type="Texture2D" uid="uid://dv2008fw015d7" path="res://Assets/UI/Interface/Button16.png" id="6_rw5ow"]
+[ext_resource type="Texture2D" uid="uid://cpebkxb56vou3" path="res://Assets/UI/Interface/MainPanel03.png" id="1_dq87h"]
+[ext_resource type="Script" uid="uid://dmdapcgshi5so" path="res://Scripts/game/ui/MusicOptionsPopup.gd" id="2"]
+[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="2_dvjwg"]
+[ext_resource type="Texture2D" uid="uid://desir2q15urfa" path="res://Assets/UI/Interface/Slider02.png" id="3_x8cb2"]
+[ext_resource type="Texture2D" uid="uid://1gt86wrk828f" path="res://Assets/UI/Interface/Button04.png" id="4_o1akm"]
+[ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="4_y78dv"]
+[ext_resource type="Texture2D" uid="uid://b6wfcx5xv6w23" path="res://Assets/UI/Interface/Button06.png" id="5_xl8xt"]
+[ext_resource type="Texture2D" uid="uid://dbm5kkv648tco" path="res://Assets/UI/Interface/Button03.png" id="6_ae31a"]
+[ext_resource type="Texture2D" uid="uid://curg3eofqypke" path="res://Assets/UI/Interface/Button15.png" id="9_xl8xt"]
+[ext_resource type="Texture2D" uid="uid://dv2008fw015d7" path="res://Assets/UI/Interface/Button16.png" id="10_ae31a"]
 [ext_resource type="Texture2D" uid="uid://dca55vfaclhk4" path="res://Assets/Effects/Particles/flare_32x32.png" id="space_particles"]
 
 [sub_resource type="Gradient" id="Gradient_space"]
@@ -85,54 +89,60 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="MediaPopup" type="PopupPanel" unique_id=48795004]
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_o1akm"]
+color = Color(0.07450981, 0.11372549, 0.13333334, 1)
+
+[node name="MusicOptionsPopup" type="PopupPanel" unique_id=546190391]
 oversampling_override = 1.0
-title = "Select Media File"
-size = Vector2i(400, 300)
+title = "Music Options"
+size = Vector2i(370, 200)
 visible = true
 theme_override_styles/panel = SubResource("StyleBoxFlat_space_panel_inner")
-script = ExtResource("1")
+script = ExtResource("2")
 
-[node name="FileDialog" type="FileDialog" parent="." unique_id=736131536]
-oversampling_override = 1.0
-title = "Open a File"
-size = Vector2i(496, 300)
-popup_window = true
-ok_button_text = "Open"
-file_mode = 0
-access = 2
-filters = PackedStringArray("*.ogg,*.wav,*.mp3 ; Audio Files", "*.ogv,*.webm,*.mp4 ; Video Files", "*.png,*.jpg,*.jpeg ; Image Files")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=915625074]
-anchors_preset = -1
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=190721616]
+anchors_preset = 15
 anchor_right = 1.0
-anchor_bottom = 0.25666666
-offset_bottom = 223.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-metadata/_edit_use_anchors_ = true
 
-[node name="Label" type="Label" parent="VBoxContainer" unique_id=2053284131]
+[node name="LoopLabel" type="Label" parent="VBoxContainer" unique_id=407439693]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
-text = "Select a media file to load into the lobby."
+text = "Number of loops (1 = play once, 2 = play twice):"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LoadButton" type="Button" parent="VBoxContainer" unique_id=2044880443]
+[node name="LoopSpin" type="SpinBox" parent="VBoxContainer" unique_id=1198475240]
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_space_panel_inner")
-theme_override_styles/hover = SubResource("StyleBoxFlat_space_panel_inner")
-text = "Load File"
-icon_alignment = 1
-expand_icon = true
+theme_override_styles/up_background = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/up_background_hovered = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/up_background_pressed = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/down_background = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/down_background_hovered = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/down_background_pressed = SubResource("StyleBoxFlat_space_panel_inner")
+value = 1.0
 
-[node name="CancelButton" type="Button" parent="VBoxContainer" unique_id=1097066660]
+[node name="VolumeLabel" type="Label" parent="VBoxContainer" unique_id=95852618]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Volume (0-100%):"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="VBoxContainer" unique_id=445285621]
+layout_mode = 2
+theme_override_icons/grabber = ExtResource("3_x8cb2")
+theme_override_icons/grabber_highlight = ExtResource("3_x8cb2")
+theme_override_icons/grabber_disabled = ExtResource("3_x8cb2")
+theme_override_styles/slider = SubResource("StyleBoxLine_o1akm")
+value = 50.0
+
+[node name="OKButton" type="Button" parent="VBoxContainer" unique_id=1647695771]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_space_panel_inner")
 theme_override_styles/hover = SubResource("StyleBoxFlat_space_panel_inner")
-text = "Cancel"
+text = "OK"
 icon_alignment = 1
-expand_icon = true
