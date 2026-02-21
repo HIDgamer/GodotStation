@@ -14,7 +14,7 @@ using Array = Godot.Collections.Array;
 
 public partial class LobbyManager : Node
 {
-	[Export] public string ApiUrl = "https://godotstation.duckdns.org";
+	[Export] public string ApiUrl = "auth.godostation.com";
 	[Export] public float HeartbeatInterval = 10.0f;
 	private const int MinPort = 1024;
 	private const int MaxPort = 65535;

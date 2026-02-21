@@ -9,7 +9,7 @@ public partial class ServerConfig : Node
     private const int DefaultMaxPlayers = 64;
     private const string DefaultMap = "DDome";
     private const string DefaultGamemode = "PVE";
-    private const string DefaultBackendUrl = "https://godotstation.duckdns.org";
+    private const string DefaultBackendUrl = "auth.godostation.com";
     private const bool DefaultIsPublic = true;
 
     private const string ConfigFilePath = "user://server_config.cfg";
