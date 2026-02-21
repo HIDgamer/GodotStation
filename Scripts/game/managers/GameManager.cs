@@ -378,10 +378,6 @@ public partial class GameManager : Node
 		if (error == Error.Ok)
 		{
 			Multiplayer.MultiplayerPeer = _peer;
-			// Do NOT change scene here. The peer is only connecting, not yet connected.
-			// OnConnectedToServer() will fire once the handshake completes and THEN
-			// we switch to Communications. This prevents Communications.gd from loading
-			// with a null/pending peer and crashing on multiplayer.get_unique_id().
 			_isConnected = false;
 			SetGameState(GameState.Lobby);
 		}
@@ -574,18 +570,12 @@ public partial class GameManager : Node
 		var peerId = Multiplayer.GetUniqueId();
 		GD.Print($"[GameManager] OnConnectedToServer: peer ID = {peerId}");
 
-		// Only now that ENet has fully handshaked do we switch to the game UI.
-		// JoinGame() deliberately left us on the menu/lobby scene so the
-		// peer was not null when Communications.gd loaded.
-		GetTree().ChangeSceneToFile(CommunicationsScenePath);
-
 		_connectedPeers.Add(peerId);
 
 		var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
 		var discordTag = accountManager?.GetDiscordTag() ?? "";
 		var token      = accountManager?.GetAuthToken()  ?? "";
 
-		// Cache our own discord tag locally so client-side GetPeerRole() works.
 		if (!string.IsNullOrEmpty(discordTag))
 		{
 			_peerToDiscordTag[peerId] = discordTag;
@@ -598,7 +588,6 @@ public partial class GameManager : Node
 			var playerData = (Dictionary)prefManager.Call("get_character_data");
 			if (!playerData.ContainsKey("peer_id")) playerData["peer_id"] = peerId;
 
-			// Determine preferred job from role priorities.
 			string preferredJob = "";
 			if (playerData.ContainsKey("role_priorities"))
 			{
@@ -606,7 +595,6 @@ public partial class GameManager : Node
 				preferredJob = DeterminePreferredJob(priorities);
 			}
 
-			// Include auth token so the server can validate in dedicated mode.
 			RpcId(1, MethodName.RegisterPlayer, peerId, discordTag, playerData, token, preferredJob);
 		}
 		else
@@ -615,6 +603,13 @@ public partial class GameManager : Node
 		}
 
 		RpcId(1, MethodName.RequestCurrentVideo);
+
+		CallDeferred(MethodName.TransitionToCommunications);
+	}
+
+	private void TransitionToCommunications()
+	{
+		GetTree().ChangeSceneToFile(CommunicationsScenePath);
 	}
 
 	private void OnConnectionFailed()
