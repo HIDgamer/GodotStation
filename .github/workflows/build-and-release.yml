@@ -24,18 +24,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: windows
+          - name: windows
+            platform: windows
             preset: "Windows Desktop Client"
             output: "GodotStation.exe"
             artifact: windows-build
-          - platform: linux
+          - name: linux
+            platform: linux
             preset: "Linux Client"
             output: "GodotStation.x86_64"
             artifact: linux-build
-          - platform: server
+          - name: server
+            platform: server
             preset: "Linux Dedicated Server"
             output: "GodotStationServer.x86_64"
             artifact: server-build
+
+    name: build (${{ matrix.name }})
 
     container:
       image: barichello/godot-ci:mono-4.6.1
@@ -67,7 +72,7 @@ jobs:
           mv templates/* /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono/
           rm Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
 
-      - name: Export ${{ matrix.platform }}
+      - name: Export ${{ matrix.name }}
         run: |
           mkdir -p build/${{ matrix.platform }}
           OUTPUT="build/${{ matrix.platform }}/${{ matrix.output }}"
@@ -114,10 +119,21 @@ jobs:
         with:
           path: artifacts
 
-      - name: Verify server binary exists
+      - name: Verify all platform binaries exist
         run: |
-          echo "=== Server build contents ==="
+          echo "=== Artifact contents ==="
+          ls -la artifacts/windows-build/
+          ls -la artifacts/linux-build/
           ls -la artifacts/server-build/
+
+          if [ ! -f "artifacts/windows-build/GodotStation.exe" ]; then
+            echo "ERROR: Windows binary missing from artifact."
+            exit 1
+          fi
+          if [ ! -f "artifacts/linux-build/GodotStation.x86_64" ]; then
+            echo "ERROR: Linux binary missing from artifact."
+            exit 1
+          fi
           if [ ! -f "artifacts/server-build/GodotStationServer.x86_64" ]; then
             echo "ERROR: Server binary missing from artifact."
             exit 1
