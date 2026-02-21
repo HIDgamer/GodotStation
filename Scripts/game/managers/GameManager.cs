@@ -139,10 +139,27 @@ public partial class GameManager : Node
 
 	public bool LocalPlayerCanStartGame()
 	{
+		// Guard: Multiplayer.GetUniqueId() throws a C++ error if no peer is assigned.
+		if (Multiplayer.MultiplayerPeer == null) return false;
+
 		var peerId = Multiplayer.GetUniqueId();
-		if (peerId == 1) return true; // Server process itself
+		if (peerId == 1) return true; // Server process itself always has authority
+
+		// Server-side path: _serverPrivileges is loaded and _peerToDiscordTag is populated.
 		var role = GetPeerRole(peerId);
-		return role >= ServerPrivileges.ServerRole.Administrator;
+		if (role >= ServerPrivileges.ServerRole.Administrator) return true;
+
+		// Client-side path: _serverPrivileges is null on clients, but the server stamps
+		// "server_role" into character data and broadcasts it via BroadcastPlayerJoinedWithData.
+		// Read our own role back from that cached data.
+		if (_peerCharacters.TryGetValue(peerId, out var charData) && charData.ContainsKey("server_role"))
+		{
+			if (System.Enum.TryParse<ServerPrivileges.ServerRole>(
+					charData["server_role"].ToString(), out var stampedRole))
+				return stampedRole >= ServerPrivileges.ServerRole.Administrator;
+		}
+
+		return false;
 	}
 
 	public override void _Ready()
@@ -361,9 +378,12 @@ public partial class GameManager : Node
 		if (error == Error.Ok)
 		{
 			Multiplayer.MultiplayerPeer = _peer;
-			_isConnected = true;
+			// Do NOT change scene here. The peer is only connecting, not yet connected.
+			// OnConnectedToServer() will fire once the handshake completes and THEN
+			// we switch to Communications. This prevents Communications.gd from loading
+			// with a null/pending peer and crashing on multiplayer.get_unique_id().
+			_isConnected = false;
 			SetGameState(GameState.Lobby);
-			GetTree().ChangeSceneToFile(CommunicationsScenePath);
 		}
 		else
 		{
@@ -554,11 +574,23 @@ public partial class GameManager : Node
 		var peerId = Multiplayer.GetUniqueId();
 		GD.Print($"[GameManager] OnConnectedToServer: peer ID = {peerId}");
 
+		// Only now that ENet has fully handshaked do we switch to the game UI.
+		// JoinGame() deliberately left us on the menu/lobby scene so the
+		// peer was not null when Communications.gd loaded.
+		GetTree().ChangeSceneToFile(CommunicationsScenePath);
+
 		_connectedPeers.Add(peerId);
 
 		var accountManager = GetNodeOrNull<AccountManager>("/root/AccountManager");
 		var discordTag = accountManager?.GetDiscordTag() ?? "";
 		var token      = accountManager?.GetAuthToken()  ?? "";
+
+		// Cache our own discord tag locally so client-side GetPeerRole() works.
+		if (!string.IsNullOrEmpty(discordTag))
+		{
+			_peerToDiscordTag[peerId] = discordTag;
+			_discordTagToPeer[discordTag] = peerId;
+		}
 
 		var prefManager = GetNodeOrNull<Node>("/root/PreferenceManager");
 		if (prefManager != null)
@@ -591,6 +623,9 @@ public partial class GameManager : Node
 		EmitSignal(SignalName.ConnectionFailed);
 		_isConnected = false;
 		Multiplayer.MultiplayerPeer = null;
+		// Scene was never changed in JoinGame(), so the player is still on the
+		// menu/lobby screen. Just reset game state so the UI can react.
+		SetGameState(GameState.Menu);
 	}
 
 	private void OnServerDisconnected()

@@ -197,6 +197,11 @@ func _restrict_admin_visibility() -> void:
 	_refresh_admin_visibility()
 
 func _local_has_admin_privileges() -> bool:
+	# If there is no active multiplayer peer yet (e.g. still connecting, or
+	# connection failed and peer was cleared) calling get_unique_id() in C# will
+	# throw a C++ error. Bail out early so we don't crash every timer tick.
+	if not multiplayer.has_multiplayer_peer():
+		return false
 	if multiplayer.is_server():
 		return true
 	if GameManager == null:
