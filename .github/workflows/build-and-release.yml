@@ -71,19 +71,19 @@ jobs:
         run: |
           mkdir -p build/${{ matrix.platform }}
           OUTPUT="build/${{ matrix.platform }}/${{ matrix.output }}"
+
+          # Server export must not depend on Rapier GDExtension files.
+          if [ "${{ matrix.platform }}" = "server" ]; then
+            mkdir -p .godot
+            : > .godot/extension_list.cfg
+          fi
+
           godot --headless --verbose --export-release "${{ matrix.preset }}" "$OUTPUT"
 
           if [ ! -f "$OUTPUT" ]; then
             echo "ERROR: Export did not produce: $OUTPUT"
             ls -la build/${{ matrix.platform }}/
             exit 1
-          fi
-
-          # Keep Rapier addon files next to the dedicated server export.
-          # Some panel/runtime setups require GDExtension files on disk.
-          if [ "${{ matrix.platform }}" = "server" ]; then
-            mkdir -p build/${{ matrix.platform }}/Addons
-            cp -r Addons/godot-rapier2d build/${{ matrix.platform }}/Addons/
           fi
 
           chmod +x "$OUTPUT" || true

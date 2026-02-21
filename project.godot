@@ -323,8 +323,9 @@ firewall_checked=true
 [physics]
 
 2d/run_on_separate_thread=true
-2d/physics_engine="Rapier2D"
+2d/physics_engine="GodotPhysics2D"
 common/physics_interpolation=true
+2d/physics_engine.rapier_client="Rapier2D"
 2d/physics_engine.dedicated_server="GodotPhysics2D"
 
 [rendering]

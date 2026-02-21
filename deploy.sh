@@ -118,6 +118,9 @@ if [ -d "$EXTRACT/$ADDONS_DIR_IN_ZIP" ]; then
   cp -r "$EXTRACT/$ADDONS_DIR_IN_ZIP" "$DEPLOY_DIR/"
 fi
 
+# Dedicated server must never ship the Rapier addon.
+rm -rf "$DEPLOY_DIR/Addons/godot-rapier2d"
+
 echo "=== Installed ==="
 ls -lh "$DEPLOY_DIR/$BINARY_NAME" "$DEPLOY_DIR/$PCK_NAME"
 
