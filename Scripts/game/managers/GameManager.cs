@@ -631,6 +631,14 @@ public partial class GameManager : Node
 			return;
 		}
 
+		// RegisterPlayer can race ahead of PeerConnected signal callbacks.
+		// Ensure server bookkeeping includes the peer immediately.
+		if (!_connectedPeers.Contains(peerId))
+		{
+			_connectedPeers.Add(peerId);
+			PlayerCount = _connectedPeers.Count;
+		}
+
 		if (_dedicatedServer != null)
 		{
 			// Dedicated mode: gate on auth. Store pending and kick off async verification.
@@ -665,7 +673,7 @@ public partial class GameManager : Node
 		}
 		_pendingAuth.Remove(peerId);
 
-		if (!_connectedPeers.Contains(peerId))
+		if (!IsPeerCurrentlyConnected(peerId))
 		{
 			GD.Print($"[GameManager] Peer {peerId} disconnected during auth. Skipping.");
 			return;
@@ -679,6 +687,27 @@ public partial class GameManager : Node
 		charData["job"]  = assignedJob;
 
 		ProcessPlayerRegistration(peerId, tag, charData);
+	}
+
+	private bool IsPeerCurrentlyConnected(int peerId)
+	{
+		if (peerId <= 0)
+			return false;
+
+		if (peerId == 1 && Multiplayer.IsServer())
+			return true;
+
+		if (Multiplayer.MultiplayerPeer == null)
+			return false;
+
+		var peers = Multiplayer.GetPeers();
+		for (int i = 0; i < peers.Length; i++)
+		{
+			if (peers[i] == peerId)
+				return true;
+		}
+
+		return _connectedPeers.Contains(peerId);
 	}
 
 	private void OnDedicatedPlayerAuthFailed(int peerId, string reason)

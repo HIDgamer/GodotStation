@@ -31,6 +31,12 @@ public partial class WallLight : Node2D
 	private bool _isShortCircuiting;
 	private float _debugCooldown;
 
+	private bool HasServerAuthority()
+	{
+		var peer = Multiplayer.MultiplayerPeer;
+		return peer != null && Multiplayer.IsServer();
+	}
+
 	public override void _Ready()
 	{
 		_basePosition = Position;
@@ -68,7 +74,7 @@ public partial class WallLight : Node2D
 				_flickerTimer -= (float)delta;
 				if (_flickerTimer <= 0)
 				{
-					if (Multiplayer.IsServer() && GD.Randf() < BurnoutChance)
+					if (HasServerAuthority() && GD.Randf() < BurnoutChance)
 					{
 						BurnoutFlicker();
 						Rpc(nameof(BurnoutFlickerRpc));
@@ -88,7 +94,7 @@ public partial class WallLight : Node2D
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void RequestBurnoutRpc(NodePath lightPath)
 	{
-		if (!Multiplayer.IsServer()) return;
+		if (!HasServerAuthority()) return;
 		var light = GetNodeOrNull<WallLight>(lightPath);
 		if (light != null && !light._isShortCircuiting)
 		{

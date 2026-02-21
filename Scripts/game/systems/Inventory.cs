@@ -553,7 +553,7 @@ public partial class Inventory : Node, IMobSystem
 	
 	public void Process(double delta) 
 	{
-		if (!Multiplayer.IsServer()) return;
+		if (Multiplayer.MultiplayerPeer == null || !Multiplayer.IsServer()) return;
 		
 		_foodQualityTimer += (float)delta;
 		if (_foodQualityTimer >= FoodQualityDecayInterval)

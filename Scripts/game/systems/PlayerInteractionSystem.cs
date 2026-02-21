@@ -18,6 +18,12 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	private DoAfterComponent _doAfter;
 	private IntentSystem _intentSystem;
 	private Inventory _inventory;
+
+	private bool HasServerAuthority()
+	{
+		var peer = Multiplayer.MultiplayerPeer;
+		return peer != null && Multiplayer.IsServer();
+	}
 	
 	[Signal] public delegate void StartedPullingEventHandler(Mob target);
 	[Signal] public delegate void StoppedPullingEventHandler();
@@ -43,7 +49,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 			return;
 		}
 
-		if (Multiplayer.IsServer() && _pullingTarget != null && !HasGrabItemEquipped())
+		if (HasServerAuthority() && _pullingTarget != null && !HasGrabItemEquipped())
 		{
 			StopPull();
 			return;
@@ -658,10 +664,12 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	{
 		if (_pullingTarget == null || _grabLevel >= GrabLevel.Fireman) return;
 
-		if (!Multiplayer.IsServer())
+		bool isServer = HasServerAuthority();
+
+		if (!isServer)
 			RpcId(1, nameof(ServerPullStepRpc), _owner.GetPath(), ownerTile, ownerTargetTile);
 
-		HandlePullStepFromTiles(ownerTile, ownerTargetTile, Multiplayer.IsServer());
+		HandlePullStepFromTiles(ownerTile, ownerTargetTile, isServer);
 	}
 
 	private void HandlePullStepFromTiles(Vector2I ownerTile, Vector2I ownerTargetTile, bool broadcast)
@@ -741,7 +749,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	{
 		if (_pulledBy == null) return;
 
-		if (Multiplayer.IsServer())
+		if (HasServerAuthority())
 		{
 			BreakPullAndStun();
 		}

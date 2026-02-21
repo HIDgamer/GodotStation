@@ -202,7 +202,7 @@ public partial class LateJoinLobbyUI : Control
 
 	private void OnReadyPressed()
 	{
-		if (!Multiplayer.IsServer() && !IsMultiplayerConnected())
+		if (!IsMultiplayerConnected())
 		{
 			if (StatusLabel != null)
 				StatusLabel.Text = "> ERROR: NOT CONNECTED";

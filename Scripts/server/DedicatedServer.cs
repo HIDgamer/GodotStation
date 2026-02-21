@@ -107,7 +107,8 @@ public partial class DedicatedServer : Node
     private void OnPeerConnected(long id)
     {
         var peerId = (int)id;
-        _players[peerId] = new PlayerInfo { Authenticated = false };
+        if (!_players.ContainsKey(peerId))
+            _players[peerId] = new PlayerInfo { Authenticated = false };
         GD.Print($"[DedicatedServer] Peer {peerId} connected; awaiting auth.");
 
         var timer = GetTree().CreateTimer(10.0, false);
@@ -137,8 +138,10 @@ public partial class DedicatedServer : Node
     {
         if (!_players.ContainsKey(peerId))
         {
-            GD.PrintErr($"[DedicatedServer] BeginAuth for unknown peer {peerId}; ignoring.");
-            return;
+            // RegisterPlayer RPC can arrive before PeerConnected handlers fire.
+            // Create a placeholder player entry so auth is not dropped.
+            GD.Print($"[DedicatedServer] BeginAuth arrived before PeerConnected for {peerId}; creating placeholder entry.");
+            _players[peerId] = new PlayerInfo { Authenticated = false };
         }
         if (_players[peerId].Authenticated)
         {
