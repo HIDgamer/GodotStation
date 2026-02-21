@@ -9,7 +9,7 @@ using Array = Godot.Collections.Array;
 
 public partial class ChatManager : Node
 {
-	[Export] public string ApiUrl = "auth.godostation.com";
+	[Export] public string ApiUrl = "https://auth.godostation.com";
 	
 	[Signal] public delegate void MessageReceivedEventHandler(Dictionary message);
 	[Signal] public delegate void MessageSentEventHandler(Dictionary message);

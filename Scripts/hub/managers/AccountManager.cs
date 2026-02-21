@@ -8,7 +8,7 @@ using StringContent = System.Net.Http.StringContent;
 
 public partial class AccountManager : Node
 {
-	[Export] public string ApiUrl = "auth.godostation.com";
+	[Export] public string ApiUrl = "https://auth.godostation.com";
 	[Export] public string DiscordClientId = "1470420296040189995";
 	[Export] public string DiscordRedirectUri = "http://127.0.0.1:8080";
 
