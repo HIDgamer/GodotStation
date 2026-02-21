@@ -40,10 +40,13 @@ public partial class ServerConfig : Node
     {
         ResetDefaults();
         LoadDotEnvFiles();
-        LoadFromEnvironment();
 
         if (Godot.FileAccess.FileExists(ConfigFilePath))
             LoadFromFile(ConfigFilePath);
+
+        // Deployment overrides should win over persisted user config.
+        LoadFromEnvironment();
+        BackendUrl = NormalizeBackendUrl(BackendUrl);
 
         _loaded = true;
 
@@ -201,5 +204,19 @@ public partial class ServerConfig : Node
         }
 
         return fallback;
+    }
+
+    private static string NormalizeBackendUrl(string rawUrl)
+    {
+        var url = string.IsNullOrWhiteSpace(rawUrl) ? DefaultBackendUrl : rawUrl.Trim();
+        url = url.TrimEnd('/');
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return DefaultBackendUrl;
+
+        if (string.Equals(uri.Host, "godotstation.duckdns.org", StringComparison.OrdinalIgnoreCase))
+            return DefaultBackendUrl;
+
+        return url;
     }
 }

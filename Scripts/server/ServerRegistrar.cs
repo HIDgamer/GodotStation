@@ -85,7 +85,7 @@ public partial class ServerRegistrar : Node
         }
         catch (Exception e)
         {
-            GD.PrintErr($"[ServerRegistrar] Register exception: {e.Message}");
+            GD.PrintErr($"[ServerRegistrar] Register exception for '{_config?.BackendUrl}': {DescribeException(e)}");
             EmitSignal(SignalName.RegistrationFailed, "Connection error");
             return false;
         }
@@ -117,7 +117,7 @@ public partial class ServerRegistrar : Node
         }
         catch (Exception e)
         {
-            GD.PrintErr($"[ServerRegistrar] Deregister exception: {e.Message}");
+            GD.PrintErr($"[ServerRegistrar] Deregister exception: {DescribeException(e)}");
         }
     }
 
@@ -150,7 +150,7 @@ public partial class ServerRegistrar : Node
         }
         catch (Exception e)
         {
-            GD.PrintErr($"[ServerRegistrar] Heartbeat exception: {e.Message}");
+            GD.PrintErr($"[ServerRegistrar] Heartbeat exception: {DescribeException(e)}");
         }
     }
 
@@ -182,6 +182,22 @@ public partial class ServerRegistrar : Node
         }
         catch { }
         return "Unknown error";
+    }
+
+    private static string DescribeException(Exception e)
+    {
+        if (e == null) return "Unknown exception";
+
+        var message = e.Message;
+        var inner = e.InnerException;
+        int depth = 0;
+        while (inner != null && depth < 4)
+        {
+            message += $" | inner[{depth}]: {inner.Message}";
+            inner = inner.InnerException;
+            depth++;
+        }
+        return message;
     }
 
     public override void _ExitTree()
