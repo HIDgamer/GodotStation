@@ -60,9 +60,7 @@ public partial class GameManager : Node
 
 	private DedicatedServer  _dedicatedServer;
 	private ServerPrivileges _serverPrivileges;
-
-	// Peers that connected but have not passed dedicated auth yet.
-	// Key = peerId, Value = (discordTag, charData, authToken, preferredJob).
+	
 		private readonly System.Collections.Generic.Dictionary<int,
 			(string tag, Dictionary charData, string token, string preferredJob)> _pendingAuth = new();
 
@@ -75,6 +73,14 @@ public partial class GameManager : Node
 	private const string CommunicationsScenePath = "res://Scenes/game/ui/Communications.tscn";
 	private const string MainLobbyScenePath = "res://Scenes/MainMenu.tscn";
 	private const string DefaultDedicatedMapUid = "uid://dible6m71p44g";
+	private static readonly string[] DefaultScreensavers = {
+		"uid://m44b5scm3sf2",
+		"uid://baddbapvxhyjw",
+		"uid://s331mwi01abw",
+		"uid://bttyceok81cxh",
+		"uid://cs4b47j652yok",
+		"uid://c2kq5gljee3h0"
+	};
 
 	private static readonly System.Collections.Generic.Dictionary<string, string> DedicatedMapAliases =
 		new(StringComparer.OrdinalIgnoreCase)
@@ -95,9 +101,6 @@ public partial class GameManager : Node
 	private JobManager _jobManager;
 	private bool _isHosting = false;
 	private bool _isConnected = false;
-
-	// Discord tag and auth token received from the hub via command-line args.
-	// Populated during ParseHubArguments() which runs at the end of _Ready().
 	private string _hubDiscordTag = "";
 
 	[Signal] public delegate void PlayerJoinedEventHandler(int id);
@@ -786,8 +789,6 @@ public partial class GameManager : Node
 			_discordTagToPeer[discordTag] = peerId;
 		}
 
-		// Stamp the player's server role into their character data so all.
-		// clients receive it in BroadcastPlayerJoinedWithData.
 		if (_serverPrivileges != null && !string.IsNullOrEmpty(discordTag))
 		{
 			var role = _serverPrivileges.GetRole(discordTag);
@@ -819,7 +820,7 @@ public partial class GameManager : Node
 		}
 
 		RpcId(peerId, MethodName.SyncLobbyState, LobbyTimeLeft, LobbyTimerPaused, CurrentVideoUid);
-		Rpc(MethodName.BroadcastPlayerJoined, peerId, playerName);
+		Rpc(MethodName.BroadcastPlayerJoinedWithData, peerId, playerName, characterData);
 		EmitSignal(SignalName.PlayersUpdated);
 	}
 
@@ -1176,12 +1177,18 @@ public partial class GameManager : Node
 		if (!EnsureDedicatedWorldLoaded())
 			GD.PrintErr("[GameManager] Dedicated world failed to load; spawn requests will fail.");
 
+		if (string.IsNullOrEmpty(CurrentVideoUid))
+		{
+			var rng = new Random();
+			CurrentVideoUid = DefaultScreensavers[rng.Next(DefaultScreensavers.Length)];
+			GD.Print($"[GameManager] Dedicated lobby screensaver: {CurrentVideoUid}");
+		}
+
 		GD.Print("[GameManager] Starting dedicated server lobby countdown.");
 		_isHosting = true;
 		if (_lobbyTimer == null)
 			SetupLobbyTimer();
 		SetGameState(GameState.Lobby);
-		// Dedicated server runs headless; no scene transition here.
 	}
 
 	private void ApplyDedicatedServerConfig()
@@ -1507,6 +1514,7 @@ public partial class GameManager : Node
 		playerInstance.Position = position;
 		playerInstance.SetMultiplayerAuthority(peerId);
 		world.CallDeferred("add_child", playerInstance);
+		Rpc(MethodName.SpawnPlayerOnClients, peerId, position, characterData);
 		CallDeferred(nameof(ApplyCharacterDataDeferred), playerInstance, characterData);
 
 		var discordTag = _peerToDiscordTag.ContainsKey(peerId) ? _peerToDiscordTag[peerId] : "";
@@ -1549,6 +1557,32 @@ public partial class GameManager : Node
 			playerInstance.Call("ApplyCharacterData", characterData);
 		else if (playerInstance.Get("character_data").VariantType != Variant.Type.Nil)
 			playerInstance.Set("character_data", characterData);
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SpawnPlayerOnClients(int peerId, Vector2 position, Dictionary charData)
+	{
+		var world = GetTree().GetFirstNodeInGroup("World");
+		if (world == null) { GD.PrintErr("[GameManager] SpawnPlayerOnClients: World not found."); return; }
+
+		// Avoid duplicate spawns
+		if (world.GetNodeOrNull<Node2D>(peerId.ToString()) != null) return;
+
+		if (PlayerScene == null)
+			PlayerScene = GD.Load<PackedScene>("uid://cj25bsb3ooj62") ??
+						GD.Load<PackedScene>("res://Scenes/Characters/Human.tscn");
+		if (PlayerScene == null) { GD.PrintErr("[GameManager] SpawnPlayerOnClients: PlayerScene null."); return; }
+
+		var player = PlayerScene.Instantiate<Node2D>();
+		player.Name = peerId.ToString();
+		player.Position = position;
+		player.SetMultiplayerAuthority(peerId);
+		world.AddChild(player);
+
+		if (player.HasMethod("ApplyCharacterData"))
+			player.Call("ApplyCharacterData", charData);
+
+		GD.Print($"[GameManager] SpawnPlayerOnClients: spawned peer {peerId} at {position}");
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]

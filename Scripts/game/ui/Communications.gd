@@ -596,7 +596,7 @@ func _on_preference_pressed() -> void:
 func _on_back_to_lobby_pressed() -> void:
 	if audio_manager:
 		audio_manager.play_ui_click()
-	GameManager.BackToLobby()
+	get_tree().quit()
 
 func _on_media_selected(type: String, path: String) -> void:
 	if not multiplayer.is_server():
