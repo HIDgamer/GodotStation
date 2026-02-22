@@ -255,6 +255,34 @@ public partial class GameManager : Node
 
 	public void SetChatInputActive(bool active) => ChatInputActive = active;
 
+    private void StartLocalLobby()
+    {
+        if (ServerName == "") ServerName = "Local Server";
+        GD.Print($"[GameManager] StartLocalLobby: port={DefaultPort} name='{ServerName}'");
+
+        var peer = new ENetMultiplayerPeer();
+        var err  = peer.CreateServer(DefaultPort, MaxPlayers, ENET_CHANNEL_COUNT);
+        if (err != Error.Ok)
+        {
+            GD.PrintErr($"[GameManager] StartLocalLobby: CreateServer failed — {err}");
+            EmitSignal(SignalName.ConnectionFailed);
+            return;
+        }
+
+        peer.RefuseNewConnections = false;
+        Multiplayer.MultiplayerPeer = peer;
+        _peer       = peer;
+        _isHosting  = true;
+        PlayerCount = 1;
+
+        SetGameState(GameState.Hosting);
+        SetupLobbyTimer();
+
+        if (Godot.FileAccess.FileExists(CommunicationsScenePath))
+            GetTree().ChangeSceneToFile(CommunicationsScenePath);
+        else
+            GD.PrintErr($"[GameManager] Communications scene not found at '{CommunicationsScenePath}'.");
+    }
 
 	public void HostGame(int port = -1)
 	{
@@ -1900,6 +1928,35 @@ public partial class GameManager : Node
 				i++;
 				continue;
 			}
+
+            // ── Host mode ───────────────────────────────────────────────────────
+            if (args[i] == "--host")
+            {
+                GD.Print("[GameManager] Hub requesting local host mode.");
+                CallDeferred(MethodName.StartLocalLobby);
+                continue;
+            }
+
+            // ── Override port for hosting ────────────────────────────────────────
+            if (args[i] == "--port" && i + 1 < args.Length)
+            {
+                if (int.TryParse(args[i + 1], out int overridePort))
+                {
+                    DefaultPort = overridePort;
+                    GD.Print($"[GameManager] Port override from hub: {DefaultPort}");
+                }
+                i++;
+                continue;
+            }
+
+            // ── Server name override ─────────────────────────────────────────────
+            if (args[i] == "--server-name" && i + 1 < args.Length)
+            {
+                ServerName = args[i + 1];
+                GD.Print($"[GameManager] Server name override: {ServerName}");
+                i++;
+                continue;
+            }
 
 			// ── Discord tag ─────────────────────────────────────────────────────
 			if (args[i] == "--discord-tag" && i + 1 < args.Length)
