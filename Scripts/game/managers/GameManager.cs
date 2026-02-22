@@ -73,7 +73,7 @@ public partial class GameManager : Node
 	private const int MAX_NETWORK_PORT = 65535;
 	private const int ENET_CHANNEL_COUNT = 2;
 	private const string CommunicationsScenePath = "res://Scenes/game/ui/Communications.tscn";
-	private const string MainLobbyScenePath = "res://Scenes/game/ui/Hub.tscn";
+	private const string MainLobbyScenePath = "res://Scenes/MainMenu.tscn";
 	private const string DefaultDedicatedMapUid = "uid://dible6m71p44g";
 
 	private static readonly System.Collections.Generic.Dictionary<string, string> DedicatedMapAliases =
@@ -309,8 +309,11 @@ public partial class GameManager : Node
 		SetupLobbyTimer();
 		// Server registration is handled by the GS-Nebula hub — no in-game lobby call needed.
 		EmitSignal(SignalName.PlayerCountChanged, PlayerCount);
-		SetGameState(GameState.Lobby);
-		GetTree().ChangeSceneToFile(CommunicationsScenePath);
+		SetGameState(GameState.Hosting);
+		if (Godot.FileAccess.FileExists(CommunicationsScenePath))
+			GetTree().ChangeSceneToFile(CommunicationsScenePath);
+		else
+			GD.PrintErr($"[GameManager] Communications scene not found at '{CommunicationsScenePath}'. Staying on current scene.");
 	}
 
 	private void SetupLobbyTimer()
