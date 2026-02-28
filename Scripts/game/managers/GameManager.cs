@@ -671,7 +671,7 @@ public partial class GameManager : Node
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void RegisterPlayer(int peerId, string discordTag, Dictionary characterData,
-								string token = "", string preferredJob = "")
+								string token, string preferredJob)
 	{
 		if (!Multiplayer.IsServer()) return;
 
@@ -1351,7 +1351,7 @@ public partial class GameManager : Node
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void SyncStatusInfo(string mapName, string gamemode, int currentPlayers,
-								string musicName = "", float timeLeft = -1.0f, bool paused = false)
+								string musicName, float timeLeft, bool paused)
 	{
 		if (!string.IsNullOrEmpty(mapName))    CurrentMap   = mapName;
 		if (!string.IsNullOrEmpty(gamemode))   Gamemode     = gamemode;
@@ -1377,7 +1377,7 @@ public partial class GameManager : Node
 
 	// Item spawn compatibility endpoint used by AdminSpawnPopup.gd.
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	public void RequestSpawnItem(string scenePath, Vector2 position, int amount = 1)
+	public void RequestSpawnItem(string scenePath, Vector2 position, int amount)
 	{
 		if (Multiplayer.IsServer())
 		{

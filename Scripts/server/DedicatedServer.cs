@@ -73,6 +73,7 @@ public partial class DedicatedServer : Node
         Multiplayer.MultiplayerPeer = peer;
         Multiplayer.PeerConnected += OnPeerConnected;
         Multiplayer.PeerDisconnected += OnPeerDisconnected;
+        EnsureLateJoinRpcBridge();
 
         GD.Print($"[DedicatedServer] '{_config.ServerName}' listening on :{_config.Port} (max {_config.MaxPlayers}, channels {EnetChannelCount})");
         GD.Print($"[DedicatedServer] Backend: {_config.BackendUrl}");
@@ -102,6 +103,27 @@ public partial class DedicatedServer : Node
                 return true;
 
         return false;
+    }
+
+    private void EnsureLateJoinRpcBridge()
+    {
+        var root = GetTree().Root;
+        if (root == null)
+            return;
+
+        var communications = root.GetNodeOrNull<Node>("Communications");
+        if (communications == null)
+        {
+            communications = new Node { Name = "Communications" };
+            root.AddChild(communications);
+        }
+
+        if (communications.GetNodeOrNull<Node>("LateJoinLobbyUI") != null)
+            return;
+
+        var proxy = new LateJoinLobbyServerProxy { Name = "LateJoinLobbyUI" };
+        communications.AddChild(proxy);
+        GD.Print("[DedicatedServer] Installed LateJoinLobby RPC bridge at /root/Communications/LateJoinLobbyUI.");
     }
 
     private void OnPeerConnected(long id)

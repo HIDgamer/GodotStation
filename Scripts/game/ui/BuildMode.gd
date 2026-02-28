@@ -13,6 +13,12 @@ enum Mode { NONE, BUILD, DESTROY }
 var current_mode: Mode = Mode.NONE
 
 func _ready() -> void:
+	if _is_dedicated_runtime():
+		visible = false
+		set_process(false)
+		set_process_input(false)
+		return
+
 	if not multiplayer.is_server():
 		visible = false
 		set_process_input(false)
@@ -42,22 +48,39 @@ func _setup_ui_animations() -> void:
 func _initialize_world_references() -> void:
 	var world = _find_world()
 	if world:
-		build_mode_tile_map = world.get_node("BuildMode")
-		world_manager = world.get_node("WorldManager")
-		collision_manager = world.get_node("CollisionManager")
+		build_mode_tile_map = world.get_node_or_null("BuildMode")
+		world_manager = world.get_node_or_null("WorldManager")
+		collision_manager = world.get_node_or_null("CollisionManager")
+
+func _is_dedicated_runtime() -> bool:
+	if OS.has_feature("dedicated_server"):
+		return true
+	return DisplayServer.get_name().to_lower() == "headless"
 
 func _find_world() -> Node:
+	var world_from_group = get_tree().get_first_node_in_group("World")
+	if world_from_group:
+		return world_from_group
+
 	var subviewport = get_node_or_null("/root/Communications/HSplitContainer/SubViewportContainer/SubViewport")
 	if subviewport and subviewport.get_child_count() > 0:
 		return subviewport.get_child(0)
-	return get_tree().current_scene
+
+	var scene = get_tree().current_scene
+	if scene and scene.has_node("WorldManager") and scene.has_node("CollisionManager"):
+		return scene
+
+	return null
 
 func _on_back_pressed() -> void:
 	visible = false
 	current_mode = Mode.NONE
 
 func _get_world_mouse_position() -> Vector2:
-	var container = get_node("/root/Communications/HSplitContainer/SubViewportContainer")
+	var container = get_node_or_null("/root/Communications/HSplitContainer/SubViewportContainer")
+	if not container:
+		return Vector2.ZERO
+
 	var screen_pos = get_viewport().get_mouse_position()
 	var local_pos = screen_pos - container.global_position
 	
