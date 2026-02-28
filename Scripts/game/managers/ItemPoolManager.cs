@@ -61,7 +61,8 @@ public partial class ItemPoolManager : Node
 		if (!_pools.ContainsKey(scenePath))
 			_pools[scenePath] = new Queue<WorldItem>();
 		
-		var gridSystem = item.GetNodeOrNull<GridSystem>("/root/World/GridSystem");
+		var world = GetTree().GetFirstNodeInGroup("World");
+		var gridSystem = world?.GetNodeOrNull<GridSystem>("GridSystem");
 		if (gridSystem != null)
 		{
 			var tile = gridSystem.WorldToGrid(item.GlobalPosition);

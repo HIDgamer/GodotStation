@@ -32,6 +32,9 @@ public partial class Mob : CharacterBody2D
 		
 		if (IsMultiplayerAuthority())
 		{
+			if (!IsInGroup("Player"))
+				AddToGroup("Player");
+
 			var camera = GetNodeOrNull<Camera2D>("PlayerCameraSetup");
 			if (camera == null)
 			{
@@ -43,6 +46,9 @@ public partial class Mob : CharacterBody2D
 		}
 		else
 		{
+			if (IsInGroup("Player"))
+				RemoveFromGroup("Player");
+
 			var camera = GetNodeOrNull<Camera2D>("PlayerCameraSetup");
 			if (camera != null)
 				camera.Enabled = false;
@@ -280,6 +286,15 @@ public partial class Mob : CharacterBody2D
 			SetMultiplayerAuthority(peerId);
 
 		var isAuthority = IsMultiplayerAuthority();
+		if (isAuthority)
+		{
+			if (!IsInGroup("Player"))
+				AddToGroup("Player");
+		}
+		else if (IsInGroup("Player"))
+		{
+			RemoveFromGroup("Player");
+		}
 
 		// Find or create the camera.
 		var camera = GetNodeOrNull<Camera2D>("PlayerCameraSetup");

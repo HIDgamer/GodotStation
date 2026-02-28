@@ -65,6 +65,18 @@ public partial class WorldItem : RigidBody2D
 	public void HandleWorldItemDoubleClick()
 	{
 		var mob = GetTree().GetFirstNodeInGroup("Player") as Mob;
+		if (mob == null)
+		{
+			foreach (var node in GetTree().GetNodesInGroup("Mob"))
+			{
+				if (node is Mob candidate && candidate.IsMultiplayerAuthority())
+				{
+					mob = candidate;
+					break;
+				}
+			}
+		}
+
 		if (mob != null)
 		{
 			TryPickup(mob);

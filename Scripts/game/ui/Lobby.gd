@@ -68,7 +68,12 @@ func _on_audio_finished() -> void:
 func load_video(path: String) -> void:
 	if video_player.is_playing():
 		video_player.stop()
-	video_player.stream = load(path)
+	var stream = load(path)
+	if stream == null and path.get_extension().to_lower() == "ogv":
+		var ogv_stream := VideoStreamTheora.new()
+		ogv_stream.file = path
+		stream = ogv_stream
+	video_player.stream = stream
 	video_player.loop = true
 	video_player.play()
 	if not video_player.is_playing():
@@ -118,6 +123,9 @@ func load_audio_external(path: String) -> AudioStream:
 
 		"wav":
 			return _load_wav_stream(path)
+		
+		"mp3":
+			return _load_mp3_stream(path)
 
 		_:
 			push_error("Unsupported audio format: " + ext)
@@ -142,6 +150,16 @@ func _load_wav_stream(path: String) -> AudioStreamWAV:
 
 	var stream := AudioStreamWAV.new()
 	stream.load_wav(file)
+	return stream
+
+func _load_mp3_stream(path: String) -> AudioStreamMP3:
+	var bytes := FileAccess.get_file_as_bytes(path)
+	if bytes.is_empty():
+		push_error("Failed to read MP3 file: " + path)
+		return null
+
+	var stream := AudioStreamMP3.new()
+	stream.data = bytes
 	return stream
 
 func _load_art(path: String) -> void:

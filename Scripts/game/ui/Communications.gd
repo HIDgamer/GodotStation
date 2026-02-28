@@ -599,12 +599,12 @@ func _on_back_to_lobby_pressed() -> void:
 	get_tree().quit()
 
 func _on_media_selected(type: String, path: String) -> void:
-	if not multiplayer.is_server():
+	if not _is_network_ready_for_rpc():
 		return
 
 	var synced_path := _normalize_media_path_for_sync(path)
 	if synced_path == "":
-		music_label.text = "Media sync failed: select files from inside the game folder/resources."
+		music_label.text = "Media sync failed: invalid file path."
 		return
 	
 	var lobby_viewport: SubViewport = lobby_subviewport.get_node_or_null("SubViewport") as SubViewport
@@ -619,7 +619,12 @@ func _on_media_selected(type: String, path: String) -> void:
 				var path_parts = synced_path.split("/")
 				current_music_name = path_parts[-1] if path_parts.size() > 0 else "Unknown"
 
-	GameManager.SyncMedia(type, synced_path, music_loops if type == "music" else 0, music_volume if type == "music" else 0.5)
+	var loops := music_loops if type == "music" else 0
+	var volume := music_volume if type == "music" else 0.5
+	if GameManager.has_method("RequestMediaSyncFromClient"):
+		GameManager.call("RequestMediaSyncFromClient", type, synced_path, loops, volume)
+	else:
+		GameManager.SyncMedia(type, synced_path, loops, volume)
 
 func _on_media_sync_received(type: String, path: String, loops: int, volume: float) -> void:
 	if path == "":
@@ -789,15 +794,27 @@ func _sync_video_to_all_peers(path: String) -> void:
 			lobby.load_media("video", path)
 
 func _normalize_media_path_for_sync(path: String) -> String:
+	if path == "":
+		return ""
+
 	if path.begins_with("uid://") or path.begins_with("res://"):
+		return path
+	if path.begins_with("user://"):
 		return path
 
 	var normalized: String = path.replace("\\", "/")
+	if normalized.begins_with("file://"):
+		normalized = normalized.trim_prefix("file://")
+
 	var project_root: String = ProjectSettings.globalize_path("res://").replace("\\", "/")
 	if not project_root.ends_with("/"):
 		project_root += "/"
 
 	if normalized.begins_with(project_root):
 		return "res://" + normalized.substr(project_root.length())
+
+	# Allow absolute local paths. These are valid for same-machine dedicated setups.
+	if normalized.contains(":/") or normalized.begins_with("/"):
+		return normalized
 
 	return ""

@@ -72,6 +72,7 @@ public partial class GameManager : Node
 	private const int ENET_CHANNEL_COUNT = 2;
 	private const string CommunicationsScenePath = "res://Scenes/game/ui/Communications.tscn";
 	private const string MainLobbyScenePath = "res://Scenes/MainMenu.tscn";
+	private const string DedicatedWorldHostPath = "/root/Communications/HSplitContainer/SubViewportContainer/SubViewport";
 	private const string DefaultDedicatedMapUid = "uid://dible6m71p44g";
 	private static readonly string[] DefaultScreensavers = {
 		"uid://m44b5scm3sf2",
@@ -1097,6 +1098,37 @@ public partial class GameManager : Node
 			EmitSignal(SignalName.MediaSyncReceived, type, path, loops, volume);
 		}
 
+	public void RequestMediaSyncFromClient(string type, string path, int loops, float volume)
+	{
+		if (Multiplayer.IsServer())
+		{
+			SyncMedia(type, path, loops, volume);
+			return;
+		}
+
+		var peer = Multiplayer.MultiplayerPeer;
+		if (peer == null || peer.GetConnectionStatus() != MultiplayerPeer.ConnectionStatus.Connected)
+			return;
+
+		RpcId(1, MethodName.RequestMediaSyncRpc, Multiplayer.GetUniqueId(), type, path, loops, volume);
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void RequestMediaSyncRpc(int requesterId, string type, string path, int loops, float volume)
+	{
+		if (!Multiplayer.IsServer()) return;
+		if (!ValidateRpcSender(requesterId)) return;
+
+		var tag = _peerToDiscordTag.ContainsKey(requesterId) ? _peerToDiscordTag[requesterId] : "";
+		if (_serverPrivileges != null && !_serverPrivileges.CanStartGame(tag))
+		{
+			GD.Print($"[GameManager] RequestMediaSync denied: peer {requesterId} ('{tag}') lacks permission.");
+			return;
+		}
+
+		SyncMedia(type, path, Mathf.Clamp(loops, 0, 99), Mathf.Clamp(volume, 0.0f, 1.0f));
+	}
+
 		private void SpawnConnectedPlayersForDedicatedRound()
 		{
 			if (_jobManager == null)
@@ -1231,7 +1263,12 @@ public partial class GameManager : Node
 	{
 		var existingWorld = GetTree().GetFirstNodeInGroup("World");
 		if (existingWorld != null)
+		{
+			var host = EnsureDedicatedWorldHostNode();
+			if (host != null && existingWorld.GetParent() != host)
+				existingWorld.Reparent(host);
 			return true;
+		}
 
 		var mapReference = string.IsNullOrWhiteSpace(CurrentMap) ? DefaultDedicatedMapUid : CurrentMap;
 		PackedScene mapScene = GD.Load<PackedScene>(mapReference);
@@ -1255,9 +1292,40 @@ public partial class GameManager : Node
 		if (!world.IsInGroup("World"))
 			world.AddToGroup("World");
 
-		GetTree().Root.AddChild(world);
-		GD.Print($"[GameManager] Dedicated world loaded: '{world.Name}' from '{mapReference}'.");
+		var worldHost = EnsureDedicatedWorldHostNode();
+		if (worldHost == null)
+		{
+			GD.PrintErr("[GameManager] Dedicated world host node could not be created.");
+			return false;
+		}
+
+		worldHost.AddChild(world);
+		GD.Print($"[GameManager] Dedicated world loaded: '{world.GetPath()}' from '{mapReference}'.");
 		return true;
+	}
+
+	private Node EnsureDedicatedWorldHostNode()
+	{
+		var existing = GetNodeOrNull<Node>(DedicatedWorldHostPath);
+		if (existing != null) return existing;
+
+		var root = GetTree().Root;
+		if (root == null) return null;
+
+		var communications = EnsureNamedChild(root, "Communications");
+		var split = EnsureNamedChild(communications, "HSplitContainer");
+		var subViewportContainer = EnsureNamedChild(split, "SubViewportContainer");
+		return EnsureNamedChild(subViewportContainer, "SubViewport");
+	}
+
+	private static Node EnsureNamedChild(Node parent, string childName)
+	{
+		var child = parent.GetNodeOrNull<Node>(childName);
+		if (child != null) return child;
+
+		child = new Node { Name = childName };
+		parent.AddChild(child);
+		return child;
 	}
 
 
@@ -1387,12 +1455,20 @@ public partial class GameManager : Node
 				if (_serverPrivileges == null)
 				{
 					// Player-hosted mode: only host is allowed to spawn via RPC.
-					if (senderId != 1) return;
+					if (senderId != 1)
+					{
+						GD.Print($"[GameManager] RequestSpawnItem denied: peer {senderId} is not host.");
+						return;
+					}
 				}
 				else
 				{
 					var tag = _peerToDiscordTag.ContainsKey(senderId) ? _peerToDiscordTag[senderId] : "";
-					if (!_serverPrivileges.CanStartGame(tag)) return;
+					if (!_serverPrivileges.CanStartGame(tag))
+					{
+						GD.Print($"[GameManager] RequestSpawnItem denied: peer {senderId} ('{tag}') lacks permission.");
+						return;
+					}
 				}
 			}
 
