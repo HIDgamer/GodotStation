@@ -413,7 +413,7 @@ public partial class Inventory : Node, IMobSystem
 	{
 		if (!Multiplayer.IsServer())
 		{
-			RpcId(1, nameof(RequestQuickPickupRpc), _owner.GetPath());
+			RpcId(1, nameof(RequestQuickPickupRpc), _owner.GetMultiplayerAuthority());
 			return false;
 		}
 		
@@ -441,12 +441,11 @@ public partial class Inventory : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequestQuickPickupRpc(NodePath mobPath)
+	private void RequestQuickPickupRpc(int ownerPeerId)
 	{
 		if (!Multiplayer.IsServer()) return;
-		
-		var mob = GetNode<Mob>(mobPath);
-		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
+
+		var inventory = ResolveInventoryForRpc(ownerPeerId);
 		inventory?.QuickPickup();
 	}
 	
@@ -482,12 +481,11 @@ public partial class Inventory : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequestUnequipToHandRpc(NodePath mobPath, string fromSlot, string toSlot)
+	private void RequestUnequipToHandRpc(int ownerPeerId, string fromSlot, string toSlot)
 	{
 		if (!Multiplayer.IsServer()) return;
-		
-		var mob = GetNodeOrNull<Mob>(mobPath);
-		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
+
+		var inventory = ResolveInventoryForRpc(ownerPeerId);
 		if (inventory == null) return;
 		
 		var item = inventory.GetEquipped(fromSlot);
@@ -499,23 +497,51 @@ public partial class Inventory : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequestEquipFromHandRpc(NodePath mobPath, string slot)
+	private void RequestEquipFromHandRpc(int ownerPeerId, string slot)
 	{
 		if (!Multiplayer.IsServer()) return;
-		
-		var mob = GetNodeOrNull<Mob>(mobPath);
-		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
+
+		var inventory = ResolveInventoryForRpc(ownerPeerId);
 		inventory?.TryEquipFromInventory(slot);
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequestDropEquippedRpc(NodePath mobPath, string slot)
+	private void RequestDropEquippedRpc(int ownerPeerId, string slot)
 	{
 		if (!Multiplayer.IsServer()) return;
-		
-		var mob = GetNodeOrNull<Mob>(mobPath);
-		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
+
+		var inventory = ResolveInventoryForRpc(ownerPeerId);
 		inventory?.DropEquipped(slot);
+	}
+
+	private Inventory ResolveInventoryForRpc(int ownerPeerId)
+	{
+		var senderId = Multiplayer.GetRemoteSenderId();
+		if (senderId > 0 && ownerPeerId > 0 && senderId != ownerPeerId)
+		{
+			GD.PrintErr($"[Inventory] RPC sender mismatch: sender={senderId}, owner={ownerPeerId}");
+			return null;
+		}
+
+		var resolvedPeerId = senderId > 0 ? senderId : ownerPeerId;
+		if (resolvedPeerId <= 0)
+			return null;
+
+		var world = GetTree().GetFirstNodeInGroup("World");
+		var mob = world?.GetNodeOrNull<Mob>(resolvedPeerId.ToString()) as Mob;
+		if (mob == null)
+		{
+			foreach (var node in GetTree().GetNodesInGroup("Mob"))
+			{
+				if (node is Mob candidate && candidate.GetMultiplayerAuthority() == resolvedPeerId)
+				{
+					mob = candidate;
+					break;
+				}
+			}
+		}
+
+		return mob?.GetNodeOrNull<Inventory>("Inventory");
 	}
 	
 	public bool SwapItems(string slot1, string slot2)

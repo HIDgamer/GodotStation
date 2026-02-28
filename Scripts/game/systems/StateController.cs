@@ -21,7 +21,7 @@ public partial class StateController : Node, IMobSystem
 	{
 		if (!_owner.IsMultiplayerAuthority()) return;
 
-		if (Input.IsActionJustPressed("go_prone"))
+		if (e.IsActionPressed("go_prone"))
 			ToggleProne();
 	}
 
@@ -36,14 +36,14 @@ public partial class StateController : Node, IMobSystem
 			if (Multiplayer.IsServer())
 				_states.SetState(MobState.Standing);
 			else
-				RpcId(1, nameof(ServerToggleProne), _owner.GetPath());
+				RpcId(1, nameof(ServerToggleProne), _owner.GetMultiplayerAuthority());
 		}
 		else if (current == MobState.Standing)
 		{
 			if (Multiplayer.IsServer())
 				_states.SetState(MobState.Prone);
 			else
-				RpcId(1, nameof(ServerToggleProne), _owner.GetPath());
+				RpcId(1, nameof(ServerToggleProne), _owner.GetMultiplayerAuthority());
 		}
 	}
 
@@ -58,25 +58,39 @@ public partial class StateController : Node, IMobSystem
 		if (Multiplayer.IsServer())
 			_states.SetState(next);
 		else
-			RpcId(1, nameof(ServerToggleRest), _owner.GetPath());
+			RpcId(1, nameof(ServerToggleRest), _owner.GetMultiplayerAuthority());
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerToggleProne(NodePath mobPath)
+	private void ServerToggleProne(int ownerPeerId)
 	{
 		if (!Multiplayer.IsServer()) return;
-		GetNodeOrNull<Mob>(mobPath)?
+		ResolveOwnerForRpc(ownerPeerId)?
 			.GetNodeOrNull<StateController>("StateController")?
 			.ToggleProne();
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerToggleRest(NodePath mobPath)
+	private void ServerToggleRest(int ownerPeerId)
 	{
 		if (!Multiplayer.IsServer()) return;
-		GetNodeOrNull<Mob>(mobPath)?
+		ResolveOwnerForRpc(ownerPeerId)?
 			.GetNodeOrNull<StateController>("StateController")?
 			.ToggleRest();
+	}
+
+	private Mob ResolveOwnerForRpc(int ownerPeerId)
+	{
+		var senderId = Multiplayer.GetRemoteSenderId();
+		if (senderId > 0 && ownerPeerId > 0 && senderId != ownerPeerId)
+			return null;
+
+		var resolvedPeerId = senderId > 0 ? senderId : ownerPeerId;
+		if (resolvedPeerId <= 0)
+			return null;
+
+		var world = GetTree().GetFirstNodeInGroup("World");
+		return world?.GetNodeOrNull<Mob>(resolvedPeerId.ToString()) as Mob;
 	}
 
 	public void Process(double delta) { }

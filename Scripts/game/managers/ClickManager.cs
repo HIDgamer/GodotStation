@@ -331,7 +331,7 @@ public partial class ClickManager : Node2D
 		}
 		else
 		{
-			RpcId(1, nameof(ServerStartFiremanCarryRpc), _mob.GetPath(), dropPosition);
+			RpcId(1, nameof(ServerStartFiremanCarryRpc), _mob.GetMultiplayerAuthority(), dropPosition);
 		}
 		
 		_isDragging = false;
@@ -340,10 +340,15 @@ public partial class ClickManager : Node2D
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerStartFiremanCarryRpc(NodePath mobPath, Vector2 dropPosition)
+	private void ServerStartFiremanCarryRpc(int ownerPeerId, Vector2 dropPosition)
 	{
 		if (!Multiplayer.IsServer()) return;
-		var mob = GetNode<Mob>(mobPath);
+		var senderId = Multiplayer.GetRemoteSenderId();
+		if (senderId > 0 && ownerPeerId > 0 && senderId != ownerPeerId)
+			return;
+		var resolvedPeer = senderId > 0 ? senderId : ownerPeerId;
+		var world = GetTree().GetFirstNodeInGroup("World");
+		var mob = world?.GetNodeOrNull(resolvedPeer.ToString()) as Mob;
 		mob?.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem")?.StartDragCarry(dropPosition);
 	}
 	

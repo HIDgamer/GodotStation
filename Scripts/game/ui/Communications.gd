@@ -44,6 +44,8 @@ var current_tab: String = ""
 
 func _ready() -> void:
 	add_to_group("Communications")
+	set_process_input(true)
+	set_process_unhandled_input(true)
 	print("[Communications] _ready() called at ", Time.get_ticks_msec())
 	print("[Communications] multiplayer.is_server() = ", multiplayer.is_server())
 	print("[Communications] multiplayer.get_unique_id() = ", multiplayer.get_unique_id())
@@ -51,6 +53,8 @@ func _ready() -> void:
 	_load_world_map()
 	
 	var text_input_scene = load("uid://2oufqaxsmbt8")
+	if text_input_scene == null:
+		text_input_scene = load("res://Scenes/game/ui/TextInput.tscn")
 	if text_input_scene:
 		text_input_instance = text_input_scene.instantiate()
 		add_child(text_input_instance)
@@ -276,7 +280,21 @@ func _setup_ui_animations() -> void:
 	UIAnimationHelper.setup_button_animations(back_to_lobby_button)
 
 func _show_text_input() -> void:
-	text_input_instance.show_input()
+	if text_input_instance == null:
+		return
+	if text_input_instance.has_method("show_input"):
+		text_input_instance.call_deferred("show_input")
+	else:
+		text_input_instance.visible = true
+
+func _toggle_text_input() -> void:
+	if text_input_instance == null:
+		return
+	if text_input_instance.visible:
+		text_input_instance.hide()
+	else:
+		_show_text_input()
+	get_viewport().set_input_as_handled()
 
 func _on_tab_pressed(tab_name: String) -> void:
 	if audio_manager:
@@ -651,12 +669,12 @@ func _on_media_sync_received(type: String, path: String, loops: int, volume: flo
 			current_music_name = path_parts[-1] if path_parts.size() > 0 else "Unknown"
 
 func _input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("text") and text_input_instance:
-		if text_input_instance.visible:
-			text_input_instance.hide()
-		else:
-			_show_text_input()
-		get_viewport().set_input_as_handled()
+	if event.is_action_pressed("text"):
+		_toggle_text_input()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("text"):
+		_toggle_text_input()
 
 func _get_player_name(peer_id: int) -> String:
 	var game_manager = get_node_or_null("/root/GameManager")
@@ -672,6 +690,30 @@ func _get_player_name(peer_id: int) -> String:
 			return char_data2["name"]
 	return "Player " + str(peer_id)
 
+func _get_discord_tag(peer_id: int, fallback: String = "") -> String:
+	var game_manager = get_node_or_null("/root/GameManager")
+	if game_manager and game_manager.has_method("GetDiscordTagForPeer"):
+		var tag = str(game_manager.call("GetDiscordTagForPeer", peer_id))
+		if tag != "":
+			return tag
+	return fallback
+
+func _format_sender_for_mode(sender_peer_id: int, sender_name: String, mode: String) -> String:
+	var ic_name: String = _get_player_name(sender_peer_id)
+	if ic_name == "":
+		ic_name = sender_name if sender_name != "" else "Player " + str(sender_peer_id)
+	var tag: String = _get_discord_tag(sender_peer_id, sender_name)
+
+	match mode:
+		"OOC":
+			return tag if tag != "" else ic_name
+		"LOOC":
+			if ic_name != "" and tag != "" and ic_name != tag:
+				return "%s[%s]" % [ic_name, tag]
+			return ic_name if ic_name != "" else tag
+		_:
+			return ic_name
+
 func _on_message_sent(message: String, mode: String) -> void:
 	if not _is_network_ready_for_rpc():
 		return
@@ -681,7 +723,8 @@ func _on_message_sent(message: String, mode: String) -> void:
 func _on_chat_message_received(sender_peer_id: int, sender_name: String, message: String, mode: String = "IC") -> void:
 	if audio_manager:
 		audio_manager.play_chat_message()
-	_add_chat_message(sender_name, message, mode)
+	var formatted_sender = _format_sender_for_mode(sender_peer_id, sender_name, mode)
+	_add_chat_message(formatted_sender, message, mode)
 	_show_chat_bubble_for_player(sender_peer_id, message, mode)
 
 func _add_chat_message(sender: String, message: String, mode: String = "IC") -> void:
@@ -706,13 +749,13 @@ func _add_chat_message(sender: String, message: String, mode: String = "IC") -> 
 		"OOC":
 			formatted_text = "[color=#4DA6FF][OOC] %s: %s[/color]" % [sender, message]
 		"LOOC":
-			formatted_text = "[color=#FFB6C1][LOOC] %s: %s[/color]" % [sender, message]
+			formatted_text = "[color=#FFB6C1][LOOC] %s says: %s[/color]" % [sender, message]
 		"ME":
 			formatted_text = "[i]*%s %s*[/i]" % [sender, message]
 		"System":
 			formatted_text = "[color=#00FF00]> SYSTEM: %s[/color]" % [message]
 		_:
-			formatted_text = "[%s]: %s" % [sender, message]
+			formatted_text = "%s says: %s" % [sender, message]
 	
 	label.text = formatted_text
 	chat_vbox.add_child(label)

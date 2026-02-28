@@ -144,9 +144,7 @@ public partial class WorldItem : RigidBody2D
 		if (!Multiplayer.IsServer()) 
 		{
 			GD.Print($"[WorldItem] TryPickup called on client, requesting from server");
-			var itemPath = GetPath();
-			var mobPath = mob.GetPath();
-			RpcId(1, nameof(RequestPickupRpc), itemPath, mobPath);
+			RpcId(1, nameof(RequestPickupRpc), mob.GetMultiplayerAuthority());
 			return false;
 		}
 		
@@ -184,23 +182,26 @@ public partial class WorldItem : RigidBody2D
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequestPickupRpc(NodePath itemPath, NodePath mobPath)
+	private void RequestPickupRpc(int ownerPeerId)
 	{
 		if (!Multiplayer.IsServer()) return;
-		
-		GD.Print($"[WorldItem] Server received pickup request: item={itemPath}, mob={mobPath}");
-		
-		var item = GetNodeOrNull<WorldItem>(itemPath);
-		var mob = GetNodeOrNull<Mob>(mobPath);
-		
-		if (item != null && mob != null)
+
+		var senderId = Multiplayer.GetRemoteSenderId();
+		if (senderId > 0 && ownerPeerId > 0 && senderId != ownerPeerId)
 		{
-			item.TryPickup(mob);
+			GD.PrintErr($"[WorldItem] Pickup sender mismatch: sender={senderId}, owner={ownerPeerId}");
+			return;
 		}
-		else
+
+		var resolvedPeerId = senderId > 0 ? senderId : ownerPeerId;
+		var mob = FindMobByAuthority(resolvedPeerId);
+		if (mob == null)
 		{
-			GD.Print($"[WorldItem] Server couldn't find nodes: item={item != null}, mob={mob != null}");
+			GD.Print($"[WorldItem] Server couldn't find mob for pickup: peer={resolvedPeerId}");
+			return;
 		}
+
+		TryPickup(mob);
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -218,25 +219,19 @@ public partial class WorldItem : RigidBody2D
 		}
 		else
 		{
-			var itemPath = GetPath();
-			GD.Print($"[WorldItem] Client requesting throw: {itemPath} to {targetPos}");
-			RpcId(1, nameof(RequestThrowRpc), itemPath, targetPos);
+			GD.Print($"[WorldItem] Client requesting throw to {targetPos}");
+			RpcId(1, nameof(RequestThrowRpc), targetPos);
 		}
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void RequestThrowRpc(NodePath itemPath, Vector2 targetPos)
+	private void RequestThrowRpc(Vector2 targetPos)
 	{
 		if (!Multiplayer.IsServer()) return;
 		
-		GD.Print($"[WorldItem] Server received throw request: {itemPath} to {targetPos}");
-		
-		var item = GetNodeOrNull<WorldItem>(itemPath);
-		if (item != null)
-		{
-			item.ThrowToPositionLocal(targetPos);
-			Rpc(nameof(ThrowToPositionRpc), targetPos);
-		}
+		GD.Print($"[WorldItem] Server received throw request to {targetPos}");
+		ThrowToPositionLocal(targetPos);
+		Rpc(nameof(ThrowToPositionRpc), targetPos);
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -392,5 +387,23 @@ public partial class WorldItem : RigidBody2D
 	public bool Interact(Mob user, WorldItem heldItem = null)
 	{
 		return false;
+	}
+
+	private Mob FindMobByAuthority(int peerId)
+	{
+		if (peerId <= 0) return null;
+
+		var world = GetTree().GetFirstNodeInGroup("World");
+		var byName = world?.GetNodeOrNull<Mob>(peerId.ToString());
+		if (byName != null)
+			return byName;
+
+		foreach (var node in GetTree().GetNodesInGroup("Mob"))
+		{
+			if (node is Mob mob && mob.GetMultiplayerAuthority() == peerId)
+				return mob;
+		}
+
+		return null;
 	}
 }

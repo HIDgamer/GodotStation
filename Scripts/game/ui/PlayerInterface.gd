@@ -484,23 +484,23 @@ func _on_clothing_slot_input(event: InputEvent, slot_name: String) -> void:
 						if multiplayer.is_server():
 							inventory.DropEquipped(slot_name)
 						else:
-							var mob_path = player.get_path()
-							inventory.rpc_id(1, "RequestDropEquippedRpc", mob_path, slot_name)
+							var owner_peer_id = player.get_multiplayer_authority()
+							inventory.rpc_id(1, "RequestDropEquippedRpc", owner_peer_id, slot_name)
 					else:
 						var activeSlot = "left_hand" if selected_hand == 0 else "right_hand"
 						if inventory.GetEquipped(activeSlot) == null:
-							var mob_path = player.get_path()
+							var owner_peer_id = player.get_multiplayer_authority()
 							if multiplayer.is_server():
 								inventory.Unequip(slot_name)
 								inventory.Equip(item, activeSlot)
 							else:
-								inventory.rpc_id(1, "RequestUnequipToHandRpc", mob_path, slot_name, activeSlot)
+								inventory.rpc_id(1, "RequestUnequipToHandRpc", owner_peer_id, slot_name, activeSlot)
 				else:
-					var mob_path = player.get_path()
+					var owner_peer_id = player.get_multiplayer_authority()
 					if multiplayer.is_server():
 						inventory.TryEquipFromInventory(slot_name)
 					else:
-						inventory.rpc_id(1, "RequestEquipFromHandRpc", mob_path, slot_name)
+						inventory.rpc_id(1, "RequestEquipFromHandRpc", owner_peer_id, slot_name)
 			get_viewport().set_input_as_handled()
 
 func _update_ui() -> void:

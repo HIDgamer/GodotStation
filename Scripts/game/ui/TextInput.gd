@@ -15,6 +15,7 @@ var _post_send_lock_seconds: float = 0.15
 
 func _ready() -> void:
 	add_to_group("TextInput")
+	exclusive = false
 	send_button.connect("pressed", Callable(self, "_on_send"))
 	line_edit.connect("text_submitted", Callable(self, "_on_send"))
 	mode_button.connect("pressed", Callable(self, "_on_mode_button_pressed"))
@@ -180,8 +181,17 @@ func get_player_name() -> String:
 		var char_data = pref_manager.get_character_data()
 		if char_data and char_data.has("name"):
 			return char_data["name"]
-	var tag = AccountManager.GetDiscordTag();
-	return tag
+	if game_manager and game_manager.has_method("GetDiscordTagForPeer"):
+		var tag = str(game_manager.call("GetDiscordTagForPeer", multiplayer.get_unique_id()))
+		if tag != "":
+			return tag
+	return "Unknown"
 
 func show_input() -> void:
 	popup_centered()
+	show()
+	call_deferred("_focus_line_edit")
+
+func _focus_line_edit() -> void:
+	if line_edit:
+		line_edit.grab_focus()

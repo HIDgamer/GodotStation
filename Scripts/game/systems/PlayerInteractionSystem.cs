@@ -291,7 +291,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		_pullingTarget = target;
 		_grabLevel = GrabLevel.Passive;
 		targetInteraction._pulledBy = _owner;
-		targetInteraction.Rpc(nameof(SyncPulledByRpc), _owner.GetPath());
+		targetInteraction.Rpc(nameof(SyncPulledByRpc), _owner.GetMultiplayerAuthority());
 		_grabItem = new GrabItem();
 		
 		GD.Print($"[PlayerInteraction] About to equip GrabItem to slot {activeSlot}, _inventory is {(_inventory == null ? "NULL" : "NOT NULL")}");
@@ -304,7 +304,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		EmitSignal(SignalName.StartedPulling, target);
 		_owner.ShowChatBubble($"grabs {target.GetPlayerName()}");
 		
-		Rpc(nameof(SyncStartPullRpc), target.GetPath());
+		Rpc(nameof(SyncStartPullRpc), target.GetMultiplayerAuthority());
 		UpdatePullerSpeed();
 	}
 	
@@ -332,7 +332,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 						: _pullingTarget.GlobalPosition;
 
 					_pullingTarget.GlobalPosition = snappedPos;
-					Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetPath(), snappedPos);
+					Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetMultiplayerAuthority(), snappedPos);
 
 					if (int.TryParse(_pullingTarget.Name, out int tPeerId))
 						GetNodeOrNull<NetworkManager>("/root/NetworkManager")
@@ -441,7 +441,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		var offset = GetCarryOffset();
 		_pullingTarget.GlobalPosition = _owner.GlobalPosition + offset;
 		
-		Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetPath(), _pullingTarget.GlobalPosition);
+		Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetMultiplayerAuthority(), _pullingTarget.GlobalPosition);
 	}
 
 	private void UpdateChokePosition()
@@ -453,7 +453,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		if (_pullingTarget.GlobalPosition == targetPos) return;
 
 		_pullingTarget.GlobalPosition = targetPos;
-		Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetPath(), targetPos);
+		Rpc(nameof(SyncPullPositionRpc), _pullingTarget.GetMultiplayerAuthority(), targetPos);
 
 		if (int.TryParse(_pullingTarget.Name, out int targetPeerId))
 		{
@@ -569,9 +569,9 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SyncStartPullRpc(NodePath targetPath)
+	private void SyncStartPullRpc(int targetPeerId)
 	{
-		var target = GetNodeOrNull<Mob>(targetPath);
+		var target = ResolveMobByPeerId(targetPeerId);
 		if (target != null)
 		{
 			_pullingTarget = target;
@@ -607,9 +607,9 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SyncPullPositionRpc(NodePath targetPath, Vector2 position)
+	private void SyncPullPositionRpc(int targetPeerId, Vector2 position)
 	{
-		var target = GetNodeOrNull<Mob>(targetPath);
+		var target = ResolveMobByPeerId(targetPeerId);
 		if (target != null)
 		{
 			target.GlobalPosition = position;
@@ -617,9 +617,9 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SyncPulledByRpc(NodePath ownerPath)
+	private void SyncPulledByRpc(int ownerPeerId)
 	{
-		_pulledBy = GetNodeOrNull<Mob>(ownerPath);
+		_pulledBy = ResolveMobByPeerId(ownerPeerId);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -640,11 +640,11 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void SyncPullStepRpc(NodePath targetPath, Vector2I targetTile, bool ignoreEntities)
+	private void SyncPullStepRpc(int targetPeerId, Vector2I targetTile, bool ignoreEntities)
 	{
 		if (_grabLevel >= GrabLevel.Fireman) return;
 
-		var target = GetNodeOrNull<Mob>(targetPath);
+		var target = ResolveMobByPeerId(targetPeerId);
 		if (target == null) return;
 
 		var targetInteraction = target.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
@@ -667,7 +667,7 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		bool isServer = HasServerAuthority();
 
 		if (!isServer)
-			RpcId(1, nameof(ServerPullStepRpc), _owner.GetPath(), ownerTile, ownerTargetTile);
+			RpcId(1, nameof(ServerPullStepRpc), _owner.GetMultiplayerAuthority(), ownerTile, ownerTargetTile);
 
 		HandlePullStepFromTiles(ownerTile, ownerTargetTile, isServer);
 	}
@@ -710,23 +710,29 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		if (!MovePulledTarget(_pullingTarget, desiredTile, true)) return;
 
 		if (broadcast)
-			Rpc(nameof(SyncPullStepRpc), _pullingTarget.GetPath(), desiredTile, true);
+			Rpc(nameof(SyncPullStepRpc), _pullingTarget.GetMultiplayerAuthority(), desiredTile, true);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerBreakPullRpc(NodePath mobPath)
+	private void ServerBreakPullRpc(int ownerPeerId)
 	{
 		if (!Multiplayer.IsServer()) return;
-		var mob = GetNodeOrNull<Mob>(mobPath);
+		var senderId = Multiplayer.GetRemoteSenderId();
+		if (senderId > 0 && ownerPeerId > 0 && senderId != ownerPeerId) return;
+		var resolvedPeerId = senderId > 0 ? senderId : ownerPeerId;
+		var mob = ResolveMobByPeerId(resolvedPeerId);
 		mob?.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem")?.BreakPullAndStun();
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerPullStepRpc(NodePath ownerPath, Vector2I ownerTile, Vector2I ownerTargetTile)
+	private void ServerPullStepRpc(int ownerPeerId, Vector2I ownerTile, Vector2I ownerTargetTile)
 	{
 		if (!Multiplayer.IsServer()) return;
 
-		var owner = GetNodeOrNull<Mob>(ownerPath);
+		var senderId = Multiplayer.GetRemoteSenderId();
+		if (senderId > 0 && ownerPeerId > 0 && senderId != ownerPeerId) return;
+		var resolvedPeerId = senderId > 0 ? senderId : ownerPeerId;
+		var owner = ResolveMobByPeerId(resolvedPeerId);
 		var interaction = owner?.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
 		if (interaction == null || interaction._pullingTarget == null || interaction._grabLevel >= GrabLevel.Fireman)
 			return;
@@ -755,8 +761,25 @@ public partial class PlayerInteractionSystem : Node, IMobSystem
 		}
 		else
 		{
-			RpcId(1, nameof(ServerBreakPullRpc), _owner.GetPath());
+			RpcId(1, nameof(ServerBreakPullRpc), _owner.GetMultiplayerAuthority());
 		}
+	}
+
+	private Mob ResolveMobByPeerId(int peerId)
+	{
+		if (peerId <= 0) return null;
+		var world = GetTree().GetFirstNodeInGroup("World");
+		var mob = world?.GetNodeOrNull<Mob>(peerId.ToString()) as Mob;
+		if (mob != null)
+			return mob;
+
+		foreach (var node in GetTree().GetNodesInGroup("Mob"))
+		{
+			if (node is Mob candidate && candidate.GetMultiplayerAuthority() == peerId)
+				return candidate;
+		}
+
+		return null;
 	}
 
 	private void BreakPullAndStun()

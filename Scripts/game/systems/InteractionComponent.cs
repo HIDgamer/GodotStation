@@ -117,7 +117,7 @@ public partial class InteractionComponent : Node, IMobSystem
 		}
 		else
 		{
-			RpcId(1, nameof(ServerSwapHand), _owner.GetPath());
+			RpcId(1, nameof(ServerSwapHand), _owner.GetMultiplayerAuthority());
 		}
 	}
 	
@@ -168,7 +168,7 @@ public partial class InteractionComponent : Node, IMobSystem
 		}
 		else
 		{
-			RpcId(1, nameof(ServerDropItem), _owner.GetPath(), slot, _owner.GlobalPosition);
+			RpcId(1, nameof(ServerDropItem), _owner.GetMultiplayerAuthority(), slot, _owner.GlobalPosition);
 		}
 	}
 	
@@ -191,7 +191,7 @@ public partial class InteractionComponent : Node, IMobSystem
 			}
 			else
 			{
-				RpcId(1, nameof(ServerPerformLongThrow), _owner.GetPath(), targetPos, slot, item.ItemName);
+				RpcId(1, nameof(ServerPerformLongThrow), _owner.GetMultiplayerAuthority(), targetPos, slot, item.ItemName);
 			}
 		}
 		else if (_throwMode)
@@ -202,7 +202,7 @@ public partial class InteractionComponent : Node, IMobSystem
 			}
 			else
 			{
-				RpcId(1, nameof(ServerPerformNormalThrow), _owner.GetPath(), targetPos, slot, item.ItemName);
+				RpcId(1, nameof(ServerPerformNormalThrow), _owner.GetMultiplayerAuthority(), targetPos, slot, item.ItemName);
 			}
 		}
 	}
@@ -317,7 +317,7 @@ public partial class InteractionComponent : Node, IMobSystem
 			}
 			else
 			{
-				RpcId(1, nameof(ServerActivate), _owner.GetPath(), slot);
+				RpcId(1, nameof(ServerActivate), _owner.GetMultiplayerAuthority(), slot);
 			}
 		}
 		else if (item is ConsumableItem consumable)
@@ -329,7 +329,7 @@ public partial class InteractionComponent : Node, IMobSystem
 			}
 			else
 			{
-				RpcId(1, nameof(ServerActivate), _owner.GetPath(), slot);
+				RpcId(1, nameof(ServerActivate), _owner.GetMultiplayerAuthority(), slot);
 			}
 		}
 		else if (item is ClothingItem clothing)
@@ -337,7 +337,7 @@ public partial class InteractionComponent : Node, IMobSystem
 			if (Multiplayer.IsServer())
 				_inventory.TryEquipFromInventory(GetClothingSlot(clothing));
 			else
-				RpcId(1, nameof(ServerActivate), _owner.GetPath(), slot);
+				RpcId(1, nameof(ServerActivate), _owner.GetMultiplayerAuthority(), slot);
 		}
 	}
 	
@@ -469,10 +469,11 @@ public partial class InteractionComponent : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerSwapHand(NodePath mobPath)
+	private void ServerSwapHand(int ownerPeerId)
 	{
 		if (!Multiplayer.IsServer()) return;
-		GetNodeOrNull<Mob>(mobPath)?.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.SwitchHands();
+		var mob = ResolveMobForRpc(ownerPeerId);
+		mob?.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.SwitchHands();
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -482,11 +483,11 @@ public partial class InteractionComponent : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerDropItem(NodePath mobPath, string slot, Vector2 position)
+	private void ServerDropItem(int ownerPeerId, string slot, Vector2 position)
 	{
 		if (!Multiplayer.IsServer()) return;
 		
-		var mob = GetNode<Mob>(mobPath);
+		var mob = ResolveMobForRpc(ownerPeerId);
 		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
 		var item = inventory?.GetEquipped(slot);
 		
@@ -498,11 +499,11 @@ public partial class InteractionComponent : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerThrowItem(NodePath mobPath, string slot, Vector2 spawnPos, Vector2 targetPos)
+	private void ServerThrowItem(int ownerPeerId, string slot, Vector2 spawnPos, Vector2 targetPos)
 	{
 		if (!Multiplayer.IsServer()) return;
 		
-		var mob = GetNode<Mob>(mobPath);
+		var mob = ResolveMobForRpc(ownerPeerId);
 		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
 		var item = inventory?.GetEquipped(slot);
 		
@@ -514,18 +515,18 @@ public partial class InteractionComponent : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerActivate(NodePath mobPath, string slot)
+	private void ServerActivate(int ownerPeerId, string slot)
 	{
 		if (!Multiplayer.IsServer()) return;
-		GetNodeOrNull<Mob>(mobPath)?.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.ActivateHeld();
+		var mob = ResolveMobForRpc(ownerPeerId);
+		mob?.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.ActivateHeld();
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void ServerActivateGrab(int ownerPeerId)
 	{
 		if (!Multiplayer.IsServer()) return;
-		var world = GetTree().GetFirstNodeInGroup("World");
-		var mob = world?.GetNodeOrNull(ownerPeerId.ToString()) as Mob;
+		var mob = ResolveMobForRpc(ownerPeerId);
 		mob?.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem")?.HandleActivate();
 	}
 	
@@ -533,8 +534,7 @@ public partial class InteractionComponent : Node, IMobSystem
 	private void ServerReleaseGrab(int ownerPeerId, string slot)
 	{
 		if (!Multiplayer.IsServer()) return;
-		var world = GetTree().GetFirstNodeInGroup("World");
-		var mob = world?.GetNodeOrNull(ownerPeerId.ToString()) as Mob;
+		var mob = ResolveMobForRpc(ownerPeerId);
 		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
 		var interactionSystem = mob?.GetNodeOrNull<PlayerInteractionSystem>("PlayerInteractionSystem");
 		
@@ -546,10 +546,10 @@ public partial class InteractionComponent : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerPerformLongThrow(NodePath mobPath, Vector2 targetPos, string slot, string itemName)
+	private void ServerPerformLongThrow(int ownerPeerId, Vector2 targetPos, string slot, string itemName)
 	{
 		if (!Multiplayer.IsServer()) return;
-		var mob = GetNode<Mob>(mobPath);
+		var mob = ResolveMobForRpc(ownerPeerId);
 		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
 		var item = inventory?.GetEquipped(slot);
 		
@@ -560,10 +560,10 @@ public partial class InteractionComponent : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerPerformNormalThrow(NodePath mobPath, Vector2 targetPos, string slot, string itemName)
+	private void ServerPerformNormalThrow(int ownerPeerId, Vector2 targetPos, string slot, string itemName)
 	{
 		if (!Multiplayer.IsServer()) return;
-		var mob = GetNode<Mob>(mobPath);
+		var mob = ResolveMobForRpc(ownerPeerId);
 		var inventory = mob?.GetNodeOrNull<Inventory>("Inventory");
 		var item = inventory?.GetEquipped(slot);
 		
@@ -574,10 +574,11 @@ public partial class InteractionComponent : Node, IMobSystem
 	}
 	
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-	private void ServerSetSelectedLimb(NodePath mobPath, string limbName)
+	private void ServerSetSelectedLimb(int ownerPeerId, string limbName)
 	{
 		if (!Multiplayer.IsServer()) return;
-		GetNodeOrNull<Mob>(mobPath)?.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.SetSelectedLimb(limbName);
+		var mob = ResolveMobForRpc(ownerPeerId);
+		mob?.GetNodeOrNull<InteractionComponent>("InteractionComponent")?.SetSelectedLimb(limbName);
 	}
 	
 	public int GetActiveHand() => _activeHand;
@@ -603,8 +604,35 @@ public partial class InteractionComponent : Node, IMobSystem
 		}
 		else
 		{
-			RpcId(1, nameof(ServerSetSelectedLimb), _owner.GetPath(), limbName);
+			RpcId(1, nameof(ServerSetSelectedLimb), _owner.GetMultiplayerAuthority(), limbName);
 		}
+	}
+
+	private Mob ResolveMobForRpc(int ownerPeerId)
+	{
+		var senderId = Multiplayer.GetRemoteSenderId();
+		if (senderId > 0 && ownerPeerId > 0 && senderId != ownerPeerId)
+		{
+			GD.PrintErr($"[InteractionComponent] RPC sender mismatch: sender={senderId}, owner={ownerPeerId}");
+			return null;
+		}
+
+		var resolvedPeerId = senderId > 0 ? senderId : ownerPeerId;
+		if (resolvedPeerId <= 0)
+			return null;
+
+		var world = GetTree().GetFirstNodeInGroup("World");
+		var mob = world?.GetNodeOrNull<Mob>(resolvedPeerId.ToString()) as Mob;
+		if (mob != null)
+			return mob;
+
+		foreach (var node in GetTree().GetNodesInGroup("Mob"))
+		{
+			if (node is Mob candidate && candidate.GetMultiplayerAuthority() == resolvedPeerId)
+				return candidate;
+		}
+
+		return null;
 	}
 	
 	public void Process(double delta)
