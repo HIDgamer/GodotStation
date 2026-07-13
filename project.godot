@@ -12,33 +12,15 @@ config_version=5
 
 config/name="GodotStation"
 config/version="8.0"
-run/main_scene="res://Scenes/game/ui/MainMenu.tscn"
 config/custom_user_dir_name="GodotStation"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://Assets/Icons/Ico/UCFGS_64x64.ico"
 config/windows_native_icon="res://Assets/Icons/Ico/UCFGS_64x64.ico"
-run/main_scene.dedicated_server="res://Scenes/server/ServerMain.tscn"
 
 [autoload]
 
-NetworkManager="*res://Scripts/network/NetworkManager.cs"
-DedicatedServer="*res://Scripts/server/DedicatedServer.cs"
-ServerConfig="*res://Scripts/server/ServerConfig.cs"
-ServerRegistrar="*res://Scripts/server/ServerRegistrar.cs"
-PreferenceManager="*res://Scripts/game/managers/PreferenceManager.gd"
-BatchManager="*res://Scripts/game/managers/BatchManager.cs"
-ClothingManager="*res://Scripts/game/managers/ClothingManager.cs"
-FrameUpdateManager="*res://Scripts/game/managers/FrameUpdateManager.cs"
-GameManager="*res://Scripts/game/managers/GameManager.cs"
-ItemPoolManager="*res://Scripts/game/managers/ItemPoolManager.cs"
-JobManager="*res://Scripts/game/managers/JobManager.cs"
-ProfilingManager="*res://Scripts/game/managers/ProfilingManager.cs"
-AudioManager="*res://Scripts/game/managers/AudioManager.gd"
-UiAnimationHelper="*res://Scripts/game/ui/UIAnimationHelper.gd"
-Scheduler="*res://Scripts/game/utils/Scheduler.cs"
-DiscordRpc="*res://Scripts/game/utils/DiscordRPC.cs"
-ServerPrivileges="*res://Scripts/game/utils/ServerPrivileges.cs"
-ScriptingManager="*res://Scripts/game/managers/ScriptingManager.cs"
+; Cleared for the M2 rebuild (2026-07-13) — old Scripts/ and Scenes/ content
+; deleted, autoloads and main scenes will be re-added as the rebuild lands.
 
 [display]
 

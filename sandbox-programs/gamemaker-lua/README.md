@@ -19,7 +19,7 @@ check doesn't try to link a native Windows test binary against a RISC-V
 cross-compiler) and builds with Ninja.
 
 Output: `.build/gamemaker_lua.elf`. Copy it to
-`UACMGS/Addons/godot-sandbox-scripts/gamemaker_lua.elf` (create that folder
+`UCFGS/Addons/godot-sandbox-scripts/gamemaker_lua.elf` (create that folder
 if it doesn't exist) so `ScriptingManager.cs` can load it.
 
 ## API exposed to the host (Godot/C#)
