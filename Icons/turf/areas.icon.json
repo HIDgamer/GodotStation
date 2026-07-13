@@ -1,0 +1,4952 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 19,
+  "states": {
+    "": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "bridge": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ]
+      }
+    },
+    "unknown": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            0
+          ]
+        ]
+      }
+    },
+    "engine": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    },
+    "engine_waste": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            0
+          ]
+        ]
+      }
+    },
+    "prototype_engine": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            0
+          ]
+        ]
+      }
+    },
+    "engine_control": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            0
+          ]
+        ]
+      }
+    },
+    "engine_monitoring": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            0
+          ]
+        ]
+      }
+    },
+    "teleporter": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            0
+          ]
+        ]
+      }
+    },
+    "chapel": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            0
+          ]
+        ]
+      }
+    },
+    "chapeloffice": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            0
+          ]
+        ]
+      }
+    },
+    "engine_storage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            0
+          ]
+        ]
+      }
+    },
+    "engine_hallway": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            0
+          ]
+        ]
+      }
+    },
+    "yellow": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            0
+          ]
+        ]
+      }
+    },
+    "ass_line": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            0
+          ]
+        ]
+      }
+    },
+    "green": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            0
+          ]
+        ]
+      }
+    },
+    "security": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            0
+          ]
+        ]
+      }
+    },
+    "sec_prison": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            0
+          ]
+        ]
+      }
+    },
+    "sec_hos": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            0
+          ]
+        ]
+      }
+    },
+    "security_sub": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "toxlab": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "xeno_lab": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    "xeno_f_lab": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "xeno_f_store": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            1
+          ]
+        ]
+      }
+    },
+    "toxstorage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            1
+          ]
+        ]
+      }
+    },
+    "toxtest": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            1
+          ]
+        ]
+      }
+    },
+    "toxmisc": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            1
+          ]
+        ]
+      }
+    },
+    "chem": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            1
+          ]
+        ]
+      }
+    },
+    "decontamination": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            1
+          ]
+        ]
+      }
+    },
+    "crew_quarters": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            1
+          ]
+        ]
+      }
+    },
+    "research": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            1
+          ]
+        ]
+      }
+    },
+    "research_dock": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            1
+          ]
+        ]
+      }
+    },
+    "mechbay": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            1
+          ]
+        ]
+      }
+    },
+    "morgue": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            1
+          ]
+        ]
+      }
+    },
+    "storage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            1
+          ]
+        ]
+      }
+    },
+    "shuttle": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            1
+          ]
+        ]
+      }
+    },
+    "exit": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            1
+          ]
+        ]
+      }
+    },
+    "start": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            1
+          ]
+        ]
+      }
+    },
+    "dk_yellow": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ]
+      }
+    },
+    "purple": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "bar": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "cafeteria": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ]
+        ]
+      }
+    },
+    "portico": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            2
+          ]
+        ]
+      }
+    },
+    "houseground": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Kitchen": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Diner": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_MOFFICE": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Living": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Mines": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Panic": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Basement": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Crypt": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Lake": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            2
+          ]
+        ]
+      }
+    },
+    "HH_Second": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            2
+          ]
+        ]
+      }
+    },
+    "conference": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            2
+          ]
+        ]
+      }
+    },
+    "restrooms": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            2
+          ]
+        ]
+      }
+    },
+    "observatory": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            2
+          ]
+        ]
+      }
+    },
+    "atmos": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "shuttle2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ]
+        ]
+      }
+    },
+    "shuttle3": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            3
+          ]
+        ]
+      }
+    },
+    "brig": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            3
+          ]
+        ]
+      }
+    },
+    "armory": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            3
+          ]
+        ]
+      }
+    },
+    "captain": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            3
+          ]
+        ]
+      }
+    },
+    "courtroom": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            3
+          ]
+        ]
+      }
+    },
+    "ai_upload": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            3
+          ]
+        ]
+      }
+    },
+    "ai_server": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            3
+          ]
+        ]
+      }
+    },
+    "ai_foyer": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            3
+          ]
+        ]
+      }
+    },
+    "ai_chamber": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            3
+          ]
+        ]
+      }
+    },
+    "ai_cyborg": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            3
+          ]
+        ]
+      }
+    },
+    "detective": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            3
+          ]
+        ]
+      }
+    },
+    "checkpoint1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            3
+          ]
+        ]
+      }
+    },
+    "eva": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            3
+          ]
+        ]
+      }
+    },
+    "kitchen": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            3
+          ]
+        ]
+      }
+    },
+    "medbay": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            3
+          ]
+        ]
+      }
+    },
+    "medbay2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            3
+          ]
+        ]
+      }
+    },
+    "medbay3": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            3
+          ]
+        ]
+      }
+    },
+    "primarystorage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    },
+    "panelsS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            4
+          ]
+        ]
+      }
+    },
+    "panelsP": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            4
+          ]
+        ]
+      }
+    },
+    "SolarcontrolS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    },
+    "SolarcontrolP": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            4
+          ]
+        ]
+      }
+    },
+    "construction": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            4
+          ]
+        ]
+      }
+    },
+    "auxstorage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            4
+          ]
+        ]
+      }
+    },
+    "emergencystorage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            4
+          ]
+        ]
+      }
+    },
+    "locker": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            4
+          ]
+        ]
+      }
+    },
+    "fitness": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            4
+          ]
+        ]
+      }
+    },
+    "head_quarters": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            4
+          ]
+        ]
+      }
+    },
+    "maintcentral": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            4
+          ]
+        ]
+      }
+    },
+    "fsmaint": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            4
+          ]
+        ]
+      }
+    },
+    "fmaint": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            4
+          ]
+        ]
+      }
+    },
+    "fpmaint": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            4
+          ]
+        ]
+      }
+    },
+    "pmaint": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            4
+          ]
+        ]
+      }
+    },
+    "apmaint": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            4
+          ]
+        ]
+      }
+    },
+    "smaint": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            4
+          ]
+        ]
+      }
+    },
+    "amaint": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            4
+          ]
+        ]
+      }
+    },
+    "asmaint": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_engine": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_e_shuttle": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_research_shuttle": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_research_port": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_research_starboard": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_bar": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_cargo": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_locker": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_arrivals": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_engineering": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_medbay": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_eva": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_dormitory": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_security_port": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            5
+          ]
+        ]
+      }
+    },
+    "maint_security_starboard": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            5
+          ]
+        ]
+      }
+    },
+    "hallC1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            5
+          ]
+        ]
+      }
+    },
+    "hallC2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            5
+          ]
+        ]
+      }
+    },
+    "hallC3": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            5
+          ]
+        ]
+      }
+    },
+    "hallF": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            6
+          ]
+        ]
+      }
+    },
+    "hallS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            6
+          ]
+        ]
+      }
+    },
+    "hallA": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    },
+    "hallP": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            6
+          ]
+        ]
+      }
+    },
+    "escape": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            6
+          ]
+        ]
+      }
+    },
+    "entry": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            6
+          ]
+        ]
+      }
+    },
+    "quart": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            6
+          ]
+        ]
+      }
+    },
+    "quartoffice": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            6
+          ]
+        ]
+      }
+    },
+    "quartstorage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            6
+          ]
+        ]
+      }
+    },
+    "janitor": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            6
+          ]
+        ]
+      }
+    },
+    "ai": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            6
+          ]
+        ]
+      }
+    },
+    "disposal": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            6
+          ]
+        ]
+      }
+    },
+    "mining": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            6
+          ]
+        ]
+      }
+    },
+    "mining_production": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            6
+          ]
+        ]
+      }
+    },
+    "mining_eva": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            6
+          ]
+        ]
+      }
+    },
+    "mining_living": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            6
+          ]
+        ]
+      }
+    },
+    "explored": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            6
+          ]
+        ]
+      }
+    },
+    "unexplored": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            6
+          ]
+        ]
+      }
+    },
+    "cave": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            6
+          ]
+        ]
+      }
+    },
+    "hydro": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            7
+          ]
+        ]
+      }
+    },
+    "garden": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            7
+          ]
+        ]
+      }
+    },
+    "hydro_north": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            7
+          ]
+        ]
+      }
+    },
+    "hydro_south": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            7
+          ]
+        ]
+      }
+    },
+    "library": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            7
+          ]
+        ]
+      }
+    },
+    "law": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            7
+          ]
+        ]
+      }
+    },
+    "toxmix": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            7
+          ]
+        ]
+      }
+    },
+    "shuttlegrn": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            7
+          ]
+        ]
+      }
+    },
+    "shuttlegrn2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            7
+          ]
+        ]
+      }
+    },
+    "shuttlered": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            7
+          ]
+        ]
+      }
+    },
+    "shuttlered2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            7
+          ]
+        ]
+      }
+    },
+    "nuke_storage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            7
+          ]
+        ]
+      }
+    },
+    "virology": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            7
+          ]
+        ]
+      }
+    },
+    "CMO": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            7
+          ]
+        ]
+      }
+    },
+    "Warden": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            7
+          ]
+        ]
+      }
+    },
+    "panelsA": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            7
+          ]
+        ]
+      }
+    },
+    "Sleep": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            7
+          ]
+        ]
+      }
+    },
+    "SolarcontrolA": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            7
+          ]
+        ]
+      }
+    },
+    "toilet": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            7
+          ]
+        ]
+      }
+    },
+    "LP": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    },
+    "LPS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            8
+          ]
+        ]
+      }
+    },
+    "showroom": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            8
+          ]
+        ]
+      }
+    },
+    "Theatre": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            8
+          ]
+        ]
+      }
+    },
+    "exam_room": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            8
+          ]
+        ]
+      }
+    },
+    "surgery": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            8
+          ]
+        ]
+      }
+    },
+    "genetics": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            8
+          ]
+        ]
+      }
+    },
+    "cloning": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            8
+          ]
+        ]
+      }
+    },
+    "server": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            8
+          ]
+        ]
+      }
+    },
+    "engine_smes": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            8
+          ]
+        ]
+      }
+    },
+    "thunder": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            8
+          ]
+        ]
+      }
+    },
+    "centcom": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            8
+          ]
+        ]
+      }
+    },
+    "cryo": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            8
+          ]
+        ]
+      }
+    },
+    "patients": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            8
+          ]
+        ]
+      }
+    },
+    "syndie-ship": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            8
+          ]
+        ]
+      }
+    },
+    "syndie-control": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            8
+          ]
+        ]
+      }
+    },
+    "syndie-elite": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            8
+          ]
+        ]
+      }
+    },
+    "firingrange": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            8
+          ]
+        ]
+      }
+    },
+    "tcomsatcham": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            8
+          ]
+        ]
+      }
+    },
+    "tcomsatentrance": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            9
+          ]
+        ]
+      }
+    },
+    "tcomsatlob": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            9
+          ]
+        ]
+      }
+    },
+    "tcomsatstore": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            9
+          ]
+        ]
+      }
+    },
+    "tcomsateast": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            9
+          ]
+        ]
+      }
+    },
+    "tcomsatwest": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            9
+          ]
+        ]
+      }
+    },
+    "tcomsatcomp": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            9
+          ]
+        ]
+      }
+    },
+    "tcomsatlounge": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            9
+          ]
+        ]
+      }
+    },
+    "Holodeck": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            9
+          ]
+        ]
+      }
+    },
+    "away": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            9
+          ]
+        ]
+      }
+    },
+    "away1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            9
+          ]
+        ]
+      }
+    },
+    "away2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            9
+          ]
+        ]
+      }
+    },
+    "away3": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            9
+          ]
+        ]
+      }
+    },
+    "away4": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            9
+          ]
+        ]
+      }
+    },
+    "red2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            9
+          ]
+        ]
+      }
+    },
+    "blue2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            9
+          ]
+        ]
+      }
+    },
+    "blue-red2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            9
+          ]
+        ]
+      }
+    },
+    "blue-red-d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            9
+          ]
+        ]
+      }
+    },
+    "blue-red": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        5.0,
+        5.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            9
+          ],
+          [
+            18,
+            9
+          ]
+        ]
+      }
+    },
+    "invi": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            10
+          ]
+        ]
+      }
+    },
+    "blueold": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        5.0,
+        5.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            10
+          ],
+          [
+            2,
+            10
+          ]
+        ]
+      }
+    },
+    "dark": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            10
+          ]
+        ]
+      }
+    },
+    "dark160": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            10
+          ]
+        ]
+      }
+    },
+    "dark128": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            10
+          ]
+        ]
+      }
+    },
+    "party": {
+      "dirs": 1,
+      "frames": 8,
+      "delay": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            10
+          ],
+          [
+            7,
+            10
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            9,
+            10
+          ],
+          [
+            10,
+            10
+          ],
+          [
+            11,
+            10
+          ],
+          [
+            12,
+            10
+          ],
+          [
+            13,
+            10
+          ]
+        ]
+      }
+    },
+    "blue": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        3.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            10
+          ],
+          [
+            15,
+            10
+          ],
+          [
+            16,
+            10
+          ],
+          [
+            17,
+            10
+          ]
+        ]
+      }
+    },
+    "bluenew": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        5.0,
+        5.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            10
+          ],
+          [
+            0,
+            11
+          ]
+        ]
+      }
+    },
+    "anomaly": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            11
+          ]
+        ]
+      }
+    },
+    "anog": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            11
+          ]
+        ]
+      }
+    },
+    "anosample": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            11
+          ]
+        ]
+      }
+    },
+    "anolab": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            11
+          ]
+        ]
+      }
+    },
+    "anospectro": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            11
+          ]
+        ]
+      }
+    },
+    "iso1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            11
+          ]
+        ]
+      }
+    },
+    "iso2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            11
+          ]
+        ]
+      }
+    },
+    "iso3": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            11
+          ]
+        ]
+      }
+    },
+    "red": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            11
+          ],
+          [
+            10,
+            11
+          ],
+          [
+            11,
+            11
+          ],
+          [
+            12,
+            11
+          ]
+        ]
+      }
+    },
+    "north": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            11
+          ]
+        ]
+      }
+    },
+    "northeast": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            11
+          ]
+        ]
+      }
+    },
+    "northwest": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            11
+          ]
+        ]
+      }
+    },
+    "south": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            11
+          ]
+        ]
+      }
+    },
+    "southeast": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            11
+          ]
+        ]
+      }
+    },
+    "southwest": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            11
+          ]
+        ]
+      }
+    },
+    "east": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            12
+          ]
+        ]
+      }
+    },
+    "west": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            12
+          ]
+        ]
+      }
+    },
+    "central": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            12
+          ]
+        ]
+      }
+    },
+    "Tactical": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            12
+          ]
+        ]
+      }
+    },
+    "engine_eva": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            12
+          ]
+        ]
+      }
+    },
+    "substation": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            12
+          ]
+        ]
+      }
+    },
+    "landing_pad": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            12
+          ]
+        ]
+      }
+    },
+    "container_yard": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            12
+          ]
+        ]
+      }
+    },
+    "landing_pad_ext": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            12
+          ]
+        ]
+      }
+    },
+    "cliff_blocked": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            12
+          ]
+        ]
+      }
+    },
+    "valley": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            12
+          ]
+        ]
+      }
+    },
+    "valley_north": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            12
+          ]
+        ]
+      }
+    },
+    "valley_north_east": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            12
+          ]
+        ]
+      }
+    },
+    "valley_north_west": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            12
+          ]
+        ]
+      }
+    },
+    "valley_west": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            12
+          ]
+        ]
+      }
+    },
+    "valley_south": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            12
+          ]
+        ]
+      }
+    },
+    "valley_south_west": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            12
+          ]
+        ]
+      }
+    },
+    "valley_south_excv": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            12
+          ]
+        ]
+      }
+    },
+    "valley_east": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            12
+          ]
+        ]
+      }
+    },
+    "clear": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            13
+          ]
+        ]
+      }
+    },
+    "clear_north": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            13
+          ]
+        ]
+      }
+    },
+    "clear_south": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            13
+          ]
+        ]
+      }
+    },
+    "clear_pass": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            13
+          ]
+        ]
+      }
+    },
+    "hangar": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            13
+          ]
+        ]
+      }
+    },
+    "hangar_alpha": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            13
+          ]
+        ]
+      }
+    },
+    "hangar_beta": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            13
+          ]
+        ]
+      }
+    },
+    "mining_outpost": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            13
+          ]
+        ]
+      }
+    },
+    "mining_storage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            13
+          ]
+        ]
+      }
+    },
+    "garage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            13
+          ]
+        ]
+      }
+    },
+    "garage_one": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            13
+          ]
+        ]
+      }
+    },
+    "garage_two": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            13
+          ]
+        ]
+      }
+    },
+    "interrogation": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            13
+          ]
+        ]
+      }
+    },
+    "sec_backroom": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            13
+          ]
+        ]
+      }
+    },
+    "alarm_ready": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": true,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            13
+          ],
+          [
+            15,
+            13
+          ],
+          [
+            16,
+            13
+          ],
+          [
+            17,
+            13
+          ]
+        ]
+      }
+    },
+    "alarm_evac": {
+      "dirs": 1,
+      "frames": 6,
+      "delay": [
+        5.0,
+        2.0,
+        2.0,
+        3.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            13
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            14
+          ],
+          [
+            4,
+            14
+          ]
+        ]
+      }
+    },
+    "alarm_atmos": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        5.0,
+        5.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            14
+          ],
+          [
+            6,
+            14
+          ]
+        ]
+      }
+    },
+    "alarm_fire": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        3.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            14
+          ],
+          [
+            8,
+            14
+          ],
+          [
+            9,
+            14
+          ],
+          [
+            10,
+            14
+          ]
+        ]
+      }
+    },
+    "alarm_down": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        15.0,
+        2.0,
+        2.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            14
+          ],
+          [
+            12,
+            14
+          ],
+          [
+            13,
+            14
+          ],
+          [
+            14,
+            14
+          ]
+        ]
+      }
+    },
+    "area_destroyed": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            14
+          ]
+        ]
+      }
+    },
+    "cells_low_nw": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            14
+          ]
+        ]
+      }
+    },
+    "cells_low_ne": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            14
+          ]
+        ]
+      }
+    },
+    "cells_low_sw": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            14
+          ]
+        ]
+      }
+    },
+    "cells_low_se": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_med_n": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_med_s": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_med_e": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_med_w": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_high_nn": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_high_ns": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_high_sn": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_high_ss": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_max_n": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_max_s": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_protective": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            15
+          ]
+        ]
+      }
+    },
+    "cells_vip": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            15
+          ]
+        ]
+      }
+    },
+    "caves_virology": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            15
+          ]
+        ]
+      }
+    },
+    "caves_sw": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            15
+          ]
+        ]
+      }
+    },
+    "caves_research": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            15
+          ]
+        ]
+      }
+    },
+    "caves_se": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            15
+          ]
+        ]
+      }
+    },
+    "caves_east": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            15
+          ]
+        ]
+      }
+    },
+    "caves_lambda": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            15
+          ]
+        ]
+      }
+    },
+    "caves_north": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_main": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_medbay": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_security": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_engineering": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_storage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_gear": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_bedroom": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_command": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_bathroom": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_kitchen": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_hydroponics": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_caves": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_caves_outpost": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            16
+          ]
+        ]
+      }
+    },
+    "bunker01_break": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            16
+          ]
+        ]
+      }
+    },
+    "eta_living": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            16
+          ]
+        ]
+      }
+    },
+    "eta_xeno": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            16
+          ]
+        ]
+      }
+    },
+    "eta_storage": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            16
+          ]
+        ]
+      }
+    },
+    "eta_research": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            16
+          ]
+        ]
+      }
+    },
+    "lam_virology": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            17
+          ]
+        ]
+      }
+    },
+    "lam_research": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            17
+          ]
+        ]
+      }
+    },
+    "lam_break": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            17
+          ]
+        ]
+      }
+    },
+    "lam_xeno": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            17
+          ]
+        ]
+      }
+    },
+    "tutorial": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            17
+          ]
+        ]
+      }
+    },
+    "noop": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            17
+          ]
+        ]
+      }
+    }
+  }
+}

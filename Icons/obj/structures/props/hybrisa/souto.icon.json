@@ -1,0 +1,73 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 3,
+  "states": {
+    "souto_can_stack": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "souto_man_prop": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "souto_rack": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    }
+  }
+}

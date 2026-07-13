@@ -1,0 +1,359 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 7,
+  "states": {
+    "blank": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "strata_outpost_": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ]
+      }
+    },
+    "strata_outpost_0": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            0
+          ]
+        ],
+        "north": [
+          [
+            3,
+            0
+          ]
+        ],
+        "east": [
+          [
+            4,
+            0
+          ]
+        ],
+        "west": [
+          [
+            5,
+            0
+          ]
+        ]
+      }
+    },
+    "strata_outpost_1": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            0
+          ]
+        ],
+        "north": [
+          [
+            0,
+            1
+          ]
+        ],
+        "east": [
+          [
+            1,
+            1
+          ]
+        ],
+        "west": [
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    "strata_outpost_2": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            1
+          ]
+        ],
+        "north": [
+          [
+            4,
+            1
+          ]
+        ],
+        "east": [
+          [
+            5,
+            1
+          ]
+        ],
+        "west": [
+          [
+            6,
+            1
+          ]
+        ]
+      }
+    },
+    "strata_outpost_3": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ],
+        "north": [
+          [
+            1,
+            2
+          ]
+        ],
+        "east": [
+          [
+            2,
+            2
+          ]
+        ],
+        "west": [
+          [
+            3,
+            2
+          ]
+        ]
+      }
+    },
+    "strata_outpost_4": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            2
+          ]
+        ],
+        "north": [
+          [
+            5,
+            2
+          ]
+        ],
+        "east": [
+          [
+            6,
+            2
+          ]
+        ],
+        "west": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "strata_outpost_5": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ]
+        ],
+        "north": [
+          [
+            2,
+            3
+          ]
+        ],
+        "east": [
+          [
+            3,
+            3
+          ]
+        ],
+        "west": [
+          [
+            4,
+            3
+          ]
+        ]
+      }
+    },
+    "strata_outpost_6": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            3
+          ]
+        ],
+        "north": [
+          [
+            6,
+            3
+          ]
+        ],
+        "east": [
+          [
+            0,
+            4
+          ]
+        ],
+        "west": [
+          [
+            1,
+            4
+          ]
+        ]
+      }
+    },
+    "strata_outpost_7": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            4
+          ]
+        ],
+        "north": [
+          [
+            3,
+            4
+          ]
+        ],
+        "east": [
+          [
+            4,
+            4
+          ]
+        ],
+        "west": [
+          [
+            5,
+            4
+          ]
+        ]
+      }
+    },
+    "strata_outpost_deco_wall_0": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            4
+          ]
+        ]
+      }
+    },
+    "strata_outpost_deco_wall_1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            5
+          ]
+        ]
+      }
+    },
+    "strata_outpost_deco_wall_2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            5
+          ]
+        ]
+      }
+    }
+  }
+}

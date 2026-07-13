@@ -1,0 +1,273 @@
+{
+  "width": 48,
+  "height": 48,
+  "columns": 6,
+  "states": {
+    "Normal Lurker Walking": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    },
+    "Normal Lurker Running": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            0
+          ]
+        ],
+        "north": [
+          [
+            5,
+            0
+          ]
+        ],
+        "east": [
+          [
+            0,
+            1
+          ]
+        ],
+        "west": [
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Lurker Sleeping": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Lurker Knocked Down": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Lurker Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Lurker Invisible": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            1
+          ]
+        ],
+        "north": [
+          [
+            0,
+            2
+          ]
+        ],
+        "east": [
+          [
+            1,
+            2
+          ]
+        ],
+        "west": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "Vampire Lurker Walking": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ]
+        ],
+        "north": [
+          [
+            4,
+            2
+          ]
+        ],
+        "east": [
+          [
+            5,
+            2
+          ]
+        ],
+        "west": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "Vampire Lurker Running": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ]
+        ],
+        "north": [
+          [
+            2,
+            3
+          ]
+        ],
+        "east": [
+          [
+            3,
+            3
+          ]
+        ],
+        "west": [
+          [
+            4,
+            3
+          ]
+        ]
+      }
+    },
+    "Vampire Lurker Sleeping": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            3
+          ]
+        ]
+      }
+    },
+    "Vampire Lurker Knocked Down": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    },
+    "Vampire Lurker Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            4
+          ]
+        ]
+      }
+    }
+  }
+}

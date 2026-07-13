@@ -1,0 +1,211 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 4,
+  "states": {
+    "medcab": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "medcab_vend": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ]
+        ]
+      }
+    },
+    "medcab_deny": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "extinguisher": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "extinguisher_closed": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    "extinguisher_full": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "extinguisher_mini": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ]
+      }
+    },
+    "extinguisher_empty": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "supplycab": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "supplycab_vend": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ],
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "supplycab_deny": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ]
+        ]
+      }
+    }
+  }
+}

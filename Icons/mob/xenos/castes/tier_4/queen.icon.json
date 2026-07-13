@@ -1,0 +1,532 @@
+{
+  "width": 64,
+  "height": 64,
+  "columns": 8,
+  "states": {
+    "Normal Queen Walking": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    },
+    "Normal Queen Running": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            0
+          ]
+        ],
+        "north": [
+          [
+            5,
+            0
+          ]
+        ],
+        "east": [
+          [
+            6,
+            0
+          ]
+        ],
+        "west": [
+          [
+            7,
+            0
+          ]
+        ]
+      }
+    },
+    "Normal Queen Sleeping": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Queen Knocked Down": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Queen Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Queen Charging": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            1
+          ]
+        ],
+        "north": [
+          [
+            4,
+            1
+          ]
+        ],
+        "east": [
+          [
+            5,
+            1
+          ]
+        ],
+        "west": [
+          [
+            6,
+            1
+          ]
+        ]
+      }
+    },
+    "gibbed-a": {
+      "dirs": 1,
+      "frames": 10,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 1,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "gibbed-a-corpse": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ]
+        ]
+      }
+    },
+    "wounds": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            3
+          ]
+        ]
+      }
+    },
+    "Queen_walk_3": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            3
+          ]
+        ],
+        "north": [
+          [
+            4,
+            3
+          ]
+        ],
+        "east": [
+          [
+            5,
+            3
+          ]
+        ],
+        "west": [
+          [
+            6,
+            3
+          ]
+        ]
+      }
+    },
+    "Queen_walk_2": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            3
+          ]
+        ],
+        "north": [
+          [
+            0,
+            4
+          ]
+        ],
+        "east": [
+          [
+            1,
+            4
+          ]
+        ],
+        "west": [
+          [
+            2,
+            4
+          ]
+        ]
+      }
+    },
+    "Queen_walk_1": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            4
+          ]
+        ],
+        "north": [
+          [
+            4,
+            4
+          ]
+        ],
+        "east": [
+          [
+            5,
+            4
+          ]
+        ],
+        "west": [
+          [
+            6,
+            4
+          ]
+        ]
+      }
+    },
+    "Queen_walk_0": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            4
+          ]
+        ],
+        "north": [
+          [
+            0,
+            5
+          ]
+        ],
+        "east": [
+          [
+            1,
+            5
+          ]
+        ],
+        "west": [
+          [
+            2,
+            5
+          ]
+        ]
+      }
+    },
+    "Queen_rest_3": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            5
+          ]
+        ]
+      }
+    },
+    "Queen_rest_2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            5
+          ]
+        ]
+      }
+    },
+    "Queen_rest_1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            5
+          ]
+        ]
+      }
+    },
+    "Queen_rest_0": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            5
+          ]
+        ]
+      }
+    },
+    "Queen_downed_3": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            5
+          ]
+        ]
+      }
+    },
+    "Queen_downed_2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            6
+          ]
+        ]
+      }
+    },
+    "Queen_downed_1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            6
+          ]
+        ]
+      }
+    },
+    "Queen_downed_0": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    },
+    "Queen_dissection": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            6
+          ]
+        ]
+      }
+    }
+  }
+}

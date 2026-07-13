@@ -1,0 +1,130 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 4,
+  "states": {
+    "Normal Hellhound Walking": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    },
+    "Normal Hellhound Running": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ],
+        "north": [
+          [
+            1,
+            1
+          ]
+        ],
+        "east": [
+          [
+            2,
+            1
+          ]
+        ],
+        "west": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Hellhound Sleeping": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        10.0,
+        10.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "Normal Hellhound Knocked Down": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "Normal Hellhound Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ]
+        ]
+      }
+    }
+  }
+}

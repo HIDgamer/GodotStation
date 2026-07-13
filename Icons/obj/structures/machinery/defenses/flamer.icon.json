@@ -1,0 +1,524 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 8,
+  "states": {
+    "BASE": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "defense_base": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ]
+      }
+    },
+    "defense_base_off": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            0
+          ]
+        ]
+      }
+    },
+    "NORMAL": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    },
+    "Normal uac_flamer": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            0
+          ]
+        ],
+        "north": [
+          [
+            5,
+            0
+          ]
+        ],
+        "east": [
+          [
+            6,
+            0
+          ]
+        ],
+        "west": [
+          [
+            7,
+            0
+          ]
+        ]
+      }
+    },
+    "Normal uac_flamer_noammo": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ],
+        "north": [
+          [
+            1,
+            1
+          ]
+        ],
+        "east": [
+          [
+            2,
+            1
+          ]
+        ],
+        "west": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal uac_flamer_on": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            1
+          ]
+        ],
+        "north": [
+          [
+            5,
+            1
+          ]
+        ],
+        "east": [
+          [
+            6,
+            1
+          ]
+        ],
+        "west": [
+          [
+            7,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal uac_flamer_destroyed": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ]
+      }
+    },
+    "Normal uac_flamer_handheld": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "Mini": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "Mini uac_flamer": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ]
+        ],
+        "north": [
+          [
+            4,
+            2
+          ]
+        ],
+        "east": [
+          [
+            5,
+            2
+          ]
+        ],
+        "west": [
+          [
+            6,
+            2
+          ]
+        ]
+      }
+    },
+    "Mini uac_flamer_noammo": {
+      "dirs": 4,
+      "frames": 2,
+      "delay": [
+        3.0,
+        4.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            2
+          ],
+          [
+            0,
+            3
+          ]
+        ],
+        "north": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "east": [
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ]
+        ],
+        "west": [
+          [
+            5,
+            3
+          ],
+          [
+            6,
+            3
+          ]
+        ]
+      }
+    },
+    "Mini uac_flamer_on": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            3
+          ]
+        ],
+        "north": [
+          [
+            0,
+            4
+          ]
+        ],
+        "east": [
+          [
+            1,
+            4
+          ]
+        ],
+        "west": [
+          [
+            2,
+            4
+          ]
+        ]
+      }
+    },
+    "Mini uac_flamer_destroyed": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    },
+    "Mini uac_flamer_handheld": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            4
+          ]
+        ]
+      }
+    },
+    "Plasma": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            4
+          ]
+        ]
+      }
+    },
+    "Plasma uac_flamer": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            4
+          ]
+        ],
+        "north": [
+          [
+            7,
+            4
+          ]
+        ],
+        "east": [
+          [
+            0,
+            5
+          ]
+        ],
+        "west": [
+          [
+            1,
+            5
+          ]
+        ]
+      }
+    },
+    "Plasma uac_flamer_noammo": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            5
+          ]
+        ],
+        "north": [
+          [
+            3,
+            5
+          ]
+        ],
+        "east": [
+          [
+            4,
+            5
+          ]
+        ],
+        "west": [
+          [
+            5,
+            5
+          ]
+        ]
+      }
+    },
+    "Plasma uac_flamer_on": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            5
+          ]
+        ],
+        "north": [
+          [
+            7,
+            5
+          ]
+        ],
+        "east": [
+          [
+            0,
+            6
+          ]
+        ],
+        "west": [
+          [
+            1,
+            6
+          ]
+        ]
+      }
+    },
+    "Plasma uac_flamer_destroyed": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    },
+    "Plasma uac_flamer_handheld": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            6
+          ]
+        ]
+      }
+    }
+  }
+}

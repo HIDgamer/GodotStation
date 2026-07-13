@@ -1,0 +1,313 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 6,
+  "states": {
+    "autolathe_n": {
+      "dirs": 1,
+      "frames": 7,
+      "delay": [
+        1.0,
+        1.0,
+        2.0,
+        2.0,
+        1.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": true,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "autolathe": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    "autolathe_t": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "autolathe_r": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            1
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "autolathe_o": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ]
+        ]
+      }
+    },
+    "armylathe_n": {
+      "dirs": 1,
+      "frames": 7,
+      "delay": [
+        1.0,
+        1.0,
+        2.0,
+        2.0,
+        1.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": true,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    },
+    "armylathe": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            4
+          ]
+        ]
+      }
+    },
+    "armylathe_t": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    },
+    "armylathe_r": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            4
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            1,
+            5
+          ]
+        ]
+      }
+    },
+    "armylathe_o": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            5
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            5,
+            5
+          ]
+        ]
+      }
+    }
+  }
+}

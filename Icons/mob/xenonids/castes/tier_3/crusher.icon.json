@@ -1,0 +1,307 @@
+{
+  "width": 64,
+  "height": 64,
+  "columns": 6,
+  "states": {
+    "Normal Crusher Walking": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    },
+    "Normal Crusher Running": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            0
+          ]
+        ],
+        "north": [
+          [
+            5,
+            0
+          ]
+        ],
+        "east": [
+          [
+            0,
+            1
+          ]
+        ],
+        "west": [
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Crusher Charging": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            1
+          ]
+        ],
+        "north": [
+          [
+            3,
+            1
+          ]
+        ],
+        "east": [
+          [
+            4,
+            1
+          ]
+        ],
+        "west": [
+          [
+            5,
+            1
+          ]
+        ]
+      }
+    },
+    "Normal Crusher Sleeping": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ]
+      }
+    },
+    "Normal Crusher Knocked Down": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "Normal Crusher Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "Charger Crusher Walking": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ]
+        ],
+        "north": [
+          [
+            4,
+            2
+          ]
+        ],
+        "east": [
+          [
+            5,
+            2
+          ]
+        ],
+        "west": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "Charger Crusher Running": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ]
+        ],
+        "north": [
+          [
+            2,
+            3
+          ]
+        ],
+        "east": [
+          [
+            3,
+            3
+          ]
+        ],
+        "west": [
+          [
+            4,
+            3
+          ]
+        ]
+      }
+    },
+    "Charger Crusher Charging": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            3
+          ]
+        ],
+        "north": [
+          [
+            0,
+            4
+          ]
+        ],
+        "east": [
+          [
+            1,
+            4
+          ]
+        ],
+        "west": [
+          [
+            2,
+            4
+          ]
+        ]
+      }
+    },
+    "Charger Crusher Sleeping": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    },
+    "Charger Crusher Knocked Down": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            4
+          ]
+        ]
+      }
+    },
+    "Charger Crusher Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            4
+          ]
+        ]
+      }
+    }
+  }
+}

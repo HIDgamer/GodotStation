@@ -1,0 +1,1967 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 15,
+  "states": {
+    "K9 PACKS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "marinepack_medic_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ],
+        "north": [
+          [
+            2,
+            0
+          ]
+        ],
+        "east": [
+          [
+            3,
+            0
+          ]
+        ],
+        "west": [
+          [
+            4,
+            0
+          ]
+        ]
+      }
+    },
+    "marinepack_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            0
+          ]
+        ],
+        "north": [
+          [
+            6,
+            0
+          ]
+        ],
+        "east": [
+          [
+            7,
+            0
+          ]
+        ],
+        "west": [
+          [
+            8,
+            0
+          ]
+        ]
+      }
+    },
+    "mppack_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            0
+          ]
+        ],
+        "north": [
+          [
+            10,
+            0
+          ]
+        ],
+        "east": [
+          [
+            11,
+            0
+          ]
+        ],
+        "west": [
+          [
+            12,
+            0
+          ]
+        ]
+      }
+    },
+    "marinepack_medic_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            0
+          ]
+        ],
+        "north": [
+          [
+            14,
+            0
+          ]
+        ],
+        "east": [
+          [
+            0,
+            1
+          ]
+        ],
+        "west": [
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "marinepack_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            1
+          ]
+        ],
+        "north": [
+          [
+            3,
+            1
+          ]
+        ],
+        "east": [
+          [
+            4,
+            1
+          ]
+        ],
+        "west": [
+          [
+            5,
+            1
+          ]
+        ]
+      }
+    },
+    "mppack_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            1
+          ]
+        ],
+        "north": [
+          [
+            7,
+            1
+          ]
+        ],
+        "east": [
+          [
+            8,
+            1
+          ]
+        ],
+        "west": [
+          [
+            9,
+            1
+          ]
+        ]
+      }
+    },
+    "medicpack Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            1
+          ]
+        ]
+      }
+    },
+    "marinepack Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            1
+          ]
+        ]
+      }
+    },
+    "mppack Dead": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            1
+          ]
+        ]
+      }
+    },
+    "GEAR": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            1
+          ]
+        ]
+      }
+    },
+    "k9_dogtags": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            1
+          ]
+        ]
+      }
+    },
+    "safetyvest_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ],
+        "north": [
+          [
+            1,
+            2
+          ]
+        ],
+        "east": [
+          [
+            2,
+            2
+          ]
+        ],
+        "west": [
+          [
+            3,
+            2
+          ]
+        ]
+      }
+    },
+    "medicalvest_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            2
+          ]
+        ],
+        "north": [
+          [
+            5,
+            2
+          ]
+        ],
+        "east": [
+          [
+            6,
+            2
+          ]
+        ],
+        "west": [
+          [
+            7,
+            2
+          ]
+        ]
+      }
+    },
+    "safetyvest_b_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            2
+          ]
+        ],
+        "north": [
+          [
+            9,
+            2
+          ]
+        ],
+        "east": [
+          [
+            10,
+            2
+          ]
+        ],
+        "west": [
+          [
+            11,
+            2
+          ]
+        ]
+      }
+    },
+    "safetyvest_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            2
+          ]
+        ],
+        "north": [
+          [
+            13,
+            2
+          ]
+        ],
+        "east": [
+          [
+            14,
+            2
+          ]
+        ],
+        "west": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "medicalvest_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ]
+        ],
+        "north": [
+          [
+            2,
+            3
+          ]
+        ],
+        "east": [
+          [
+            3,
+            3
+          ]
+        ],
+        "west": [
+          [
+            4,
+            3
+          ]
+        ]
+      }
+    },
+    "safetyvest_b_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            3
+          ]
+        ],
+        "north": [
+          [
+            6,
+            3
+          ]
+        ],
+        "east": [
+          [
+            7,
+            3
+          ]
+        ],
+        "west": [
+          [
+            8,
+            3
+          ]
+        ]
+      }
+    },
+    "safetyvest_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            3
+          ]
+        ]
+      }
+    },
+    "medicalvest_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            3
+          ]
+        ]
+      }
+    },
+    "safetyvest_b_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            3
+          ]
+        ]
+      }
+    },
+    "MASKS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            3
+          ]
+        ]
+      }
+    },
+    "bandana_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            3
+          ]
+        ],
+        "north": [
+          [
+            14,
+            3
+          ]
+        ],
+        "east": [
+          [
+            0,
+            4
+          ]
+        ],
+        "west": [
+          [
+            1,
+            4
+          ]
+        ]
+      }
+    },
+    "bandana_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            4
+          ]
+        ],
+        "north": [
+          [
+            3,
+            4
+          ]
+        ],
+        "east": [
+          [
+            4,
+            4
+          ]
+        ],
+        "west": [
+          [
+            5,
+            4
+          ]
+        ]
+      }
+    },
+    "bandana_k9_y": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            4
+          ]
+        ],
+        "north": [
+          [
+            7,
+            4
+          ]
+        ],
+        "east": [
+          [
+            8,
+            4
+          ]
+        ],
+        "west": [
+          [
+            9,
+            4
+          ]
+        ]
+      }
+    },
+    "bandana_k9_p": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            4
+          ]
+        ],
+        "north": [
+          [
+            11,
+            4
+          ]
+        ],
+        "east": [
+          [
+            12,
+            4
+          ]
+        ],
+        "west": [
+          [
+            13,
+            4
+          ]
+        ]
+      }
+    },
+    "bandana_k9_b": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            4
+          ]
+        ],
+        "north": [
+          [
+            0,
+            5
+          ]
+        ],
+        "east": [
+          [
+            1,
+            5
+          ]
+        ],
+        "west": [
+          [
+            2,
+            5
+          ]
+        ]
+      }
+    },
+    "bandana_k9_g": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            5
+          ]
+        ],
+        "north": [
+          [
+            4,
+            5
+          ]
+        ],
+        "east": [
+          [
+            5,
+            5
+          ]
+        ],
+        "west": [
+          [
+            6,
+            5
+          ]
+        ]
+      }
+    },
+    "bandana_k9_bl": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            5
+          ]
+        ],
+        "north": [
+          [
+            8,
+            5
+          ]
+        ],
+        "east": [
+          [
+            9,
+            5
+          ]
+        ],
+        "west": [
+          [
+            10,
+            5
+          ]
+        ]
+      }
+    },
+    "bandana_r_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            5
+          ]
+        ],
+        "north": [
+          [
+            12,
+            5
+          ]
+        ],
+        "east": [
+          [
+            13,
+            5
+          ]
+        ],
+        "west": [
+          [
+            14,
+            5
+          ]
+        ]
+      }
+    },
+    "bandana_r_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            6
+          ]
+        ],
+        "north": [
+          [
+            1,
+            6
+          ]
+        ],
+        "east": [
+          [
+            2,
+            6
+          ]
+        ],
+        "west": [
+          [
+            3,
+            6
+          ]
+        ]
+      }
+    },
+    "bandana_r_k9_y": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            6
+          ]
+        ],
+        "north": [
+          [
+            5,
+            6
+          ]
+        ],
+        "east": [
+          [
+            6,
+            6
+          ]
+        ],
+        "west": [
+          [
+            7,
+            6
+          ]
+        ]
+      }
+    },
+    "bandana_r_k9_p": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            6
+          ]
+        ],
+        "north": [
+          [
+            9,
+            6
+          ]
+        ],
+        "east": [
+          [
+            10,
+            6
+          ]
+        ],
+        "west": [
+          [
+            11,
+            6
+          ]
+        ]
+      }
+    },
+    "bandana_r_k9_b": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            6
+          ]
+        ],
+        "north": [
+          [
+            13,
+            6
+          ]
+        ],
+        "east": [
+          [
+            14,
+            6
+          ]
+        ],
+        "west": [
+          [
+            0,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_r_k9_g": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            7
+          ]
+        ],
+        "north": [
+          [
+            2,
+            7
+          ]
+        ],
+        "east": [
+          [
+            3,
+            7
+          ]
+        ],
+        "west": [
+          [
+            4,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_r_k9_bl": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            7
+          ]
+        ],
+        "north": [
+          [
+            6,
+            7
+          ]
+        ],
+        "east": [
+          [
+            7,
+            7
+          ]
+        ],
+        "west": [
+          [
+            8,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_k9_r_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_k9_y_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_k9_p_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_k9_b_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_k9_g_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            7
+          ]
+        ]
+      }
+    },
+    "bandana_k9_bl_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    },
+    "HEAD": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            8
+          ]
+        ]
+      }
+    },
+    "drillhat_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            8
+          ]
+        ],
+        "north": [
+          [
+            3,
+            8
+          ]
+        ],
+        "east": [
+          [
+            4,
+            8
+          ]
+        ],
+        "west": [
+          [
+            5,
+            8
+          ]
+        ]
+      }
+    },
+    "mpberet_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            8
+          ]
+        ],
+        "north": [
+          [
+            7,
+            8
+          ]
+        ],
+        "east": [
+          [
+            8,
+            8
+          ]
+        ],
+        "west": [
+          [
+            9,
+            8
+          ]
+        ]
+      }
+    },
+    "engiberet_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            8
+          ]
+        ],
+        "north": [
+          [
+            11,
+            8
+          ]
+        ],
+        "east": [
+          [
+            12,
+            8
+          ]
+        ],
+        "west": [
+          [
+            13,
+            8
+          ]
+        ]
+      }
+    },
+    "purpleberet_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            8
+          ]
+        ],
+        "north": [
+          [
+            0,
+            9
+          ]
+        ],
+        "east": [
+          [
+            1,
+            9
+          ]
+        ],
+        "west": [
+          [
+            2,
+            9
+          ]
+        ]
+      }
+    },
+    "drillhat_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            9
+          ]
+        ],
+        "north": [
+          [
+            4,
+            9
+          ]
+        ],
+        "east": [
+          [
+            5,
+            9
+          ]
+        ],
+        "west": [
+          [
+            6,
+            9
+          ]
+        ]
+      }
+    },
+    "mpberet_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            9
+          ]
+        ],
+        "north": [
+          [
+            8,
+            9
+          ]
+        ],
+        "east": [
+          [
+            9,
+            9
+          ]
+        ],
+        "west": [
+          [
+            10,
+            9
+          ]
+        ]
+      }
+    },
+    "engiberet_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            9
+          ]
+        ],
+        "north": [
+          [
+            12,
+            9
+          ]
+        ],
+        "east": [
+          [
+            13,
+            9
+          ]
+        ],
+        "west": [
+          [
+            14,
+            9
+          ]
+        ]
+      }
+    },
+    "purpleberet_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            10
+          ]
+        ],
+        "north": [
+          [
+            1,
+            10
+          ]
+        ],
+        "east": [
+          [
+            2,
+            10
+          ]
+        ],
+        "west": [
+          [
+            3,
+            10
+          ]
+        ]
+      }
+    },
+    "drillhat_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            10
+          ]
+        ]
+      }
+    },
+    "mpberet_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            10
+          ]
+        ]
+      }
+    },
+    "engiberet_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            10
+          ]
+        ]
+      }
+    },
+    "purpleberet_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            10
+          ]
+        ]
+      }
+    },
+    "EYES": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            10
+          ]
+        ]
+      }
+    },
+    "megoggles_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            10
+          ]
+        ],
+        "north": [
+          [
+            10,
+            10
+          ]
+        ],
+        "east": [
+          [
+            11,
+            10
+          ]
+        ],
+        "west": [
+          [
+            12,
+            10
+          ]
+        ]
+      }
+    },
+    "mgoggles2_k9": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            10
+          ]
+        ],
+        "north": [
+          [
+            14,
+            10
+          ]
+        ],
+        "east": [
+          [
+            0,
+            11
+          ]
+        ],
+        "west": [
+          [
+            1,
+            11
+          ]
+        ]
+      }
+    },
+    "mgoggles_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            11
+          ]
+        ],
+        "north": [
+          [
+            3,
+            11
+          ]
+        ],
+        "east": [
+          [
+            4,
+            11
+          ]
+        ],
+        "west": [
+          [
+            5,
+            11
+          ]
+        ]
+      }
+    },
+    "mgoggles2_k9_r": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            11
+          ]
+        ],
+        "north": [
+          [
+            7,
+            11
+          ]
+        ],
+        "east": [
+          [
+            8,
+            11
+          ]
+        ],
+        "west": [
+          [
+            9,
+            11
+          ]
+        ]
+      }
+    },
+    "mgoggles_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            11
+          ]
+        ]
+      }
+    },
+    "mgoggles2_k9_d": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            11
+          ]
+        ]
+      }
+    },
+    "K9_DAM": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            11
+          ]
+        ]
+      }
+    },
+    "k9_dam_l": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            11
+          ]
+        ],
+        "north": [
+          [
+            14,
+            11
+          ]
+        ],
+        "east": [
+          [
+            0,
+            12
+          ]
+        ],
+        "west": [
+          [
+            1,
+            12
+          ]
+        ]
+      }
+    },
+    "k9_dam_m": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            12
+          ]
+        ],
+        "north": [
+          [
+            3,
+            12
+          ]
+        ],
+        "east": [
+          [
+            4,
+            12
+          ]
+        ],
+        "west": [
+          [
+            5,
+            12
+          ]
+        ]
+      }
+    },
+    "k9_dam_h": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            12
+          ]
+        ],
+        "north": [
+          [
+            7,
+            12
+          ]
+        ],
+        "east": [
+          [
+            8,
+            12
+          ]
+        ],
+        "west": [
+          [
+            9,
+            12
+          ]
+        ]
+      }
+    },
+    "k9_dam_r_l": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            12
+          ]
+        ],
+        "north": [
+          [
+            11,
+            12
+          ]
+        ],
+        "east": [
+          [
+            12,
+            12
+          ]
+        ],
+        "west": [
+          [
+            13,
+            12
+          ]
+        ]
+      }
+    },
+    "k9_dam_r_m": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            12
+          ]
+        ],
+        "north": [
+          [
+            0,
+            13
+          ]
+        ],
+        "east": [
+          [
+            1,
+            13
+          ]
+        ],
+        "west": [
+          [
+            2,
+            13
+          ]
+        ]
+      }
+    },
+    "k9_dam_r_h": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            13
+          ]
+        ],
+        "north": [
+          [
+            4,
+            13
+          ]
+        ],
+        "east": [
+          [
+            5,
+            13
+          ]
+        ],
+        "west": [
+          [
+            6,
+            13
+          ]
+        ]
+      }
+    },
+    "k9_dam_d_l": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            13
+          ]
+        ]
+      }
+    },
+    "k9_dam_d_m": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            13
+          ]
+        ]
+      }
+    },
+    "k9_dam_d_h": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            13
+          ]
+        ]
+      }
+    }
+  }
+}

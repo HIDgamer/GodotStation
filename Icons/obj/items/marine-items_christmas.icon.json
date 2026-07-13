@@ -1,0 +1,46 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 2,
+  "states": {
+    "barbed_wire": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "festive_wire": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        4.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    }
+  }
+}

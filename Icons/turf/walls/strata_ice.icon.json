@@ -1,0 +1,887 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 10,
+  "states": {
+    "blank": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "strata_ice": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ]
+      }
+    },
+    "strata_ice0": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            0
+          ]
+        ],
+        "north": [
+          [
+            3,
+            0
+          ]
+        ],
+        "east": [
+          [
+            4,
+            0
+          ]
+        ],
+        "west": [
+          [
+            5,
+            0
+          ]
+        ]
+      }
+    },
+    "strata_ice1": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            0
+          ]
+        ],
+        "north": [
+          [
+            7,
+            0
+          ]
+        ],
+        "east": [
+          [
+            8,
+            0
+          ]
+        ],
+        "west": [
+          [
+            9,
+            0
+          ]
+        ]
+      }
+    },
+    "strata_ice2": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ],
+        "north": [
+          [
+            1,
+            1
+          ]
+        ],
+        "east": [
+          [
+            2,
+            1
+          ]
+        ],
+        "west": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "strata_ice3": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            1
+          ]
+        ],
+        "north": [
+          [
+            5,
+            1
+          ]
+        ],
+        "east": [
+          [
+            6,
+            1
+          ]
+        ],
+        "west": [
+          [
+            7,
+            1
+          ]
+        ]
+      }
+    },
+    "strata_ice4": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            1
+          ]
+        ],
+        "north": [
+          [
+            9,
+            1
+          ]
+        ],
+        "east": [
+          [
+            0,
+            2
+          ]
+        ],
+        "west": [
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "strata_ice5": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ]
+        ],
+        "north": [
+          [
+            3,
+            2
+          ]
+        ],
+        "east": [
+          [
+            4,
+            2
+          ]
+        ],
+        "west": [
+          [
+            5,
+            2
+          ]
+        ]
+      }
+    },
+    "strata_ice6": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            2
+          ]
+        ],
+        "north": [
+          [
+            7,
+            2
+          ]
+        ],
+        "east": [
+          [
+            8,
+            2
+          ]
+        ],
+        "west": [
+          [
+            9,
+            2
+          ]
+        ]
+      }
+    },
+    "strata_ice7": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            3
+          ]
+        ],
+        "north": [
+          [
+            1,
+            3
+          ]
+        ],
+        "east": [
+          [
+            2,
+            3
+          ]
+        ],
+        "west": [
+          [
+            3,
+            3
+          ]
+        ]
+      }
+    },
+    "strata_jungle": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            3
+          ]
+        ]
+      }
+    },
+    "strata_jungle0": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            3
+          ]
+        ],
+        "north": [
+          [
+            6,
+            3
+          ]
+        ],
+        "east": [
+          [
+            7,
+            3
+          ]
+        ],
+        "west": [
+          [
+            8,
+            3
+          ]
+        ]
+      }
+    },
+    "strata_jungle1": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            3
+          ]
+        ],
+        "north": [
+          [
+            0,
+            4
+          ]
+        ],
+        "east": [
+          [
+            1,
+            4
+          ]
+        ],
+        "west": [
+          [
+            2,
+            4
+          ]
+        ]
+      }
+    },
+    "strata_jungle2": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            4
+          ]
+        ],
+        "north": [
+          [
+            4,
+            4
+          ]
+        ],
+        "east": [
+          [
+            5,
+            4
+          ]
+        ],
+        "west": [
+          [
+            6,
+            4
+          ]
+        ]
+      }
+    },
+    "strata_jungle3": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            4
+          ]
+        ],
+        "north": [
+          [
+            8,
+            4
+          ]
+        ],
+        "east": [
+          [
+            9,
+            4
+          ]
+        ],
+        "west": [
+          [
+            0,
+            5
+          ]
+        ]
+      }
+    },
+    "strata_jungle4": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            5
+          ]
+        ],
+        "north": [
+          [
+            2,
+            5
+          ]
+        ],
+        "east": [
+          [
+            3,
+            5
+          ]
+        ],
+        "west": [
+          [
+            4,
+            5
+          ]
+        ]
+      }
+    },
+    "strata_jungle5": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            5
+          ]
+        ],
+        "north": [
+          [
+            6,
+            5
+          ]
+        ],
+        "east": [
+          [
+            7,
+            5
+          ]
+        ],
+        "west": [
+          [
+            8,
+            5
+          ]
+        ]
+      }
+    },
+    "strata_jungle6": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            5
+          ]
+        ],
+        "north": [
+          [
+            0,
+            6
+          ]
+        ],
+        "east": [
+          [
+            1,
+            6
+          ]
+        ],
+        "west": [
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    },
+    "strata_jungle7": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            6
+          ]
+        ],
+        "north": [
+          [
+            4,
+            6
+          ]
+        ],
+        "east": [
+          [
+            5,
+            6
+          ]
+        ],
+        "west": [
+          [
+            6,
+            6
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            6
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty0": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            6
+          ]
+        ],
+        "north": [
+          [
+            9,
+            6
+          ]
+        ],
+        "east": [
+          [
+            0,
+            7
+          ]
+        ],
+        "west": [
+          [
+            1,
+            7
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty1": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            7
+          ]
+        ],
+        "north": [
+          [
+            3,
+            7
+          ]
+        ],
+        "east": [
+          [
+            4,
+            7
+          ]
+        ],
+        "west": [
+          [
+            5,
+            7
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty2": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            7
+          ]
+        ],
+        "north": [
+          [
+            7,
+            7
+          ]
+        ],
+        "east": [
+          [
+            8,
+            7
+          ]
+        ],
+        "west": [
+          [
+            9,
+            7
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty3": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            8
+          ]
+        ],
+        "north": [
+          [
+            1,
+            8
+          ]
+        ],
+        "east": [
+          [
+            2,
+            8
+          ]
+        ],
+        "west": [
+          [
+            3,
+            8
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty4": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            8
+          ]
+        ],
+        "north": [
+          [
+            5,
+            8
+          ]
+        ],
+        "east": [
+          [
+            6,
+            8
+          ]
+        ],
+        "west": [
+          [
+            7,
+            8
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty5": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            8
+          ]
+        ],
+        "north": [
+          [
+            9,
+            8
+          ]
+        ],
+        "east": [
+          [
+            0,
+            9
+          ]
+        ],
+        "west": [
+          [
+            1,
+            9
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty6": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            9
+          ]
+        ],
+        "north": [
+          [
+            3,
+            9
+          ]
+        ],
+        "east": [
+          [
+            4,
+            9
+          ]
+        ],
+        "west": [
+          [
+            5,
+            9
+          ]
+        ]
+      }
+    },
+    "strata_ice_dirty7": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            9
+          ]
+        ],
+        "north": [
+          [
+            7,
+            9
+          ]
+        ],
+        "east": [
+          [
+            8,
+            9
+          ]
+        ],
+        "west": [
+          [
+            9,
+            9
+          ]
+        ]
+      }
+    }
+  }
+}

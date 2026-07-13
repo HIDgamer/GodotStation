@@ -1,0 +1,635 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 9,
+  "states": {
+    "": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "blank_s": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ],
+        "north": [
+          [
+            2,
+            0
+          ]
+        ],
+        "east": [
+          [
+            3,
+            0
+          ]
+        ],
+        "west": [
+          [
+            4,
+            0
+          ]
+        ]
+      }
+    },
+    "eyes_s": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            0
+          ]
+        ],
+        "north": [
+          [
+            6,
+            0
+          ]
+        ],
+        "east": [
+          [
+            7,
+            0
+          ]
+        ],
+        "west": [
+          [
+            8,
+            0
+          ]
+        ]
+      }
+    },
+    "blank_eyes_s": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ],
+        "north": [
+          [
+            1,
+            1
+          ]
+        ],
+        "east": [
+          [
+            2,
+            1
+          ]
+        ],
+        "west": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "paint_red_lipstick": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            1
+          ]
+        ],
+        "north": [
+          [
+            5,
+            1
+          ]
+        ],
+        "east": [
+          [
+            6,
+            1
+          ]
+        ],
+        "west": [
+          [
+            7,
+            1
+          ]
+        ]
+      }
+    },
+    "paint_purp_lipstick": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            1
+          ]
+        ],
+        "north": [
+          [
+            0,
+            2
+          ]
+        ],
+        "east": [
+          [
+            1,
+            2
+          ]
+        ],
+        "west": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "paint_jade_lipstick": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ]
+        ],
+        "north": [
+          [
+            4,
+            2
+          ]
+        ],
+        "east": [
+          [
+            5,
+            2
+          ]
+        ],
+        "west": [
+          [
+            6,
+            2
+          ]
+        ]
+      }
+    },
+    "paint_marn_lipstick": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            2
+          ]
+        ],
+        "north": [
+          [
+            8,
+            2
+          ]
+        ],
+        "east": [
+          [
+            0,
+            3
+          ]
+        ],
+        "west": [
+          [
+            1,
+            3
+          ]
+        ]
+      }
+    },
+    "paint_full_camo": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            3
+          ]
+        ],
+        "north": [
+          [
+            3,
+            3
+          ]
+        ],
+        "east": [
+          [
+            4,
+            3
+          ]
+        ],
+        "west": [
+          [
+            5,
+            3
+          ]
+        ]
+      }
+    },
+    "paint_black_camo": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            3
+          ]
+        ],
+        "north": [
+          [
+            7,
+            3
+          ]
+        ],
+        "east": [
+          [
+            8,
+            3
+          ]
+        ],
+        "west": [
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    },
+    "paint_green_camo": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            4
+          ]
+        ],
+        "north": [
+          [
+            2,
+            4
+          ]
+        ],
+        "east": [
+          [
+            3,
+            4
+          ]
+        ],
+        "west": [
+          [
+            4,
+            4
+          ]
+        ]
+      }
+    },
+    "paint_brown_camo": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            4
+          ]
+        ],
+        "north": [
+          [
+            6,
+            4
+          ]
+        ],
+        "east": [
+          [
+            7,
+            4
+          ]
+        ],
+        "west": [
+          [
+            8,
+            4
+          ]
+        ]
+      }
+    },
+    "paint_skull_camo": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            5
+          ]
+        ],
+        "north": [
+          [
+            1,
+            5
+          ]
+        ],
+        "east": [
+          [
+            2,
+            5
+          ]
+        ],
+        "west": [
+          [
+            3,
+            5
+          ]
+        ]
+      }
+    },
+    "monkey_eyes_s": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            5
+          ]
+        ],
+        "north": [
+          [
+            5,
+            5
+          ]
+        ],
+        "east": [
+          [
+            6,
+            5
+          ]
+        ],
+        "west": [
+          [
+            7,
+            5
+          ]
+        ]
+      }
+    },
+    "paint_sunscreen_stick": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            5
+          ]
+        ],
+        "north": [
+          [
+            0,
+            6
+          ]
+        ],
+        "east": [
+          [
+            1,
+            6
+          ]
+        ],
+        "west": [
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    },
+    "paint_full_camo_snow": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            6
+          ]
+        ],
+        "north": [
+          [
+            4,
+            6
+          ]
+        ],
+        "east": [
+          [
+            5,
+            6
+          ]
+        ],
+        "west": [
+          [
+            6,
+            6
+          ]
+        ]
+      }
+    },
+    "paint_full_camo_desert": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            6
+          ]
+        ],
+        "north": [
+          [
+            8,
+            6
+          ]
+        ],
+        "east": [
+          [
+            0,
+            7
+          ]
+        ],
+        "west": [
+          [
+            1,
+            7
+          ]
+        ]
+      }
+    },
+    "paint_full_camo_jungle": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            7
+          ]
+        ],
+        "north": [
+          [
+            3,
+            7
+          ]
+        ],
+        "east": [
+          [
+            4,
+            7
+          ]
+        ],
+        "west": [
+          [
+            5,
+            7
+          ]
+        ]
+      }
+    },
+    "paint_full_camo_urban": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            7
+          ]
+        ],
+        "north": [
+          [
+            7,
+            7
+          ]
+        ],
+        "east": [
+          [
+            8,
+            7
+          ]
+        ],
+        "west": [
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    }
+  }
+}

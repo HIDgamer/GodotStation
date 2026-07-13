@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://cotviv3h66wvj"]
+
+[ext_resource type="Script" uid="uid://cwqphd4m12lud" path="res://Scripts/Game/Objects/Items/MeleeWeapon.cs" id="1_melee"]
+
+[node name="MeleeWeapon" type="Node2D" unique_id=1404112772]
+z_index = 5
+script = ExtResource("1_melee")
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=63588014]
+texture_filter = 1
+position = Vector2(16, 16)

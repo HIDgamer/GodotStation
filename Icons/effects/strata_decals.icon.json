@@ -1,0 +1,275 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 6,
+  "states": {
+    "": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "grime1": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ],
+        "north": [
+          [
+            2,
+            0
+          ]
+        ],
+        "east": [
+          [
+            3,
+            0
+          ]
+        ],
+        "west": [
+          [
+            4,
+            0
+          ]
+        ]
+      }
+    },
+    "grime2": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            0
+          ]
+        ],
+        "north": [
+          [
+            0,
+            1
+          ]
+        ],
+        "east": [
+          [
+            1,
+            1
+          ]
+        ],
+        "west": [
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    "grime3": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            1
+          ]
+        ],
+        "north": [
+          [
+            4,
+            1
+          ]
+        ],
+        "east": [
+          [
+            5,
+            1
+          ]
+        ],
+        "west": [
+          [
+            0,
+            2
+          ]
+        ]
+      }
+    },
+    "grime4": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            2
+          ]
+        ],
+        "north": [
+          [
+            2,
+            2
+          ]
+        ],
+        "east": [
+          [
+            3,
+            2
+          ]
+        ],
+        "west": [
+          [
+            4,
+            2
+          ]
+        ]
+      }
+    },
+    "icerock": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            2
+          ]
+        ],
+        "north": [
+          [
+            0,
+            3
+          ]
+        ],
+        "east": [
+          [
+            1,
+            3
+          ]
+        ],
+        "west": [
+          [
+            2,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    },
+    "tufts": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            4
+          ]
+        ],
+        "north": [
+          [
+            2,
+            4
+          ]
+        ],
+        "east": [
+          [
+            3,
+            4
+          ]
+        ],
+        "west": [
+          [
+            4,
+            4
+          ]
+        ],
+        "southeast": [
+          [
+            5,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            5
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            5
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            5
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 5,
+  "states": {
+    "blank": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "Single": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ]
+      }
+    },
+    "End": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            0
+          ]
+        ],
+        "north": [
+          [
+            3,
+            0
+          ]
+        ],
+        "east": [
+          [
+            4,
+            0
+          ]
+        ],
+        "west": [
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "Straight": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ]
+        ],
+        "north": [
+          [
+            2,
+            1
+          ]
+        ],
+        "east": [
+          [
+            3,
+            1
+          ]
+        ],
+        "west": [
+          [
+            4,
+            1
+          ]
+        ]
+      }
+    },
+    "Corner": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ],
+        "north": [
+          [
+            1,
+            2
+          ]
+        ],
+        "east": [
+          [
+            2,
+            2
+          ]
+        ],
+        "west": [
+          [
+            3,
+            2
+          ]
+        ]
+      }
+    },
+    "T_Junction": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            2
+          ]
+        ],
+        "north": [
+          [
+            0,
+            3
+          ]
+        ],
+        "east": [
+          [
+            1,
+            3
+          ]
+        ],
+        "west": [
+          [
+            2,
+            3
+          ]
+        ]
+      }
+    },
+    "Intersection": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            3
+          ]
+        ]
+      }
+    }
+  }
+}

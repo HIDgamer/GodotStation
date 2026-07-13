@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://rbygyctrvrvt"]
+
+[ext_resource type="Script" uid="uid://202wdtqshom8" path="res://Scripts/Game/Mobs/PlayerMob.cs" id="1_player"]
+[ext_resource type="Script" uid="uid://ck2kvt8pthjwy" path="res://Scripts/Core/World/MovementController.cs" id="2_movement"]
+[ext_resource type="Script" uid="uid://di87pr075silj" path="res://Scripts/Game/Mobs/Inventory.cs" id="3_inventory"]
+[ext_resource type="Script" uid="uid://cr44f62hkpvh5" path="res://Scripts/Game/Mobs/Health/HealthSystem.cs" id="4_health"]
+[ext_resource type="Script" uid="uid://cbgw843oa5v4r" path="res://Scripts/Game/Mobs/Health/LimbSystem.cs" id="5_limbs"]
+[ext_resource type="Script" uid="uid://bi3ffpnwu6hpk" path="res://Scripts/Game/Mobs/MobStateSystem.cs" id="6_state"]
+[ext_resource type="Script" uid="uid://bof0wchxfjnpr" path="res://Scripts/Game/Mobs/DoAfterComponent.cs" id="7_doafter"]
+[ext_resource type="Script" uid="uid://b7x5u7rlpfrrb" path="res://Scripts/Game/Mobs/MobAppearance.cs" id="8_appearance"]
+[ext_resource type="Script" uid="uid://1qx05dr71vqd" path="res://Scripts/Game/Mobs/Health/FireSystem.cs" id="9_fire"]
+[ext_resource type="Script" uid="uid://236lh3plbhs0" path="res://Scripts/Game/Mobs/SkillComponent.cs" id="10_skill"]
+[ext_resource type="Script" uid="uid://bqmrcebkikg7q" path="res://Scripts/Game/Interaction/StateController.cs" id="11_statectrl"]
+[ext_resource type="Script" uid="uid://b68frdluawf18" path="res://Scripts/Game/Interaction/PlayerInteractionSystem.cs" id="12_playerinteract"]
+[ext_resource type="Script" uid="uid://dvevrpkrie7g3" path="res://Scripts/Game/Interaction/ClickManager.cs" id="13_click"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/PUI.tscn" id="14_pui"]
+
+[node name="Human" type="Node2D" unique_id=1598287335]
+script = ExtResource("1_player")
+AtomName = "Marine"
+Description = "A United States Colonial Marine."
+
+[node name="Appearance" type="Node2D" parent="." unique_id=1760723117]
+position = Vector2(16, 16)
+script = ExtResource("8_appearance")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1166829156]
+position = Vector2(16, 16)
+zoom = Vector2(3, 3)
+position_smoothing_enabled = true
+
+[node name="MovementController" type="Node" parent="." unique_id=1181258023]
+script = ExtResource("2_movement")
+
+[node name="Inventory" type="Node" parent="." unique_id=1524180035]
+script = ExtResource("3_inventory")
+
+[node name="HealthSystem" type="Node" parent="." unique_id=1487430319]
+script = ExtResource("4_health")
+
+[node name="LimbSystem" type="Node" parent="." unique_id=755226992]
+script = ExtResource("5_limbs")
+
+[node name="MobStateSystem" type="Node" parent="." unique_id=528786472]
+script = ExtResource("6_state")
+
+[node name="DoAfterComponent" type="Node" parent="." unique_id=1889371804]
+script = ExtResource("7_doafter")
+
+[node name="FireSystem" type="Node" parent="." unique_id=1794709203]
+script = ExtResource("9_fire")
+
+[node name="SkillComponent" type="Node" parent="." unique_id=706481945]
+script = ExtResource("10_skill")
+
+[node name="StateController" type="Node" parent="." unique_id=487886759]
+script = ExtResource("11_statectrl")
+
+[node name="PlayerInteractionSystem" type="Node" parent="." unique_id=463015402]
+script = ExtResource("12_playerinteract")
+
+[node name="ClickManager" type="Node" parent="." unique_id=1615719564]
+script = ExtResource("13_click")
+
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=973367562]
+
+[node name="PlayerInterface" parent="UILayer" unique_id=1193039439 instance=ExtResource("14_pui")]

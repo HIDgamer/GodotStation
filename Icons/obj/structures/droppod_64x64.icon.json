@@ -1,0 +1,76 @@
+{
+  "width": 64,
+  "height": 64,
+  "columns": 3,
+  "states": {
+    "chute_static": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "chute_animated": {
+      "dirs": 1,
+      "frames": 8,
+      "delay": [
+        5.0,
+        3.0,
+        2.0,
+        3.0,
+        2.0,
+        3.0,
+        5.0,
+        5.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    }
+  }
+}

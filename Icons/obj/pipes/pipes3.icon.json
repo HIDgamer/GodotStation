@@ -1,0 +1,3937 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 24,
+  "states": {
+    "intact": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            0
+          ]
+        ]
+      }
+    },
+    "intact-db": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            0
+          ]
+        ],
+        "north": [
+          [
+            9,
+            0
+          ]
+        ],
+        "east": [
+          [
+            10,
+            0
+          ]
+        ],
+        "west": [
+          [
+            11,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            12,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            13,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            14,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            15,
+            0
+          ]
+        ]
+      }
+    },
+    "intact-f": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            0
+          ]
+        ],
+        "north": [
+          [
+            17,
+            0
+          ]
+        ],
+        "east": [
+          [
+            18,
+            0
+          ]
+        ],
+        "west": [
+          [
+            19,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            20,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            21,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            22,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            23,
+            0
+          ]
+        ]
+      }
+    },
+    "intact-f-lb": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ],
+        "north": [
+          [
+            1,
+            1
+          ]
+        ],
+        "east": [
+          [
+            2,
+            1
+          ]
+        ],
+        "west": [
+          [
+            3,
+            1
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            1
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            1
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            1
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            1
+          ]
+        ]
+      }
+    },
+    "intact-f-db": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            1
+          ]
+        ],
+        "north": [
+          [
+            9,
+            1
+          ]
+        ],
+        "east": [
+          [
+            10,
+            1
+          ]
+        ],
+        "west": [
+          [
+            11,
+            1
+          ]
+        ],
+        "southeast": [
+          [
+            12,
+            1
+          ]
+        ],
+        "southwest": [
+          [
+            13,
+            1
+          ]
+        ],
+        "northeast": [
+          [
+            14,
+            1
+          ]
+        ],
+        "northwest": [
+          [
+            15,
+            1
+          ]
+        ]
+      }
+    },
+    "exposed": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            1
+          ]
+        ],
+        "north": [
+          [
+            17,
+            1
+          ]
+        ],
+        "east": [
+          [
+            18,
+            1
+          ]
+        ],
+        "west": [
+          [
+            19,
+            1
+          ]
+        ]
+      }
+    },
+    "exposed-db": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            20,
+            1
+          ]
+        ],
+        "north": [
+          [
+            21,
+            1
+          ]
+        ],
+        "east": [
+          [
+            22,
+            1
+          ]
+        ],
+        "west": [
+          [
+            23,
+            1
+          ]
+        ]
+      }
+    },
+    "exposed-f": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ],
+        "north": [
+          [
+            1,
+            2
+          ]
+        ],
+        "east": [
+          [
+            2,
+            2
+          ]
+        ],
+        "west": [
+          [
+            3,
+            2
+          ]
+        ]
+      }
+    },
+    "exposed-f-db": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            2
+          ]
+        ],
+        "north": [
+          [
+            5,
+            2
+          ]
+        ],
+        "east": [
+          [
+            6,
+            2
+          ]
+        ],
+        "west": [
+          [
+            7,
+            2
+          ]
+        ]
+      }
+    },
+    "exposed-f-lb": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            2
+          ]
+        ],
+        "north": [
+          [
+            9,
+            2
+          ]
+        ],
+        "east": [
+          [
+            10,
+            2
+          ]
+        ],
+        "west": [
+          [
+            11,
+            2
+          ]
+        ]
+      }
+    },
+    "one-way": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            2
+          ]
+        ],
+        "north": [
+          [
+            13,
+            2
+          ]
+        ],
+        "east": [
+          [
+            14,
+            2
+          ]
+        ],
+        "west": [
+          [
+            15,
+            2
+          ]
+        ]
+      }
+    },
+    "one-way-db": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            2
+          ]
+        ],
+        "north": [
+          [
+            17,
+            2
+          ]
+        ],
+        "east": [
+          [
+            18,
+            2
+          ]
+        ],
+        "west": [
+          [
+            19,
+            2
+          ]
+        ]
+      }
+    },
+    "connector": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            20,
+            2
+          ]
+        ],
+        "north": [
+          [
+            21,
+            2
+          ]
+        ],
+        "east": [
+          [
+            22,
+            2
+          ]
+        ],
+        "west": [
+          [
+            23,
+            2
+          ]
+        ]
+      }
+    },
+    "connector-f": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            3
+          ]
+        ],
+        "north": [
+          [
+            1,
+            3
+          ]
+        ],
+        "east": [
+          [
+            2,
+            3
+          ]
+        ],
+        "west": [
+          [
+            3,
+            3
+          ]
+        ]
+      }
+    },
+    "high_capacity": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            3
+          ]
+        ],
+        "north": [
+          [
+            5,
+            3
+          ]
+        ],
+        "east": [
+          [
+            6,
+            3
+          ]
+        ],
+        "west": [
+          [
+            7,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            8,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            9,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            10,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            11,
+            3
+          ]
+        ]
+      }
+    },
+    "high>low": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            3
+          ]
+        ],
+        "north": [
+          [
+            13,
+            3
+          ]
+        ],
+        "east": [
+          [
+            14,
+            3
+          ]
+        ],
+        "west": [
+          [
+            15,
+            3
+          ]
+        ]
+      }
+    },
+    "meterX": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        5.0,
+        5.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            3
+          ],
+          [
+            17,
+            3
+          ]
+        ]
+      }
+    },
+    "meter0": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            3
+          ]
+        ]
+      }
+    },
+    "meter1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            3
+          ]
+        ]
+      }
+    },
+    "meter2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            20,
+            3
+          ]
+        ]
+      }
+    },
+    "meter3": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            21,
+            3
+          ]
+        ]
+      }
+    },
+    "meter4": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            22,
+            3
+          ]
+        ]
+      }
+    },
+    "meter5": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            3
+          ]
+        ]
+      }
+    },
+    "meter6": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    },
+    "meter7": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            4
+          ]
+        ]
+      }
+    },
+    "meter8": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            4
+          ]
+        ]
+      }
+    },
+    "meter9": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    },
+    "meter10": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            4
+          ]
+        ]
+      }
+    },
+    "meter11": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            4
+          ]
+        ]
+      }
+    },
+    "meter12": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            4
+          ]
+        ]
+      }
+    },
+    "meter13": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            4
+          ]
+        ]
+      }
+    },
+    "meter14": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            4
+          ]
+        ]
+      }
+    },
+    "meter15": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            4
+          ]
+        ]
+      }
+    },
+    "meter16": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            4
+          ],
+          [
+            11,
+            4
+          ]
+        ]
+      }
+    },
+    "meter17": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            4
+          ]
+        ]
+      }
+    },
+    "meter18": {
+      "dirs": 1,
+      "frames": 3,
+      "delay": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            4
+          ],
+          [
+            14,
+            4
+          ],
+          [
+            15,
+            4
+          ]
+        ]
+      }
+    },
+    "manifold": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            4
+          ]
+        ],
+        "north": [
+          [
+            17,
+            4
+          ]
+        ],
+        "east": [
+          [
+            18,
+            4
+          ]
+        ],
+        "west": [
+          [
+            19,
+            4
+          ]
+        ]
+      }
+    },
+    "manifold-db": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            20,
+            4
+          ]
+        ],
+        "north": [
+          [
+            21,
+            4
+          ]
+        ],
+        "east": [
+          [
+            22,
+            4
+          ]
+        ],
+        "west": [
+          [
+            23,
+            4
+          ]
+        ]
+      }
+    },
+    "manifold-f": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            5
+          ]
+        ],
+        "north": [
+          [
+            1,
+            5
+          ]
+        ],
+        "east": [
+          [
+            2,
+            5
+          ]
+        ],
+        "west": [
+          [
+            3,
+            5
+          ]
+        ]
+      }
+    },
+    "manifold-f-db": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            5
+          ]
+        ],
+        "north": [
+          [
+            5,
+            5
+          ]
+        ],
+        "east": [
+          [
+            6,
+            5
+          ]
+        ],
+        "west": [
+          [
+            7,
+            5
+          ]
+        ]
+      }
+    },
+    "circ-run": {
+      "dirs": 4,
+      "frames": 4,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            5
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            10,
+            5
+          ],
+          [
+            11,
+            5
+          ]
+        ],
+        "north": [
+          [
+            12,
+            5
+          ],
+          [
+            13,
+            5
+          ],
+          [
+            14,
+            5
+          ],
+          [
+            15,
+            5
+          ]
+        ],
+        "east": [
+          [
+            16,
+            5
+          ],
+          [
+            17,
+            5
+          ],
+          [
+            18,
+            5
+          ],
+          [
+            19,
+            5
+          ]
+        ],
+        "west": [
+          [
+            20,
+            5
+          ],
+          [
+            21,
+            5
+          ],
+          [
+            22,
+            5
+          ],
+          [
+            23,
+            5
+          ]
+        ]
+      }
+    },
+    "circ-slow": {
+      "dirs": 4,
+      "frames": 4,
+      "delay": [
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            3,
+            6
+          ]
+        ],
+        "north": [
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            7,
+            6
+          ]
+        ],
+        "east": [
+          [
+            8,
+            6
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            11,
+            6
+          ]
+        ],
+        "west": [
+          [
+            12,
+            6
+          ],
+          [
+            13,
+            6
+          ],
+          [
+            14,
+            6
+          ],
+          [
+            15,
+            6
+          ]
+        ]
+      }
+    },
+    "circ-off": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            6
+          ]
+        ],
+        "north": [
+          [
+            17,
+            6
+          ]
+        ],
+        "east": [
+          [
+            18,
+            6
+          ]
+        ],
+        "west": [
+          [
+            19,
+            6
+          ]
+        ]
+      }
+    },
+    "circ-p": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            20,
+            6
+          ]
+        ],
+        "north": [
+          [
+            21,
+            6
+          ]
+        ],
+        "east": [
+          [
+            22,
+            6
+          ]
+        ],
+        "west": [
+          [
+            23,
+            6
+          ]
+        ]
+      }
+    },
+    "vent": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            7
+          ]
+        ],
+        "north": [
+          [
+            1,
+            7
+          ]
+        ],
+        "east": [
+          [
+            2,
+            7
+          ]
+        ],
+        "west": [
+          [
+            3,
+            7
+          ]
+        ]
+      }
+    },
+    "vent-db": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            7
+          ]
+        ],
+        "north": [
+          [
+            5,
+            7
+          ]
+        ],
+        "east": [
+          [
+            6,
+            7
+          ]
+        ],
+        "west": [
+          [
+            7,
+            7
+          ]
+        ]
+      }
+    },
+    "inlet": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            7
+          ]
+        ],
+        "north": [
+          [
+            9,
+            7
+          ]
+        ],
+        "east": [
+          [
+            10,
+            7
+          ]
+        ],
+        "west": [
+          [
+            11,
+            7
+          ]
+        ]
+      }
+    },
+    "trunk": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            7
+          ]
+        ],
+        "north": [
+          [
+            13,
+            7
+          ]
+        ],
+        "east": [
+          [
+            14,
+            7
+          ]
+        ],
+        "west": [
+          [
+            15,
+            7
+          ]
+        ]
+      }
+    },
+    "compressor": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            7
+          ]
+        ],
+        "north": [
+          [
+            17,
+            7
+          ]
+        ],
+        "east": [
+          [
+            18,
+            7
+          ]
+        ],
+        "west": [
+          [
+            19,
+            7
+          ]
+        ]
+      }
+    },
+    "turbine": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            20,
+            7
+          ]
+        ],
+        "north": [
+          [
+            21,
+            7
+          ]
+        ],
+        "east": [
+          [
+            22,
+            7
+          ]
+        ],
+        "west": [
+          [
+            23,
+            7
+          ]
+        ]
+      }
+    },
+    "comp-o1": {
+      "dirs": 1,
+      "frames": 8,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            8
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            2,
+            8
+          ],
+          [
+            3,
+            8
+          ],
+          [
+            4,
+            8
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            6,
+            8
+          ],
+          [
+            7,
+            8
+          ]
+        ]
+      }
+    },
+    "comp-o2": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            8
+          ],
+          [
+            9,
+            8
+          ],
+          [
+            10,
+            8
+          ],
+          [
+            11,
+            8
+          ]
+        ]
+      }
+    },
+    "comp-o3": {
+      "dirs": 1,
+      "frames": 3,
+      "delay": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            8
+          ],
+          [
+            13,
+            8
+          ],
+          [
+            14,
+            8
+          ]
+        ]
+      }
+    },
+    "comp-o4": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            8
+          ],
+          [
+            16,
+            8
+          ]
+        ]
+      }
+    },
+    "turb-o": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        3.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            8
+          ],
+          [
+            18,
+            8
+          ]
+        ]
+      }
+    },
+    "inlet_filter-4": {
+      "dirs": 4,
+      "frames": 5,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            8
+          ],
+          [
+            20,
+            8
+          ],
+          [
+            21,
+            8
+          ],
+          [
+            22,
+            8
+          ],
+          [
+            23,
+            8
+          ]
+        ],
+        "north": [
+          [
+            0,
+            9
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            9
+          ],
+          [
+            4,
+            9
+          ]
+        ],
+        "east": [
+          [
+            5,
+            9
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            7,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            9,
+            9
+          ]
+        ],
+        "west": [
+          [
+            10,
+            9
+          ],
+          [
+            11,
+            9
+          ],
+          [
+            12,
+            9
+          ],
+          [
+            13,
+            9
+          ],
+          [
+            14,
+            9
+          ]
+        ]
+      }
+    },
+    "inlet_filter-3": {
+      "dirs": 4,
+      "frames": 5,
+      "delay": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            9
+          ],
+          [
+            16,
+            9
+          ],
+          [
+            17,
+            9
+          ],
+          [
+            18,
+            9
+          ],
+          [
+            19,
+            9
+          ]
+        ],
+        "north": [
+          [
+            20,
+            9
+          ],
+          [
+            21,
+            9
+          ],
+          [
+            22,
+            9
+          ],
+          [
+            23,
+            9
+          ],
+          [
+            0,
+            10
+          ]
+        ],
+        "east": [
+          [
+            1,
+            10
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            3,
+            10
+          ],
+          [
+            4,
+            10
+          ],
+          [
+            5,
+            10
+          ]
+        ],
+        "west": [
+          [
+            6,
+            10
+          ],
+          [
+            7,
+            10
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            9,
+            10
+          ],
+          [
+            10,
+            10
+          ]
+        ]
+      }
+    },
+    "inlet_filter-2": {
+      "dirs": 4,
+      "frames": 5,
+      "delay": [
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            10
+          ],
+          [
+            12,
+            10
+          ],
+          [
+            13,
+            10
+          ],
+          [
+            14,
+            10
+          ],
+          [
+            15,
+            10
+          ]
+        ],
+        "north": [
+          [
+            16,
+            10
+          ],
+          [
+            17,
+            10
+          ],
+          [
+            18,
+            10
+          ],
+          [
+            19,
+            10
+          ],
+          [
+            20,
+            10
+          ]
+        ],
+        "east": [
+          [
+            21,
+            10
+          ],
+          [
+            22,
+            10
+          ],
+          [
+            23,
+            10
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            1,
+            11
+          ]
+        ],
+        "west": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            11
+          ],
+          [
+            4,
+            11
+          ],
+          [
+            5,
+            11
+          ],
+          [
+            6,
+            11
+          ]
+        ]
+      }
+    },
+    "inlet_filter-1": {
+      "dirs": 4,
+      "frames": 5,
+      "delay": [
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            11
+          ],
+          [
+            10,
+            11
+          ],
+          [
+            11,
+            11
+          ]
+        ],
+        "north": [
+          [
+            12,
+            11
+          ],
+          [
+            13,
+            11
+          ],
+          [
+            14,
+            11
+          ],
+          [
+            15,
+            11
+          ],
+          [
+            16,
+            11
+          ]
+        ],
+        "east": [
+          [
+            17,
+            11
+          ],
+          [
+            18,
+            11
+          ],
+          [
+            19,
+            11
+          ],
+          [
+            20,
+            11
+          ],
+          [
+            21,
+            11
+          ]
+        ],
+        "west": [
+          [
+            22,
+            11
+          ],
+          [
+            23,
+            11
+          ],
+          [
+            0,
+            12
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            12
+          ]
+        ]
+      }
+    },
+    "inlet_filter-0": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            12
+          ]
+        ],
+        "north": [
+          [
+            4,
+            12
+          ]
+        ],
+        "east": [
+          [
+            5,
+            12
+          ]
+        ],
+        "west": [
+          [
+            6,
+            12
+          ]
+        ]
+      }
+    },
+    "vent_filter-0": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            12
+          ]
+        ],
+        "north": [
+          [
+            8,
+            12
+          ]
+        ],
+        "east": [
+          [
+            9,
+            12
+          ]
+        ],
+        "west": [
+          [
+            10,
+            12
+          ]
+        ]
+      }
+    },
+    "vent_filter-4": {
+      "dirs": 4,
+      "frames": 8,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            12
+          ],
+          [
+            12,
+            12
+          ],
+          [
+            13,
+            12
+          ],
+          [
+            14,
+            12
+          ],
+          [
+            15,
+            12
+          ],
+          [
+            16,
+            12
+          ],
+          [
+            17,
+            12
+          ],
+          [
+            18,
+            12
+          ]
+        ],
+        "north": [
+          [
+            19,
+            12
+          ],
+          [
+            20,
+            12
+          ],
+          [
+            21,
+            12
+          ],
+          [
+            22,
+            12
+          ],
+          [
+            23,
+            12
+          ],
+          [
+            0,
+            13
+          ],
+          [
+            1,
+            13
+          ],
+          [
+            2,
+            13
+          ]
+        ],
+        "east": [
+          [
+            3,
+            13
+          ],
+          [
+            4,
+            13
+          ],
+          [
+            5,
+            13
+          ],
+          [
+            6,
+            13
+          ],
+          [
+            7,
+            13
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            9,
+            13
+          ],
+          [
+            10,
+            13
+          ]
+        ],
+        "west": [
+          [
+            11,
+            13
+          ],
+          [
+            12,
+            13
+          ],
+          [
+            13,
+            13
+          ],
+          [
+            14,
+            13
+          ],
+          [
+            15,
+            13
+          ],
+          [
+            16,
+            13
+          ],
+          [
+            17,
+            13
+          ],
+          [
+            18,
+            13
+          ]
+        ]
+      }
+    },
+    "vent_filter-3": {
+      "dirs": 4,
+      "frames": 8,
+      "delay": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            13
+          ],
+          [
+            20,
+            13
+          ],
+          [
+            21,
+            13
+          ],
+          [
+            22,
+            13
+          ],
+          [
+            23,
+            13
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            2,
+            14
+          ]
+        ],
+        "north": [
+          [
+            3,
+            14
+          ],
+          [
+            4,
+            14
+          ],
+          [
+            5,
+            14
+          ],
+          [
+            6,
+            14
+          ],
+          [
+            7,
+            14
+          ],
+          [
+            8,
+            14
+          ],
+          [
+            9,
+            14
+          ],
+          [
+            10,
+            14
+          ]
+        ],
+        "east": [
+          [
+            11,
+            14
+          ],
+          [
+            12,
+            14
+          ],
+          [
+            13,
+            14
+          ],
+          [
+            14,
+            14
+          ],
+          [
+            15,
+            14
+          ],
+          [
+            16,
+            14
+          ],
+          [
+            17,
+            14
+          ],
+          [
+            18,
+            14
+          ]
+        ],
+        "west": [
+          [
+            19,
+            14
+          ],
+          [
+            20,
+            14
+          ],
+          [
+            21,
+            14
+          ],
+          [
+            22,
+            14
+          ],
+          [
+            23,
+            14
+          ],
+          [
+            0,
+            15
+          ],
+          [
+            1,
+            15
+          ],
+          [
+            2,
+            15
+          ]
+        ]
+      }
+    },
+    "vent_filter-2": {
+      "dirs": 4,
+      "frames": 8,
+      "delay": [
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            15
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            5,
+            15
+          ],
+          [
+            6,
+            15
+          ],
+          [
+            7,
+            15
+          ],
+          [
+            8,
+            15
+          ],
+          [
+            9,
+            15
+          ],
+          [
+            10,
+            15
+          ]
+        ],
+        "north": [
+          [
+            11,
+            15
+          ],
+          [
+            12,
+            15
+          ],
+          [
+            13,
+            15
+          ],
+          [
+            14,
+            15
+          ],
+          [
+            15,
+            15
+          ],
+          [
+            16,
+            15
+          ],
+          [
+            17,
+            15
+          ],
+          [
+            18,
+            15
+          ]
+        ],
+        "east": [
+          [
+            19,
+            15
+          ],
+          [
+            20,
+            15
+          ],
+          [
+            21,
+            15
+          ],
+          [
+            22,
+            15
+          ],
+          [
+            23,
+            15
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            1,
+            16
+          ],
+          [
+            2,
+            16
+          ]
+        ],
+        "west": [
+          [
+            3,
+            16
+          ],
+          [
+            4,
+            16
+          ],
+          [
+            5,
+            16
+          ],
+          [
+            6,
+            16
+          ],
+          [
+            7,
+            16
+          ],
+          [
+            8,
+            16
+          ],
+          [
+            9,
+            16
+          ],
+          [
+            10,
+            16
+          ]
+        ]
+      }
+    },
+    "vent_filter-1": {
+      "dirs": 4,
+      "frames": 8,
+      "delay": [
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            16
+          ],
+          [
+            12,
+            16
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            14,
+            16
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            16,
+            16
+          ],
+          [
+            17,
+            16
+          ],
+          [
+            18,
+            16
+          ]
+        ],
+        "north": [
+          [
+            19,
+            16
+          ],
+          [
+            20,
+            16
+          ],
+          [
+            21,
+            16
+          ],
+          [
+            22,
+            16
+          ],
+          [
+            23,
+            16
+          ],
+          [
+            0,
+            17
+          ],
+          [
+            1,
+            17
+          ],
+          [
+            2,
+            17
+          ]
+        ],
+        "east": [
+          [
+            3,
+            17
+          ],
+          [
+            4,
+            17
+          ],
+          [
+            5,
+            17
+          ],
+          [
+            6,
+            17
+          ],
+          [
+            7,
+            17
+          ],
+          [
+            8,
+            17
+          ],
+          [
+            9,
+            17
+          ],
+          [
+            10,
+            17
+          ]
+        ],
+        "west": [
+          [
+            11,
+            17
+          ],
+          [
+            12,
+            17
+          ],
+          [
+            13,
+            17
+          ],
+          [
+            14,
+            17
+          ],
+          [
+            15,
+            17
+          ],
+          [
+            16,
+            17
+          ],
+          [
+            17,
+            17
+          ],
+          [
+            18,
+            17
+          ]
+        ]
+      }
+    },
+    "discon": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            17
+          ]
+        ],
+        "north": [
+          [
+            20,
+            17
+          ]
+        ],
+        "east": [
+          [
+            21,
+            17
+          ]
+        ],
+        "west": [
+          [
+            22,
+            17
+          ]
+        ]
+      }
+    },
+    "intact-y": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            17
+          ]
+        ],
+        "north": [
+          [
+            0,
+            18
+          ]
+        ],
+        "east": [
+          [
+            1,
+            18
+          ]
+        ],
+        "west": [
+          [
+            2,
+            18
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            18
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            18
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            18
+          ]
+        ],
+        "northwest": [
+          [
+            6,
+            18
+          ]
+        ]
+      }
+    },
+    "intact-y-f": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            18
+          ]
+        ],
+        "north": [
+          [
+            8,
+            18
+          ]
+        ],
+        "east": [
+          [
+            9,
+            18
+          ]
+        ],
+        "west": [
+          [
+            10,
+            18
+          ]
+        ],
+        "southeast": [
+          [
+            11,
+            18
+          ]
+        ],
+        "southwest": [
+          [
+            12,
+            18
+          ]
+        ],
+        "northeast": [
+          [
+            13,
+            18
+          ]
+        ],
+        "northwest": [
+          [
+            14,
+            18
+          ]
+        ]
+      }
+    },
+    "intact-g": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            18
+          ]
+        ],
+        "north": [
+          [
+            16,
+            18
+          ]
+        ],
+        "east": [
+          [
+            17,
+            18
+          ]
+        ],
+        "west": [
+          [
+            18,
+            18
+          ]
+        ],
+        "southeast": [
+          [
+            19,
+            18
+          ]
+        ],
+        "southwest": [
+          [
+            20,
+            18
+          ]
+        ],
+        "northeast": [
+          [
+            21,
+            18
+          ]
+        ],
+        "northwest": [
+          [
+            22,
+            18
+          ]
+        ]
+      }
+    },
+    "intact-g-f": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            18
+          ]
+        ],
+        "north": [
+          [
+            0,
+            19
+          ]
+        ],
+        "east": [
+          [
+            1,
+            19
+          ]
+        ],
+        "west": [
+          [
+            2,
+            19
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            19
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            19
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            19
+          ]
+        ],
+        "northwest": [
+          [
+            6,
+            19
+          ]
+        ]
+      }
+    },
+    "intact-r": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            19
+          ]
+        ],
+        "north": [
+          [
+            8,
+            19
+          ]
+        ],
+        "east": [
+          [
+            9,
+            19
+          ]
+        ],
+        "west": [
+          [
+            10,
+            19
+          ]
+        ],
+        "southeast": [
+          [
+            11,
+            19
+          ]
+        ],
+        "southwest": [
+          [
+            12,
+            19
+          ]
+        ],
+        "northeast": [
+          [
+            13,
+            19
+          ]
+        ],
+        "northwest": [
+          [
+            14,
+            19
+          ]
+        ]
+      }
+    },
+    "intact-r-f": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            19
+          ]
+        ],
+        "north": [
+          [
+            16,
+            19
+          ]
+        ],
+        "east": [
+          [
+            17,
+            19
+          ]
+        ],
+        "west": [
+          [
+            18,
+            19
+          ]
+        ],
+        "southeast": [
+          [
+            19,
+            19
+          ]
+        ],
+        "southwest": [
+          [
+            20,
+            19
+          ]
+        ],
+        "northeast": [
+          [
+            21,
+            19
+          ]
+        ],
+        "northwest": [
+          [
+            22,
+            19
+          ]
+        ]
+      }
+    },
+    "intact-b": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            19
+          ]
+        ],
+        "north": [
+          [
+            0,
+            20
+          ]
+        ],
+        "east": [
+          [
+            1,
+            20
+          ]
+        ],
+        "west": [
+          [
+            2,
+            20
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            20
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            20
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            20
+          ]
+        ],
+        "northwest": [
+          [
+            6,
+            20
+          ]
+        ]
+      }
+    },
+    "intact-b-f": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            20
+          ]
+        ],
+        "north": [
+          [
+            8,
+            20
+          ]
+        ],
+        "east": [
+          [
+            9,
+            20
+          ]
+        ],
+        "west": [
+          [
+            10,
+            20
+          ]
+        ],
+        "southeast": [
+          [
+            11,
+            20
+          ]
+        ],
+        "southwest": [
+          [
+            12,
+            20
+          ]
+        ],
+        "northeast": [
+          [
+            13,
+            20
+          ]
+        ],
+        "northwest": [
+          [
+            14,
+            20
+          ]
+        ]
+      }
+    },
+    "intact-c": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            20
+          ]
+        ],
+        "north": [
+          [
+            16,
+            20
+          ]
+        ],
+        "east": [
+          [
+            17,
+            20
+          ]
+        ],
+        "west": [
+          [
+            18,
+            20
+          ]
+        ],
+        "southeast": [
+          [
+            19,
+            20
+          ]
+        ],
+        "southwest": [
+          [
+            20,
+            20
+          ]
+        ],
+        "northeast": [
+          [
+            21,
+            20
+          ]
+        ],
+        "northwest": [
+          [
+            22,
+            20
+          ]
+        ]
+      }
+    },
+    "intact-c-f": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            20
+          ]
+        ],
+        "north": [
+          [
+            0,
+            21
+          ]
+        ],
+        "east": [
+          [
+            1,
+            21
+          ]
+        ],
+        "west": [
+          [
+            2,
+            21
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            21
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            21
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            21
+          ]
+        ],
+        "northwest": [
+          [
+            6,
+            21
+          ]
+        ]
+      }
+    },
+    "intact-p": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            21
+          ]
+        ],
+        "north": [
+          [
+            8,
+            21
+          ]
+        ],
+        "east": [
+          [
+            9,
+            21
+          ]
+        ],
+        "west": [
+          [
+            10,
+            21
+          ]
+        ],
+        "southeast": [
+          [
+            11,
+            21
+          ]
+        ],
+        "southwest": [
+          [
+            12,
+            21
+          ]
+        ],
+        "northeast": [
+          [
+            13,
+            21
+          ]
+        ],
+        "northwest": [
+          [
+            14,
+            21
+          ]
+        ]
+      }
+    },
+    "intact-p-f": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            21
+          ]
+        ],
+        "north": [
+          [
+            16,
+            21
+          ]
+        ],
+        "east": [
+          [
+            17,
+            21
+          ]
+        ],
+        "west": [
+          [
+            18,
+            21
+          ]
+        ],
+        "southeast": [
+          [
+            19,
+            21
+          ]
+        ],
+        "southwest": [
+          [
+            20,
+            21
+          ]
+        ],
+        "northeast": [
+          [
+            21,
+            21
+          ]
+        ],
+        "northwest": [
+          [
+            22,
+            21
+          ]
+        ]
+      }
+    },
+    "exposed10": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            21
+          ]
+        ],
+        "north": [
+          [
+            0,
+            22
+          ]
+        ],
+        "east": [
+          [
+            1,
+            22
+          ]
+        ],
+        "west": [
+          [
+            2,
+            22
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            22
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            22
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            22
+          ]
+        ],
+        "northwest": [
+          [
+            6,
+            22
+          ]
+        ]
+      }
+    },
+    "exposed01": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            22
+          ]
+        ],
+        "north": [
+          [
+            8,
+            22
+          ]
+        ],
+        "east": [
+          [
+            9,
+            22
+          ]
+        ],
+        "west": [
+          [
+            10,
+            22
+          ]
+        ],
+        "southeast": [
+          [
+            11,
+            22
+          ]
+        ],
+        "southwest": [
+          [
+            12,
+            22
+          ]
+        ],
+        "northeast": [
+          [
+            13,
+            22
+          ]
+        ],
+        "northwest": [
+          [
+            14,
+            22
+          ]
+        ]
+      }
+    },
+    "cap": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            22
+          ]
+        ],
+        "north": [
+          [
+            16,
+            22
+          ]
+        ],
+        "east": [
+          [
+            17,
+            22
+          ]
+        ],
+        "west": [
+          [
+            18,
+            22
+          ]
+        ]
+      }
+    },
+    "cap-f": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            22
+          ]
+        ],
+        "north": [
+          [
+            20,
+            22
+          ]
+        ],
+        "east": [
+          [
+            21,
+            22
+          ]
+        ],
+        "west": [
+          [
+            22,
+            22
+          ]
+        ]
+      }
+    },
+    "cap-supply": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            22
+          ]
+        ],
+        "north": [
+          [
+            0,
+            23
+          ]
+        ],
+        "east": [
+          [
+            1,
+            23
+          ]
+        ],
+        "west": [
+          [
+            2,
+            23
+          ]
+        ]
+      }
+    },
+    "cap-f-supply": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            23
+          ]
+        ],
+        "north": [
+          [
+            4,
+            23
+          ]
+        ],
+        "east": [
+          [
+            5,
+            23
+          ]
+        ],
+        "west": [
+          [
+            6,
+            23
+          ]
+        ]
+      }
+    },
+    "cap-scrubbers": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            23
+          ]
+        ],
+        "north": [
+          [
+            8,
+            23
+          ]
+        ],
+        "east": [
+          [
+            9,
+            23
+          ]
+        ],
+        "west": [
+          [
+            10,
+            23
+          ]
+        ]
+      }
+    },
+    "cap-f-scrubbers": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            23
+          ]
+        ],
+        "north": [
+          [
+            12,
+            23
+          ]
+        ],
+        "east": [
+          [
+            13,
+            23
+          ]
+        ],
+        "west": [
+          [
+            14,
+            23
+          ]
+        ]
+      }
+    }
+  }
+}

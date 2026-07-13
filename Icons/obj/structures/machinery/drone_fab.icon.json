@@ -1,0 +1,84 @@
+{
+  "width": 64,
+  "height": 32,
+  "columns": 2,
+  "states": {
+    "drone_fab_idle": {
+      "dirs": 1,
+      "frames": 4,
+      "delay": [
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    "drone_fab_active": {
+      "dirs": 1,
+      "frames": 3,
+      "delay": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "drone_fab_nopower": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ]
+        ]
+      }
+    }
+  }
+}

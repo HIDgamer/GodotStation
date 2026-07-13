@@ -1,0 +1,2265 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 17,
+  "states": {
+    "NEUTER": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "c_t_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ],
+        "north": [
+          [
+            2,
+            0
+          ]
+        ],
+        "east": [
+          [
+            3,
+            0
+          ]
+        ],
+        "west": [
+          [
+            4,
+            0
+          ]
+        ]
+      }
+    },
+    "c_t_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            0
+          ]
+        ],
+        "north": [
+          [
+            6,
+            0
+          ]
+        ],
+        "east": [
+          [
+            7,
+            0
+          ]
+        ],
+        "west": [
+          [
+            8,
+            0
+          ]
+        ]
+      }
+    },
+    "c_t_rolled_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            0
+          ]
+        ],
+        "north": [
+          [
+            10,
+            0
+          ]
+        ],
+        "east": [
+          [
+            11,
+            0
+          ]
+        ],
+        "west": [
+          [
+            12,
+            0
+          ]
+        ]
+      }
+    },
+    "c_t_rolled_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            0
+          ]
+        ],
+        "north": [
+          [
+            14,
+            0
+          ]
+        ],
+        "east": [
+          [
+            15,
+            0
+          ]
+        ],
+        "west": [
+          [
+            16,
+            0
+          ]
+        ]
+      }
+    },
+    "c_t_long_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ],
+        "north": [
+          [
+            1,
+            1
+          ]
+        ],
+        "east": [
+          [
+            2,
+            1
+          ]
+        ],
+        "west": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "b_t_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            1
+          ]
+        ],
+        "north": [
+          [
+            5,
+            1
+          ]
+        ],
+        "east": [
+          [
+            6,
+            1
+          ]
+        ],
+        "west": [
+          [
+            7,
+            1
+          ]
+        ]
+      }
+    },
+    "b_t_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            1
+          ]
+        ],
+        "north": [
+          [
+            9,
+            1
+          ]
+        ],
+        "east": [
+          [
+            10,
+            1
+          ]
+        ],
+        "west": [
+          [
+            11,
+            1
+          ]
+        ]
+      }
+    },
+    "b_t_rolled_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            1
+          ]
+        ],
+        "north": [
+          [
+            13,
+            1
+          ]
+        ],
+        "east": [
+          [
+            14,
+            1
+          ]
+        ],
+        "west": [
+          [
+            15,
+            1
+          ]
+        ]
+      }
+    },
+    "b_t_rolled_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            1
+          ]
+        ],
+        "north": [
+          [
+            0,
+            2
+          ]
+        ],
+        "east": [
+          [
+            1,
+            2
+          ]
+        ],
+        "west": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "b_t_long_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ]
+        ],
+        "north": [
+          [
+            4,
+            2
+          ]
+        ],
+        "east": [
+          [
+            5,
+            2
+          ]
+        ],
+        "west": [
+          [
+            6,
+            2
+          ]
+        ]
+      }
+    },
+    "j_t_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            2
+          ]
+        ],
+        "north": [
+          [
+            8,
+            2
+          ]
+        ],
+        "east": [
+          [
+            9,
+            2
+          ]
+        ],
+        "west": [
+          [
+            10,
+            2
+          ]
+        ]
+      }
+    },
+    "j_t_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            2
+          ]
+        ],
+        "north": [
+          [
+            12,
+            2
+          ]
+        ],
+        "east": [
+          [
+            13,
+            2
+          ]
+        ],
+        "west": [
+          [
+            14,
+            2
+          ]
+        ]
+      }
+    },
+    "j_t_rolled_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            2
+          ]
+        ],
+        "north": [
+          [
+            16,
+            2
+          ]
+        ],
+        "east": [
+          [
+            0,
+            3
+          ]
+        ],
+        "west": [
+          [
+            1,
+            3
+          ]
+        ]
+      }
+    },
+    "j_t_rolled_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            3
+          ]
+        ],
+        "north": [
+          [
+            3,
+            3
+          ]
+        ],
+        "east": [
+          [
+            4,
+            3
+          ]
+        ],
+        "west": [
+          [
+            5,
+            3
+          ]
+        ]
+      }
+    },
+    "j_t_long_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            3
+          ]
+        ],
+        "north": [
+          [
+            7,
+            3
+          ]
+        ],
+        "east": [
+          [
+            8,
+            3
+          ]
+        ],
+        "west": [
+          [
+            9,
+            3
+          ]
+        ]
+      }
+    },
+    "s_t_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            3
+          ]
+        ],
+        "north": [
+          [
+            11,
+            3
+          ]
+        ],
+        "east": [
+          [
+            12,
+            3
+          ]
+        ],
+        "west": [
+          [
+            13,
+            3
+          ]
+        ]
+      }
+    },
+    "s_t_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            3
+          ]
+        ],
+        "north": [
+          [
+            15,
+            3
+          ]
+        ],
+        "east": [
+          [
+            16,
+            3
+          ]
+        ],
+        "west": [
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    },
+    "s_t_rolled_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            4
+          ]
+        ],
+        "north": [
+          [
+            2,
+            4
+          ]
+        ],
+        "east": [
+          [
+            3,
+            4
+          ]
+        ],
+        "west": [
+          [
+            4,
+            4
+          ]
+        ]
+      }
+    },
+    "s_t_rolled_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            4
+          ]
+        ],
+        "north": [
+          [
+            6,
+            4
+          ]
+        ],
+        "east": [
+          [
+            7,
+            4
+          ]
+        ],
+        "west": [
+          [
+            8,
+            4
+          ]
+        ]
+      }
+    },
+    "s_t_long_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            4
+          ]
+        ],
+        "north": [
+          [
+            10,
+            4
+          ]
+        ],
+        "east": [
+          [
+            11,
+            4
+          ]
+        ],
+        "west": [
+          [
+            12,
+            4
+          ]
+        ]
+      }
+    },
+    "d_t_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            4
+          ]
+        ],
+        "north": [
+          [
+            14,
+            4
+          ]
+        ],
+        "east": [
+          [
+            15,
+            4
+          ]
+        ],
+        "west": [
+          [
+            16,
+            4
+          ]
+        ]
+      }
+    },
+    "d_t_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            5
+          ]
+        ],
+        "north": [
+          [
+            1,
+            5
+          ]
+        ],
+        "east": [
+          [
+            2,
+            5
+          ]
+        ],
+        "west": [
+          [
+            3,
+            5
+          ]
+        ]
+      }
+    },
+    "d_t_rolled_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            5
+          ]
+        ],
+        "north": [
+          [
+            5,
+            5
+          ]
+        ],
+        "east": [
+          [
+            6,
+            5
+          ]
+        ],
+        "west": [
+          [
+            7,
+            5
+          ]
+        ]
+      }
+    },
+    "d_t_rolled_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            5
+          ]
+        ],
+        "north": [
+          [
+            9,
+            5
+          ]
+        ],
+        "east": [
+          [
+            10,
+            5
+          ]
+        ],
+        "west": [
+          [
+            11,
+            5
+          ]
+        ]
+      }
+    },
+    "d_t_long_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            5
+          ]
+        ],
+        "north": [
+          [
+            13,
+            5
+          ]
+        ],
+        "east": [
+          [
+            14,
+            5
+          ]
+        ],
+        "west": [
+          [
+            15,
+            5
+          ]
+        ]
+      }
+    },
+    "u_t_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            5
+          ]
+        ],
+        "north": [
+          [
+            0,
+            6
+          ]
+        ],
+        "east": [
+          [
+            1,
+            6
+          ]
+        ],
+        "west": [
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    },
+    "u_t_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            6
+          ]
+        ],
+        "north": [
+          [
+            4,
+            6
+          ]
+        ],
+        "east": [
+          [
+            5,
+            6
+          ]
+        ],
+        "west": [
+          [
+            6,
+            6
+          ]
+        ]
+      }
+    },
+    "u_t_rolled_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            6
+          ]
+        ],
+        "north": [
+          [
+            8,
+            6
+          ]
+        ],
+        "east": [
+          [
+            9,
+            6
+          ]
+        ],
+        "west": [
+          [
+            10,
+            6
+          ]
+        ]
+      }
+    },
+    "u_t_rolled_undershirt_sleeveless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            6
+          ]
+        ],
+        "north": [
+          [
+            12,
+            6
+          ]
+        ],
+        "east": [
+          [
+            13,
+            6
+          ]
+        ],
+        "west": [
+          [
+            14,
+            6
+          ]
+        ]
+      }
+    },
+    "u_t_long_undershirt": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            6
+          ]
+        ],
+        "north": [
+          [
+            16,
+            6
+          ]
+        ],
+        "east": [
+          [
+            0,
+            7
+          ]
+        ],
+        "west": [
+          [
+            1,
+            7
+          ]
+        ]
+      }
+    },
+    "MALE": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            7
+          ]
+        ]
+      }
+    },
+    "none": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            7
+          ]
+        ],
+        "north": [
+          [
+            4,
+            7
+          ]
+        ],
+        "east": [
+          [
+            5,
+            7
+          ]
+        ],
+        "west": [
+          [
+            6,
+            7
+          ]
+        ]
+      }
+    },
+    "FEMALE": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            7
+          ]
+        ]
+      }
+    },
+    "c_sports": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            7
+          ]
+        ],
+        "north": [
+          [
+            9,
+            7
+          ]
+        ],
+        "east": [
+          [
+            10,
+            7
+          ]
+        ],
+        "west": [
+          [
+            11,
+            7
+          ]
+        ]
+      }
+    },
+    "c_strapless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            7
+          ]
+        ],
+        "north": [
+          [
+            13,
+            7
+          ]
+        ],
+        "east": [
+          [
+            14,
+            7
+          ]
+        ],
+        "west": [
+          [
+            15,
+            7
+          ]
+        ]
+      }
+    },
+    "c_bra": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            7
+          ]
+        ],
+        "north": [
+          [
+            0,
+            8
+          ]
+        ],
+        "east": [
+          [
+            1,
+            8
+          ]
+        ],
+        "west": [
+          [
+            2,
+            8
+          ]
+        ]
+      }
+    },
+    "j_bra": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            8
+          ]
+        ],
+        "north": [
+          [
+            4,
+            8
+          ]
+        ],
+        "east": [
+          [
+            5,
+            8
+          ]
+        ],
+        "west": [
+          [
+            6,
+            8
+          ]
+        ]
+      }
+    },
+    "d_bra": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            8
+          ]
+        ],
+        "north": [
+          [
+            8,
+            8
+          ]
+        ],
+        "east": [
+          [
+            9,
+            8
+          ]
+        ],
+        "west": [
+          [
+            10,
+            8
+          ]
+        ]
+      }
+    },
+    "s_bra": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            8
+          ]
+        ],
+        "north": [
+          [
+            12,
+            8
+          ]
+        ],
+        "east": [
+          [
+            13,
+            8
+          ]
+        ],
+        "west": [
+          [
+            14,
+            8
+          ]
+        ]
+      }
+    },
+    "c_sports_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            8
+          ]
+        ],
+        "north": [
+          [
+            16,
+            8
+          ]
+        ],
+        "east": [
+          [
+            0,
+            9
+          ]
+        ],
+        "west": [
+          [
+            1,
+            9
+          ]
+        ]
+      }
+    },
+    "j_sports": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            9
+          ]
+        ],
+        "north": [
+          [
+            3,
+            9
+          ]
+        ],
+        "east": [
+          [
+            4,
+            9
+          ]
+        ],
+        "west": [
+          [
+            5,
+            9
+          ]
+        ]
+      }
+    },
+    "j_sports_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            9
+          ]
+        ],
+        "north": [
+          [
+            7,
+            9
+          ]
+        ],
+        "east": [
+          [
+            8,
+            9
+          ]
+        ],
+        "west": [
+          [
+            9,
+            9
+          ]
+        ]
+      }
+    },
+    "j_strapless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            9
+          ]
+        ],
+        "north": [
+          [
+            11,
+            9
+          ]
+        ],
+        "east": [
+          [
+            12,
+            9
+          ]
+        ],
+        "west": [
+          [
+            13,
+            9
+          ]
+        ]
+      }
+    },
+    "d_sports": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            9
+          ]
+        ],
+        "north": [
+          [
+            15,
+            9
+          ]
+        ],
+        "east": [
+          [
+            16,
+            9
+          ]
+        ],
+        "west": [
+          [
+            0,
+            10
+          ]
+        ]
+      }
+    },
+    "d_strapless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            10
+          ]
+        ],
+        "north": [
+          [
+            2,
+            10
+          ]
+        ],
+        "east": [
+          [
+            3,
+            10
+          ]
+        ],
+        "west": [
+          [
+            4,
+            10
+          ]
+        ]
+      }
+    },
+    "d_sports_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            10
+          ]
+        ],
+        "north": [
+          [
+            6,
+            10
+          ]
+        ],
+        "east": [
+          [
+            7,
+            10
+          ]
+        ],
+        "west": [
+          [
+            8,
+            10
+          ]
+        ]
+      }
+    },
+    "s_sports": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            10
+          ]
+        ],
+        "north": [
+          [
+            10,
+            10
+          ]
+        ],
+        "east": [
+          [
+            11,
+            10
+          ]
+        ],
+        "west": [
+          [
+            12,
+            10
+          ]
+        ]
+      }
+    },
+    "s_strapless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            10
+          ]
+        ],
+        "north": [
+          [
+            14,
+            10
+          ]
+        ],
+        "east": [
+          [
+            15,
+            10
+          ]
+        ],
+        "west": [
+          [
+            16,
+            10
+          ]
+        ]
+      }
+    },
+    "s_sports_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            11
+          ]
+        ],
+        "north": [
+          [
+            1,
+            11
+          ]
+        ],
+        "east": [
+          [
+            2,
+            11
+          ]
+        ],
+        "west": [
+          [
+            3,
+            11
+          ]
+        ]
+      }
+    },
+    "b_sports_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            11
+          ]
+        ],
+        "north": [
+          [
+            5,
+            11
+          ]
+        ],
+        "east": [
+          [
+            6,
+            11
+          ]
+        ],
+        "west": [
+          [
+            7,
+            11
+          ]
+        ]
+      }
+    },
+    "u_sports_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            11
+          ]
+        ],
+        "north": [
+          [
+            9,
+            11
+          ]
+        ],
+        "east": [
+          [
+            10,
+            11
+          ]
+        ],
+        "west": [
+          [
+            11,
+            11
+          ]
+        ]
+      }
+    },
+    "c_halter": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            11
+          ]
+        ],
+        "north": [
+          [
+            13,
+            11
+          ]
+        ],
+        "east": [
+          [
+            14,
+            11
+          ]
+        ],
+        "west": [
+          [
+            15,
+            11
+          ]
+        ]
+      }
+    },
+    "j_halter": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            16,
+            11
+          ]
+        ],
+        "north": [
+          [
+            0,
+            12
+          ]
+        ],
+        "east": [
+          [
+            1,
+            12
+          ]
+        ],
+        "west": [
+          [
+            2,
+            12
+          ]
+        ]
+      }
+    },
+    "d_halter": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            12
+          ]
+        ],
+        "north": [
+          [
+            4,
+            12
+          ]
+        ],
+        "east": [
+          [
+            5,
+            12
+          ]
+        ],
+        "west": [
+          [
+            6,
+            12
+          ]
+        ]
+      }
+    },
+    "s_halter": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            12
+          ]
+        ],
+        "north": [
+          [
+            8,
+            12
+          ]
+        ],
+        "east": [
+          [
+            9,
+            12
+          ]
+        ],
+        "west": [
+          [
+            10,
+            12
+          ]
+        ]
+      }
+    },
+    "u_halter": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            12
+          ]
+        ],
+        "north": [
+          [
+            12,
+            12
+          ]
+        ],
+        "east": [
+          [
+            13,
+            12
+          ]
+        ],
+        "west": [
+          [
+            14,
+            12
+          ]
+        ]
+      }
+    },
+    "b_halter": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            12
+          ]
+        ],
+        "north": [
+          [
+            16,
+            12
+          ]
+        ],
+        "east": [
+          [
+            0,
+            13
+          ]
+        ],
+        "west": [
+          [
+            1,
+            13
+          ]
+        ]
+      }
+    },
+    "c_strapless_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            13
+          ]
+        ],
+        "north": [
+          [
+            3,
+            13
+          ]
+        ],
+        "east": [
+          [
+            4,
+            13
+          ]
+        ],
+        "west": [
+          [
+            5,
+            13
+          ]
+        ]
+      }
+    },
+    "j_strapless_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            13
+          ]
+        ],
+        "north": [
+          [
+            7,
+            13
+          ]
+        ],
+        "east": [
+          [
+            8,
+            13
+          ]
+        ],
+        "west": [
+          [
+            9,
+            13
+          ]
+        ]
+      }
+    },
+    "d_strapless_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            13
+          ]
+        ],
+        "north": [
+          [
+            11,
+            13
+          ]
+        ],
+        "east": [
+          [
+            12,
+            13
+          ]
+        ],
+        "west": [
+          [
+            13,
+            13
+          ]
+        ]
+      }
+    },
+    "s_strapless_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            13
+          ]
+        ],
+        "north": [
+          [
+            15,
+            13
+          ]
+        ],
+        "east": [
+          [
+            16,
+            13
+          ]
+        ],
+        "west": [
+          [
+            0,
+            14
+          ]
+        ]
+      }
+    },
+    "u_strapless_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            14
+          ]
+        ],
+        "north": [
+          [
+            2,
+            14
+          ]
+        ],
+        "east": [
+          [
+            3,
+            14
+          ]
+        ],
+        "west": [
+          [
+            4,
+            14
+          ]
+        ]
+      }
+    },
+    "b_strapless_c": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            14
+          ]
+        ],
+        "north": [
+          [
+            6,
+            14
+          ]
+        ],
+        "east": [
+          [
+            7,
+            14
+          ]
+        ],
+        "west": [
+          [
+            8,
+            14
+          ]
+        ]
+      }
+    },
+    "b_sports": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            14
+          ]
+        ],
+        "north": [
+          [
+            10,
+            14
+          ]
+        ],
+        "east": [
+          [
+            11,
+            14
+          ]
+        ],
+        "west": [
+          [
+            12,
+            14
+          ]
+        ]
+      }
+    },
+    "b_strapless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            13,
+            14
+          ]
+        ],
+        "north": [
+          [
+            14,
+            14
+          ]
+        ],
+        "east": [
+          [
+            15,
+            14
+          ]
+        ],
+        "west": [
+          [
+            16,
+            14
+          ]
+        ]
+      }
+    },
+    "u_sports": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            15
+          ]
+        ],
+        "north": [
+          [
+            1,
+            15
+          ]
+        ],
+        "east": [
+          [
+            2,
+            15
+          ]
+        ],
+        "west": [
+          [
+            3,
+            15
+          ]
+        ]
+      }
+    },
+    "u_strapless": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            15
+          ]
+        ],
+        "north": [
+          [
+            5,
+            15
+          ]
+        ],
+        "east": [
+          [
+            6,
+            15
+          ]
+        ],
+        "west": [
+          [
+            7,
+            15
+          ]
+        ]
+      }
+    }
+  }
+}

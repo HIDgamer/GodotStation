@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://cidit0bdhdicv"]
+
+[ext_resource type="Script" uid="uid://08yxicv8wp5u" path="res://Scripts/Game/World/MapBootstrap.cs" id="1_map"]
+[ext_resource type="Script" uid="uid://cqn2whjlbs6pb" path="res://Scripts/Game/World/SpawnPoint.cs" id="2_spawn"]
+[ext_resource type="PackedScene" uid="uid://0gsa52lm00jv" path="res://Scenes/Game/Item.tscn" id="3_item"]
+[ext_resource type="PackedScene" uid="uid://c11ibrwu0wx8c" path="res://Scenes/Game/Gun.tscn" id="4_gun"]
+[ext_resource type="PackedScene" uid="uid://cotviv3h66wvj" path="res://Scenes/Game/MeleeWeapon.tscn" id="5_melee"]
+
+[node name="TestMap" type="Node2D" unique_id=1910861934]
+script = ExtResource("1_map")
+
+[node name="SpawnPoint1" type="Node2D" parent="." unique_id=1487623427]
+position = Vector2(240, 144)
+script = ExtResource("2_spawn")
+
+[node name="SpawnPoint2" type="Node2D" parent="." unique_id=2062828925]
+position = Vector2(272, 144)
+script = ExtResource("2_spawn")
+
+[node name="SpawnPoint3" type="Node2D" parent="." unique_id=659007630]
+position = Vector2(240, 176)
+script = ExtResource("2_spawn")
+
+[node name="SpawnPoint4" type="Node2D" parent="." unique_id=559804205]
+position = Vector2(272, 176)
+script = ExtResource("2_spawn")
+
+[node name="Flashlight" parent="." unique_id=156612639 instance=ExtResource("3_item")]
+position = Vector2(176, 144)
+IconSheetPath = "res://Icons/obj/items/lighting.png"
+IconState = "flashlight"
+AtomName = "Flashlight"
+Description = "A standard-issue hand flashlight. Currently off."
+
+[node name="Pistol" parent="." unique_id=1556411774 instance=ExtResource("4_gun")]
+position = Vector2(336, 144)
+IconSheetPath = "res://Icons/obj/items/weapons/guns/guns_by_faction/USCM/pistols.png"
+IconState = "m4a3"
+AtomName = "M4A3 Service Pistol"
+Description = "The standard USCM sidearm."
+
+[node name="CombatKnife" parent="." unique_id=540874908 instance=ExtResource("5_melee")]
+position = Vector2(336, 176)
+IconSheetPath = "res://Icons/obj/items/weapons/melee/knives.png"
+IconState = "fighting_knife"
+AtomName = "Fighting Knife"
+Description = "A standard-issue combat knife."

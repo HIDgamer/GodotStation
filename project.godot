@@ -12,33 +12,21 @@ config_version=5
 
 config/name="GodotStation"
 config/version="8.0"
-run/main_scene="res://Scenes/game/ui/MainMenu.tscn"
+run/main_scene="res://Scenes/UI/MainMenu.tscn"
 config/custom_user_dir_name="GodotStation"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
-config/icon="res://Assets/Icons/Ico/UCFGS_64x64.ico"
-config/windows_native_icon="res://Assets/Icons/Ico/UCFGS_64x64.ico"
-run/main_scene.dedicated_server="res://Scenes/server/ServerMain.tscn"
 
 [autoload]
 
-NetworkManager="*res://Scripts/network/NetworkManager.cs"
-DedicatedServer="*res://Scripts/server/DedicatedServer.cs"
-ServerConfig="*res://Scripts/server/ServerConfig.cs"
-ServerRegistrar="*res://Scripts/server/ServerRegistrar.cs"
-PreferenceManager="*res://Scripts/game/managers/PreferenceManager.gd"
-BatchManager="*res://Scripts/game/managers/BatchManager.cs"
-ClothingManager="*res://Scripts/game/managers/ClothingManager.cs"
-FrameUpdateManager="*res://Scripts/game/managers/FrameUpdateManager.cs"
-GameManager="*res://Scripts/game/managers/GameManager.cs"
-ItemPoolManager="*res://Scripts/game/managers/ItemPoolManager.cs"
-JobManager="*res://Scripts/game/managers/JobManager.cs"
-ProfilingManager="*res://Scripts/game/managers/ProfilingManager.cs"
-AudioManager="*res://Scripts/game/managers/AudioManager.gd"
-UiAnimationHelper="*res://Scripts/game/ui/UIAnimationHelper.gd"
-Scheduler="*res://Scripts/game/utils/Scheduler.cs"
-DiscordRpc="*res://Scripts/game/utils/DiscordRPC.cs"
-ServerPrivileges="*res://Scripts/game/utils/ServerPrivileges.cs"
-ScriptingManager="*res://Scripts/game/managers/ScriptingManager.cs"
+SubsystemManager="*uid://ceuel77h4xpwj"
+AtomRegistry="*res://Scripts/Core/Atoms/AtomRegistry.cs"
+WorldGrid="*res://Scripts/Core/World/WorldGrid.cs"
+ScriptingManager="*res://Scripts/Core/Scripting/ScriptingManager.cs"
+NetworkManager="*uid://cwclxemw2l40b"
+ChatManager="*res://Scripts/Core/Net/ChatManager.cs"
+IconBridge="*res://Scripts/Core/Assets/IconBridge.cs"
+JobManager="*res://Scripts/Game/Jobs/JobManager.cs"
+AudioManager="*uid://blp75yg3ot36a"
 
 [display]
 
@@ -78,18 +66,14 @@ exclude_filter="*.import,*.tmp,*.bak,*.cache"
 [file_customization]
 
 folder_colors={
-"res://Assets/": "orange",
-"res://Godot Doc/": "teal",
+"res://Icons/": "orange",
 "res://Scenes/": "blue",
 "res://Scripts/": "gray",
 "res://Sound/": "purple",
+"res://Tools/": "pink",
 "res://addons/": "red",
-"res://assets/": "orange",
 "res://build/": "teal",
-"res://sandbox-programs/": "yellow",
-"res://scenes/": "blue",
-"res://scripts/": "gray",
-"res://sound/": "purple"
+"res://sandbox-programs/": "yellow"
 }
 
 [filesystem]
@@ -351,6 +335,5 @@ lightmapping/bake_performance/region_size=2048
 2d/snap/snap_2d_transforms_to_pixel=true
 2d/snap/snap_2d_vertices_to_pixel=true
 anti_aliasing/bake_performance/region_size=512
-anti_aliasing/main_scene="uid://dwdx03uq5hwnt"
 2d/directional_shadow/soft_shadow_filter_quality=3
 2d/positional_shadow/soft_shadow_filter_quality=3

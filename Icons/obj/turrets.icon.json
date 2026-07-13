@@ -1,0 +1,1179 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 13,
+  "states": {
+    "grey_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            0
+          ]
+        ]
+      }
+    },
+    "popup": {
+      "dirs": 1,
+      "frames": 11,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 1,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            0
+          ],
+          [
+            9,
+            0
+          ],
+          [
+            10,
+            0
+          ],
+          [
+            11,
+            0
+          ],
+          [
+            12,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            5,
+            1
+          ]
+        ]
+      }
+    },
+    "turretCover": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            1
+          ]
+        ]
+      }
+    },
+    "openTurretCover": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            1
+          ]
+        ]
+      }
+    },
+    "popdown": {
+      "dirs": 1,
+      "frames": 11,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 1,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            1
+          ],
+          [
+            9,
+            1
+          ],
+          [
+            10,
+            1
+          ],
+          [
+            11,
+            1
+          ],
+          [
+            12,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ]
+        ]
+      }
+    },
+    "destroyed_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            2
+          ]
+        ],
+        "north": [
+          [
+            7,
+            2
+          ]
+        ],
+        "east": [
+          [
+            8,
+            2
+          ]
+        ],
+        "west": [
+          [
+            9,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            10,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            11,
+            2
+          ]
+        ],
+        "northeast": [
+          [
+            12,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            3
+          ]
+        ],
+        "north": [
+          [
+            2,
+            3
+          ]
+        ],
+        "east": [
+          [
+            3,
+            3
+          ]
+        ],
+        "west": [
+          [
+            4,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            5,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            6,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            7,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            8,
+            3
+          ]
+        ]
+      }
+    },
+    "orange_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            3
+          ]
+        ],
+        "north": [
+          [
+            10,
+            3
+          ]
+        ],
+        "east": [
+          [
+            11,
+            3
+          ]
+        ],
+        "west": [
+          [
+            12,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            0,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            1,
+            4
+          ]
+        ],
+        "northeast": [
+          [
+            2,
+            4
+          ]
+        ],
+        "northwest": [
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    },
+    "tesla2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            4
+          ]
+        ]
+      }
+    },
+    "tesla1": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            4
+          ]
+        ]
+      }
+    },
+    "tesla3": {
+      "dirs": 1,
+      "frames": 5,
+      "delay": [
+        15.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            4
+          ],
+          [
+            7,
+            4
+          ],
+          [
+            8,
+            4
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            10,
+            4
+          ]
+        ]
+      }
+    },
+    "tesla3_2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            4
+          ]
+        ]
+      }
+    },
+    "tesla5": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            12,
+            4
+          ]
+        ]
+      }
+    },
+    "tesla5_2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            5
+          ]
+        ]
+      }
+    },
+    "tesla4": {
+      "dirs": 1,
+      "frames": 5,
+      "delay": [
+        15.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            5,
+            5
+          ]
+        ]
+      }
+    },
+    "tesla6_0": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            5
+          ]
+        ]
+      }
+    },
+    "tesla6_nomove": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            5
+          ]
+        ]
+      }
+    },
+    "tesla6_1": {
+      "dirs": 1,
+      "frames": 5,
+      "delay": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            5
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            10,
+            5
+          ],
+          [
+            11,
+            5
+          ],
+          [
+            12,
+            5
+          ]
+        ]
+      }
+    },
+    "tesla6_2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            6
+          ]
+        ]
+      }
+    },
+    "gun_turret": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            6
+          ]
+        ],
+        "north": [
+          [
+            2,
+            6
+          ]
+        ],
+        "east": [
+          [
+            3,
+            6
+          ]
+        ],
+        "west": [
+          [
+            4,
+            6
+          ]
+        ]
+      }
+    },
+    "turret_frame": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 1,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            6
+          ]
+        ]
+      }
+    },
+    "turret_frame2": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            6
+          ]
+        ]
+      }
+    },
+    "rgrey_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            6
+          ]
+        ],
+        "north": [
+          [
+            8,
+            6
+          ]
+        ],
+        "east": [
+          [
+            9,
+            6
+          ]
+        ],
+        "west": [
+          [
+            10,
+            6
+          ]
+        ],
+        "southeast": [
+          [
+            11,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            12,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            0,
+            7
+          ]
+        ],
+        "northwest": [
+          [
+            1,
+            7
+          ]
+        ]
+      }
+    },
+    "rdestroyed_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            7
+          ]
+        ],
+        "north": [
+          [
+            3,
+            7
+          ]
+        ],
+        "east": [
+          [
+            4,
+            7
+          ]
+        ],
+        "west": [
+          [
+            5,
+            7
+          ]
+        ],
+        "southeast": [
+          [
+            6,
+            7
+          ]
+        ],
+        "southwest": [
+          [
+            7,
+            7
+          ]
+        ],
+        "northeast": [
+          [
+            8,
+            7
+          ]
+        ],
+        "northwest": [
+          [
+            9,
+            7
+          ]
+        ]
+      }
+    },
+    "rtarget_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            7
+          ]
+        ],
+        "north": [
+          [
+            11,
+            7
+          ]
+        ],
+        "east": [
+          [
+            12,
+            7
+          ]
+        ],
+        "west": [
+          [
+            0,
+            8
+          ]
+        ],
+        "southeast": [
+          [
+            1,
+            8
+          ]
+        ],
+        "southwest": [
+          [
+            2,
+            8
+          ]
+        ],
+        "northeast": [
+          [
+            3,
+            8
+          ]
+        ],
+        "northwest": [
+          [
+            4,
+            8
+          ]
+        ]
+      }
+    },
+    "rorange_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            8
+          ]
+        ],
+        "north": [
+          [
+            6,
+            8
+          ]
+        ],
+        "east": [
+          [
+            7,
+            8
+          ]
+        ],
+        "west": [
+          [
+            8,
+            8
+          ]
+        ],
+        "southeast": [
+          [
+            9,
+            8
+          ]
+        ],
+        "southwest": [
+          [
+            10,
+            8
+          ]
+        ],
+        "northeast": [
+          [
+            11,
+            8
+          ]
+        ],
+        "northwest": [
+          [
+            12,
+            8
+          ]
+        ]
+      }
+    },
+    "bgrey_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            9
+          ]
+        ],
+        "north": [
+          [
+            1,
+            9
+          ]
+        ],
+        "east": [
+          [
+            2,
+            9
+          ]
+        ],
+        "west": [
+          [
+            3,
+            9
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            9
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            9
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            9
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            9
+          ]
+        ]
+      }
+    },
+    "bdestroyed_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            9
+          ]
+        ],
+        "north": [
+          [
+            9,
+            9
+          ]
+        ],
+        "east": [
+          [
+            10,
+            9
+          ]
+        ],
+        "west": [
+          [
+            11,
+            9
+          ]
+        ],
+        "southeast": [
+          [
+            12,
+            9
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            10
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            10
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            10
+          ]
+        ]
+      }
+    },
+    "btarget_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            10
+          ]
+        ],
+        "north": [
+          [
+            4,
+            10
+          ]
+        ],
+        "east": [
+          [
+            5,
+            10
+          ]
+        ],
+        "west": [
+          [
+            6,
+            10
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            10
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            10
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            10
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            10
+          ]
+        ]
+      }
+    },
+    "borange_target_prism": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            10
+          ]
+        ],
+        "north": [
+          [
+            12,
+            10
+          ]
+        ],
+        "east": [
+          [
+            0,
+            11
+          ]
+        ],
+        "west": [
+          [
+            1,
+            11
+          ]
+        ],
+        "southeast": [
+          [
+            2,
+            11
+          ]
+        ],
+        "southwest": [
+          [
+            3,
+            11
+          ]
+        ],
+        "northeast": [
+          [
+            4,
+            11
+          ]
+        ],
+        "northwest": [
+          [
+            5,
+            11
+          ]
+        ]
+      }
+    }
+  }
+}

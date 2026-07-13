@@ -1,0 +1,453 @@
+{
+  "width": 64,
+  "height": 32,
+  "columns": 5,
+  "states": {
+    "armokbar": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      }
+    },
+    "brokendrum": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    },
+    "limbo": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "magmasea": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    "pinkflamingo": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ]
+      }
+    },
+    "rustyaxe": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "empty": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    },
+    "meadbay": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ]
+        ]
+      }
+    },
+    "cindikate": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            3
+          ]
+        ]
+      }
+    },
+    "thecavern": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ]
+        ]
+      }
+    },
+    "theclownshead": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            3
+          ],
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    },
+    "theorchard": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            4
+          ]
+        ]
+      }
+    },
+    "thesaucyclown": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            4
+          ]
+        ]
+      }
+    },
+    "thedamnwall": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            5
+          ],
+          [
+            1,
+            5
+          ]
+        ]
+      }
+    },
+    "whiskeyimplant": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            5
+          ],
+          [
+            3,
+            5
+          ]
+        ]
+      }
+    },
+    "carpecarp": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            5
+          ],
+          [
+            0,
+            6
+          ]
+        ]
+      }
+    },
+    "robustroadhouse": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    },
+    "greytide": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            6
+          ],
+          [
+            4,
+            6
+          ]
+        ]
+      }
+    },
+    "theredshirt": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        4.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            7
+          ],
+          [
+            1,
+            7
+          ]
+        ]
+      }
+    },
+    "off": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            7
+          ]
+        ]
+      }
+    }
+  }
+}

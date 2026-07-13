@@ -1,0 +1,81 @@
+{
+  "width": 64,
+  "height": 64,
+  "columns": 3,
+  "states": {
+    "resin_pillar_OLD": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        7.0,
+        7.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      }
+    },
+    "resin_pillar_strong": {
+      "dirs": 1,
+      "frames": 2,
+      "delay": [
+        7.0,
+        7.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "pillar_shield": {
+      "dirs": 1,
+      "frames": 3,
+      "delay": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            0,
+            2
+          ]
+        ]
+      }
+    }
+  }
+}

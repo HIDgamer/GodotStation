@@ -1,0 +1,65 @@
+{
+  "width": 96,
+  "height": 96,
+  "columns": 3,
+  "states": {
+    "light": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            0,
+            1
+          ]
+        ],
+        "southeast": [
+          [
+            1,
+            1
+          ]
+        ],
+        "southwest": [
+          [
+            2,
+            1
+          ]
+        ],
+        "northeast": [
+          [
+            0,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    }
+  }
+}

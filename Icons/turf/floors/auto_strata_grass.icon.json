@@ -1,0 +1,355 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 7,
+  "states": {
+    "grass_0": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "grass_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ]
+        ],
+        "north": [
+          [
+            2,
+            1
+          ]
+        ],
+        "east": [
+          [
+            3,
+            1
+          ]
+        ],
+        "west": [
+          [
+            4,
+            1
+          ]
+        ],
+        "southeast": [
+          [
+            5,
+            1
+          ]
+        ],
+        "southwest": [
+          [
+            6,
+            1
+          ]
+        ],
+        "northeast": [
+          [
+            0,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "grass_innercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            2
+          ]
+        ],
+        "north": [
+          [
+            3,
+            2
+          ]
+        ],
+        "east": [
+          [
+            4,
+            2
+          ]
+        ],
+        "west": [
+          [
+            5,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            6,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            3
+          ]
+        ]
+      }
+    },
+    "grass_outercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            3
+          ]
+        ],
+        "north": [
+          [
+            4,
+            3
+          ]
+        ],
+        "east": [
+          [
+            5,
+            3
+          ]
+        ],
+        "west": [
+          [
+            6,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            0,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            1,
+            4
+          ]
+        ],
+        "northeast": [
+          [
+            2,
+            4
+          ]
+        ],
+        "northwest": [
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    },
+    "grass_0_mud": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            4
+          ]
+        ],
+        "north": [
+          [
+            5,
+            4
+          ]
+        ],
+        "east": [
+          [
+            6,
+            4
+          ]
+        ],
+        "west": [
+          [
+            0,
+            5
+          ]
+        ],
+        "southeast": [
+          [
+            1,
+            5
+          ]
+        ],
+        "southwest": [
+          [
+            2,
+            5
+          ]
+        ],
+        "northeast": [
+          [
+            3,
+            5
+          ]
+        ],
+        "northwest": [
+          [
+            4,
+            5
+          ]
+        ]
+      }
+    },
+    "grass_0_mud_alt": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            5,
+            5
+          ]
+        ],
+        "north": [
+          [
+            6,
+            5
+          ]
+        ],
+        "east": [
+          [
+            0,
+            6
+          ]
+        ],
+        "west": [
+          [
+            1,
+            6
+          ]
+        ],
+        "southeast": [
+          [
+            2,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            3,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            4,
+            6
+          ]
+        ],
+        "northwest": [
+          [
+            5,
+            6
+          ]
+        ]
+      }
+    }
+  }
+}

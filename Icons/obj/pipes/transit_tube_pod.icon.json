@@ -1,0 +1,123 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 4,
+  "states": {
+    "pod": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            0,
+            1
+          ]
+        ],
+        "southwest": [
+          [
+            1,
+            1
+          ]
+        ],
+        "northeast": [
+          [
+            2,
+            1
+          ]
+        ],
+        "northwest": [
+          [
+            3,
+            1
+          ]
+        ]
+      }
+    },
+    "pod_occupied": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ],
+        "north": [
+          [
+            1,
+            2
+          ]
+        ],
+        "east": [
+          [
+            2,
+            2
+          ]
+        ],
+        "west": [
+          [
+            3,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            0,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            1,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            2,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            3,
+            3
+          ]
+        ]
+      }
+    }
+  }
+}

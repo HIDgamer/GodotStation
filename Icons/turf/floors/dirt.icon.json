@@ -1,0 +1,703 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 10,
+  "states": {
+    "bgrey": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            0
+          ]
+        ]
+      }
+    },
+    "bgrey_innercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            0
+          ]
+        ],
+        "north": [
+          [
+            9,
+            0
+          ]
+        ],
+        "east": [
+          [
+            0,
+            1
+          ]
+        ],
+        "west": [
+          [
+            1,
+            1
+          ]
+        ],
+        "southeast": [
+          [
+            2,
+            1
+          ]
+        ],
+        "southwest": [
+          [
+            3,
+            1
+          ]
+        ],
+        "northeast": [
+          [
+            4,
+            1
+          ]
+        ],
+        "northwest": [
+          [
+            5,
+            1
+          ]
+        ]
+      }
+    },
+    "bgrey_outercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            1
+          ]
+        ],
+        "north": [
+          [
+            7,
+            1
+          ]
+        ],
+        "east": [
+          [
+            8,
+            1
+          ]
+        ],
+        "west": [
+          [
+            9,
+            1
+          ]
+        ],
+        "southeast": [
+          [
+            0,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            1,
+            2
+          ]
+        ],
+        "northeast": [
+          [
+            2,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            3,
+            2
+          ]
+        ]
+      }
+    },
+    "bgreysnow": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            2
+          ]
+        ],
+        "north": [
+          [
+            5,
+            2
+          ]
+        ],
+        "east": [
+          [
+            6,
+            2
+          ]
+        ],
+        "west": [
+          [
+            7,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            8,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            9,
+            2
+          ]
+        ],
+        "northeast": [
+          [
+            0,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            1,
+            3
+          ]
+        ]
+      }
+    },
+    "gyellow": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            3
+          ]
+        ],
+        "north": [
+          [
+            3,
+            3
+          ]
+        ],
+        "east": [
+          [
+            4,
+            3
+          ]
+        ],
+        "west": [
+          [
+            5,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            6,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            7,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            8,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            9,
+            3
+          ]
+        ]
+      }
+    },
+    "gyellow_innercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            4
+          ]
+        ],
+        "north": [
+          [
+            1,
+            4
+          ]
+        ],
+        "east": [
+          [
+            2,
+            4
+          ]
+        ],
+        "west": [
+          [
+            3,
+            4
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            4
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            4
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            4
+          ]
+        ]
+      }
+    },
+    "gyellow_outercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            4
+          ]
+        ],
+        "north": [
+          [
+            9,
+            4
+          ]
+        ],
+        "east": [
+          [
+            0,
+            5
+          ]
+        ],
+        "west": [
+          [
+            1,
+            5
+          ]
+        ],
+        "southeast": [
+          [
+            2,
+            5
+          ]
+        ],
+        "southwest": [
+          [
+            3,
+            5
+          ]
+        ],
+        "northeast": [
+          [
+            4,
+            5
+          ]
+        ],
+        "northwest": [
+          [
+            5,
+            5
+          ]
+        ]
+      }
+    },
+    "snow_innercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            6,
+            5
+          ]
+        ],
+        "north": [
+          [
+            7,
+            5
+          ]
+        ],
+        "east": [
+          [
+            8,
+            5
+          ]
+        ],
+        "west": [
+          [
+            9,
+            5
+          ]
+        ],
+        "southeast": [
+          [
+            0,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            1,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            2,
+            6
+          ]
+        ],
+        "northwest": [
+          [
+            3,
+            6
+          ]
+        ]
+      }
+    },
+    "snow_outercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            4,
+            6
+          ]
+        ],
+        "north": [
+          [
+            5,
+            6
+          ]
+        ],
+        "east": [
+          [
+            6,
+            6
+          ]
+        ],
+        "west": [
+          [
+            7,
+            6
+          ]
+        ],
+        "southeast": [
+          [
+            8,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            9,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            0,
+            7
+          ]
+        ],
+        "northwest": [
+          [
+            1,
+            7
+          ]
+        ]
+      }
+    },
+    "snow_outercornerT": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            7
+          ]
+        ],
+        "north": [
+          [
+            3,
+            7
+          ]
+        ],
+        "east": [
+          [
+            4,
+            7
+          ]
+        ],
+        "west": [
+          [
+            5,
+            7
+          ]
+        ],
+        "southeast": [
+          [
+            6,
+            7
+          ]
+        ],
+        "southwest": [
+          [
+            7,
+            7
+          ]
+        ],
+        "northeast": [
+          [
+            8,
+            7
+          ]
+        ],
+        "northwest": [
+          [
+            9,
+            7
+          ]
+        ]
+      }
+    },
+    "snow_innercornerT": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            8
+          ]
+        ],
+        "north": [
+          [
+            1,
+            8
+          ]
+        ],
+        "east": [
+          [
+            2,
+            8
+          ]
+        ],
+        "west": [
+          [
+            3,
+            8
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            8
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            8
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            8
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            8
+          ]
+        ]
+      }
+    },
+    "dirt": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            8
+          ]
+        ],
+        "north": [
+          [
+            9,
+            8
+          ]
+        ],
+        "east": [
+          [
+            0,
+            9
+          ]
+        ],
+        "west": [
+          [
+            1,
+            9
+          ]
+        ],
+        "southeast": [
+          [
+            2,
+            9
+          ]
+        ],
+        "southwest": [
+          [
+            3,
+            9
+          ]
+        ],
+        "northeast": [
+          [
+            4,
+            9
+          ]
+        ],
+        "northwest": [
+          [
+            5,
+            9
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,413 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 8,
+  "states": {
+    "ice_0": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ],
+        "north": [
+          [
+            1,
+            0
+          ]
+        ],
+        "east": [
+          [
+            2,
+            0
+          ]
+        ],
+        "west": [
+          [
+            3,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            0
+          ]
+        ]
+      }
+    },
+    "ice_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            1
+          ]
+        ],
+        "north": [
+          [
+            1,
+            1
+          ]
+        ],
+        "east": [
+          [
+            2,
+            1
+          ]
+        ],
+        "west": [
+          [
+            3,
+            1
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            1
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            1
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            1
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            1
+          ]
+        ]
+      }
+    },
+    "ice_2": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            2
+          ]
+        ],
+        "north": [
+          [
+            1,
+            2
+          ]
+        ],
+        "east": [
+          [
+            2,
+            2
+          ]
+        ],
+        "west": [
+          [
+            3,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            2
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            2
+          ]
+        ]
+      }
+    },
+    "ice_innercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            3
+          ]
+        ],
+        "north": [
+          [
+            1,
+            3
+          ]
+        ],
+        "east": [
+          [
+            2,
+            3
+          ]
+        ],
+        "west": [
+          [
+            3,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            3
+          ]
+        ]
+      }
+    },
+    "ice_outercorner": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            4
+          ]
+        ],
+        "north": [
+          [
+            1,
+            4
+          ]
+        ],
+        "east": [
+          [
+            2,
+            4
+          ]
+        ],
+        "west": [
+          [
+            3,
+            4
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            4
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            4
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            4
+          ]
+        ]
+      }
+    },
+    "ice_0_composite1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            5
+          ]
+        ],
+        "north": [
+          [
+            1,
+            5
+          ]
+        ],
+        "east": [
+          [
+            2,
+            5
+          ]
+        ],
+        "west": [
+          [
+            3,
+            5
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            5
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            5
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            5
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            5
+          ]
+        ]
+      }
+    },
+    "ice_0_composite2": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            6
+          ]
+        ],
+        "north": [
+          [
+            1,
+            6
+          ]
+        ],
+        "east": [
+          [
+            2,
+            6
+          ]
+        ],
+        "west": [
+          [
+            3,
+            6
+          ]
+        ],
+        "southeast": [
+          [
+            4,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            5,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            6,
+            6
+          ]
+        ],
+        "northwest": [
+          [
+            7,
+            6
+          ]
+        ]
+      }
+    }
+  }
+}

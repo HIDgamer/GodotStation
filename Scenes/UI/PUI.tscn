@@ -1,0 +1,440 @@
+[gd_scene format=3 uid="uid://b3kupd1ylif6w"]
+
+[ext_resource type="Script" uid="uid://cj3df4vno2fa1" path="res://Scripts/UI/PlayerInterface.gd" id="1_33e1j"]
+[ext_resource type="Script" uid="uid://drgc3mvyw8dik" path="res://Scripts/UI/IntentUI.gd" id="2_8d4ln"]
+
+[node name="Player_Interface" type="Control" unique_id=2081765824]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+script = ExtResource("1_33e1j")
+
+[node name="IntentUI" type="Control" parent="." unique_id=720792957]
+anchors_preset = 0
+script = ExtResource("2_8d4ln")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=44564025]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -248.0
+offset_top = -128.0
+offset_right = 124.0
+offset_bottom = -65.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(2, 2)
+theme_override_constants/separation = -1
+alignment = 1
+
+[node name="MainContainer" type="HBoxContainer" parent="HBoxContainer" unique_id=866452065]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -1
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Equipment" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=1195483475]
+layout_mode = 2
+toggle_mode = true
+stretch_mode = 3
+
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/MainContainer/Equipment" unique_id=326393835]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.96875
+anchor_top = -1.4603174
+anchor_right = 1.96875
+anchor_bottom = 0.7619049
+theme_override_constants/h_separation = -1
+theme_override_constants/v_separation = 4
+columns = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="LEar" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=725621250]
+layout_mode = 2
+
+[node name="LEarSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/LEar" unique_id=1243271485]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Head" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1075550071]
+layout_mode = 2
+
+[node name="HeadSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Head" unique_id=1355791745]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="REar" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1385848014]
+layout_mode = 2
+
+[node name="REarSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/REar" unique_id=1043171181]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Eyes" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=680102048]
+layout_mode = 2
+
+[node name="EyesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Eyes" unique_id=1908292237]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Mask" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=116248490]
+layout_mode = 2
+
+[node name="MaskSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Mask" unique_id=263102963]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Gloves" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1901006666]
+layout_mode = 2
+
+[node name="GlovesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Gloves" unique_id=1603895833]
+layout_mode = 0
+offset_left = 1.0
+offset_right = 33.0
+offset_bottom = 32.0
+
+[node name="Uniform" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1513073958]
+layout_mode = 2
+
+[node name="UniformSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Uniform" unique_id=209310667]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Armor" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=361297757]
+layout_mode = 2
+
+[node name="ArmorSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Armor" unique_id=1934543317]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Shoes" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1589190413]
+layout_mode = 2
+
+[node name="ShoesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Shoes" unique_id=918007827]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="ArmorHolster" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1968356795]
+layout_mode = 2
+
+[node name="ArmorHolsterSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/ArmorHolster" unique_id=580814249]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="ID" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1721674147]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="IDSlot" type="TextureRect" parent="HBoxContainer/MainContainer/ID" unique_id=723227057]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Belt" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=92597811]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="BeltSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Belt" unique_id=212603078]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Backpack" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1142549800]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="BackpackSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Backpack" unique_id=808097703]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="LHand" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=867931062]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="LHandSlot" type="TextureRect" parent="HBoxContainer/MainContainer/LHand" unique_id=1985311816]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.25757575
+anchor_right = 1.0
+anchor_bottom = 0.74242425
+stretch_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="LHighlight" type="TextureRect" parent="HBoxContainer/MainContainer/LHand" unique_id=1558808261]
+visible = false
+layout_mode = 0
+anchor_top = 0.25757575
+anchor_right = 1.0
+anchor_bottom = 0.74242425
+stretch_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="RHand" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=2077918053]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="RHandSlot" type="TextureRect" parent="HBoxContainer/MainContainer/RHand" unique_id=1340011486]
+layout_mode = 0
+anchor_top = 0.25757575
+anchor_right = 1.0
+anchor_bottom = 0.74242425
+stretch_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="RHighlight" type="TextureRect" parent="HBoxContainer/MainContainer/RHand" unique_id=1225600411]
+layout_mode = 0
+anchor_top = 0.25757575
+anchor_right = 1.0
+anchor_bottom = 0.74242425
+stretch_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="LPouch" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=958125666]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="LPouchSlot" type="TextureRect" parent="HBoxContainer/MainContainer/LPouch" unique_id=1839393010]
+layout_mode = 0
+offset_left = 155.0
+offset_right = 155.0
+offset_bottom = 66.0
+
+[node name="RPouch" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1796952337]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="LPouchSlot" type="TextureRect" parent="HBoxContainer/MainContainer/RPouch" unique_id=354065700]
+layout_mode = 0
+offset_left = 124.0
+offset_right = 124.0
+offset_bottom = 66.0
+
+[node name="IntentContainer" type="GridContainer" parent="HBoxContainer" unique_id=2083057729]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/h_separation = -1
+theme_override_constants/v_separation = -1
+columns = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Help" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=746647534]
+layout_mode = 2
+
+[node name="Disarm" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=1422587724]
+layout_mode = 2
+
+[node name="Harm" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=783691337]
+layout_mode = 2
+
+[node name="Grab" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=671746751]
+layout_mode = 2
+
+[node name="ActionContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=495271755]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -15
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Throw" type="Sprite2D" parent="HBoxContainer/ActionContainer" unique_id=1883253315]
+position = Vector2(15, 54)
+hframes = 3
+
+[node name="Pull" type="Sprite2D" parent="HBoxContainer/ActionContainer" unique_id=1238249872]
+visible = false
+position = Vector2(15.5, 7.5)
+
+[node name="Run" type="TextureButton" parent="HBoxContainer/ActionContainer" unique_id=1152859107]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="LimbContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1313562048]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -15
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="LimbsSelector" type="TextureRect" parent="HBoxContainer/LimbContainer" unique_id=806841392]
+layout_mode = 2
+
+[node name="Mouth" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1914535546]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Eyes" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1592739093]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Head" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=469388185]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Body" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=366676397]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="RightArm" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=192821953]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="RightHand" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1077455432]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftArm" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1448178753]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftHand" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=2146277504]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Groin" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1455779992]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftLeg" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1631894084]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftFoot" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=664651828]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="RightLeg" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1384835940]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="RightFoot" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1186261939]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="StatusEffectContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1710884254]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -15
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Status" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=466918455]
+position = Vector2(216, -460)
+hframes = 10
+
+[node name="Temp" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=1060063481]
+visible = false
+position = Vector2(216, -428)
+hframes = 8
+
+[node name="Hunger" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=1795928490]
+visible = false
+position = Vector2(216, -396)
+hframes = 3
+
+[node name="Effect" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=668072624]
+visible = false
+position = Vector2(184, -460)
+hframes = 6

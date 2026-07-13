@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://crks0m4c4dh4u"]
+
+[ext_resource type="Script" uid="uid://dxnjpoxsir61i" path="res://Scripts/Game/GameRoot.cs" id="1_root"]
+
+[node name="GameRoot" type="Node2D" unique_id=1760765363]
+script = ExtResource("1_root")
+
+[node name="World" type="Node2D" parent="." unique_id=1406957431]
+
+[node name="Players" type="Node2D" parent="World" unique_id=1619698141]
+z_index = 10

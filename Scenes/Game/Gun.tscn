@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://c11ibrwu0wx8c"]
+
+[ext_resource type="Script" uid="uid://d48e3qi410i" path="res://Scripts/Game/Objects/Items/Gun.cs" id="1_gun"]
+
+[node name="Gun" type="Node2D" unique_id=2039870792]
+z_index = 5
+script = ExtResource("1_gun")
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=2939915]
+texture_filter = 1
+position = Vector2(16, 16)

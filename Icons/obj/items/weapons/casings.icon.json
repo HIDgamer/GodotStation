@@ -1,0 +1,7075 @@
+{
+  "width": 32,
+  "height": 32,
+  "columns": 32,
+  "states": {
+    "DROPPABLE CASINGS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "casing": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            0
+          ]
+        ],
+        "north": [
+          [
+            2,
+            0
+          ]
+        ],
+        "east": [
+          [
+            3,
+            0
+          ]
+        ],
+        "west": [
+          [
+            4,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            5,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            6,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            7,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            8,
+            0
+          ]
+        ]
+      }
+    },
+    "shrapnel_casing": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            0
+          ]
+        ],
+        "north": [
+          [
+            10,
+            0
+          ]
+        ],
+        "east": [
+          [
+            11,
+            0
+          ]
+        ],
+        "west": [
+          [
+            12,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            13,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            14,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            15,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            16,
+            0
+          ]
+        ]
+      }
+    },
+    "cartridge": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            0
+          ]
+        ],
+        "north": [
+          [
+            18,
+            0
+          ]
+        ],
+        "east": [
+          [
+            19,
+            0
+          ]
+        ],
+        "west": [
+          [
+            20,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            21,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            22,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            23,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            24,
+            0
+          ]
+        ]
+      }
+    },
+    "lever_action_cartridge": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            25,
+            0
+          ]
+        ],
+        "north": [
+          [
+            26,
+            0
+          ]
+        ],
+        "east": [
+          [
+            27,
+            0
+          ]
+        ],
+        "west": [
+          [
+            28,
+            0
+          ]
+        ],
+        "southeast": [
+          [
+            29,
+            0
+          ]
+        ],
+        "southwest": [
+          [
+            30,
+            0
+          ]
+        ],
+        "northeast": [
+          [
+            31,
+            0
+          ]
+        ],
+        "northwest": [
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "shrapnel_cartridge": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            1,
+            1
+          ]
+        ],
+        "north": [
+          [
+            2,
+            1
+          ]
+        ],
+        "east": [
+          [
+            3,
+            1
+          ]
+        ],
+        "west": [
+          [
+            4,
+            1
+          ]
+        ],
+        "southeast": [
+          [
+            5,
+            1
+          ]
+        ],
+        "southwest": [
+          [
+            6,
+            1
+          ]
+        ],
+        "northeast": [
+          [
+            7,
+            1
+          ]
+        ],
+        "northwest": [
+          [
+            8,
+            1
+          ]
+        ]
+      }
+    },
+    "8G SHELLS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            1
+          ]
+        ]
+      }
+    },
+    "heavy_shell_red": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            10,
+            1
+          ]
+        ],
+        "north": [
+          [
+            11,
+            1
+          ]
+        ],
+        "east": [
+          [
+            12,
+            1
+          ]
+        ],
+        "west": [
+          [
+            13,
+            1
+          ]
+        ]
+      }
+    },
+    "heavy_shell_green": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            14,
+            1
+          ]
+        ],
+        "north": [
+          [
+            15,
+            1
+          ]
+        ],
+        "east": [
+          [
+            16,
+            1
+          ]
+        ],
+        "west": [
+          [
+            17,
+            1
+          ]
+        ]
+      }
+    },
+    "heavy_shell_purple": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            18,
+            1
+          ]
+        ],
+        "north": [
+          [
+            19,
+            1
+          ]
+        ],
+        "east": [
+          [
+            20,
+            1
+          ]
+        ],
+        "west": [
+          [
+            21,
+            1
+          ]
+        ]
+      }
+    },
+    "heavy_shell_blue": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            22,
+            1
+          ]
+        ],
+        "north": [
+          [
+            23,
+            1
+          ]
+        ],
+        "east": [
+          [
+            24,
+            1
+          ]
+        ],
+        "west": [
+          [
+            25,
+            1
+          ]
+        ]
+      }
+    },
+    "heavy_shell_incen": {
+      "dirs": 4,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            26,
+            1
+          ]
+        ],
+        "north": [
+          [
+            27,
+            1
+          ]
+        ],
+        "east": [
+          [
+            28,
+            1
+          ]
+        ],
+        "west": [
+          [
+            29,
+            1
+          ]
+        ]
+      }
+    },
+    "12G SHELLS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            30,
+            1
+          ]
+        ]
+      }
+    },
+    "generic_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            31,
+            1
+          ]
+        ],
+        "north": [
+          [
+            0,
+            2
+          ]
+        ],
+        "east": [
+          [
+            1,
+            2
+          ]
+        ],
+        "west": [
+          [
+            2,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            2
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            6,
+            2
+          ]
+        ]
+      }
+    },
+    "red_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            2
+          ]
+        ],
+        "north": [
+          [
+            8,
+            2
+          ]
+        ],
+        "east": [
+          [
+            9,
+            2
+          ]
+        ],
+        "west": [
+          [
+            10,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            11,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            12,
+            2
+          ]
+        ],
+        "northeast": [
+          [
+            13,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            14,
+            2
+          ]
+        ]
+      }
+    },
+    "purple_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            2
+          ]
+        ],
+        "north": [
+          [
+            16,
+            2
+          ]
+        ],
+        "east": [
+          [
+            17,
+            2
+          ]
+        ],
+        "west": [
+          [
+            18,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            19,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            20,
+            2
+          ]
+        ],
+        "northeast": [
+          [
+            21,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            22,
+            2
+          ]
+        ]
+      }
+    },
+    "green_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            2
+          ]
+        ],
+        "north": [
+          [
+            24,
+            2
+          ]
+        ],
+        "east": [
+          [
+            25,
+            2
+          ]
+        ],
+        "west": [
+          [
+            26,
+            2
+          ]
+        ],
+        "southeast": [
+          [
+            27,
+            2
+          ]
+        ],
+        "southwest": [
+          [
+            28,
+            2
+          ]
+        ],
+        "northeast": [
+          [
+            29,
+            2
+          ]
+        ],
+        "northwest": [
+          [
+            30,
+            2
+          ]
+        ]
+      }
+    },
+    "blue_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            31,
+            2
+          ]
+        ],
+        "north": [
+          [
+            0,
+            3
+          ]
+        ],
+        "east": [
+          [
+            1,
+            3
+          ]
+        ],
+        "west": [
+          [
+            2,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            6,
+            3
+          ]
+        ]
+      }
+    },
+    "incen_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            3
+          ]
+        ],
+        "north": [
+          [
+            8,
+            3
+          ]
+        ],
+        "east": [
+          [
+            9,
+            3
+          ]
+        ],
+        "west": [
+          [
+            10,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            11,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            12,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            13,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            14,
+            3
+          ]
+        ]
+      }
+    },
+    "incen_slug": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            15,
+            3
+          ]
+        ],
+        "north": [
+          [
+            16,
+            3
+          ]
+        ],
+        "east": [
+          [
+            17,
+            3
+          ]
+        ],
+        "west": [
+          [
+            18,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            19,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            20,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            21,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            22,
+            3
+          ]
+        ]
+      }
+    },
+    "es7_shock": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            23,
+            3
+          ]
+        ],
+        "north": [
+          [
+            24,
+            3
+          ]
+        ],
+        "east": [
+          [
+            25,
+            3
+          ]
+        ],
+        "west": [
+          [
+            26,
+            3
+          ]
+        ],
+        "southeast": [
+          [
+            27,
+            3
+          ]
+        ],
+        "southwest": [
+          [
+            28,
+            3
+          ]
+        ],
+        "northeast": [
+          [
+            29,
+            3
+          ]
+        ],
+        "northwest": [
+          [
+            30,
+            3
+          ]
+        ]
+      }
+    },
+    "es7_slug": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            31,
+            3
+          ]
+        ],
+        "north": [
+          [
+            0,
+            4
+          ]
+        ],
+        "east": [
+          [
+            1,
+            4
+          ]
+        ],
+        "west": [
+          [
+            2,
+            4
+          ]
+        ],
+        "southeast": [
+          [
+            3,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            4,
+            4
+          ]
+        ],
+        "northeast": [
+          [
+            5,
+            4
+          ]
+        ],
+        "northwest": [
+          [
+            6,
+            4
+          ]
+        ]
+      }
+    },
+    "blank_shell": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            7,
+            4
+          ]
+        ]
+      }
+    },
+    "16G SHELLS": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            8,
+            4
+          ]
+        ]
+      }
+    },
+    "breaching_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            9,
+            4
+          ]
+        ],
+        "north": [
+          [
+            10,
+            4
+          ]
+        ],
+        "east": [
+          [
+            11,
+            4
+          ]
+        ],
+        "west": [
+          [
+            12,
+            4
+          ]
+        ],
+        "southeast": [
+          [
+            13,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            14,
+            4
+          ]
+        ],
+        "northeast": [
+          [
+            15,
+            4
+          ]
+        ],
+        "northwest": [
+          [
+            16,
+            4
+          ]
+        ]
+      }
+    },
+    "rubbershot_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            17,
+            4
+          ]
+        ],
+        "north": [
+          [
+            18,
+            4
+          ]
+        ],
+        "east": [
+          [
+            19,
+            4
+          ]
+        ],
+        "west": [
+          [
+            20,
+            4
+          ]
+        ],
+        "southeast": [
+          [
+            21,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            22,
+            4
+          ]
+        ],
+        "northeast": [
+          [
+            23,
+            4
+          ]
+        ],
+        "northwest": [
+          [
+            24,
+            4
+          ]
+        ]
+      }
+    },
+    "TWO-BORE": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            25,
+            4
+          ]
+        ]
+      }
+    },
+    "twobore_shell": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            26,
+            4
+          ]
+        ],
+        "north": [
+          [
+            27,
+            4
+          ]
+        ],
+        "east": [
+          [
+            28,
+            4
+          ]
+        ],
+        "west": [
+          [
+            29,
+            4
+          ]
+        ],
+        "southeast": [
+          [
+            30,
+            4
+          ]
+        ],
+        "southwest": [
+          [
+            31,
+            4
+          ]
+        ],
+        "northeast": [
+          [
+            0,
+            5
+          ]
+        ],
+        "northwest": [
+          [
+            1,
+            5
+          ]
+        ]
+      }
+    },
+    "OLDSCHOOL": {
+      "dirs": 1,
+      "frames": 1,
+      "delay": [],
+      "movement": true,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            2,
+            5
+          ]
+        ]
+      }
+    },
+    "casing_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            5
+          ]
+        ],
+        "north": [
+          [
+            4,
+            5
+          ]
+        ],
+        "east": [
+          [
+            5,
+            5
+          ]
+        ],
+        "west": [
+          [
+            6,
+            5
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            5
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            5
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            5
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            5
+          ]
+        ]
+      }
+    },
+    "casing_1_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            5
+          ]
+        ],
+        "north": [
+          [
+            12,
+            5
+          ]
+        ],
+        "east": [
+          [
+            13,
+            5
+          ]
+        ],
+        "west": [
+          [
+            14,
+            5
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            5
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            5
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            5
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            5
+          ]
+        ]
+      }
+    },
+    "casing_2": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            5
+          ]
+        ],
+        "north": [
+          [
+            20,
+            5
+          ]
+        ],
+        "east": [
+          [
+            21,
+            5
+          ]
+        ],
+        "west": [
+          [
+            22,
+            5
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            5
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            5
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            5
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            5
+          ]
+        ]
+      }
+    },
+    "casing_2_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            5
+          ]
+        ],
+        "north": [
+          [
+            28,
+            5
+          ]
+        ],
+        "east": [
+          [
+            29,
+            5
+          ]
+        ],
+        "west": [
+          [
+            30,
+            5
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            5
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            6
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    },
+    "casing_3": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            6
+          ]
+        ],
+        "north": [
+          [
+            4,
+            6
+          ]
+        ],
+        "east": [
+          [
+            5,
+            6
+          ]
+        ],
+        "west": [
+          [
+            6,
+            6
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            6
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            6
+          ]
+        ]
+      }
+    },
+    "casing_3_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            6
+          ]
+        ],
+        "north": [
+          [
+            12,
+            6
+          ]
+        ],
+        "east": [
+          [
+            13,
+            6
+          ]
+        ],
+        "west": [
+          [
+            14,
+            6
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            6
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            6
+          ]
+        ]
+      }
+    },
+    "casing_4": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            6
+          ]
+        ],
+        "north": [
+          [
+            20,
+            6
+          ]
+        ],
+        "east": [
+          [
+            21,
+            6
+          ]
+        ],
+        "west": [
+          [
+            22,
+            6
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            6
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            6
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            6
+          ]
+        ]
+      }
+    },
+    "casing_4_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            6
+          ]
+        ],
+        "north": [
+          [
+            28,
+            6
+          ]
+        ],
+        "east": [
+          [
+            29,
+            6
+          ]
+        ],
+        "west": [
+          [
+            30,
+            6
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            6
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            7
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            7
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            7
+          ]
+        ]
+      }
+    },
+    "casing_5": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            7
+          ]
+        ],
+        "north": [
+          [
+            4,
+            7
+          ]
+        ],
+        "east": [
+          [
+            5,
+            7
+          ]
+        ],
+        "west": [
+          [
+            6,
+            7
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            7
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            7
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            7
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            7
+          ]
+        ]
+      }
+    },
+    "casing_5_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            7
+          ]
+        ],
+        "north": [
+          [
+            12,
+            7
+          ]
+        ],
+        "east": [
+          [
+            13,
+            7
+          ]
+        ],
+        "west": [
+          [
+            14,
+            7
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            7
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            7
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            7
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            7
+          ]
+        ]
+      }
+    },
+    "casing_6": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            7
+          ]
+        ],
+        "north": [
+          [
+            20,
+            7
+          ]
+        ],
+        "east": [
+          [
+            21,
+            7
+          ]
+        ],
+        "west": [
+          [
+            22,
+            7
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            7
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            7
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            7
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            7
+          ]
+        ]
+      }
+    },
+    "casing_6_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            7
+          ]
+        ],
+        "north": [
+          [
+            28,
+            7
+          ]
+        ],
+        "east": [
+          [
+            29,
+            7
+          ]
+        ],
+        "west": [
+          [
+            30,
+            7
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            7
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            8
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            8
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            8
+          ]
+        ]
+      }
+    },
+    "casing_7": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            8
+          ]
+        ],
+        "north": [
+          [
+            4,
+            8
+          ]
+        ],
+        "east": [
+          [
+            5,
+            8
+          ]
+        ],
+        "west": [
+          [
+            6,
+            8
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            8
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            8
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            8
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            8
+          ]
+        ]
+      }
+    },
+    "casing_7_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            8
+          ]
+        ],
+        "north": [
+          [
+            12,
+            8
+          ]
+        ],
+        "east": [
+          [
+            13,
+            8
+          ]
+        ],
+        "west": [
+          [
+            14,
+            8
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            8
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            8
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            8
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            8
+          ]
+        ]
+      }
+    },
+    "casing_8": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            8
+          ]
+        ],
+        "north": [
+          [
+            20,
+            8
+          ]
+        ],
+        "east": [
+          [
+            21,
+            8
+          ]
+        ],
+        "west": [
+          [
+            22,
+            8
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            8
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            8
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            8
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            8
+          ]
+        ]
+      }
+    },
+    "casing_8_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            8
+          ]
+        ],
+        "north": [
+          [
+            28,
+            8
+          ]
+        ],
+        "east": [
+          [
+            29,
+            8
+          ]
+        ],
+        "west": [
+          [
+            30,
+            8
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            8
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            9
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            9
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            9
+          ]
+        ]
+      }
+    },
+    "casing_9": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            9
+          ]
+        ],
+        "north": [
+          [
+            4,
+            9
+          ]
+        ],
+        "east": [
+          [
+            5,
+            9
+          ]
+        ],
+        "west": [
+          [
+            6,
+            9
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            9
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            9
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            9
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            9
+          ]
+        ]
+      }
+    },
+    "casing_9_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            9
+          ]
+        ],
+        "north": [
+          [
+            12,
+            9
+          ]
+        ],
+        "east": [
+          [
+            13,
+            9
+          ]
+        ],
+        "west": [
+          [
+            14,
+            9
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            9
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            9
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            9
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            9
+          ]
+        ]
+      }
+    },
+    "casing_10": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            9
+          ]
+        ],
+        "north": [
+          [
+            20,
+            9
+          ]
+        ],
+        "east": [
+          [
+            21,
+            9
+          ]
+        ],
+        "west": [
+          [
+            22,
+            9
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            9
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            9
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            9
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            9
+          ]
+        ]
+      }
+    },
+    "casing_10_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            9
+          ]
+        ],
+        "north": [
+          [
+            28,
+            9
+          ]
+        ],
+        "east": [
+          [
+            29,
+            9
+          ]
+        ],
+        "west": [
+          [
+            30,
+            9
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            9
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            10
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            10
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            10
+          ]
+        ]
+      }
+    },
+    "cartridge_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            10
+          ]
+        ],
+        "north": [
+          [
+            4,
+            10
+          ]
+        ],
+        "east": [
+          [
+            5,
+            10
+          ]
+        ],
+        "west": [
+          [
+            6,
+            10
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            10
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            10
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            10
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            10
+          ]
+        ]
+      }
+    },
+    "cartridge_1_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            10
+          ]
+        ],
+        "north": [
+          [
+            12,
+            10
+          ]
+        ],
+        "east": [
+          [
+            13,
+            10
+          ]
+        ],
+        "west": [
+          [
+            14,
+            10
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            10
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            10
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            10
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            10
+          ]
+        ]
+      }
+    },
+    "cartridge_2": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            10
+          ]
+        ],
+        "north": [
+          [
+            20,
+            10
+          ]
+        ],
+        "east": [
+          [
+            21,
+            10
+          ]
+        ],
+        "west": [
+          [
+            22,
+            10
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            10
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            10
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            10
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            10
+          ]
+        ]
+      }
+    },
+    "cartridge_2_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            10
+          ]
+        ],
+        "north": [
+          [
+            28,
+            10
+          ]
+        ],
+        "east": [
+          [
+            29,
+            10
+          ]
+        ],
+        "west": [
+          [
+            30,
+            10
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            10
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            11
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            11
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            11
+          ]
+        ]
+      }
+    },
+    "cartridge_3": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            11
+          ]
+        ],
+        "north": [
+          [
+            4,
+            11
+          ]
+        ],
+        "east": [
+          [
+            5,
+            11
+          ]
+        ],
+        "west": [
+          [
+            6,
+            11
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            11
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            11
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            11
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            11
+          ]
+        ]
+      }
+    },
+    "cartridge_3_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            11
+          ]
+        ],
+        "north": [
+          [
+            12,
+            11
+          ]
+        ],
+        "east": [
+          [
+            13,
+            11
+          ]
+        ],
+        "west": [
+          [
+            14,
+            11
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            11
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            11
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            11
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            11
+          ]
+        ]
+      }
+    },
+    "cartridge_4": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            11
+          ]
+        ],
+        "north": [
+          [
+            20,
+            11
+          ]
+        ],
+        "east": [
+          [
+            21,
+            11
+          ]
+        ],
+        "west": [
+          [
+            22,
+            11
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            11
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            11
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            11
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            11
+          ]
+        ]
+      }
+    },
+    "cartridge_4_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            11
+          ]
+        ],
+        "north": [
+          [
+            28,
+            11
+          ]
+        ],
+        "east": [
+          [
+            29,
+            11
+          ]
+        ],
+        "west": [
+          [
+            30,
+            11
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            11
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            12
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            12
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            12
+          ]
+        ]
+      }
+    },
+    "cartridge_5": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            12
+          ]
+        ],
+        "north": [
+          [
+            4,
+            12
+          ]
+        ],
+        "east": [
+          [
+            5,
+            12
+          ]
+        ],
+        "west": [
+          [
+            6,
+            12
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            12
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            12
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            12
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            12
+          ]
+        ]
+      }
+    },
+    "cartridge_5_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            12
+          ]
+        ],
+        "north": [
+          [
+            12,
+            12
+          ]
+        ],
+        "east": [
+          [
+            13,
+            12
+          ]
+        ],
+        "west": [
+          [
+            14,
+            12
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            12
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            12
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            12
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            12
+          ]
+        ]
+      }
+    },
+    "cartridge_6": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            12
+          ]
+        ],
+        "north": [
+          [
+            20,
+            12
+          ]
+        ],
+        "east": [
+          [
+            21,
+            12
+          ]
+        ],
+        "west": [
+          [
+            22,
+            12
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            12
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            12
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            12
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            12
+          ]
+        ]
+      }
+    },
+    "cartridge_6_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            12
+          ]
+        ],
+        "north": [
+          [
+            28,
+            12
+          ]
+        ],
+        "east": [
+          [
+            29,
+            12
+          ]
+        ],
+        "west": [
+          [
+            30,
+            12
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            12
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            13
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            13
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            13
+          ]
+        ]
+      }
+    },
+    "cartridge_7": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            13
+          ]
+        ],
+        "north": [
+          [
+            4,
+            13
+          ]
+        ],
+        "east": [
+          [
+            5,
+            13
+          ]
+        ],
+        "west": [
+          [
+            6,
+            13
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            13
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            13
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            13
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            13
+          ]
+        ]
+      }
+    },
+    "cartridge_7_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            13
+          ]
+        ],
+        "north": [
+          [
+            12,
+            13
+          ]
+        ],
+        "east": [
+          [
+            13,
+            13
+          ]
+        ],
+        "west": [
+          [
+            14,
+            13
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            13
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            13
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            13
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            13
+          ]
+        ]
+      }
+    },
+    "cartridge_8": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            13
+          ]
+        ],
+        "north": [
+          [
+            20,
+            13
+          ]
+        ],
+        "east": [
+          [
+            21,
+            13
+          ]
+        ],
+        "west": [
+          [
+            22,
+            13
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            13
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            13
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            13
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            13
+          ]
+        ]
+      }
+    },
+    "cartridge_8_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            13
+          ]
+        ],
+        "north": [
+          [
+            28,
+            13
+          ]
+        ],
+        "east": [
+          [
+            29,
+            13
+          ]
+        ],
+        "west": [
+          [
+            30,
+            13
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            13
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            14
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            14
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            14
+          ]
+        ]
+      }
+    },
+    "cartridge_9": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            14
+          ]
+        ],
+        "north": [
+          [
+            4,
+            14
+          ]
+        ],
+        "east": [
+          [
+            5,
+            14
+          ]
+        ],
+        "west": [
+          [
+            6,
+            14
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            14
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            14
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            14
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            14
+          ]
+        ]
+      }
+    },
+    "cartridge_9_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            14
+          ]
+        ],
+        "north": [
+          [
+            12,
+            14
+          ]
+        ],
+        "east": [
+          [
+            13,
+            14
+          ]
+        ],
+        "west": [
+          [
+            14,
+            14
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            14
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            14
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            14
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            14
+          ]
+        ]
+      }
+    },
+    "cartridge_10": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            14
+          ]
+        ],
+        "north": [
+          [
+            20,
+            14
+          ]
+        ],
+        "east": [
+          [
+            21,
+            14
+          ]
+        ],
+        "west": [
+          [
+            22,
+            14
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            14
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            14
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            14
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            14
+          ]
+        ]
+      }
+    },
+    "cartridge_10_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            14
+          ]
+        ],
+        "north": [
+          [
+            28,
+            14
+          ]
+        ],
+        "east": [
+          [
+            29,
+            14
+          ]
+        ],
+        "west": [
+          [
+            30,
+            14
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            14
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            15
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            15
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            15
+          ]
+        ]
+      }
+    },
+    "generic_shell_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            15
+          ]
+        ],
+        "north": [
+          [
+            4,
+            15
+          ]
+        ],
+        "east": [
+          [
+            5,
+            15
+          ]
+        ],
+        "west": [
+          [
+            6,
+            15
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            15
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            15
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            15
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            15
+          ]
+        ]
+      }
+    },
+    "generic_shell_1_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            15
+          ]
+        ],
+        "north": [
+          [
+            12,
+            15
+          ]
+        ],
+        "east": [
+          [
+            13,
+            15
+          ]
+        ],
+        "west": [
+          [
+            14,
+            15
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            15
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            15
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            15
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            15
+          ]
+        ]
+      }
+    },
+    "generic_shell_2": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            15
+          ]
+        ],
+        "north": [
+          [
+            20,
+            15
+          ]
+        ],
+        "east": [
+          [
+            21,
+            15
+          ]
+        ],
+        "west": [
+          [
+            22,
+            15
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            15
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            15
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            15
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            15
+          ]
+        ]
+      }
+    },
+    "generic_shell_2_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            15
+          ]
+        ],
+        "north": [
+          [
+            28,
+            15
+          ]
+        ],
+        "east": [
+          [
+            29,
+            15
+          ]
+        ],
+        "west": [
+          [
+            30,
+            15
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            15
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            16
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            16
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            16
+          ]
+        ]
+      }
+    },
+    "generic_shell_3": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            16
+          ]
+        ],
+        "north": [
+          [
+            4,
+            16
+          ]
+        ],
+        "east": [
+          [
+            5,
+            16
+          ]
+        ],
+        "west": [
+          [
+            6,
+            16
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            16
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            16
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            16
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            16
+          ]
+        ]
+      }
+    },
+    "generic_shell_3_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            16
+          ]
+        ],
+        "north": [
+          [
+            12,
+            16
+          ]
+        ],
+        "east": [
+          [
+            13,
+            16
+          ]
+        ],
+        "west": [
+          [
+            14,
+            16
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            16
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            16
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            16
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            16
+          ]
+        ]
+      }
+    },
+    "generic_shell_4": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            16
+          ]
+        ],
+        "north": [
+          [
+            20,
+            16
+          ]
+        ],
+        "east": [
+          [
+            21,
+            16
+          ]
+        ],
+        "west": [
+          [
+            22,
+            16
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            16
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            16
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            16
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            16
+          ]
+        ]
+      }
+    },
+    "generic_shell_4_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            16
+          ]
+        ],
+        "north": [
+          [
+            28,
+            16
+          ]
+        ],
+        "east": [
+          [
+            29,
+            16
+          ]
+        ],
+        "west": [
+          [
+            30,
+            16
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            16
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            17
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            17
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            17
+          ]
+        ]
+      }
+    },
+    "generic_shell_5": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            17
+          ]
+        ],
+        "north": [
+          [
+            4,
+            17
+          ]
+        ],
+        "east": [
+          [
+            5,
+            17
+          ]
+        ],
+        "west": [
+          [
+            6,
+            17
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            17
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            17
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            17
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            17
+          ]
+        ]
+      }
+    },
+    "generic_shell_5_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            17
+          ]
+        ],
+        "north": [
+          [
+            12,
+            17
+          ]
+        ],
+        "east": [
+          [
+            13,
+            17
+          ]
+        ],
+        "west": [
+          [
+            14,
+            17
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            17
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            17
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            17
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            17
+          ]
+        ]
+      }
+    },
+    "generic_shell_6": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            17
+          ]
+        ],
+        "north": [
+          [
+            20,
+            17
+          ]
+        ],
+        "east": [
+          [
+            21,
+            17
+          ]
+        ],
+        "west": [
+          [
+            22,
+            17
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            17
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            17
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            17
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            17
+          ]
+        ]
+      }
+    },
+    "generic_shell_6_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            17
+          ]
+        ],
+        "north": [
+          [
+            28,
+            17
+          ]
+        ],
+        "east": [
+          [
+            29,
+            17
+          ]
+        ],
+        "west": [
+          [
+            30,
+            17
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            17
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            18
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            18
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            18
+          ]
+        ]
+      }
+    },
+    "generic_shell_7": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            18
+          ]
+        ],
+        "north": [
+          [
+            4,
+            18
+          ]
+        ],
+        "east": [
+          [
+            5,
+            18
+          ]
+        ],
+        "west": [
+          [
+            6,
+            18
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            18
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            18
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            18
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            18
+          ]
+        ]
+      }
+    },
+    "generic_shell_7_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            18
+          ]
+        ],
+        "north": [
+          [
+            12,
+            18
+          ]
+        ],
+        "east": [
+          [
+            13,
+            18
+          ]
+        ],
+        "west": [
+          [
+            14,
+            18
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            18
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            18
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            18
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            18
+          ]
+        ]
+      }
+    },
+    "generic_shell_8": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            18
+          ]
+        ],
+        "north": [
+          [
+            20,
+            18
+          ]
+        ],
+        "east": [
+          [
+            21,
+            18
+          ]
+        ],
+        "west": [
+          [
+            22,
+            18
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            18
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            18
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            18
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            18
+          ]
+        ]
+      }
+    },
+    "generic_shell_8_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            18
+          ]
+        ],
+        "north": [
+          [
+            28,
+            18
+          ]
+        ],
+        "east": [
+          [
+            29,
+            18
+          ]
+        ],
+        "west": [
+          [
+            30,
+            18
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            18
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            19
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            19
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            19
+          ]
+        ]
+      }
+    },
+    "generic_shell_9": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            19
+          ]
+        ],
+        "north": [
+          [
+            4,
+            19
+          ]
+        ],
+        "east": [
+          [
+            5,
+            19
+          ]
+        ],
+        "west": [
+          [
+            6,
+            19
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            19
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            19
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            19
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            19
+          ]
+        ]
+      }
+    },
+    "generic_shell_9_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            19
+          ]
+        ],
+        "north": [
+          [
+            12,
+            19
+          ]
+        ],
+        "east": [
+          [
+            13,
+            19
+          ]
+        ],
+        "west": [
+          [
+            14,
+            19
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            19
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            19
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            19
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            19
+          ]
+        ]
+      }
+    },
+    "generic_shell_10": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            19
+          ]
+        ],
+        "north": [
+          [
+            20,
+            19
+          ]
+        ],
+        "east": [
+          [
+            21,
+            19
+          ]
+        ],
+        "west": [
+          [
+            22,
+            19
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            19
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            19
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            19
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            19
+          ]
+        ]
+      }
+    },
+    "generic_shell_10_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            19
+          ]
+        ],
+        "north": [
+          [
+            28,
+            19
+          ]
+        ],
+        "east": [
+          [
+            29,
+            19
+          ]
+        ],
+        "west": [
+          [
+            30,
+            19
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            19
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            20
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            20
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            20
+          ]
+        ]
+      }
+    },
+    "green_shell_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            20
+          ]
+        ],
+        "north": [
+          [
+            4,
+            20
+          ]
+        ],
+        "east": [
+          [
+            5,
+            20
+          ]
+        ],
+        "west": [
+          [
+            6,
+            20
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            20
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            20
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            20
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            20
+          ]
+        ]
+      }
+    },
+    "green_shell_1_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            20
+          ]
+        ],
+        "north": [
+          [
+            12,
+            20
+          ]
+        ],
+        "east": [
+          [
+            13,
+            20
+          ]
+        ],
+        "west": [
+          [
+            14,
+            20
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            20
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            20
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            20
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            20
+          ]
+        ]
+      }
+    },
+    "green_shell_2": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            20
+          ]
+        ],
+        "north": [
+          [
+            20,
+            20
+          ]
+        ],
+        "east": [
+          [
+            21,
+            20
+          ]
+        ],
+        "west": [
+          [
+            22,
+            20
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            20
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            20
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            20
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            20
+          ]
+        ]
+      }
+    },
+    "green_shell_2_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            20
+          ]
+        ],
+        "north": [
+          [
+            28,
+            20
+          ]
+        ],
+        "east": [
+          [
+            29,
+            20
+          ]
+        ],
+        "west": [
+          [
+            30,
+            20
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            20
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            21
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            21
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            21
+          ]
+        ]
+      }
+    },
+    "green_shell_3": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            21
+          ]
+        ],
+        "north": [
+          [
+            4,
+            21
+          ]
+        ],
+        "east": [
+          [
+            5,
+            21
+          ]
+        ],
+        "west": [
+          [
+            6,
+            21
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            21
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            21
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            21
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            21
+          ]
+        ]
+      }
+    },
+    "green_shell_3_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            21
+          ]
+        ],
+        "north": [
+          [
+            12,
+            21
+          ]
+        ],
+        "east": [
+          [
+            13,
+            21
+          ]
+        ],
+        "west": [
+          [
+            14,
+            21
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            21
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            21
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            21
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            21
+          ]
+        ]
+      }
+    },
+    "green_shell_4": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            21
+          ]
+        ],
+        "north": [
+          [
+            20,
+            21
+          ]
+        ],
+        "east": [
+          [
+            21,
+            21
+          ]
+        ],
+        "west": [
+          [
+            22,
+            21
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            21
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            21
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            21
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            21
+          ]
+        ]
+      }
+    },
+    "green_shell_4_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            21
+          ]
+        ],
+        "north": [
+          [
+            28,
+            21
+          ]
+        ],
+        "east": [
+          [
+            29,
+            21
+          ]
+        ],
+        "west": [
+          [
+            30,
+            21
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            21
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            22
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            22
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            22
+          ]
+        ]
+      }
+    },
+    "green_shell_5": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            22
+          ]
+        ],
+        "north": [
+          [
+            4,
+            22
+          ]
+        ],
+        "east": [
+          [
+            5,
+            22
+          ]
+        ],
+        "west": [
+          [
+            6,
+            22
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            22
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            22
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            22
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            22
+          ]
+        ]
+      }
+    },
+    "green_shell_5_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            22
+          ]
+        ],
+        "north": [
+          [
+            12,
+            22
+          ]
+        ],
+        "east": [
+          [
+            13,
+            22
+          ]
+        ],
+        "west": [
+          [
+            14,
+            22
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            22
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            22
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            22
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            22
+          ]
+        ]
+      }
+    },
+    "green_shell_6": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            22
+          ]
+        ],
+        "north": [
+          [
+            20,
+            22
+          ]
+        ],
+        "east": [
+          [
+            21,
+            22
+          ]
+        ],
+        "west": [
+          [
+            22,
+            22
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            22
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            22
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            22
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            22
+          ]
+        ]
+      }
+    },
+    "green_shell_6_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            22
+          ]
+        ],
+        "north": [
+          [
+            28,
+            22
+          ]
+        ],
+        "east": [
+          [
+            29,
+            22
+          ]
+        ],
+        "west": [
+          [
+            30,
+            22
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            22
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            23
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            23
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            23
+          ]
+        ]
+      }
+    },
+    "green_shell_7": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            23
+          ]
+        ],
+        "north": [
+          [
+            4,
+            23
+          ]
+        ],
+        "east": [
+          [
+            5,
+            23
+          ]
+        ],
+        "west": [
+          [
+            6,
+            23
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            23
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            23
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            23
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            23
+          ]
+        ]
+      }
+    },
+    "green_shell_7_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            23
+          ]
+        ],
+        "north": [
+          [
+            12,
+            23
+          ]
+        ],
+        "east": [
+          [
+            13,
+            23
+          ]
+        ],
+        "west": [
+          [
+            14,
+            23
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            23
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            23
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            23
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            23
+          ]
+        ]
+      }
+    },
+    "green_shell_8": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            23
+          ]
+        ],
+        "north": [
+          [
+            20,
+            23
+          ]
+        ],
+        "east": [
+          [
+            21,
+            23
+          ]
+        ],
+        "west": [
+          [
+            22,
+            23
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            23
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            23
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            23
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            23
+          ]
+        ]
+      }
+    },
+    "green_shell_9": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            23
+          ]
+        ],
+        "north": [
+          [
+            28,
+            23
+          ]
+        ],
+        "east": [
+          [
+            29,
+            23
+          ]
+        ],
+        "west": [
+          [
+            30,
+            23
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            23
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            24
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            24
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            24
+          ]
+        ]
+      }
+    },
+    "green_shell_8_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            24
+          ]
+        ],
+        "north": [
+          [
+            4,
+            24
+          ]
+        ],
+        "east": [
+          [
+            5,
+            24
+          ]
+        ],
+        "west": [
+          [
+            6,
+            24
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            24
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            24
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            24
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            24
+          ]
+        ]
+      }
+    },
+    "green_shell_9_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            24
+          ]
+        ],
+        "north": [
+          [
+            12,
+            24
+          ]
+        ],
+        "east": [
+          [
+            13,
+            24
+          ]
+        ],
+        "west": [
+          [
+            14,
+            24
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            24
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            24
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            24
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            24
+          ]
+        ]
+      }
+    },
+    "green_shell_10": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            24
+          ]
+        ],
+        "north": [
+          [
+            20,
+            24
+          ]
+        ],
+        "east": [
+          [
+            21,
+            24
+          ]
+        ],
+        "west": [
+          [
+            22,
+            24
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            24
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            24
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            24
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            24
+          ]
+        ]
+      }
+    },
+    "green_shell_10_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            24
+          ]
+        ],
+        "north": [
+          [
+            28,
+            24
+          ]
+        ],
+        "east": [
+          [
+            29,
+            24
+          ]
+        ],
+        "west": [
+          [
+            30,
+            24
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            24
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            25
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            25
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            25
+          ]
+        ]
+      }
+    },
+    "blue_shell_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            25
+          ]
+        ],
+        "north": [
+          [
+            4,
+            25
+          ]
+        ],
+        "east": [
+          [
+            5,
+            25
+          ]
+        ],
+        "west": [
+          [
+            6,
+            25
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            25
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            25
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            25
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            25
+          ]
+        ]
+      }
+    },
+    "blue_shell_1_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            25
+          ]
+        ],
+        "north": [
+          [
+            12,
+            25
+          ]
+        ],
+        "east": [
+          [
+            13,
+            25
+          ]
+        ],
+        "west": [
+          [
+            14,
+            25
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            25
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            25
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            25
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            25
+          ]
+        ]
+      }
+    },
+    "blue_shell_2": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            25
+          ]
+        ],
+        "north": [
+          [
+            20,
+            25
+          ]
+        ],
+        "east": [
+          [
+            21,
+            25
+          ]
+        ],
+        "west": [
+          [
+            22,
+            25
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            25
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            25
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            25
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            25
+          ]
+        ]
+      }
+    },
+    "blue_shell_2_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            25
+          ]
+        ],
+        "north": [
+          [
+            28,
+            25
+          ]
+        ],
+        "east": [
+          [
+            29,
+            25
+          ]
+        ],
+        "west": [
+          [
+            30,
+            25
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            25
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            26
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            26
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            26
+          ]
+        ]
+      }
+    },
+    "blue_shell_3": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            26
+          ]
+        ],
+        "north": [
+          [
+            4,
+            26
+          ]
+        ],
+        "east": [
+          [
+            5,
+            26
+          ]
+        ],
+        "west": [
+          [
+            6,
+            26
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            26
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            26
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            26
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            26
+          ]
+        ]
+      }
+    },
+    "blue_shell_3_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            26
+          ]
+        ],
+        "north": [
+          [
+            12,
+            26
+          ]
+        ],
+        "east": [
+          [
+            13,
+            26
+          ]
+        ],
+        "west": [
+          [
+            14,
+            26
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            26
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            26
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            26
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            26
+          ]
+        ]
+      }
+    },
+    "blue_shell_4": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            26
+          ]
+        ],
+        "north": [
+          [
+            20,
+            26
+          ]
+        ],
+        "east": [
+          [
+            21,
+            26
+          ]
+        ],
+        "west": [
+          [
+            22,
+            26
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            26
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            26
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            26
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            26
+          ]
+        ]
+      }
+    },
+    "blue_shell_4_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            26
+          ]
+        ],
+        "north": [
+          [
+            28,
+            26
+          ]
+        ],
+        "east": [
+          [
+            29,
+            26
+          ]
+        ],
+        "west": [
+          [
+            30,
+            26
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            26
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            27
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            27
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            27
+          ]
+        ]
+      }
+    },
+    "blue_shell_5": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            27
+          ]
+        ],
+        "north": [
+          [
+            4,
+            27
+          ]
+        ],
+        "east": [
+          [
+            5,
+            27
+          ]
+        ],
+        "west": [
+          [
+            6,
+            27
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            27
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            27
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            27
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            27
+          ]
+        ]
+      }
+    },
+    "blue_shell_5_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            27
+          ]
+        ],
+        "north": [
+          [
+            12,
+            27
+          ]
+        ],
+        "east": [
+          [
+            13,
+            27
+          ]
+        ],
+        "west": [
+          [
+            14,
+            27
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            27
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            27
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            27
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            27
+          ]
+        ]
+      }
+    },
+    "blue_shell_6": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            27
+          ]
+        ],
+        "north": [
+          [
+            20,
+            27
+          ]
+        ],
+        "east": [
+          [
+            21,
+            27
+          ]
+        ],
+        "west": [
+          [
+            22,
+            27
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            27
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            27
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            27
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            27
+          ]
+        ]
+      }
+    },
+    "blue_shell_6_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            27
+          ]
+        ],
+        "north": [
+          [
+            28,
+            27
+          ]
+        ],
+        "east": [
+          [
+            29,
+            27
+          ]
+        ],
+        "west": [
+          [
+            30,
+            27
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            27
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            28
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            28
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            28
+          ]
+        ]
+      }
+    },
+    "blue_shell_7": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            28
+          ]
+        ],
+        "north": [
+          [
+            4,
+            28
+          ]
+        ],
+        "east": [
+          [
+            5,
+            28
+          ]
+        ],
+        "west": [
+          [
+            6,
+            28
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            28
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            28
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            28
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            28
+          ]
+        ]
+      }
+    },
+    "blue_shell_7_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            28
+          ]
+        ],
+        "north": [
+          [
+            12,
+            28
+          ]
+        ],
+        "east": [
+          [
+            13,
+            28
+          ]
+        ],
+        "west": [
+          [
+            14,
+            28
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            28
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            28
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            28
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            28
+          ]
+        ]
+      }
+    },
+    "blue_shell_8": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            28
+          ]
+        ],
+        "north": [
+          [
+            20,
+            28
+          ]
+        ],
+        "east": [
+          [
+            21,
+            28
+          ]
+        ],
+        "west": [
+          [
+            22,
+            28
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            28
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            28
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            28
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            28
+          ]
+        ]
+      }
+    },
+    "blue_shell_8_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            28
+          ]
+        ],
+        "north": [
+          [
+            28,
+            28
+          ]
+        ],
+        "east": [
+          [
+            29,
+            28
+          ]
+        ],
+        "west": [
+          [
+            30,
+            28
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            28
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            29
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            29
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            29
+          ]
+        ]
+      }
+    },
+    "blue_shell_9": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            3,
+            29
+          ]
+        ],
+        "north": [
+          [
+            4,
+            29
+          ]
+        ],
+        "east": [
+          [
+            5,
+            29
+          ]
+        ],
+        "west": [
+          [
+            6,
+            29
+          ]
+        ],
+        "southeast": [
+          [
+            7,
+            29
+          ]
+        ],
+        "southwest": [
+          [
+            8,
+            29
+          ]
+        ],
+        "northeast": [
+          [
+            9,
+            29
+          ]
+        ],
+        "northwest": [
+          [
+            10,
+            29
+          ]
+        ]
+      }
+    },
+    "blue_shell_9_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            11,
+            29
+          ]
+        ],
+        "north": [
+          [
+            12,
+            29
+          ]
+        ],
+        "east": [
+          [
+            13,
+            29
+          ]
+        ],
+        "west": [
+          [
+            14,
+            29
+          ]
+        ],
+        "southeast": [
+          [
+            15,
+            29
+          ]
+        ],
+        "southwest": [
+          [
+            16,
+            29
+          ]
+        ],
+        "northeast": [
+          [
+            17,
+            29
+          ]
+        ],
+        "northwest": [
+          [
+            18,
+            29
+          ]
+        ]
+      }
+    },
+    "blue_shell_10": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            19,
+            29
+          ]
+        ],
+        "north": [
+          [
+            20,
+            29
+          ]
+        ],
+        "east": [
+          [
+            21,
+            29
+          ]
+        ],
+        "west": [
+          [
+            22,
+            29
+          ]
+        ],
+        "southeast": [
+          [
+            23,
+            29
+          ]
+        ],
+        "southwest": [
+          [
+            24,
+            29
+          ]
+        ],
+        "northeast": [
+          [
+            25,
+            29
+          ]
+        ],
+        "northwest": [
+          [
+            26,
+            29
+          ]
+        ]
+      }
+    },
+    "blue_shell_10_1": {
+      "dirs": 8,
+      "frames": 1,
+      "delay": [],
+      "movement": false,
+      "rewind": false,
+      "loop": 0,
+      "framesByDir": {
+        "south": [
+          [
+            27,
+            29
+          ]
+        ],
+        "north": [
+          [
+            28,
+            29
+          ]
+        ],
+        "east": [
+          [
+            29,
+            29
+          ]
+        ],
+        "west": [
+          [
+            30,
+            29
+          ]
+        ],
+        "southeast": [
+          [
+            31,
+            29
+          ]
+        ],
+        "southwest": [
+          [
+            0,
+            30
+          ]
+        ],
+        "northeast": [
+          [
+            1,
+            30
+          ]
+        ],
+        "northwest": [
+          [
+            2,
+            30
+          ]
+        ]
+      }
+    }
+  }
+}
