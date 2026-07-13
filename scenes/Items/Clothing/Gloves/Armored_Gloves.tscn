@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://bcijgf8bgu24c"]
+
+[ext_resource type="Script" uid="uid://ckwi8k8gijdah" path="res://Scripts/game/items/WorldItem.cs" id="1"]
+[ext_resource type="Script" uid="uid://ekv8cu6056mq" path="res://Scripts/game/systems/ItemSpriteSystem.cs" id="2"]
+[ext_resource type="Texture2D" uid="uid://bkxlbrknbrvt4" path="res://Assets/Icons/Items/Clothing/Gloves/Armored_Gloves.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://boegtrf5emeuj" path="res://Assets/Icons/Clothing/Gloves/Armored_Gloves.png" id="5"]
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="6"]
+
+
+[sub_resource type="Resource" id="Resource_clothing"]
+script = ExtResource("6")
+Slot = 4
+WornTexture = ExtResource("5")
+ItemName = "Armored_Gloves"
+Icon = ExtResource("4")
+ItemCategory = 3
+
+[node name="Armored_Gloves" type="RigidBody2D" unique_id=1328889150]
+script = ExtResource("1")
+ItemId = "Armored_Gloves"
+ItemData = SubResource("Resource_clothing")
+
+[node name="Icon" type="Node2D" parent="." unique_id=358869422]
+script = ExtResource("2")
+IconTexture = ExtResource("4")
+WornTexture = ExtResource("5")

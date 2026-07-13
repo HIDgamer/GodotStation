@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://dww8qf8cbo87a"]
+
+[ext_resource type="Script" uid="uid://dwnk77choy0kh" path="res://Scripts/game/structures/WallLight.cs" id="1_5gks6"]
+[ext_resource type="Texture2D" uid="uid://dq2hbw2muirdi" path="res://Assets/Icons/Items/Objects/Lights.tres" id="1_w0tih"]
+
+[sub_resource type="Gradient" id="Gradient_5gks6"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 24
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_slvor"]
+gradient = SubResource("Gradient_5gks6")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.9000001, 0.20000002)
+metadata/_snap_enabled = true
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_sparks"]
+angle_max = 360.0
+direction = Vector3(0, -1, 0)
+initial_velocity_min = 50.0
+initial_velocity_max = 100.0
+gravity = Vector3(0, 200, 0)
+color = Color(1, 1, 0, 1)
+
+[node name="WallLight" type="Node2D" unique_id=943210601]
+position = Vector2(0, -112)
+script = ExtResource("1_5gks6")
+BaseEnergy = 0.5
+
+[node name="Light" type="Sprite2D" parent="." unique_id=31057981]
+z_index = 6
+texture = ExtResource("1_w0tih")
+hframes = 4
+frame = 1
+
+[node name="Mainlight" type="PointLight2D" parent="." unique_id=1822651061]
+shadow_filter_smooth = 5.0
+texture = SubResource("GradientTexture2D_slvor")
+texture_scale = 3.0
+height = 150.0
+
+[node name="SparkParticles" type="GPUParticles2D" parent="." unique_id=1569805295]
+emitting = false
+lifetime = 0.3
+one_shot = true
+process_material = SubResource("ParticleProcessMaterial_sparks")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=319706561]
+position = Vector2(0, -24)
+rect = Rect2(-13, 8, 26, 8)

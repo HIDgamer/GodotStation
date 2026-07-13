@@ -1,0 +1,22 @@
+[gd_resource type="Resource" format=3 uid="uid://dgdkw4u5piers"]
+
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://b2bplr5hjwkpa" path="res://Assets/Icons/Items/Clothing/Uniforms/Marine_CM.png" id="1_a0iel"]
+[ext_resource type="Texture2D" uid="uid://20dkap0tqvv8" path="res://Assets/Icons/Clothing/Uniforms/Marine_CM.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+Slot = 5
+ArmorMelee = 5.0
+ArmorBullet = 5.0
+ArmorBio = 5.0
+ArmorFire = 5.0
+ArmorAcid = 5.0
+StorageSlots = 2
+WornTexture = ExtResource("2")
+ItemName = "Marine_CM_Uniform"
+Description = "Standard marine combat uniform. Provides basic protection."
+Icon = ExtResource("1_a0iel")
+Weight = 0.5
+ItemCategory = 3

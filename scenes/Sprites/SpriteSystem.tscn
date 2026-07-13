@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://cnnqbl8k2mbvo"]
+
+[ext_resource type="Script" uid="uid://c6yikr7dlwf0j" path="res://Scripts/game/systems/SpriteSystem.cs" id="1_mxu2l"]
+
+
+[node name="SpriteSystem" type="Node2D" unique_id=488627550]
+script = ExtResource("1_mxu2l")
+
+[node name="Body" type="Sprite2D" parent="." unique_id=1182175425]
+
+[node name="Head" type="Sprite2D" parent="." unique_id=592922654]
+
+[node name="Eyes" type="Sprite2D" parent="." unique_id=1642875188]
+
+[node name="Left_leg" type="Sprite2D" parent="." unique_id=1398524432]
+
+[node name="Right_leg" type="Sprite2D" parent="." unique_id=446031118]
+
+[node name="Underwear" type="Sprite2D" parent="." unique_id=678023567]
+
+[node name="Left_arm" type="Sprite2D" parent="." unique_id=1210754489]
+
+[node name="Right_arm" type="Sprite2D" parent="." unique_id=197722296]
+
+[node name="Undershirt" type="Sprite2D" parent="." unique_id=1972770232]
+
+[node name="Hair" type="Sprite2D" parent="." unique_id=771823630]
+
+[node name="Facial_Hair" type="Sprite2D" parent="." unique_id=935491459]
+
+[node name="Left_hand" type="Sprite2D" parent="." unique_id=1577228466]
+
+[node name="Right_hand" type="Sprite2D" parent="." unique_id=316102023]
+
+[node name="Left_foot" type="Sprite2D" parent="." unique_id=1569288569]
+
+[node name="Right_foot" type="Sprite2D" parent="." unique_id=1138882219]

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bh4gsgvfy7isy"]
+
+[ext_resource type="Texture2D" uid="uid://b0ra4cgsqo7uy" path="res://Assets/Tilesets/Enviroment/Grid.png" id="2_yk7y7"]
+
+[node name="GridStructure" type="Node2D" unique_id=887970720]
+z_index = 1
+
+[node name="TileMap" type="Sprite2D" parent="." unique_id=1892323862]
+texture = ExtResource("2_yk7y7")
+hframes = 3

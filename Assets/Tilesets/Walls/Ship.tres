@@ -1,0 +1,10 @@
+[gd_resource type="CanvasTexture" format=3 uid="uid://10uoy67hmef3"]
+
+[ext_resource type="Texture2D" uid="uid://cpber17b7iktb" path="res://Assets/Tilesets/Walls/Ship.png" id="1_mtkg4"]
+[ext_resource type="Texture2D" uid="uid://eimrd8l8xwxf" path="res://Assets/Tilesets/Walls/Ship_n.png" id="2_t0c2n"]
+[ext_resource type="Texture2D" uid="uid://ducc2t6qt7m0a" path="res://Assets/Tilesets/Walls/Ship_s.png" id="3_4bnrf"]
+
+[resource]
+diffuse_texture = ExtResource("1_mtkg4")
+normal_texture = ExtResource("2_t0c2n")
+specular_texture = ExtResource("3_4bnrf")

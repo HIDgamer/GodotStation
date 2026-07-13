@@ -1,0 +1,26 @@
+[gd_resource type="Resource" format=3 uid="uid://boudeydxfcjl5"]
+
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://b74arayyael0e" path="res://Assets/Icons/Items/Clothing/Suits/MA_Light.png" id="1_nqnsl"]
+[ext_resource type="Texture2D" uid="uid://cfyjh0bw2rnjd" path="res://Assets/Icons/Clothing/Suit/MA_Light.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+Slot = 6
+ArmorMelee = 15.0
+ArmorBullet = 20.0
+ArmorLaser = 10.0
+ArmorBomb = 15.0
+ArmorBio = 10.0
+ArmorRad = 5.0
+ArmorFire = 15.0
+ArmorAcid = 15.0
+SpeedModifier = 0.05
+StorageSlots = 4
+WornTexture = ExtResource("2")
+ItemName = "MA_Light_Armor"
+Description = "Light marine armor. Enhanced mobility, basic protection."
+Icon = ExtResource("1_nqnsl")
+Weight = 3.0
+ItemCategory = 3

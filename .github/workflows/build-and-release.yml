@@ -1,0 +1,308 @@
+name: Build and Release GodotStation
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '[0-9]*'
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.6.1
+  EXPORT_NAME: GodotStation
+
+jobs:
+
+  # ============================================================
+  # BUILD — Compile and export all three platform targets
+  # ============================================================
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows
+            platform: windows
+            preset: "Windows Desktop Client"
+            output: "GodotStation.exe"
+            artifact: windows-build
+          - name: linux
+            platform: linux
+            preset: "Linux Client"
+            output: "GodotStation.x86_64"
+            artifact: linux-build
+          - name: server
+            platform: server
+            preset: "Linux Dedicated Server"
+            output: "GodotStationServer.x86_64"
+            artifact: server-build
+
+    name: build (${{ matrix.name }})
+
+    container:
+      image: barichello/godot-ci:mono-4.6.1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+
+      - name: Restore .NET dependencies
+        run: dotnet restore
+
+      - name: Build .NET assembly
+        run: dotnet build --no-restore --no-incremental
+
+      - name: Install Godot Mono export templates
+        run: |
+          mkdir -p /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
+          wget --quiet --tries=3 --retry-connrefused \
+            https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
+          unzip -q Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
+          mv templates/* /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono/
+          rm Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz
+
+      - name: Export ${{ matrix.name }}
+        run: |
+          mkdir -p build/${{ matrix.platform }}
+          OUTPUT="build/${{ matrix.platform }}/${{ matrix.output }}"
+
+          # Server export must not depend on Rapier GDExtension files.
+          if [ "${{ matrix.platform }}" = "server" ]; then
+            mkdir -p .godot
+            : > .godot/extension_list.cfg
+          fi
+
+          godot --headless --verbose --export-release "${{ matrix.preset }}" "$OUTPUT"
+
+          if [ ! -f "$OUTPUT" ]; then
+            echo "ERROR: Export did not produce: $OUTPUT"
+            ls -la build/${{ matrix.platform }}/
+            exit 1
+          fi
+
+          chmod +x "$OUTPUT" || true
+          echo "${GITHUB_REF_NAME}" > build/${{ matrix.platform }}/version.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: build/${{ matrix.platform }}/
+
+  # ============================================================
+  # RELEASE — Zip artifacts and publish a GitHub release
+  # Only runs on tag pushes
+  # ============================================================
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ github.ref_name }}
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Verify all platform binaries exist
+        run: |
+          echo "=== Artifact contents ==="
+          ls -la artifacts/windows-build/
+          ls -la artifacts/linux-build/
+          ls -la artifacts/server-build/
+
+          if [ ! -f "artifacts/windows-build/GodotStation.exe" ]; then
+            echo "ERROR: Windows binary missing from artifact."
+            exit 1
+          fi
+          if [ ! -f "artifacts/linux-build/GodotStation.x86_64" ]; then
+            echo "ERROR: Linux binary missing from artifact."
+            exit 1
+          fi
+          if [ ! -f "artifacts/server-build/GodotStationServer.x86_64" ]; then
+            echo "ERROR: Server binary missing from artifact."
+            exit 1
+          fi
+
+      - name: Get build metadata
+        id: meta
+        run: |
+          echo "date=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Zip platform builds and generate version manifest
+        run: |
+          cd artifacts/windows-build && zip -r ../../GodotStation-Windows.zip . && cd ../..
+          cd artifacts/linux-build   && zip -r ../../GodotStation-Linux.zip . && cd ../..
+          cd artifacts/server-build  && zip -r ../../GodotStation-Server-Linux.zip . && cd ../..
+
+          WIN_SIZE=$(stat -c%s GodotStation-Windows.zip)
+          LIN_SIZE=$(stat -c%s GodotStation-Linux.zip)
+          SRV_SIZE=$(stat -c%s GodotStation-Server-Linux.zip)
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          cat > version-manifest.json << MANIFEST
+          {
+            "version": "$VERSION",
+            "build_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": {
+              "windows": { "url": "https://github.com/$GITHUB_REPOSITORY/releases/download/${GITHUB_REF_NAME}/GodotStation-Windows.zip", "size": $WIN_SIZE },
+              "linux":   { "url": "https://github.com/$GITHUB_REPOSITORY/releases/download/${GITHUB_REF_NAME}/GodotStation-Linux.zip", "size": $LIN_SIZE },
+              "server":  { "url": "https://github.com/$GITHUB_REPOSITORY/releases/download/${GITHUB_REF_NAME}/GodotStation-Server-Linux.zip", "size": $SRV_SIZE }
+            }
+          }
+          MANIFEST
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            ## GodotStation ${{ github.ref_name }}
+            **Release Date:** ${{ steps.meta.outputs.date }}
+            **Commit:** `${{ steps.meta.outputs.short_sha }}`
+
+            ### Downloads
+            - 🪟 **Windows:** GodotStation-Windows.zip
+            - 🐧 **Linux:** GodotStation-Linux.zip
+            - 🖥️ **Server:** GodotStation-Server-Linux.zip
+
+            ### Installation
+            1. Download the appropriate file for your platform
+            2. Extract the archive
+            3. Run the executable
+          files: |
+            GodotStation-Windows.zip
+            GodotStation-Linux.zip
+            GodotStation-Server-Linux.zip
+            version-manifest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload manifest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-manifest
+          path: version-manifest.json
+
+  # ============================================================
+  # CLEANUP — Delete old releases, keep the last 3
+  # Runs after the new release is published
+  # ============================================================
+  cleanup-old-releases:
+    needs: create-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete old releases (keep latest 3)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          KEEP=3
+
+          # List all releases sorted newest-first, skip drafts, get their tag names
+          ALL_TAGS=$(gh release list \
+            --repo "$REPO" \
+            --limit 100 \
+            --json tagName,isDraft,createdAt \
+            --jq 'sort_by(.createdAt) | reverse | map(select(.isDraft == false)) | .[].tagName')
+
+          TOTAL=$(echo "$ALL_TAGS" | grep -c . || true)
+          echo "Found $TOTAL releases. Keeping $KEEP."
+
+          if [ "$TOTAL" -le "$KEEP" ]; then
+            echo "Nothing to delete."
+            exit 0
+          fi
+
+          TO_DELETE=$(echo "$ALL_TAGS" | tail -n "+$((KEEP + 1))")
+
+          echo "Deleting:"
+          echo "$TO_DELETE"
+
+          while IFS= read -r TAG; do
+            [ -z "$TAG" ] && continue
+            echo "  Deleting release: $TAG"
+            gh release delete "$TAG" \
+              --repo "$REPO" \
+              --yes \
+              --cleanup-tag || echo "  Warning: could not delete $TAG"
+          done <<< "$TO_DELETE"
+
+  # ============================================================
+  # DEPLOY MANIFEST — Push version manifest to the game server
+  # ============================================================
+  deploy-manifest-to-game:
+    needs: create-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download version manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: version-manifest
+          path: .
+
+      - name: Upload manifest to game server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.GAME_IP }}
+          username: ubuntu
+          key: ${{ secrets.GAME_SSH_KEY }}
+          port: 22
+          source: "version-manifest.json"
+          target: "/var/www/godotstation/updates/"
+
+  # ============================================================
+  # DEPLOY SERVER — Ship deploy.sh from the repo to Oracle,
+  # then execute it. The script is always the current commit's
+  # version — no manual server file updates ever needed.
+  # ============================================================
+  deploy-dedicated-server-to-oracle:
+    needs: create-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy deploy.sh to Oracle VM
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ORACLE_IP }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          port: 22
+          source: "deploy.sh"
+          target: "/tmp/"
+
+      - name: Execute deploy.sh on Oracle VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ORACLE_IP }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          port: 22
+          script: |
+            chmod +x /tmp/deploy.sh
+            bash /tmp/deploy.sh \
+              "${{ needs.create-release.outputs.tag }}" \
+              "${{ github.repository }}" \
+              "${{ secrets.PANEL_PASSWORD }}"
+            rm -f /tmp/deploy.sh

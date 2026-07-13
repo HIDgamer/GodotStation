@@ -1,0 +1,742 @@
+[gd_scene format=3 uid="uid://cqwq1gi0y8mph"]
+
+[ext_resource type="Texture2D" uid="uid://cpebkxb56vou3" path="res://Assets/UI/Interface/MainPanel03.png" id="1_hs15i"]
+[ext_resource type="Texture2D" uid="uid://bkrb458fhhhbr" path="res://Assets/UI/Interface/SelectPanel01.png" id="2_4slky"]
+[ext_resource type="PackedScene" uid="uid://cnnqbl8k2mbvo" path="res://Scenes/Sprites/SpriteSystem.tscn" id="3_p3myt"]
+[ext_resource type="FontFile" uid="uid://bmkb34plb0dpm" path="res://Assets/Fonts/Not Jam Old Style 11/NotJamOldStyle11.ttf" id="4_5qe6n"]
+[ext_resource type="Texture2D" uid="uid://bql5556il25d6" path="res://Assets/UI/Interface/TitlePanel02.png" id="5_68nub"]
+[ext_resource type="Texture2D" uid="uid://50jw54ys28bk" path="res://Assets/UI/Interface/Button11.png" id="6_66526"]
+[ext_resource type="Texture2D" uid="uid://d21rtk51ceh2s" path="res://Assets/UI/Interface/Slider01.png" id="7_68nub"]
+[ext_resource type="Script" uid="uid://cl40yo6h8ajrh" path="res://Scripts/game/ui/PreferenceMenu.gd" id="9_script"]
+[ext_resource type="Texture2D" uid="uid://dca55vfaclhk4" path="res://Assets/Effects/Particles/flare_32x32.png" id="space_particles"]
+
+[sub_resource type="Gradient" id="Gradient_space"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(0.05, 0.05, 0.15, 1, 0.08, 0.12, 0.25, 1, 0.06, 0.1, 0.2, 1, 0.03, 0.05, 0.12, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_space"]
+gradient = SubResource("Gradient_space")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="Curve" id="Curve_particles"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel"]
+bg_color = Color(0.05, 0.1, 0.2, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 1, 0.4)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel_inner"]
+bg_color = Color(0.08, 0.12, 0.2, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.3)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_normal"]
+bg_color = Color(0.2, 0.4, 0.8, 0.3)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 1, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_hover"]
+bg_color = Color(0.3, 0.5, 1, 0.5)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.7, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.3, 0.6, 1, 0.5)
+shadow_size = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_pressed"]
+bg_color = Color(0.4, 0.6, 1, 0.6)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.8, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="PreferenceMenu" type="Window" unique_id=1438565460]
+disable_3d = true
+canvas_item_default_texture_filter = 0
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(1140, 610)
+popup_window = true
+content_scale_mode = 1
+content_scale_aspect = 4
+script = ExtResource("9_script")
+
+
+[node name="SpaceBackground" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_space")
+z_index = -10
+
+[node name="SpaceParticles" type="CPUParticles2D" parent="."]
+position = Vector2(640, 360)
+amount = 60
+texture = ExtResource("space_particles")
+lifetime = 10.0
+preprocess = 10.0
+emission_shape = 3
+emission_rect_extents = Vector2(700, 400)
+gravity = Vector2(0, 0)
+initial_velocity_min = 4.0
+initial_velocity_max = 10.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+scale_amount_min = 1.5
+scale_amount_max = 3.5
+scale_amount_curve = SubResource("Curve_particles")
+color = Color(0.6, 0.8, 1, 0.3)
+z_index = -5
+[node name="Background" type="TextureRect" parent="." unique_id=2143593320]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("1_hs15i")
+metadata/_edit_use_anchors_ = true
+
+[node name="PreviewBackground" type="TextureRect" parent="." unique_id=1582601744]
+anchors_preset = -1
+anchor_left = 0.7526042
+anchor_top = 0.049382716
+anchor_right = 0.9565972
+anchor_bottom = 0.57253087
+offset_left = 0.16668701
+offset_top = -22.123457
+offset_right = 0.16662598
+offset_bottom = -2.2438354
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("2_4slky")
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PreviewBackground" unique_id=1647781812]
+layout_mode = 0
+anchor_left = 0.00013437848
+anchor_top = 0.88736385
+anchor_right = 0.98915994
+anchor_bottom = 0.9788093
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Left" type="Button" parent="PreviewBackground/HBoxContainer" unique_id=471287946]
+layout_mode = 2
+text = "Â«"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Right" type="Button" parent="PreviewBackground/HBoxContainer" unique_id=1885067396]
+layout_mode = 2
+text = "Â»"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="CharacterBackground" type="TextureRect" parent="PreviewBackground" unique_id=764074815]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.0861366
+anchor_top = 0.043883603
+anchor_right = 0.9031577
+anchor_bottom = 0.8549155
+grow_horizontal = 0
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="SpriteSystem" parent="PreviewBackground/CharacterBackground" unique_id=1309708350 instance=ExtResource("3_p3myt")]
+position = Vector2(96, 124.939804)
+scale = Vector2(8, 8)
+
+[node name="TabHuman" type="GridContainer" parent="." unique_id=1314102218]
+anchors_preset = -1
+anchor_left = 0.013888889
+anchor_top = 0.1728395
+anchor_right = 0.7526042
+anchor_bottom = 0.98919755
+offset_left = 0.16666698
+offset_top = -12.183655
+offset_right = 0.16668701
+offset_bottom = -6.1621094
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 200
+columns = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="CharacterInfo" type="VBoxContainer" parent="TabHuman" unique_id=2088567585]
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="Name" type="VBoxContainer" parent="TabHuman/CharacterInfo" unique_id=184218192]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="Header" type="Label" parent="TabHuman/CharacterInfo/Name" unique_id=1924335954]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Name:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Picker" type="LineEdit" parent="TabHuman/CharacterInfo/Name" unique_id=60747952]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/read_only = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/focus = SubResource("StyleBoxFlat_space_panel_inner")
+placeholder_text = "Name here....."
+alignment = 1
+flat = true
+
+[node name="RandName" type="Label" parent="TabHuman/CharacterInfo/Name" unique_id=502997498]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Randomize Name always:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RandomName" type="CheckButton" parent="TabHuman/CharacterInfo/Name/RandName" unique_id=856848172]
+layout_mode = 0
+offset_left = 329.0
+offset_top = -6.0
+offset_right = 482.0
+offset_bottom = 25.0
+text = "Randomize"
+icon = ExtResource("6_66526")
+flat = true
+alignment = 1
+icon_alignment = 1
+
+[node name="RandApperance" type="Label" parent="TabHuman/CharacterInfo/Name" unique_id=2095091813]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Randomize Apperance always:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RandomApperance" type="CheckButton" parent="TabHuman/CharacterInfo/Name/RandApperance" unique_id=1310740538]
+layout_mode = 0
+offset_left = 329.0
+offset_top = -7.0
+offset_right = 482.0
+offset_bottom = 24.0
+text = "Randomize"
+icon = ExtResource("6_66526")
+flat = true
+alignment = 1
+icon_alignment = 1
+
+[node name="Physical_Information" type="VBoxContainer" parent="TabHuman/CharacterInfo" unique_id=604805359]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="Header" type="Label" parent="TabHuman/CharacterInfo/Physical_Information" unique_id=1282728812]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Physical_Information"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Age" type="Label" parent="TabHuman/CharacterInfo/Physical_Information" unique_id=648889267]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Age:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Picker" type="SpinBox" parent="TabHuman/CharacterInfo/Physical_Information/Age" unique_id=369363762]
+layout_mode = 0
+offset_left = 358.0
+offset_top = -6.0
+offset_right = 444.5625
+offset_bottom = 25.0
+min_value = 18.0
+max_value = 80.0
+value = 18.0
+alignment = 1
+
+[node name="Gender" type="Label" parent="TabHuman/CharacterInfo/Physical_Information" unique_id=2051195888]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Gender:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="TabHuman/CharacterInfo/Physical_Information/Gender" unique_id=301534187]
+layout_mode = 0
+offset_left = 358.0
+offset_top = -6.0
+offset_right = 428.0
+offset_bottom = 25.0
+flat = true
+icon_alignment = 1
+selected = 1
+fit_to_longest_item = false
+item_count = 2
+popup/item_0/text = "Female"
+popup/item_0/id = 0
+popup/item_1/text = "Male"
+popup/item_1/id = 1
+
+[node name="Race" type="Label" parent="TabHuman/CharacterInfo/Physical_Information" unique_id=2116215355]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Race:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="TabHuman/CharacterInfo/Physical_Information/Race" unique_id=2022578440]
+layout_mode = 0
+offset_left = 358.0
+offset_top = -6.0
+offset_right = 428.0
+offset_bottom = 25.0
+flat = true
+icon_alignment = 1
+fit_to_longest_item = false
+
+[node name="Traits" type="Label" parent="TabHuman/CharacterInfo/Physical_Information" unique_id=2008433021]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Traits:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Picker" type="Button" parent="TabHuman/CharacterInfo/Physical_Information/Traits" unique_id=822940328]
+layout_mode = 0
+offset_left = 334.0
+offset_top = -9.0
+offset_right = 467.0
+offset_bottom = 25.0
+text = "Character Traits"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="Occupation_Choices" type="VBoxContainer" parent="TabHuman/CharacterInfo" unique_id=2062496273]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="OccupationChoices" type="Label" parent="TabHuman/CharacterInfo/Occupation_Choices" unique_id=1059369929]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Occupation_Choices"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Role" type="Button" parent="TabHuman/CharacterInfo/Occupation_Choices" unique_id=660220965]
+layout_mode = 2
+text = "Role Preference"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="AssignRole" type="Button" parent="TabHuman/CharacterInfo/Occupation_Choices" unique_id=1513308263]
+layout_mode = 2
+text = "Assign Role"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="CharacterStyle" type="VBoxContainer" parent="TabHuman" unique_id=1598980434]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="HairEyesContainer" type="VBoxContainer" parent="TabHuman/CharacterStyle" unique_id=1895247561]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Header" type="Label" parent="TabHuman/CharacterStyle/HairEyesContainer" unique_id=1288178666]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Hair & Eyes"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FacialHairPicker" type="Button" parent="TabHuman/CharacterStyle/HairEyesContainer" unique_id=880794283]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "Facial Hair"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Picker" type="Button" parent="TabHuman/CharacterStyle/HairEyesContainer" unique_id=1574134776]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "Hair"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="HairColor" type="Label" parent="TabHuman/CharacterStyle/HairEyesContainer" unique_id=1950766641]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Hair Color"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Picker2" type="ColorPickerButton" parent="TabHuman/CharacterStyle/HairEyesContainer" unique_id=1406587027]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "Hair Base Color"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="EyeColor2" type="Label" parent="TabHuman/CharacterStyle/HairEyesContainer" unique_id=1039829189]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Eye Color"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EyeColor" type="ColorPickerButton" parent="TabHuman/CharacterStyle/HairEyesContainer" unique_id=2102365585]
+layout_mode = 2
+text = "Eye Color"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Gear" type="VBoxContainer" parent="TabHuman/CharacterStyle" unique_id=43171747]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Header" type="Label" parent="TabHuman/CharacterStyle/Gear" unique_id=1338644989]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Personal_Gear"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Underwear" type="Button" parent="TabHuman/CharacterStyle/Gear" unique_id=2026070903]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "Underwear"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="UnderShirt" type="Button" parent="TabHuman/CharacterStyle/Gear" unique_id=154370365]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "UnderShirt"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="CycleBackground" type="Button" parent="TabHuman/CharacterStyle/Gear" unique_id=906929718]
+layout_mode = 2
+text = "Cycle Background"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="BackgroundInfo" type="VBoxContainer" parent="TabHuman/CharacterStyle" unique_id=7849473]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="Label" parent="TabHuman/CharacterStyle/BackgroundInfo" unique_id=541721268]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Background Informarion"
+horizontal_alignment = 1
+
+[node name="Origin" type="Label" parent="TabHuman/CharacterStyle/BackgroundInfo" unique_id=608175850]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "Origin:"
+
+[node name="MenuButton" type="MenuButton" parent="TabHuman/CharacterStyle/BackgroundInfo/Origin" unique_id=49927684]
+layout_mode = 0
+offset_left = 80.0
+offset_top = -8.0
+offset_right = 333.0
+offset_bottom = 18.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+flat = false
+icon_alignment = 1
+expand_icon = true
+item_count = 9
+popup/item_0/text = "United Americas (Earth)"
+popup/item_0/id = 0
+popup/item_1/text = "United Americas (Luna)"
+popup/item_1/id = 1
+popup/item_2/text = "United America (Other)"
+popup/item_2/id = 2
+popup/item_3/text = "Limited Service (Colony)"
+popup/item_3/id = 3
+popup/item_4/text = "Green Card (Foregin)"
+popup/item_4/id = 4
+popup/item_5/text = "Artifical-Womb"
+popup/item_5/id = 5
+popup/item_6/text = "Convict (Minor Crimes)"
+popup/item_6/id = 6
+popup/item_7/text = "Convict (Gang Affliated)"
+popup/item_7/id = 7
+popup/item_8/text = "Convifct (Smuggling)"
+popup/item_8/id = 8
+
+[node name="Religion" type="Label" parent="TabHuman/CharacterStyle/BackgroundInfo" unique_id=544713486]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "Realigion:"
+
+[node name="MenuButton" type="MenuButton" parent="TabHuman/CharacterStyle/BackgroundInfo/Religion" unique_id=1696942664]
+layout_mode = 0
+offset_left = 112.0
+offset_top = -8.0
+offset_right = 365.0
+offset_bottom = 18.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+flat = false
+icon_alignment = 1
+expand_icon = true
+item_count = 17
+popup/item_0/text = "Christianity (Protestant)"
+popup/item_0/id = 0
+popup/item_1/text = "Christianity (Catholic)"
+popup/item_1/id = 1
+popup/item_2/text = "Christianity (Orthodox)"
+popup/item_2/id = 2
+popup/item_3/text = "Christianity (Mormonism)"
+popup/item_3/id = 3
+popup/item_4/text = "Christianity (Other)"
+popup/item_4/id = 4
+popup/item_5/text = "Judaism"
+popup/item_5/id = 5
+popup/item_6/text = "Islam (Shia)"
+popup/item_6/id = 6
+popup/item_7/text = "Islam (Sunni)"
+popup/item_7/id = 7
+popup/item_8/text = "Buddhism"
+popup/item_8/id = 8
+popup/item_9/text = "Hinduism"
+popup/item_9/id = 9
+popup/item_10/text = "Sikhism"
+popup/item_10/id = 10
+popup/item_11/text = "Wiccanism"
+popup/item_11/id = 11
+popup/item_12/text = "Paganism (Wicca)"
+popup/item_12/id = 12
+popup/item_13/text = "Minor Religion"
+popup/item_13/id = 13
+popup/item_14/text = "Atheism"
+popup/item_14/id = 14
+popup/item_15/text = "Agnostic"
+popup/item_15/id = 15
+popup/item_16/text = "Other"
+popup/item_16/id = 16
+
+[node name="Relations" type="Label" parent="TabHuman/CharacterStyle/BackgroundInfo" unique_id=1607614639]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "Corporate Relations:"
+
+[node name="MenuButton" type="MenuButton" parent="TabHuman/CharacterStyle/BackgroundInfo/Relations" unique_id=1699064815]
+layout_mode = 0
+offset_left = 216.0
+offset_top = -8.0
+offset_right = 469.0
+offset_bottom = 18.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+flat = false
+icon_alignment = 1
+expand_icon = true
+item_count = 5
+popup/item_0/text = "Loyal"
+popup/item_0/id = 0
+popup/item_1/text = "Supportive"
+popup/item_1/id = 1
+popup/item_2/text = "Neutral"
+popup/item_2/id = 2
+popup/item_3/text = "Skeptical"
+popup/item_3/id = 3
+popup/item_4/text = "Opposed"
+popup/item_4/id = 4
+
+[node name="PrefSquad" type="Label" parent="TabHuman/CharacterStyle/BackgroundInfo" unique_id=126066043]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_5qe6n")
+text = "Preferred Squad:"
+
+[node name="MenuButton" type="MenuButton" parent="TabHuman/CharacterStyle/BackgroundInfo/PrefSquad" unique_id=1624061522]
+layout_mode = 0
+anchor_left = 0.7022059
+anchor_top = -0.29411766
+anchor_right = 1.632353
+anchor_bottom = 1.2352941
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+flat = false
+icon_alignment = 1
+expand_icon = true
+item_count = 4
+popup/item_0/text = "Alpha Squad"
+popup/item_0/id = 0
+popup/item_1/text = "Charlie Squad"
+popup/item_1/id = 1
+popup/item_2/text = "Delta Squad"
+popup/item_2/id = 2
+popup/item_3/text = "Bravo Squad"
+popup/item_3/id = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1708319059]
+anchors_preset = -1
+anchor_left = 0.013888889
+anchor_top = 0.047839507
+anchor_right = 0.7213542
+anchor_bottom = 0.14969136
+offset_left = 0.16666698
+offset_top = -12.183653
+offset_right = 8.65625
+offset_bottom = -8.313286
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Tabs" type="HBoxContainer" parent="VBoxContainer" unique_id=783522185]
+layout_mode = 2
+alignment = 1
+
+[node name="Human" type="Button" parent="VBoxContainer/Tabs" unique_id=2023774235]
+layout_mode = 2
+text = "Human"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Xeno" type="Button" parent="VBoxContainer/Tabs" unique_id=2084697059]
+layout_mode = 2
+text = "Xenomorph"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="CO" type="Button" parent="VBoxContainer/Tabs" unique_id=434461727]
+layout_mode = 2
+text = "Commander"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Syn" type="Button" parent="VBoxContainer/Tabs" unique_id=211054148]
+layout_mode = 2
+text = "Synthetic"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Mentor" type="Button" parent="VBoxContainer/Tabs" unique_id=1112370706]
+layout_mode = 2
+text = "Mentor"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Settings" type="Button" parent="VBoxContainer/Tabs" unique_id=1646260764]
+layout_mode = 2
+text = "Settings"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Special" type="Button" parent="VBoxContainer/Tabs" unique_id=589650935]
+layout_mode = 2
+text = "Special Role"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Slot" type="HBoxContainer" parent="VBoxContainer" unique_id=1868592225]
+layout_mode = 2
+alignment = 1
+
+[node name="Save" type="Button" parent="VBoxContainer/Slot" unique_id=321176494]
+layout_mode = 2
+text = "Save slot"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Load" type="Button" parent="VBoxContainer/Slot" unique_id=901868909]
+layout_mode = 2
+text = "Load slot"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1
+
+[node name="Reload" type="Button" parent="VBoxContainer/Slot" unique_id=970079098]
+layout_mode = 2
+text = "Reload slot"
+icon = ExtResource("6_66526")
+flat = true
+icon_alignment = 1

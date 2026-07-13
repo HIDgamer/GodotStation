@@ -1,0 +1,187 @@
+[gd_scene format=3 uid="uid://65fg0lmyurrp"]
+
+[ext_resource type="Script" uid="uid://0xsknwexd85n" path="res://Scripts/game/ui/EntitySpawner.cs" id="1"]
+
+
+[sub_resource type="Gradient" id="Gradient_bg"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(0.05, 0.05, 0.15, 1, 0.08, 0.12, 0.25, 1, 0.06, 0.1, 0.2, 1, 0.03, 0.05, 0.12, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_bg"]
+gradient = SubResource("Gradient_bg")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.05, 0.1, 0.2, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 1, 0.4)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+bg_color = Color(0.3, 0.5, 1, 0.5)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.7, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.3, 0.6, 1, 0.5)
+shadow_size = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+bg_color = Color(0.2, 0.4, 0.8, 0.3)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 1, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+bg_color = Color(0.4, 0.6, 1, 0.6)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.8, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_inner"]
+bg_color = Color(0.08, 0.12, 0.2, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.3)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="Theme" id="Theme_scifi"]
+Button/styles/hover = SubResource("StyleBoxFlat_button_hover")
+Button/styles/normal = SubResource("StyleBoxFlat_button_normal")
+Button/styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+Panel/styles/panel = SubResource("StyleBoxFlat_inner")
+
+[node name="EntitySpawner" type="Node2D" unique_id=1798746918]
+script = ExtResource("1")
+
+[node name="EntitySpawnerWindow" type="Window" parent="." unique_id=2074985787]
+oversampling_override = 1.0
+title = "Entity Spawner"
+initial_position = 1
+size = Vector2i(400, 300)
+
+[node name="Background" type="TextureRect" parent="EntitySpawnerWindow" unique_id=1975564686]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource("GradientTexture2D_bg")
+expand_mode = 1
+
+[node name="Panel" type="Panel" parent="EntitySpawnerWindow" unique_id=1266378302]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="EntitySpawnerWindow" unique_id=1604574802]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+theme = SubResource("Theme_scifi")
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="EntitySpawnerWindow/VBox" unique_id=2118193824]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "â—ˆ ENTITY SPAWNER â—ˆ"
+horizontal_alignment = 1
+
+[node name="HSeparator1" type="HSeparator" parent="EntitySpawnerWindow/VBox" unique_id=1041193422]
+layout_mode = 2
+theme_override_constants/separation = 8
+theme_override_styles/separator = SubResource("StyleBoxFlat_inner")
+
+[node name="MobRow" type="HBoxContainer" parent="EntitySpawnerWindow/VBox" unique_id=1699064648]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MobTypeLabel" type="Label" parent="EntitySpawnerWindow/VBox/MobRow" unique_id=2002924801]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.9, 1, 1)
+text = "Entity Type:"
+
+[node name="MobTypeDropdown" type="OptionButton" parent="EntitySpawnerWindow/VBox/MobRow" unique_id=437929939]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator2" type="HSeparator" parent="EntitySpawnerWindow/VBox" unique_id=2069031408]
+layout_mode = 2
+theme_override_constants/separation = 8
+theme_override_styles/separator = SubResource("StyleBoxFlat_inner")
+
+[node name="Instructions" type="Label" parent="EntitySpawnerWindow/VBox" unique_id=2090425233]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "Click Spawn, then click on the world to place entity"
+horizontal_alignment = 1
+
+[node name="SpawnButton" type="Button" parent="EntitySpawnerWindow/VBox" unique_id=1407238559]
+layout_mode = 2
+text = "â–¸ Spawn Mob"
+
+[node name="RandomizeButton" type="Button" parent="EntitySpawnerWindow/VBox" unique_id=507195573]
+layout_mode = 2
+text = "â—ˆ Randomize Appearnce"
+
+[node name="HSeparator3" type="HSeparator" parent="EntitySpawnerWindow/VBox" unique_id=141348129]
+layout_mode = 2
+theme_override_constants/separation = 8
+theme_override_styles/separator = SubResource("StyleBoxFlat_inner")
+
+[node name="StatusLabel" type="Label" parent="EntitySpawnerWindow/VBox" unique_id=474243818]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "Status: Ready"
+horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="EntitySpawnerWindow/VBox" unique_id=123456789]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "X"
+
+[node name="Spacer" type="Control" parent="EntitySpawnerWindow/VBox" unique_id=74430315]
+layout_mode = 2
+size_flags_vertical = 3

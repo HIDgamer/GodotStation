@@ -1,0 +1,22 @@
+[gd_resource type="Resource" format=3 uid="uid://bsbq7lr3dvhu3"]
+
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://bkxlbrknbrvt4" path="res://Assets/Icons/Items/Clothing/Gloves/Armored_Gloves.png" id="1_jgyi5"]
+[ext_resource type="Texture2D" uid="uid://boegtrf5emeuj" path="res://Assets/Icons/Clothing/Gloves/Armored_Gloves.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+Slot = 4
+ArmorMelee = 10.0
+ArmorBullet = 5.0
+ArmorBomb = 5.0
+ArmorBio = 5.0
+ArmorFire = 8.0
+ArmorAcid = 8.0
+WornTexture = ExtResource("2")
+ItemName = "Armored_Gloves"
+Description = "Reinforced tactical gloves with armor plating."
+Icon = ExtResource("1_jgyi5")
+Weight = 0.5
+ItemCategory = 3

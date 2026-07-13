@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://cm766a6sb2g85"]
+
+[ext_resource type="Script" uid="uid://ckwi8k8gijdah" path="res://Scripts/game/items/WorldItem.cs" id="1"]
+[ext_resource type="Script" uid="uid://ekv8cu6056mq" path="res://Scripts/game/systems/ItemSpriteSystem.cs" id="2"]
+[ext_resource type="Texture2D" uid="uid://ck0krbue7ed31" path="res://Assets/Icons/Items/Clothing/Boots/Marine_Boots.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://k2dyncfcrjx6" path="res://Assets/Icons/Clothing/Boots/Marine_Boots.png" id="5"]
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="6"]
+
+
+[sub_resource type="Resource" id="Resource_clothing"]
+script = ExtResource("6")
+Slot = 7
+WornTexture = ExtResource("5")
+ItemName = "Marine_Boots"
+Icon = ExtResource("4")
+ItemCategory = 3
+
+[node name="Marine_Boots" type="RigidBody2D" unique_id=583250525]
+script = ExtResource("1")
+ItemId = "Marine_Boots"
+ItemData = SubResource("Resource_clothing")
+
+[node name="Icon" type="Node2D" parent="." unique_id=852023088]
+script = ExtResource("2")
+IconTexture = ExtResource("4")
+WornTexture = ExtResource("5")

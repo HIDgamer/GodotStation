@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://t33x522pii0b"]
+
+[ext_resource type="Script" uid="uid://ckwi8k8gijdah" path="res://Scripts/game/items/WorldItem.cs" id="1_13gp4"]
+[ext_resource type="Script" uid="uid://ekv8cu6056mq" path="res://Scripts/game/systems/ItemSpriteSystem.cs" id="2_drip3"]
+[ext_resource type="Texture2D" uid="uid://dr2l0ho4yxgdj" path="res://Assets/Icons/Items/Misc/fruit_banana.png" id="2_mnunc"]
+[ext_resource type="Script" uid="uid://47y56k0lbvhw" path="res://Scripts/game/items/Item.cs" id="3_item"]
+
+[sub_resource type="Resource" id="Resource_livj7"]
+script = ExtResource("3_item")
+ItemName = "Banana"
+Icon = ExtResource("2_mnunc")
+ItemCategory = 2
+metadata/_custom_type_script = "uid://47y56k0lbvhw"
+
+[node name="Banana" type="RigidBody2D" unique_id=347406083]
+script = ExtResource("1_13gp4")
+ItemId = "Banana"
+ItemData = SubResource("Resource_livj7")
+metadata/_custom_type_script = "uid://unwhnooi7g2c"
+
+[node name="Icon" type="Node2D" parent="." unique_id=153529814]
+script = ExtResource("2_drip3")
+IconTexture = ExtResource("2_mnunc")

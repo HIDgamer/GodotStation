@@ -1,0 +1,398 @@
+[gd_scene format=3 uid="uid://oe04epmutypr"]
+
+[ext_resource type="Script" uid="uid://btf0mg3rn6v87" path="res://Scripts/game/ui/LateJoinLobbyUI.cs" id="1"]
+
+[sub_resource type="Shader" id="cctv_scanline_shader"]
+code = "shader_type canvas_item;
+
+uniform float scanline_count : hint_range(100, 1000) = 400.0;
+uniform float scanline_opacity : hint_range(0.0, 1.0) = 0.15;
+uniform float flicker_speed : hint_range(0.0, 10.0) = 2.0;
+uniform float flicker_amount : hint_range(0.0, 0.3) = 0.05;
+
+void fragment() {
+	vec4 color = texture(TEXTURE, UV);
+	float scanline = sin(UV.y * scanline_count) * scanline_opacity;
+	float flicker = sin(TIME * flicker_speed) * flicker_amount;
+	color.rgb -= scanline;
+	color.rgb += flicker;
+	COLOR = color;
+}"
+
+[sub_resource type="ShaderMaterial" id="cctv_scanline_material"]
+shader = SubResource("cctv_scanline_shader")
+shader_parameter/scanline_count = 400.0
+shader_parameter/scanline_opacity = 0.15
+shader_parameter/flicker_speed = 2.0
+shader_parameter/flicker_amount = 0.05
+
+[sub_resource type="StyleBoxFlat" id="cctv_panel"]
+bg_color = Color(0.02, 0.05, 0.02, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.8, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="cctv_panel_dark"]
+bg_color = Color(0, 0, 0, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.6, 0, 0.5)
+
+[sub_resource type="StyleBoxFlat" id="cctv_button_normal"]
+bg_color = Color(0.05, 0.1, 0.05, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.8, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="cctv_button_pressed"]
+bg_color = Color(0, 0.3, 0, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 1, 0.2, 1)
+
+[sub_resource type="StyleBoxFlat" id="cctv_button_hover"]
+bg_color = Color(0.1, 0.2, 0.1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 1, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="cctv_button_disabled"]
+bg_color = Color(0.02, 0.04, 0.02, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.3, 0, 0.5)
+
+[sub_resource type="StyleBoxFlat" id="cctv_tab_unselected"]
+bg_color = Color(0.02, 0.05, 0.02, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.5, 0, 0.5)
+
+[sub_resource type="StyleBoxFlat" id="cctv_tab_selected"]
+bg_color = Color(0, 0.2, 0, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_color = Color(0, 1, 0, 1)
+
+[node name="LateJoinLobbyUI" type="Control" unique_id=912100902 node_paths=PackedStringArray("PreRoundPanel", "LateJoinPanel", "StatusLabel", "CharacterNameLabel", "ReadyButton", "UnreadyButton", "PreferencesButton", "ObserveButton", "ReadyCountLabel", "TimerLabel", "JobTabs", "JoinButton", "SelectedJobLabel", "JobDescriptionLabel", "ManifestLabel")]
+material = SubResource("cctv_scanline_material")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1")
+PreRoundPanel = NodePath("PreRoundPanel")
+LateJoinPanel = NodePath("LateJoinPanel")
+StatusLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/StatusLabel")
+CharacterNameLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/CharacterNameLabel")
+ReadyButton = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/ReadyButtons/ReadyButton")
+UnreadyButton = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/ReadyButtons/UnreadyButton")
+PreferencesButton = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/PreferencesButton")
+ObserveButton = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/ActionButtons/ObserveButton")
+ReadyCountLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/ReadyCountLabel")
+TimerLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/TimerLabel")
+JobTabs = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/JobTabs")
+JoinButton = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/ActionButtons/JoinButton")
+SelectedJobLabel = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/SelectedJobLabel")
+JobDescriptionLabel = NodePath("LateJoinPanel/MarginContainer/VBoxContainer/JobDescriptionScroll/JobDescriptionLabel")
+ManifestLabel = NodePath("PreRoundPanel/MarginContainer/VBoxContainer/ManifestLabel")
+
+[node name="PreRoundPanel" type="PanelContainer" parent="." unique_id=984523842]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("cctv_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="PreRoundPanel" unique_id=848786254]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PreRoundPanel/MarginContainer" unique_id=154482925]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=1494478692]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "STATION TERMINAL v2.4.1"
+horizontal_alignment = 1
+
+[node name="HSeparator1" type="HSeparator" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=546122770]
+layout_mode = 2
+theme_override_constants/separation = 4
+theme_override_styles/separator = SubResource("cctv_panel_dark")
+
+[node name="CharacterNameLabel" type="Label" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=1723422831]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "> OPERATOR: LOADING..."
+
+[node name="StatusLabel" type="Label" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=1303985343]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "> INITIALIZING TERMINAL..."
+
+[node name="ReadyCountLabel" type="Label" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=1851803616]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "> READY COUNT: 0/1"
+
+[node name="TimerLabel" type="Label" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=1579516650]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "> TIME UNTIL START: 05:00"
+
+[node name="ManifestLabel" type="Label" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=1303801439]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "> CREW MANIFEST: 1/4"
+
+[node name="HSeparator2" type="HSeparator" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=1772184726]
+layout_mode = 2
+theme_override_constants/separation = 4
+theme_override_styles/separator = SubResource("cctv_panel_dark")
+
+[node name="ReadyButtons" type="HBoxContainer" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=55042805]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="ReadyButton" type="Button" parent="PreRoundPanel/MarginContainer/VBoxContainer/ReadyButtons" unique_id=557719471]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.2, 1, 0.2, 1)
+theme_override_colors/font_disabled_color = Color(0, 0.4, 0, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("cctv_button_normal")
+theme_override_styles/pressed = SubResource("cctv_button_pressed")
+theme_override_styles/hover = SubResource("cctv_button_hover")
+theme_override_styles/disabled = SubResource("cctv_button_disabled")
+text = "[READY]"
+
+[node name="UnreadyButton" type="Button" parent="PreRoundPanel/MarginContainer/VBoxContainer/ReadyButtons" unique_id=27384327]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.2, 1, 0.2, 1)
+theme_override_colors/font_disabled_color = Color(0, 0.4, 0, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("cctv_button_normal")
+theme_override_styles/pressed = SubResource("cctv_button_pressed")
+theme_override_styles/hover = SubResource("cctv_button_hover")
+theme_override_styles/disabled = SubResource("cctv_button_disabled")
+disabled = true
+text = "[UNREADY]"
+
+[node name="HSeparator3" type="HSeparator" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=330930786]
+layout_mode = 2
+theme_override_constants/separation = 4
+theme_override_styles/separator = SubResource("cctv_panel_dark")
+
+[node name="PreferencesButton" type="Button" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=1854129440]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.2, 1, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("cctv_button_normal")
+theme_override_styles/pressed = SubResource("cctv_button_pressed")
+theme_override_styles/hover = SubResource("cctv_button_hover")
+text = "[CHARACTER SETUP]"
+
+[node name="ObserveButtonPreRound" type="Button" parent="PreRoundPanel/MarginContainer/VBoxContainer" unique_id=357256154]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 0, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.2, 1, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("cctv_button_normal")
+theme_override_styles/pressed = SubResource("cctv_button_pressed")
+theme_override_styles/hover = SubResource("cctv_button_hover")
+text = "[OBSERVE]"
+
+[node name="LateJoinPanel" type="PanelContainer" parent="." unique_id=996023522]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("cctv_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="LateJoinPanel" unique_id=729732838]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LateJoinPanel/MarginContainer" unique_id=1512020121]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=1937377902]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "â–ˆâ–ˆâ–ˆâ–ˆâ–ˆ LATE JOIN - ROLE SELECTION â–ˆâ–ˆâ–ˆâ–ˆâ–ˆ"
+horizontal_alignment = 1
+
+[node name="HSeparator1" type="HSeparator" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=982563244]
+layout_mode = 2
+theme_override_constants/separation = 4
+theme_override_styles/separator = SubResource("cctv_panel_dark")
+
+[node name="StatusLabelLate" type="Label" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=1939318529]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "> ROUND IN PROGRESS [SELECT ROLE]"
+
+[node name="HSeparator2" type="HSeparator" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=447577642]
+layout_mode = 2
+theme_override_constants/separation = 4
+theme_override_styles/separator = SubResource("cctv_panel_dark")
+
+[node name="JobTabs" type="TabContainer" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=1365048316]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_selected_color = Color(0, 1, 0, 1)
+theme_override_colors/font_hovered_color = Color(0.2, 1, 0.2, 1)
+theme_override_colors/font_unselected_color = Color(0, 0.6, 0, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/panel = SubResource("cctv_panel_dark")
+theme_override_styles/tab_unselected = SubResource("cctv_tab_unselected")
+theme_override_styles/tab_hovered = SubResource("cctv_tab_unselected")
+theme_override_styles/tab_selected = SubResource("cctv_tab_selected")
+
+[node name="HSeparator3" type="HSeparator" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=1028787069]
+layout_mode = 2
+theme_override_constants/separation = 4
+theme_override_styles/separator = SubResource("cctv_panel_dark")
+
+[node name="SelectedJobLabel" type="Label" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=850603778]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 16
+text = "> SELECTED ROLE: NONE"
+
+[node name="JobDescriptionScroll" type="ScrollContainer" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=1926295037]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_styles/panel = SubResource("cctv_panel_dark")
+
+[node name="JobDescriptionLabel" type="RichTextLabel" parent="LateJoinPanel/MarginContainer/VBoxContainer/JobDescriptionScroll" unique_id=1662826260]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+text = "[color=#00ff00]> SELECT A ROLE TO VIEW DETAILS[/color]"
+fit_content = true
+
+[node name="HSeparator4" type="HSeparator" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=1264476420]
+layout_mode = 2
+theme_override_constants/separation = 4
+theme_override_styles/separator = SubResource("cctv_panel_dark")
+
+[node name="ActionButtons" type="HBoxContainer" parent="LateJoinPanel/MarginContainer/VBoxContainer" unique_id=555506033]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="JoinButton" type="Button" parent="LateJoinPanel/MarginContainer/VBoxContainer/ActionButtons" unique_id=730327425]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.2, 1, 0.2, 1)
+theme_override_colors/font_disabled_color = Color(0, 0.4, 0, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("cctv_button_normal")
+theme_override_styles/pressed = SubResource("cctv_button_pressed")
+theme_override_styles/hover = SubResource("cctv_button_hover")
+theme_override_styles/disabled = SubResource("cctv_button_disabled")
+disabled = true
+text = "[JOIN GAME]"
+
+[node name="ObserveButton" type="Button" parent="LateJoinPanel/MarginContainer/VBoxContainer/ActionButtons" unique_id=453859818]
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 0, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.2, 1, 0.2, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("cctv_button_normal")
+theme_override_styles/pressed = SubResource("cctv_button_pressed")
+theme_override_styles/hover = SubResource("cctv_button_hover")
+text = "[OBSERVE]"
+
+[connection signal="pressed" from="PreRoundPanel/MarginContainer/VBoxContainer/ReadyButtons/ReadyButton" to="." method="OnReadyPressed"]
+[connection signal="pressed" from="PreRoundPanel/MarginContainer/VBoxContainer/ReadyButtons/UnreadyButton" to="." method="OnUnreadyPressed"]
+[connection signal="pressed" from="PreRoundPanel/MarginContainer/VBoxContainer/PreferencesButton" to="." method="OnPreferencesPressed"]
+[connection signal="pressed" from="PreRoundPanel/MarginContainer/VBoxContainer/ObserveButtonPreRound" to="." method="OnObservePressed"]
+[connection signal="pressed" from="LateJoinPanel/MarginContainer/VBoxContainer/ActionButtons/JoinButton" to="." method="OnJoinPressed"]
+[connection signal="pressed" from="LateJoinPanel/MarginContainer/VBoxContainer/ActionButtons/ObserveButton" to="." method="OnObservePressed"]

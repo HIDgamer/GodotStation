@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://cj25bsb3ooj62"]
+
+[ext_resource type="Script" path="res://Scripts/game/systems/Mob.cs" id="1_bgcty"]
+[ext_resource type="Script" path="res://Scripts/game/managers/ClickManager.cs" id="2_6qpgx"]
+[ext_resource type="PackedScene" uid="uid://cnnqbl8k2mbvo" path="res://Scenes/Sprites/SpriteSystem.tscn" id="2_234ot"]
+[ext_resource type="PackedScene" uid="uid://d5qqddm1cxen" path="res://Scenes/game/ui/BuildMode.tscn" id="2_w6ba5"]
+[ext_resource type="Script" path="res://Scripts/game/systems/IntentSystem.cs" id="3_qqbk0"]
+[ext_resource type="Script" path="res://Scripts/game/systems/MovementController.cs" id="3_w6ba5"]
+[ext_resource type="PackedScene" uid="uid://dl4ktqlgrj51a" path="res://Scenes/UI/PUI.tscn" id="3_wrqqt"]
+[ext_resource type="Script" path="res://Scripts/game/systems/HealthSystem.cs" id="4_nkp8n"]
+[ext_resource type="Script" path="res://Scripts/game/systems/MobStateSystem.cs" id="4_u7vs2"]
+[ext_resource type="Script" path="res://Scripts/game/systems/PlayerInteractionSystem.cs" id="5_2gvjb"]
+[ext_resource type="Script" path="res://Scripts/game/systems/SkillComponent.cs" id="5_shhub"]
+[ext_resource type="Script" path="res://Scripts/game/systems/DoAfterComponent.cs" id="5_u7vs2"]
+[ext_resource type="Script" path="res://Scripts/game/systems/Inventory.cs" id="6_6qpgx"]
+[ext_resource type="Script" path="res://Scripts/game/systems/InteractionComponent.cs" id="7_inter"]
+[ext_resource type="Script" path="res://Scripts/game/utils/PlayerCameraSetup.gd" id="7_tttvq"]
+[ext_resource type="Script" path="res://Scripts/game/systems/StateController.cs" id="10_shhub"]
+[ext_resource type="Script" path="res://Scripts/game/systems/LimbSystem.cs" id="12_tabs1"]
+[ext_resource type="Script" path="res://Scripts/game/systems/FireSystem.cs" id="13_m14ys"]
+
+[node name="Human" type="CharacterBody2D" unique_id=257466136 groups=["Mob"]]
+z_index = 5
+script = ExtResource("1_bgcty")
+
+[node name="ClickManager" type="Node2D" parent="." unique_id=1431813145]
+script = ExtResource("2_6qpgx")
+
+[node name="IntentSystem" type="Node" parent="." unique_id=746261901]
+script = ExtResource("3_qqbk0")
+
+[node name="MobStateSystem" type="Node" parent="." unique_id=1987118272]
+script = ExtResource("4_u7vs2")
+
+[node name="SkillComponent" type="Node" parent="." unique_id=1396964067]
+script = ExtResource("5_shhub")
+
+[node name="DoAfterComponent" type="Node" parent="." unique_id=377604641]
+script = ExtResource("5_u7vs2")
+
+[node name="PlayerInteractionSystem" type="Node" parent="." unique_id=1396948341]
+script = ExtResource("5_2gvjb")
+
+[node name="Inventory" type="Node" parent="." unique_id=104321020 groups=["InventorySystem"]]
+script = ExtResource("6_6qpgx")
+
+[node name="InteractionComponent" type="Node" parent="." unique_id=2087983983]
+script = ExtResource("7_inter")
+
+[node name="StateController" type="Node" parent="." unique_id=1752056659]
+script = ExtResource("10_shhub")
+
+[node name="LimbSystem" type="Node" parent="." unique_id=297768550]
+script = ExtResource("12_tabs1")
+
+[node name="FireSystem" type="Node" parent="." unique_id=1422359470]
+script = ExtResource("13_m14ys")
+
+[node name="SpriteSystem" parent="." unique_id=1319870225 instance=ExtResource("2_234ot")]
+
+[node name="MovementController" type="Node2D" parent="." unique_id=168154372]
+script = ExtResource("3_w6ba5")
+
+[node name="HealthSystem" type="Node2D" parent="." unique_id=908619037]
+script = ExtResource("4_nkp8n")
+
+[node name="PlayerCameraSetup" type="Camera2D" parent="." unique_id=2103380055]
+zoom = Vector2(3, 3)
+process_callback = 0
+script = ExtResource("7_tttvq")
+
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=961406636]
+
+[node name="Player_Interface" parent="UILayer" unique_id=429154456 instance=ExtResource("3_wrqqt")]
+
+[node name="BuildMode" parent="UILayer" unique_id=2061002537 instance=ExtResource("2_w6ba5")]
+size_flags_horizontal = 3
+size_flags_vertical = 3

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" format=3 uid="uid://cthuqu62j0q42"]
+
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://qigq57v62ywc" path="res://Assets/Icons/Items/Clothing/Boots/SteelToe_Boots.png" id="1_pysx8"]
+[ext_resource type="Texture2D" uid="uid://c87wunu57svbn" path="res://Assets/Icons/Clothing/Boots/SteelToe_Boots.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+Slot = 7
+ArmorMelee = 8.0
+ArmorBullet = 5.0
+ArmorBomb = 8.0
+ArmorBio = 10.0
+ArmorFire = 12.0
+ArmorAcid = 12.0
+SpeedModifier = -0.05
+WornTexture = ExtResource("2")
+ItemName = "Combat_Boots"
+Description = "Steel-toed combat boots. Durable and protective."
+Icon = ExtResource("1_pysx8")
+Weight = 1.2
+ItemCategory = 3

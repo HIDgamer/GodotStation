@@ -1,0 +1,197 @@
+[gd_scene format=3 uid="uid://cvifbltmvjsn"]
+
+[ext_resource type="Script" uid="uid://k0w017xnwfah" path="res://Scripts/game/ui/PlayerInterface.gd" id="1_33e1j"]
+[ext_resource type="Texture2D" uid="uid://dca55vfaclhk4" path="res://Assets/Effects/Particles/flare_32x32.png" id="space_particles"]
+
+[sub_resource type="Gradient" id="Gradient_space"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(0.05, 0.05, 0.15, 1, 0.08, 0.12, 0.25, 1, 0.06, 0.1, 0.2, 1, 0.03, 0.05, 0.12, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_space"]
+gradient = SubResource("Gradient_space")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="Curve" id="Curve_particles"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel"]
+bg_color = Color(0.05, 0.1, 0.2, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 1, 0.4)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel_inner"]
+bg_color = Color(0.08, 0.12, 0.2, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.3)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_normal"]
+bg_color = Color(0.2, 0.4, 0.8, 0.3)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.6, 1, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_hover"]
+bg_color = Color(0.3, 0.5, 1, 0.5)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.7, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.3, 0.6, 1, 0.5)
+shadow_size = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_button_pressed"]
+bg_color = Color(0.4, 0.6, 1, 0.6)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.8, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="InventoryWindow" type="Window" unique_id=504336204]
+oversampling_override = 1.0
+script = ExtResource("1_33e1j")
+
+
+[node name="SpaceBackground" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_space")
+z_index = -10
+
+[node name="SpaceParticles" type="CPUParticles2D" parent="."]
+position = Vector2(640, 360)
+amount = 60
+texture = ExtResource("space_particles")
+lifetime = 10.0
+preprocess = 10.0
+emission_shape = 3
+emission_rect_extents = Vector2(700, 400)
+gravity = Vector2(0, 0)
+initial_velocity_min = 4.0
+initial_velocity_max = 10.0
+angular_velocity_min = -20.0
+angular_velocity_max = 20.0
+scale_amount_min = 1.5
+scale_amount_max = 3.5
+scale_amount_curve = SubResource("Curve_particles")
+color = Color(0.6, 0.8, 1, 0.3)
+z_index = -5
+[node name="Container" type="TabContainer" parent="." unique_id=1789157780]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+current_tab = 0
+tabs_visible = false
+
+[node name="InventoryTab" type="VBoxContainer" parent="Container" unique_id=452552693]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 0
+
+[node name="StatusLabel" type="Label" parent="Container/InventoryTab" unique_id=1837232410]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+text = "Inventory Status"
+metadata/_edit_use_anchors_ = true
+
+[node name="InventoryGrid" type="GridContainer" parent="Container/InventoryTab" unique_id=565820675]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+columns = 5
+metadata/_edit_use_anchors_ = true
+
+[node name="EquipmentTab" type="VBoxContainer" parent="Container" unique_id=1453713822]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 1
+
+[node name="EquipmentGrid" type="GridContainer" parent="Container/EquipmentTab" unique_id=151638825]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="ContainerTab" type="VBoxContainer" parent="Container" unique_id=1886761538]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 2
+
+[node name="ContainerGrid" type="GridContainer" parent="Container/ContainerTab" unique_id=1147196349]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+columns = 5
+metadata/_edit_use_anchors_ = true
+
+[node name="QuickSlots" type="VBoxContainer" parent="Container" unique_id=39214654]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 5
+metadata/_tab_index = 3
+
+[node name="QuickSlotsContainer" type="HBoxContainer" parent="Container/QuickSlots" unique_id=248876445]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 10
+metadata/_edit_use_anchors_ = true

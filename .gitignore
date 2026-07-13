@@ -1,0 +1,13 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Export output
+/build/
+
+# Sandbox program build artifacts (CMake output, not source)
+sandbox-programs/*/.build/
+
+# Editor/antivirus lock artifacts
+*.TMP
+*.tmp

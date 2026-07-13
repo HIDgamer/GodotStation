@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://2oufqaxsmbt8"]
+
+[ext_resource type="Script" uid="uid://du13hvtwrb04v" path="res://Scripts/game/ui/TextInput.gd" id="1_5mte5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel_inner"]
+bg_color = Color(0.08, 0.12, 0.2, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.3)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="TextInput" type="Window" unique_id=2119155533]
+oversampling_override = 1.0
+title = "Say"
+initial_position = 1
+size = Vector2i(200, 30)
+visible = false
+exclusive = true
+theme_override_styles/embedded_unfocused_border = SubResource("StyleBoxFlat_space_panel_inner")
+script = ExtResource("1_5mte5")
+
+[node name="Container" type="VBoxContainer" parent="." unique_id=351708000]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0333334
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Container" unique_id=1209868686]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="ModeButton" type="Button" parent="Container/HBoxContainer" unique_id=820941845]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/hover = SubResource("StyleBoxFlat_space_panel_inner")
+text = "IC"
+icon_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="Container/HBoxContainer" unique_id=423480606]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+placeholder_text = "Type message..."
+alignment = 1
+max_length = 200
+
+[node name="SendButton" type="Button" parent="Container/HBoxContainer" unique_id=1362607279]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_space_panel_inner")
+theme_override_styles/hover = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Send"
+icon_alignment = 1

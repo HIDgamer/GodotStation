@@ -1,0 +1,26 @@
+[gd_resource type="Resource" format=3 uid="uid://btvako8kev462"]
+
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://6vrlh854iv1a" path="res://Assets/Icons/Items/Clothing/Suits/MA_Heavy.png" id="1_cqvn3"]
+[ext_resource type="Texture2D" uid="uid://d3jmjhtuc10ub" path="res://Assets/Icons/Clothing/Suit/MA_Heavy.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+Slot = 6
+ArmorMelee = 40.0
+ArmorBullet = 50.0
+ArmorLaser = 30.0
+ArmorBomb = 45.0
+ArmorBio = 20.0
+ArmorRad = 15.0
+ArmorFire = 35.0
+ArmorAcid = 30.0
+SpeedModifier = -0.25
+StorageSlots = 2
+WornTexture = ExtResource("2")
+ItemName = "MA_Heavy_Armor"
+Description = "Heavy marine armor. Maximum protection, reduced mobility."
+Icon = ExtResource("1_cqvn3")
+Weight = 8.0
+ItemCategory = 3

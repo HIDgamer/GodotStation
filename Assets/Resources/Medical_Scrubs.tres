@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ClothingItem" format=3 uid="uid://cscqmrjyjf6u6"]
+
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://604h4yhsawjv" path="res://Assets/Icons/Items/Clothing/Uniforms/Scrubs_Blue.png" id="1_7k8f6"]
+[ext_resource type="Texture2D" uid="uid://cewsesqgrvml6" path="res://Assets/Icons/Clothing/Uniforms/Scrubs_blue.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+Slot = 5
+ArmorBio = 15.0
+ArmorAcid = 10.0
+SpeedModifier = 0.05
+StorageSlots = 2
+WornTexture = ExtResource("2")
+ItemName = "Medical_Scrubs"
+Description = "Standard medical scrubs. Sterile and comfortable."
+Icon = ExtResource("1_7k8f6")
+Weight = 0.3
+ItemCategory = 3

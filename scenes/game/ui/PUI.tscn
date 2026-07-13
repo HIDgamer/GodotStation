@@ -1,0 +1,529 @@
+[gd_scene format=3 uid="uid://dl4ktqlgrj51a"]
+
+[ext_resource type="Script" uid="uid://k0w017xnwfah" path="res://Scripts/game/ui/PlayerInterface.gd" id="1_33e1j"]
+[ext_resource type="Texture2D" uid="uid://cy8euv7ngpj20" path="res://Assets/UI/Inventory/Equipment.png" id="1_twveu"]
+[ext_resource type="Script" uid="uid://ba1gyadxdh10d" path="res://Scripts/game/ui/IntentUI.gd" id="2_8d4ln"]
+[ext_resource type="Texture2D" uid="uid://4mfb2figtxos" path="res://Assets/UI/Inventory/Ear_left.png" id="2_tyahe"]
+[ext_resource type="Texture2D" uid="uid://d1k5p74i1vh71" path="res://Assets/UI/Inventory/Head.png" id="3_w3hto"]
+[ext_resource type="Texture2D" uid="uid://d2mejmxlvwe8o" path="res://Assets/UI/Inventory/Ear_right.png" id="4_seugy"]
+[ext_resource type="Texture2D" uid="uid://bhm2lg3uj4sdl" path="res://Assets/UI/Inventory/Eyes.png" id="5_xm65a"]
+[ext_resource type="Texture2D" uid="uid://cy7dm4wh8xr0m" path="res://Assets/UI/Inventory/Mask.png" id="6_oip2p"]
+[ext_resource type="Texture2D" uid="uid://dlkoh6hx8cup3" path="res://Assets/UI/Inventory/Gloves.png" id="7_royua"]
+[ext_resource type="Texture2D" uid="uid://elxbe7hm6fsm" path="res://Assets/UI/Inventory/Uniform.png" id="8_jdgjq"]
+[ext_resource type="Texture2D" uid="uid://cnb5cnkhmu7jc" path="res://Assets/UI/Inventory/Armor.png" id="9_hm5iv"]
+[ext_resource type="Texture2D" uid="uid://b24jasydxdjqt" path="res://Assets/UI/Inventory/Boots.png" id="10_33e1j"]
+[ext_resource type="Texture2D" uid="uid://df7qj0jjfwnpc" path="res://Assets/UI/Inventory/Armor_slot.png" id="11_8d4ln"]
+[ext_resource type="Texture2D" uid="uid://d1e3e3hx2nudt" path="res://Assets/UI/Inventory/ID.png" id="12_f2gop"]
+[ext_resource type="Texture2D" uid="uid://dvencpdg061ay" path="res://Assets/UI/Inventory/belt_main.png" id="13_p85yi"]
+[ext_resource type="Texture2D" uid="uid://q6axo2utlxyh" path="res://Assets/UI/Inventory/backpack.png" id="14_upjfh"]
+[ext_resource type="Texture2D" uid="uid://cfau505r4hd38" path="res://Assets/UI/Inventory/MainHand_main.png" id="15_usdso"]
+[ext_resource type="Texture2D" uid="uid://tytyoeia5ylb" path="res://Assets/UI/Inventory/OffHand_main.png" id="16_4ujf7"]
+[ext_resource type="Texture2D" uid="uid://cbagh2s71ttj" path="res://Assets/UI/Inventory/Highlight.png" id="16_hm5iv"]
+[ext_resource type="Texture2D" uid="uid://dpebp2qm0v7ce" path="res://Assets/UI/Inventory/Pouch.png" id="17_sbdbv"]
+[ext_resource type="Texture2D" uid="uid://ca6t6jyg74up1" path="res://Assets/UI/Inventory/help.png" id="18_jdgjq"]
+[ext_resource type="Texture2D" uid="uid://b7bie87r1xm21" path="res://Assets/UI/Inventory/grab.png" id="19_hm5iv"]
+[ext_resource type="Texture2D" uid="uid://cjsy8mh2ghs2q" path="res://Assets/UI/Inventory/harm.png" id="20_33e1j"]
+[ext_resource type="Texture2D" uid="uid://chqf6cfi2fsf6" path="res://Assets/UI/Inventory/disarm.png" id="21_8d4ln"]
+[ext_resource type="Texture2D" uid="uid://dym3ukbe2a4o6" path="res://Assets/UI/Inventory/Throw.png" id="22_f2gop"]
+[ext_resource type="Texture2D" uid="uid://cqj6d245fuwcx" path="res://Assets/UI/Inventory/Pull.png" id="23_p85yi"]
+[ext_resource type="Texture2D" uid="uid://q03wkamu3cwm" path="res://Assets/UI/Inventory/Run.png" id="24_upjfh"]
+[ext_resource type="Texture2D" uid="uid://bbstl413ty70m" path="res://Assets/UI/Inventory/PartSelector.png" id="28_56ibi"]
+[ext_resource type="Texture2D" uid="uid://k5nfsuop3igd" path="res://Assets/UI/Inventory/PartSelector_m.png" id="29_6d613"]
+[ext_resource type="Texture2D" uid="uid://vvv2p2v7v2sc" path="res://Assets/UI/Inventory/PartSelector_e.png" id="30_gk7n5"]
+[ext_resource type="Texture2D" uid="uid://csqfeuv081syd" path="res://Assets/UI/Inventory/PartSelector_h.png" id="31_6ofsj"]
+[ext_resource type="Texture2D" uid="uid://bfeylgawnhaqd" path="res://Assets/UI/Inventory/PartSelector_b.png" id="32_foymk"]
+[ext_resource type="Texture2D" uid="uid://cgljh6tpijbe2" path="res://Assets/UI/Inventory/PartSelector_r_a.png" id="33_sg612"]
+[ext_resource type="Texture2D" uid="uid://5r71vr1x5yd" path="res://Assets/UI/Inventory/PartSelector_r_h.png" id="34_v4345"]
+[ext_resource type="Texture2D" uid="uid://ci1e1a0iaknmy" path="res://Assets/UI/Inventory/PartSelector_l_a.png" id="35_wfvhe"]
+[ext_resource type="Texture2D" uid="uid://ctn5e88usgr7w" path="res://Assets/UI/Inventory/PartSelector_l_h.png" id="36_wnu01"]
+[ext_resource type="Texture2D" uid="uid://dkofptj4qg66w" path="res://Assets/UI/Inventory/PartSelector_g.png" id="37_6mtex"]
+[ext_resource type="Texture2D" uid="uid://bxnt1qxmrn1ln" path="res://Assets/UI/Inventory/PartSelector_l_l.png" id="38_dwy2v"]
+[ext_resource type="Texture2D" uid="uid://bwwap81bfy06q" path="res://Assets/UI/Inventory/PartSelector_l_f.png" id="39_8hdti"]
+[ext_resource type="Texture2D" uid="uid://cvo6qu51h77n0" path="res://Assets/UI/Inventory/PartSelector_r_l.png" id="40_gb5f0"]
+[ext_resource type="Texture2D" uid="uid://i6cmqarrinyx" path="res://Assets/UI/Inventory/PartSelector_r_f.png" id="41_b0n1a"]
+[ext_resource type="Texture2D" uid="uid://c8wi806aed82m" path="res://Assets/UI/Inventory/Status.png" id="42_wouq0"]
+[ext_resource type="Texture2D" uid="uid://sayyre3p7p30" path="res://Assets/UI/Inventory/Temp.png" id="43_02wvs"]
+[ext_resource type="Texture2D" uid="uid://b46gp8uny8use" path="res://Assets/UI/Inventory/Hunger.png" id="44_a4igh"]
+[ext_resource type="Texture2D" uid="uid://n7iffhunnwd" path="res://Assets/UI/Inventory/Effect.png" id="45_w3ewf"]
+
+
+[node name="Player_Interface" type="Control" unique_id=2081765824]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+script = ExtResource("1_33e1j")
+
+[node name="IntentUI" type="Control" parent="." unique_id=720792957]
+anchors_preset = 0
+script = ExtResource("2_8d4ln")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=44564025]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -248.0
+offset_top = -128.0
+offset_right = 124.0
+offset_bottom = -65.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(2, 2)
+theme_override_constants/separation = -1
+alignment = 1
+
+[node name="MainContainer" type="HBoxContainer" parent="HBoxContainer" unique_id=866452065]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -1
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Equipment" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=1195483475]
+layout_mode = 2
+toggle_mode = true
+texture_normal = ExtResource("1_twveu")
+stretch_mode = 3
+
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/MainContainer/Equipment" unique_id=326393835]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.96875
+anchor_top = -1.4603174
+anchor_right = 1.96875
+anchor_bottom = 0.7619049
+theme_override_constants/h_separation = -1
+theme_override_constants/v_separation = 4
+columns = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="LEar" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=725621250]
+layout_mode = 2
+texture = ExtResource("2_tyahe")
+
+[node name="LEarSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/LEar" unique_id=1243271485]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Head" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1075550071]
+layout_mode = 2
+texture = ExtResource("3_w3hto")
+
+[node name="HeadSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Head" unique_id=1355791745]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="REar" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1385848014]
+layout_mode = 2
+texture = ExtResource("4_seugy")
+
+[node name="REarSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/REar" unique_id=1043171181]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Eyes" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=680102048]
+layout_mode = 2
+texture = ExtResource("5_xm65a")
+
+[node name="EyesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Eyes" unique_id=1908292237]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Mask" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=116248490]
+layout_mode = 2
+texture = ExtResource("6_oip2p")
+
+[node name="MaskSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Mask" unique_id=263102963]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Gloves" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1901006666]
+layout_mode = 2
+texture = ExtResource("7_royua")
+
+[node name="GlovesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Gloves" unique_id=1603895833]
+layout_mode = 0
+offset_left = 1.0
+offset_right = 33.0
+offset_bottom = 32.0
+
+[node name="Uniform" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1513073958]
+layout_mode = 2
+texture = ExtResource("8_jdgjq")
+
+[node name="UniformSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Uniform" unique_id=209310667]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Armor" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=361297757]
+layout_mode = 2
+texture = ExtResource("9_hm5iv")
+
+[node name="ArmorSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Armor" unique_id=1934543317]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="Shoes" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1589190413]
+layout_mode = 2
+texture = ExtResource("10_33e1j")
+
+[node name="ShoesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Shoes" unique_id=918007827]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="ArmorHolster" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1968356795]
+layout_mode = 2
+texture = ExtResource("11_8d4ln")
+
+[node name="ArmorHolsterSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/ArmorHolster" unique_id=580814249]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="ID" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1721674147]
+layout_mode = 2
+texture = ExtResource("12_f2gop")
+stretch_mode = 3
+
+[node name="IDSlot" type="TextureRect" parent="HBoxContainer/MainContainer/ID" unique_id=723227057]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Belt" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=92597811]
+layout_mode = 2
+texture = ExtResource("13_p85yi")
+stretch_mode = 3
+
+[node name="BeltSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Belt" unique_id=212603078]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Backpack" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1142549800]
+layout_mode = 2
+texture = ExtResource("14_upjfh")
+stretch_mode = 3
+
+[node name="BackpackSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Backpack" unique_id=808097703]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="LHand" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=867931062]
+layout_mode = 2
+texture_normal = ExtResource("15_usdso")
+stretch_mode = 3
+
+[node name="LHandSlot" type="TextureRect" parent="HBoxContainer/MainContainer/LHand" unique_id=1985311816]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.25757575
+anchor_right = 1.0
+anchor_bottom = 0.74242425
+stretch_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="LHighlight" type="TextureRect" parent="HBoxContainer/MainContainer/LHand" unique_id=1558808261]
+visible = false
+layout_mode = 0
+anchor_top = 0.25757575
+anchor_right = 1.0
+anchor_bottom = 0.74242425
+texture = ExtResource("16_hm5iv")
+stretch_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="RHand" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=2077918053]
+layout_mode = 2
+texture_normal = ExtResource("16_4ujf7")
+stretch_mode = 3
+
+[node name="RHandSlot" type="TextureRect" parent="HBoxContainer/MainContainer/RHand" unique_id=1340011486]
+layout_mode = 0
+anchor_top = 0.25757575
+anchor_right = 1.0
+anchor_bottom = 0.74242425
+stretch_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="RHighlight" type="TextureRect" parent="HBoxContainer/MainContainer/RHand" unique_id=1225600411]
+layout_mode = 0
+anchor_top = 0.25757575
+anchor_right = 1.0
+anchor_bottom = 0.74242425
+texture = ExtResource("16_hm5iv")
+stretch_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="LPouch" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=958125666]
+layout_mode = 2
+texture = ExtResource("17_sbdbv")
+stretch_mode = 3
+
+[node name="LPouchSlot" type="TextureRect" parent="HBoxContainer/MainContainer/LPouch" unique_id=1839393010]
+layout_mode = 0
+offset_left = 155.0
+offset_right = 155.0
+offset_bottom = 66.0
+
+[node name="RPouch" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1796952337]
+layout_mode = 2
+texture = ExtResource("17_sbdbv")
+stretch_mode = 3
+
+[node name="LPouchSlot" type="TextureRect" parent="HBoxContainer/MainContainer/RPouch" unique_id=354065700]
+layout_mode = 0
+offset_left = 124.0
+offset_right = 124.0
+offset_bottom = 66.0
+
+[node name="IntentContainer" type="GridContainer" parent="HBoxContainer" unique_id=2083057729]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/h_separation = -1
+theme_override_constants/v_separation = -1
+columns = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Help" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=746647534]
+layout_mode = 2
+texture_normal = ExtResource("18_jdgjq")
+
+[node name="Disarm" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=1422587724]
+layout_mode = 2
+texture_normal = ExtResource("21_8d4ln")
+
+[node name="Harm" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=783691337]
+layout_mode = 2
+texture_normal = ExtResource("20_33e1j")
+
+[node name="Grab" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=671746751]
+layout_mode = 2
+texture_normal = ExtResource("19_hm5iv")
+
+[node name="ActionContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=495271755]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -15
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Throw" type="Sprite2D" parent="HBoxContainer/ActionContainer" unique_id=1883253315]
+position = Vector2(15, 54)
+texture = ExtResource("22_f2gop")
+hframes = 3
+
+[node name="Pull" type="Sprite2D" parent="HBoxContainer/ActionContainer" unique_id=1238249872]
+visible = false
+position = Vector2(15.5, 7.5)
+texture = ExtResource("23_p85yi")
+
+[node name="Run" type="TextureButton" parent="HBoxContainer/ActionContainer" unique_id=1152859107]
+layout_mode = 2
+texture_normal = ExtResource("24_upjfh")
+stretch_mode = 3
+
+[node name="LimbContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1313562048]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -15
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="LimbsSelector" type="TextureRect" parent="HBoxContainer/LimbContainer" unique_id=806841392]
+layout_mode = 2
+texture = ExtResource("28_56ibi")
+
+[node name="Mouth" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1914535546]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("29_6d613")
+metadata/_edit_use_anchors_ = true
+
+[node name="Eyes" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1592739093]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("30_gk7n5")
+metadata/_edit_use_anchors_ = true
+
+[node name="Head" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=469388185]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("31_6ofsj")
+metadata/_edit_use_anchors_ = true
+
+[node name="Body" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=366676397]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("32_foymk")
+metadata/_edit_use_anchors_ = true
+
+[node name="RightArm" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=192821953]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("33_sg612")
+metadata/_edit_use_anchors_ = true
+
+[node name="RightHand" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1077455432]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("34_v4345")
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftArm" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1448178753]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("35_wfvhe")
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftHand" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=2146277504]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("36_wnu01")
+metadata/_edit_use_anchors_ = true
+
+[node name="Groin" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1455779992]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("37_6mtex")
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftLeg" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1631894084]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("38_dwy2v")
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftFoot" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=664651828]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("39_8hdti")
+metadata/_edit_use_anchors_ = true
+
+[node name="RightLeg" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1384835940]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("40_gb5f0")
+metadata/_edit_use_anchors_ = true
+
+[node name="RightFoot" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1186261939]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("41_b0n1a")
+metadata/_edit_use_anchors_ = true
+
+[node name="StatusEffectContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1710884254]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -15
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Status" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=466918455]
+position = Vector2(216, -460)
+texture = ExtResource("42_wouq0")
+hframes = 10
+
+[node name="Temp" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=1060063481]
+visible = false
+position = Vector2(216, -428)
+texture = ExtResource("43_02wvs")
+hframes = 8
+
+[node name="Hunger" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=1795928490]
+visible = false
+position = Vector2(216, -396)
+texture = ExtResource("44_a4igh")
+hframes = 3
+
+[node name="Effect" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=668072624]
+visible = false
+position = Vector2(184, -460)
+texture = ExtResource("45_w3ewf")
+hframes = 6

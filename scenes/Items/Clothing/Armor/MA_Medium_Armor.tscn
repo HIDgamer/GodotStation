@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://vcq5pgy5hx6q"]
+
+[ext_resource type="Script" uid="uid://ckwi8k8gijdah" path="res://Scripts/game/items/WorldItem.cs" id="1"]
+[ext_resource type="Script" uid="uid://ekv8cu6056mq" path="res://Scripts/game/systems/ItemSpriteSystem.cs" id="2"]
+[ext_resource type="Texture2D" uid="uid://b1lrrnh4ouqp5" path="res://Assets/Icons/Items/Clothing/Suits/MA_Medium.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://ctn0s1qnsrj8x" path="res://Assets/Icons/Clothing/Suit/MA_Medium.png" id="5"]
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="6"]
+
+
+[sub_resource type="Resource" id="Resource_clothing"]
+script = ExtResource("6")
+Slot = 6
+WornTexture = ExtResource("5")
+ItemName = "MA_Medium_Armor"
+Icon = ExtResource("4")
+ItemCategory = 3
+
+[node name="MA_Medium_Armor" type="RigidBody2D" unique_id=1411452241]
+script = ExtResource("1")
+ItemId = "MA_Medium_Armor"
+ItemData = SubResource("Resource_clothing")
+
+[node name="Icon" type="Node2D" parent="." unique_id=535345934]
+script = ExtResource("2")
+IconTexture = ExtResource("4")
+WornTexture = ExtResource("5")

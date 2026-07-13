@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://d5qqddm1cxen"]
+
+[ext_resource type="Script" uid="uid://bsxg5qsovj1ly" path="res://Scripts/game/ui/BuildMode.gd" id="1_b2qlh"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_space_panel_inner"]
+bg_color = Color(0.08, 0.12, 0.2, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.3)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="BuildMode" type="Control" unique_id=1947768626]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_b2qlh")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=2055748555]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.100595236
+anchor_bottom = 0.04761905
+mouse_filter = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="Build" type="Button" parent="HBoxContainer" unique_id=1675824444]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Build"
+icon_alignment = 1
+expand_icon = true
+
+[node name="Destroy" type="Button" parent="HBoxContainer" unique_id=928714057]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Destroy"
+icon_alignment = 1
+expand_icon = true
+
+[node name="Back" type="Button" parent="HBoxContainer" unique_id=316281345]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_space_panel_inner")
+text = "Back"
+icon_alignment = 1

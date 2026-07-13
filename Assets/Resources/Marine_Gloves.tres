@@ -1,0 +1,20 @@
+[gd_resource type="Resource" format=3 uid="uid://cye535o1fasxn"]
+
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://dipygup5lifw6" path="res://Assets/Icons/Items/Clothing/Gloves/Gloves.png" id="1_u5umj"]
+[ext_resource type="Texture2D" uid="uid://clw8h56l6gdi5" path="res://Assets/Icons/Clothing/Gloves/Marine_Gloves.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+Slot = 4
+ArmorMelee = 5.0
+ArmorBio = 5.0
+ArmorFire = 5.0
+ArmorAcid = 5.0
+WornTexture = ExtResource("2")
+ItemName = "Marine_Gloves"
+Description = "Tactical combat gloves for marines."
+Icon = ExtResource("1_u5umj")
+Weight = 0.3
+ItemCategory = 3

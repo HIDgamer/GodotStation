@@ -1,0 +1,26 @@
+[gd_resource type="Resource" format=3 uid="uid://phn025cjouci"]
+
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://b1lrrnh4ouqp5" path="res://Assets/Icons/Items/Clothing/Suits/MA_Medium.png" id="1_l7r37"]
+[ext_resource type="Texture2D" uid="uid://ctn0s1qnsrj8x" path="res://Assets/Icons/Clothing/Suit/MA_Medium.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+Slot = 6
+ArmorMelee = 25.0
+ArmorBullet = 35.0
+ArmorLaser = 20.0
+ArmorBomb = 30.0
+ArmorBio = 15.0
+ArmorRad = 10.0
+ArmorFire = 25.0
+ArmorAcid = 25.0
+SpeedModifier = -0.1
+StorageSlots = 3
+WornTexture = ExtResource("2")
+ItemName = "MA_Medium_Armor"
+Description = "Medium marine armor. Balanced protection and mobility."
+Icon = ExtResource("1_l7r37")
+Weight = 5.0
+ItemCategory = 3

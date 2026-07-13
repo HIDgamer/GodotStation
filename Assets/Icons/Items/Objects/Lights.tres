@@ -1,0 +1,9 @@
+[gd_resource type="CanvasTexture" format=3 uid="uid://dq2hbw2muirdi"]
+
+[ext_resource type="Texture2D" uid="uid://tfnqhlc1fwgr" path="res://Assets/Icons/Items/Objects/Lights.png" id="1_hxeom"]
+[ext_resource type="Texture2D" uid="uid://cne8ux0vg7r8w" path="res://Assets/Icons/Items/Objects/Lights_n.png" id="2_5awp2"]
+
+[resource]
+diffuse_texture = ExtResource("1_hxeom")
+normal_texture = ExtResource("2_5awp2")
+specular_shininess = 0.0

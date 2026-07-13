@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://bafal7piiq62r"]
+
+[ext_resource type="Script" uid="uid://ckwi8k8gijdah" path="res://Scripts/game/items/WorldItem.cs" id="1"]
+[ext_resource type="Script" uid="uid://ekv8cu6056mq" path="res://Scripts/game/systems/ItemSpriteSystem.cs" id="2"]
+[ext_resource type="Texture2D" uid="uid://b2bplr5hjwkpa" path="res://Assets/Icons/Items/Clothing/Uniforms/Marine_CM.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://20dkap0tqvv8" path="res://Assets/Icons/Clothing/Uniforms/Marine_CM.png" id="5"]
+[ext_resource type="Script" uid="uid://b5scgkro25qc" path="res://Scripts/game/items/ClothingItem.cs" id="6"]
+
+
+[sub_resource type="Resource" id="Resource_clothing"]
+script = ExtResource("6")
+Slot = 5
+ArmorMelee = 5.0
+ArmorBullet = 5.0
+WornTexture = ExtResource("5")
+ItemName = "Marine_CM_Uniform"
+Description = "Standard marine combat uniform."
+Icon = ExtResource("4")
+Weight = 0.5
+ItemCategory = 3
+
+[node name="Marine_CM_Uniform" type="RigidBody2D" unique_id=263447433]
+script = ExtResource("1")
+ItemId = "Marine_CM_Uniform"
+ItemData = SubResource("Resource_clothing")
+
+[node name="Icon" type="Node2D" parent="." unique_id=146652358]
+script = ExtResource("2")
+IconTexture = ExtResource("4")
+WornTexture = ExtResource("5")
