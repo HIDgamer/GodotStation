@@ -14,7 +14,7 @@ config/name="GodotStation"
 config/version="8.0"
 run/main_scene="res://Scenes/game/ui/MainMenu.tscn"
 config/custom_user_dir_name="GodotStation"
-config/features=PackedStringArray("4.6", "C#", "Forward Plus")
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://Assets/Icons/Ico/UACMGS_64x64.ico"
 config/windows_native_icon="res://Assets/Icons/Ico/UACMGS_64x64.ico"
 run/main_scene.dedicated_server="res://Scenes/server/ServerMain.tscn"
@@ -38,6 +38,7 @@ UiAnimationHelper="*res://Scripts/game/ui/UIAnimationHelper.gd"
 Scheduler="*res://Scripts/game/utils/Scheduler.cs"
 DiscordRpc="*res://Scripts/game/utils/DiscordRPC.cs"
 ServerPrivileges="*res://Scripts/game/utils/ServerPrivileges.cs"
+ScriptingManager="*res://Scripts/game/managers/ScriptingManager.cs"
 
 [display]
 
@@ -52,9 +53,13 @@ window/vsync/vsync_mode=0
 
 project/assembly_name="GodotStation"
 
+[editor]
+
+script/skip=true
+
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/godot_sandbox/plugin.cfg")
 
 [export]
 
@@ -73,12 +78,18 @@ exclude_filter="*.import,*.tmp,*.bak,*.cache"
 [file_customization]
 
 folder_colors={
-"res://Addons/": "red",
 "res://Assets/": "orange",
 "res://Godot Doc/": "teal",
 "res://Scenes/": "blue",
 "res://Scripts/": "gray",
-"res://Sound/": "purple"
+"res://Sound/": "purple",
+"res://addons/": "red",
+"res://assets/": "orange",
+"res://build/": "teal",
+"res://sandbox-programs/": "yellow",
+"res://scenes/": "blue",
+"res://scripts/": "gray",
+"res://sound/": "purple"
 }
 
 [filesystem]
