@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  GODOT_VERSION: 4.6.1
+  GODOT_VERSION: 4.7.2
   EXPORT_NAME: GodotStation
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
     name: build (${{ matrix.name }})
 
     container:
-      image: barichello/godot-ci:mono-4.6.1
+      image: barichello/godot-ci:mono-4.7.2
 
     steps:
       - name: Checkout repository
@@ -77,7 +77,7 @@ jobs:
           mkdir -p build/${{ matrix.platform }}
           OUTPUT="build/${{ matrix.platform }}/${{ matrix.output }}"
 
-          # Server export must not depend on Rapier GDExtension files.
+          # Server export must not bundle client-only GDExtension binaries.
           if [ "${{ matrix.platform }}" = "server" ]; then
             mkdir -p .godot
             : > .godot/extension_list.cfg

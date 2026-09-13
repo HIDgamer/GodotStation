@@ -4,7 +4,7 @@
 [![CC BY-SA 3.0](https://img.shields.io/badge/License-CC%20BY--SA%203.0-green.svg)](https://creativecommons.org/licenses/by-sa/3.0/)
 [![Discord](https://img.shields.io/discord/273774715741667329.svg?label=Discord&color=5865F2)](https://discord.gg/jCKAugrWBP)
 
-**Project GodotStation** (Started 2025/07/12) is an open-source development project powered by **Godot 4.5**, inspired by the systems and gameplay of *Space Station 13*.
+**Project GodotStation** (Started 2025/07/12) is an open-source development project powered by **Godot 4.7** (C#/.NET 8), inspired by the systems and gameplay of *Space Station 13*.
 
 ---
 
@@ -14,12 +14,14 @@ For development coordination, technical support, or to hang out with other contr
 
 ---
 
-## 🛠️ Contribution Guide
+## 🛠️ Getting Started
 
-1. **Fork & Clone:** Fork this repository and clone it to your machine.
-2. **Engine:** Download and install [Godot 4.5](https://godotengine.org/download).
-3. **Import:** Open the Godot Project Manager and import `project.godot`.
-4. **Submit:** Push your changes to your fork and open a Pull Request.
+1. **Git LFS:** This repo stores large binaries (native addon libraries) via [Git LFS](https://git-lfs.com/). Install it once (`git lfs install`) *before* cloning, or those files will come down as tiny text pointers instead of the real content.
+2. **Fork & Clone:** Fork this repository and clone it to your machine.
+3. **Engine:** Download and install [Godot 4.7 (.NET/Mono)](https://godotengine.org/download) and the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
+4. **Import:** Open the Godot Project Manager and import `project.godot`.
+5. **Build:** Godot will prompt to build the C# project on first open, or run `dotnet build GodotStation.sln` manually.
+6. **Submit:** Push your changes to your fork and open a Pull Request.
 
 ---
 

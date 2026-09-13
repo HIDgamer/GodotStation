@@ -8,6 +8,23 @@
 # Sandbox program build artifacts (CMake output, not source)
 sandbox-programs/*/.build/
 
+# .NET/C# build output (this project routes into .godot/mono/ by default,
+# but ignore the conventional locations too for any other IDE/setup)
+bin/
+obj/
+*.csproj.user
+mono_crash.*.json
+
+# Editor-specific, personal to each contributor's machine
+.vs/
+.idea/
+.vscode/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
 # Editor/antivirus lock artifacts
 *.TMP
 *.tmp
