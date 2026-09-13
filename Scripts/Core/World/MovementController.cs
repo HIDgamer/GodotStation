@@ -123,9 +123,8 @@ public partial class MovementController : Node
 
     // Pixel mode: continuous movement input, called once per physics frame
     // by whatever reads player/AI input. Actual collision response is left
-    // to the owner's own physics body composition (Rapier2D) - this just
-    // applies the requested motion and re-derives the authoritative grid
-    // cell afterward.
+    // to the owner's own physics body composition - this just applies the
+    // requested motion and re-derives the authoritative grid cell afterward.
     public void MovePixel(Vector2 direction, double delta)
     {
         if (_owner == null) return;
