@@ -264,7 +264,8 @@ metadata/_edit_use_anchors_ = true
 position = Vector2(15, 54)
 hframes = 3
 
-[node name="Pull" type="Sprite2D" parent="HBoxContainer/ActionContainer" unique_id=1238249872]
+[node name="Pull" type="TextureButton" parent="HBoxContainer/ActionContainer" unique_id=1238249872]
+layout_mode = 2
 visible = false
 position = Vector2(15.5, 7.5)
 

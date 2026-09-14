@@ -40,7 +40,7 @@ extends Control
 @onready var equipment_section: Control = $HBoxContainer/MainContainer/Equipment/GridContainer
 @onready var main_container: Control = $HBoxContainer/MainContainer
 @onready var throw_button: Sprite2D = $HBoxContainer/ActionContainer/Throw
-@onready var pull_button: Sprite2D = $HBoxContainer/ActionContainer/Pull
+@onready var pull_button: TextureButton = $HBoxContainer/ActionContainer/Pull
 @onready var run_button: TextureButton = $HBoxContainer/ActionContainer/Run
 
 @onready var status_sprite: Sprite2D = $HBoxContainer/StatusEffectContainer/Status
