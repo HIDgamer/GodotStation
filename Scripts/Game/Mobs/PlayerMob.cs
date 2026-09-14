@@ -64,7 +64,6 @@ public partial class PlayerMob : Mob
     private Vector2 _pendingDirection;
     private float _syncAccumulator;
     private int _facingIndex; // committed/visible facing - synced to clients
-    private int _desiredFacingIndex; // latest input intent - not yet committed if mid-tween
     private int _lastAppliedFacing = -1; // client-side: avoid redundant texture swaps
 
     public override void _Ready()
@@ -645,20 +644,24 @@ public partial class PlayerMob : Mob
 
         var directionChanged = direction != Vector2.Zero && direction != previous;
 
-        // Only updates the *desired* facing, not the visible one. Concrete
-        // example this needs to satisfy: mid-tween sliding north, player
-        // presses west - the sprite keeps facing north until that north
-        // tween actually finishes, and only turns to face west once the
-        // west step itself begins. ServerTick below commits _desiredFacingIndex
-        // to the visible _facingIndex only once the previous tween has landed.
+        // Facing ties to the input directly and instantly, matching real DM
+        // (BYOND mobs have no glide/tween between tiles at all, so there's
+        // no "mid-move" state to wait on - turning is unconditional, tied
+        // 1:1 to whichever direction is currently being pressed/attempted,
+        // confirmed against the real source: movement.dm's Move() calls
+        // setDir() every time regardless of whether the move itself
+        // succeeds). Applied here (not deferred to ServerTick) for the
+        // server's own instant local feedback; SyncFacing still rides
+        // ServerTick's existing periodic broadcast to remote peers.
         if (directionChanged)
         {
-            _desiredFacingIndex = DirectionToFacingIndex(direction);
+            _facingIndex = DirectionToFacingIndex(direction);
+            ApplyFacing(_facingIndex);
         }
 
         // Grid mode steps discretely on a direction change rather than every
-        // tick - continuous stepping while held is handled by TryStepGrid's
-        // own re-entrancy guard once movement animation finishes.
+        // tick - continuous stepping while held is handled by ServerTick's
+        // re-attempt once the previous step's move-delay cooldown expires.
         if (MovementController.GlobalMode == MovementMode.Grid && directionChanged)
         {
             TryGridStep(direction);
@@ -682,24 +685,15 @@ public partial class PlayerMob : Mob
 
         if (MovementController.GlobalMode == MovementMode.Grid)
         {
-            // Captured before this tick's own TryGridStep call - reflects
-            // whether a step was still animating as of the end of the
-            // previous frame, which is what facing should actually wait on.
-            var wasMoving = _movementController.IsMoving;
-
-            // Held-direction re-attempt: TryStepGrid no-ops mid-animation, so
-            // this just keeps walking while a key stays down.
+            // Held-direction re-attempt: TryStepGrid no-ops while still on
+            // the previous step's move-delay cooldown, so this just keeps
+            // walking while a key stays down.
             if (_pendingDirection != Vector2.Zero) TryGridStep(_pendingDirection);
-
-            if (!wasMoving) _facingIndex = _desiredFacingIndex;
         }
         else
         {
             _movementController.MovePixel(_pendingDirection, delta);
-            _facingIndex = _desiredFacingIndex; // Pixel mode has no tween to wait on
         }
-
-        ApplyFacing(_facingIndex); // server's own local visual - SyncFacing below is CallLocal=false
 
         _syncAccumulator += delta;
         if (_syncAccumulator < SyncIntervalSeconds) return;

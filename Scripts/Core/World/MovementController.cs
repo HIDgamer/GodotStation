@@ -24,7 +24,16 @@ public partial class MovementController : Node
     public static MovementMode GlobalMode = MovementMode.Grid;
 
     [Export] public float GridCellSize = 32f;
-    [Export] public float GridMoveDuration = 0.15f;
+
+    // Real DM/BYOND mobs have no glide/tween at all (glide_size 0 - a move
+    // just snaps the mob's screen position to the new tile the instant it
+    // succeeds) and are instead paced by a fixed post-move cooldown before
+    // the next step is accepted (/client/Move's next_movement gate). This
+    // is that cooldown, not an animation duration - confirmed against the
+    // real source (human_movement.dm, mob.dm) rather than assumed; base
+    // running human delay there is roughly 0.2-0.3s before gear/wounds add
+    // more, which per-item/wound modifiers don't exist to layer on yet.
+    [Export] public float GridMoveDelaySeconds = 0.25f;
     [Export] public float PixelSpeed = 160f;
 
     // Independent slow-down channels so their owners never overwrite each
@@ -41,15 +50,7 @@ public partial class MovementController : Node
 
     private MovableAtom? _owner;
     private WorldGrid? _worldGrid;
-    private Vector2 _gridModeTargetPosition;
-    private bool _gridModeMoving;
-
-    // Whether a grid-mode step is currently mid-tween. Exposed so callers
-    // (e.g. facing/animation logic) can defer visible state changes until
-    // the current step actually finishes, rather than reacting instantly to
-    // a new direction while still sliding toward the previous cell. Not
-    // meaningful in Pixel mode (always false there).
-    public bool IsMoving => _gridModeMoving;
+    private float _moveCooldownRemaining;
 
     public override void _Ready()
     {
@@ -65,8 +66,6 @@ public partial class MovementController : Node
         {
             GD.PrintErr("[MovementController] WorldGrid autoload not found at /root/WorldGrid.");
         }
-
-        _gridModeTargetPosition = _owner.Position;
     }
 
     public override void _PhysicsProcess(double delta)
@@ -76,7 +75,7 @@ public partial class MovementController : Node
         switch (GlobalMode)
         {
             case MovementMode.Grid:
-                TickGridMode((float)delta);
+                if (_moveCooldownRemaining > 0f) _moveCooldownRemaining -= (float)delta;
                 break;
             case MovementMode.Pixel:
                 TickPixelMode();
@@ -85,10 +84,12 @@ public partial class MovementController : Node
     }
 
     // Grid mode: attempts to step exactly one cell in the given direction.
-    // No-ops if a move is already animating or the destination is dense.
+    // No-ops while still on the post-move cooldown or the destination is
+    // dense. A successful step snaps Position directly to the new tile -
+    // no animation - matching real DM's glide_size-0 movement exactly.
     public bool TryStepGrid(Vector2I direction)
     {
-        if (_owner == null || _worldGrid == null || _gridModeMoving) return false;
+        if (_owner == null || _worldGrid == null || _moveCooldownRemaining > 0f) return false;
         if (EffectiveSpeedMultiplier <= 0f) return false;
 
         var target = _owner.GridCell + direction;
@@ -96,37 +97,16 @@ public partial class MovementController : Node
         {
             // Bump-to-open: a closed door reacts to being walked into rather
             // than just blocking silently, matching ucfss13's own airlock
-            // behavior. The step itself still fails this frame either way -
-            // stepping through happens on a later, now-unblocked attempt.
+            // behavior. No cooldown is spent on a blocked attempt - DM only
+            // sets its move-delay gate on a move that actually succeeds.
             if (_worldGrid.GetStructure(target) is IBumpable bumpable) bumpable.OnBumped();
             return false;
         }
 
         _worldGrid.MoveOccupant(_owner, _owner.GridCell, target);
-        _gridModeTargetPosition = CellToWorld(target);
-        _gridModeMoving = true;
+        _owner.Position = CellToWorld(target);
+        _moveCooldownRemaining = GridMoveDelaySeconds / EffectiveSpeedMultiplier;
         return true;
-    }
-
-    private void TickGridMode(float delta)
-    {
-        if (!_gridModeMoving || _owner == null) return;
-
-        // An in-flight step always completes even if the multiplier just hit
-        // 0 (getting stunned mid-step shouldn't freeze you between tiles) -
-        // but a slowed mob slides proportionally slower.
-        var speedScale = Mathf.Max(0.25f, EffectiveSpeedMultiplier);
-        var toTarget = _gridModeTargetPosition - _owner.Position;
-        var step = GridCellSize / GridMoveDuration * speedScale * delta;
-        if (toTarget.Length() <= step)
-        {
-            _owner.Position = _gridModeTargetPosition;
-            _gridModeMoving = false;
-        }
-        else
-        {
-            _owner.Position += toTarget.Normalized() * step;
-        }
     }
 
     // Pixel mode: continuous movement input, called once per physics frame
@@ -150,18 +130,16 @@ public partial class MovementController : Node
         }
     }
 
-    // Instantly relocates the owner to a cell without animating a step -
-    // for systems that move a mob without it choosing to move itself
-    // (grabbed/carried by another mob). Cancels any in-flight step tween,
-    // since the cell just changed out from under it.
+    // Instantly relocates the owner to a cell - for systems that move a mob
+    // without it choosing to move itself (grabbed/carried by another mob).
+    // Doesn't touch the move cooldown - being dragged isn't a step this mob
+    // took, so it shouldn't affect when its next own step is allowed.
     public void ForceSetCell(Vector2I cell)
     {
         if (_owner == null || _worldGrid == null) return;
 
         _worldGrid.MoveOccupant(_owner, _owner.GridCell, cell);
-        _gridModeTargetPosition = CellToWorld(cell);
-        _owner.Position = _gridModeTargetPosition;
-        _gridModeMoving = false;
+        _owner.Position = CellToWorld(cell);
     }
 
     private Vector2 CellToWorld(Vector2I cell) => new(cell.X * GridCellSize, cell.Y * GridCellSize);
