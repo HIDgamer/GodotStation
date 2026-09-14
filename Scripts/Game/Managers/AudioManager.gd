@@ -1,8 +1,12 @@
 @tool
 extends Node
-class_name AudioManager
 
-static var instance: AudioManager
+# No class_name: this script is registered as the "AudioManager" autoload
+# (project.godot), and Godot rejects a class_name matching an existing
+# autoload's name ("hides an autoload singleton" parse error - confirmed by
+# direct testing 2026-09-14). Untyped static var instead of self-typing this
+# static var, for the same reason.
+static var instance
 
 # Audio buses for volume control.
 const UI_BUS_INDEX: int = 1
