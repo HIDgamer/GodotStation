@@ -49,7 +49,7 @@ func _get_mode_string() -> String:
 		_: return "IC"
 
 func _on_mode_button_pressed() -> void:
-	current_mode = (current_mode + 1) % 4
+	current_mode = ((current_mode + 1) % 4) as ChatMode
 	_update_mode_button()
 
 func _update_mode_button() -> void:
