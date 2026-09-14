@@ -368,6 +368,13 @@ func _parse_args() -> void:
 						join_port = int(parts[1])
 			"--host":
 				is_host = true
+			# Automated multiplayer test scenarios only - see
+			# Tools/multiplayer_tests/. Real play never passes these.
+			"--auto-start-round":
+				TestHarnessConfig.AutoStartRound = true
+			"--auto-drop-delay":
+				if i + 1 < args.size():
+					TestHarnessConfig.AutoDropAfterSpawnSeconds = float(args[i + 1])
 
 	_last_ip   = join_ip
 	_last_port = join_port

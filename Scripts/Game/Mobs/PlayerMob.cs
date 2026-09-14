@@ -1,6 +1,7 @@
 using Godot;
 using GodotStation.Core.Assets;
 using GodotStation.Core.Net;
+using GodotStation.Core.Testing;
 using GodotStation.Core.World;
 using GodotStation.Game.Mobs.Health;
 using GodotStation.Game.Objects.Items;
@@ -96,6 +97,19 @@ public partial class PlayerMob : Mob
         }
 
         _appearance?.SetLayer("body", BodySheetPath, BodyState);
+
+        // Automated test scenarios only (see Tools/multiplayer_tests/) - runs
+        // the exact same drop dispatch a real keypress would, just on a
+        // timer instead of input. Real play never sets this delay, so this
+        // is a no-op for every normal session.
+        if (Multiplayer.GetUniqueId() == OwnerPeerId)
+        {
+            var testConfig = GetNode<TestHarnessConfig>("/root/TestHarnessConfig");
+            if (testConfig.AutoDropAfterSpawnSeconds > 0f)
+            {
+                GetTree().CreateTimer(testConfig.AutoDropAfterSpawnSeconds).Timeout += HudRequestDrop;
+            }
+        }
     }
 
     public override void _PhysicsProcess(double delta)

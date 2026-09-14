@@ -1,6 +1,7 @@
 using Godot;
 using GodotStation.Core.Net;
 using GodotStation.Core.Subsystems;
+using GodotStation.Core.Testing;
 using GodotStation.Core.World;
 using GodotStation.Game.Mobs;
 using GodotStation.Game.Objects.Items;
@@ -29,6 +30,7 @@ public partial class GameRoot : Node2D
     private Node2D? _world;
     private Node2D? _playersContainer;
     private MapBootstrap? _activeMap;
+    private TestHarnessConfig? _testConfig;
 
     public override void _Ready()
     {
@@ -36,9 +38,22 @@ public partial class GameRoot : Node2D
         _ticker = GetNode<SubsystemManager>("/root/SubsystemManager").GetSubsystem<TickerSubsystem>();
         _world = GetNode<Node2D>("World");
         _playersContainer = GetNode<Node2D>("World/Players");
+        _testConfig = GetNode<TestHarnessConfig>("/root/TestHarnessConfig");
 
         if (_ticker != null) _ticker.StateChanged += OnRoundStateChanged;
         if (_network != null) _network.PeerConnected += OnPeerConnected;
+        if (_network != null) _network.ServerCreated += OnServerCreated;
+    }
+
+    // Automated test scenarios only (see Tools/multiplayer_tests/) - skips
+    // waiting for the host's real "Start Round" UI click. Real play never
+    // sets this flag, so this is a no-op for every normal session.
+    private void OnServerCreated()
+    {
+        if (_testConfig != null && _testConfig.AutoStartRound)
+        {
+            ServerStartRound();
+        }
     }
 
     // Called by the host's "Start Round" UI action once - not automatic on

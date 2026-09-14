@@ -84,6 +84,7 @@ public partial class Item : WorldObject
         Position = position;
         Visible = true;
         RegisterAtCurrentPosition();
+        GD.Print($"[Item] {Name} placed in world at {position}");
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
@@ -108,6 +109,7 @@ public partial class Item : WorldObject
         worldGrid.RemoveOccupant(this, GridCell);
         GetParent()?.RemoveChild(this);
         Visible = false;
+        GD.Print($"[Item] {Name} removed from world");
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]

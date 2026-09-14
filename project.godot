@@ -18,15 +18,16 @@ config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 
 [autoload]
 
-SubsystemManager="*uid://ceuel77h4xpwj"
+SubsystemManager="*res://Scripts/Core/Subsystems/SubsystemManager.cs"
 AtomRegistry="*res://Scripts/Core/Atoms/AtomRegistry.cs"
 WorldGrid="*res://Scripts/Core/World/WorldGrid.cs"
 ScriptingManager="*res://Scripts/Core/Scripting/ScriptingManager.cs"
-NetworkManager="*uid://cwclxemw2l40b"
+NetworkManager="*res://Scripts/Core/Net/NetworkManager.cs"
 ChatManager="*res://Scripts/Core/Net/ChatManager.cs"
 IconBridge="*res://Scripts/Core/Assets/IconBridge.cs"
 JobManager="*res://Scripts/Game/Jobs/JobManager.cs"
-AudioManager="*uid://blp75yg3ot36a"
+AudioManager="*res://Scripts/Game/Managers/AudioManager.gd"
+TestHarnessConfig="*res://Scripts/Core/Testing/TestHarnessConfig.cs"
 
 [display]
 
