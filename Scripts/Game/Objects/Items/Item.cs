@@ -98,12 +98,19 @@ public partial class Item : WorldObject
     // PlaceInWorld's comment above for the broadcast/authority reasoning.
     public void RemoveFromWorld()
     {
-        DoRemoveFromWorld();
-
+        // Broadcast BEFORE the local removal, not after: DoRemoveFromWorld
+        // takes this node out of the tree (GetParent()?.RemoveChild(this)),
+        // and a Node2D's Multiplayer accessor throws once it's no longer
+        // inside the tree - checking it after the removal crashed every
+        // pickup with a NullReferenceException. PlaceInWorld doesn't have
+        // this problem (it ADDS to the tree before its own Multiplayer
+        // check), only this removal direction did.
         if (Multiplayer.HasMultiplayerPeer() && Multiplayer.IsServer())
         {
             Rpc(nameof(SyncRemoveFromWorld));
         }
+
+        DoRemoveFromWorld();
     }
 
     private void DoRemoveFromWorld()
