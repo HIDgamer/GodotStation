@@ -89,10 +89,21 @@ public partial class WorldGrid : Node
 
     public void SetArea(Vector2I cell, GameArea area) => GetOrCreateCell(cell).Area = area;
 
+    // Registers/clears the dense structure (a door, today) occupying a cell -
+    // see TurfCell.Structure. A structure that removes itself (destroyed,
+    // deleted) should call this with null rather than leave a stale entry.
+    public void SetStructure(Vector2I cell, IDenseStructure? structure) => GetOrCreateCell(cell).Structure = structure;
+
+    public IDenseStructure? GetStructure(Vector2I cell) => GetCell(cell)?.Structure;
+
     // An unmapped cell (no TurfCell created yet) is treated as passable, not
     // blocked - true out-of-bounds handling belongs to whatever loads the
     // map, not to this default.
-    public bool IsDense(Vector2I cell) => GetCell(cell)?.Turf?.IsDense ?? false;
+    public bool IsDense(Vector2I cell)
+    {
+        var turfCell = GetCell(cell);
+        return (turfCell?.Turf?.IsDense ?? false) || (turfCell?.Structure?.IsDense ?? false);
+    }
 
     public bool BlocksLight(Vector2I cell) => GetCell(cell)?.Turf?.BlocksLight ?? false;
 

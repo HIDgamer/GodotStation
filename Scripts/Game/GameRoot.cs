@@ -45,15 +45,17 @@ public partial class GameRoot : Node2D
 
         if (_ticker != null) _ticker.StateChanged += OnRoundStateChanged;
         if (_network != null) _network.PeerConnected += OnPeerConnected;
-        if (_network != null) _network.ServerCreated += OnServerCreated;
-    }
 
-    // Automated test scenarios only (see Tools/multiplayer_tests/) - skips
-    // waiting for the host's real "Start Round" UI click. Real play never
-    // sets this flag, so this is a no-op for every normal session.
-    private void OnServerCreated()
-    {
-        if (_testConfig != null && _testConfig.AutoStartRound)
+        // Automated test scenarios only (see Tools/multiplayer_tests/) -
+        // skips waiting for the host's real "Start Round" UI click. Real
+        // play never sets this flag, so this is a no-op for every normal
+        // session. Checked directly here rather than via NetworkManager's
+        // ServerCreated signal: MainMenu's own ServerCreated handler is what
+        // defers this scene into existence in the first place (see its
+        // change_scene_to_file.call_deferred), so by the time GameRoot._Ready
+        // runs, that signal has already fired and gone - subscribing to it
+        // here would never actually receive it.
+        if (_network != null && _network.IsServer && _testConfig != null && _testConfig.AutoStartRound)
         {
             ServerStartRound();
         }

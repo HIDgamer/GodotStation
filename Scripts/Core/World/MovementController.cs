@@ -92,7 +92,15 @@ public partial class MovementController : Node
         if (EffectiveSpeedMultiplier <= 0f) return false;
 
         var target = _owner.GridCell + direction;
-        if (_worldGrid.IsDense(target)) return false;
+        if (_worldGrid.IsDense(target))
+        {
+            // Bump-to-open: a closed door reacts to being walked into rather
+            // than just blocking silently, matching ucfss13's own airlock
+            // behavior. The step itself still fails this frame either way -
+            // stepping through happens on a later, now-unblocked attempt.
+            if (_worldGrid.GetStructure(target) is IBumpable bumpable) bumpable.OnBumped();
+            return false;
+        }
 
         _worldGrid.MoveOccupant(_owner, _owner.GridCell, target);
         _gridModeTargetPosition = CellToWorld(target);

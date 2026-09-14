@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://0gsa52lm00jv" path="res://Scenes/Game/Item.tscn" id="3_item"]
 [ext_resource type="PackedScene" uid="uid://c11ibrwu0wx8c" path="res://Scenes/Game/Gun.tscn" id="4_gun"]
 [ext_resource type="PackedScene" uid="uid://cotviv3h66wvj" path="res://Scenes/Game/MeleeWeapon.tscn" id="5_melee"]
+[ext_resource type="PackedScene" path="res://Scenes/Game/Door.tscn" id="6_door"]
 
 [node name="TestMap" type="Node2D" unique_id=1910861934]
 script = ExtResource("1_map")
@@ -45,3 +46,8 @@ IconSheetPath = "res://Icons/obj/items/weapons/melee/knives.png"
 IconState = "fighting_knife"
 AtomName = "Fighting Knife"
 Description = "A standard-issue combat knife."
+
+[node name="SouthDoor" parent="." unique_id=1093847362 instance=ExtResource("6_door")]
+position = Vector2(256, 288)
+AtomName = "Airlock"
+Description = "A standard airlock."

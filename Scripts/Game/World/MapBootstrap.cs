@@ -17,6 +17,12 @@ public partial class MapBootstrap : Node2D
     [Export] public int RoomWidth = 16;
     [Export] public int RoomHeight = 10;
 
+    // A gap left in the south wall for TestMap.tscn's Door instance to sit
+    // in - without this the border loop below would wall it back in, and
+    // Phase 3's new Door/bump-to-open behavior would have nothing real to
+    // exercise (see PORT_ROADMAP.md's Doors/airlocks entry).
+    private static readonly Vector2I DoorwayCell = new(8, 9);
+
     private readonly List<SpawnPoint> _spawnPoints = new();
     private int _nextSpawnIndex;
 
@@ -49,7 +55,7 @@ public partial class MapBootstrap : Node2D
             {
                 var cell = new Vector2I(x, y);
                 var isBorder = x == 0 || y == 0 || x == RoomWidth - 1 || y == RoomHeight - 1;
-                Turf turf = isBorder ? new WallTurf() : new FloorTurf();
+                Turf turf = isBorder && cell != DoorwayCell ? new WallTurf() : new FloorTurf();
 
                 worldGrid.SetTurf(cell, turf);
             }

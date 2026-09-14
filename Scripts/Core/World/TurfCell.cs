@@ -12,4 +12,9 @@ public sealed class TurfCell
     public Turf? Turf;
     public GameArea? Area;
     public readonly List<MovableAtom> Occupants = new();
+
+    // The dense structure placed on this cell, if any (a door today) -
+    // separate from Occupants, which is mobs/items passing through or
+    // sitting on the cell, not a fixed structure built into it.
+    public IDenseStructure? Structure;
 }
