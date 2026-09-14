@@ -1,10 +1,12 @@
 using Godot;
 using GodotStation.Core.Assets;
+using GodotStation.Core.Atoms;
 using GodotStation.Core.Net;
 using GodotStation.Core.Testing;
 using GodotStation.Core.World;
 using GodotStation.Game.Mobs.Health;
 using GodotStation.Game.Objects.Items;
+using GodotStation.Game.Objects.Structures;
 
 namespace GodotStation.Game.Mobs;
 
@@ -195,11 +197,18 @@ public partial class PlayerMob : Mob
             if (Multiplayer.IsServer()) DoDebugDamage(); else RpcId(1, nameof(RequestDebugDamage));
         }
         // Same temporary-hook rationale as debug_short_circuit above, but for
-        // turfs - Phase 4 combat is what should eventually deal real damage
-        // to the turf a player is facing. Remove once that exists.
+        // turfs/structures - Phase 4 combat is what should eventually deal
+        // real damage to whatever a player is facing. Remove once that exists.
         if (Input.IsActionJustPressed("debug_turf_damage"))
         {
             if (Multiplayer.IsServer()) DoDebugTurfDamage(); else RpcId(1, nameof(RequestDebugTurfDamage));
+        }
+        // Temporary hook for the airlock bolts Phase 3 added - stands in for
+        // the real trigger (a bolt-cutting tool interaction), which needs
+        // Phase 4's click dispatch to exist. Remove once that exists.
+        if (Input.IsActionJustPressed("debug_door_bolt_toggle"))
+        {
+            if (Multiplayer.IsServer()) DoDebugDoorBoltToggle(); else RpcId(1, nameof(RequestDebugDoorBoltToggle));
         }
     }
 
@@ -425,6 +434,25 @@ public partial class PlayerMob : Mob
         var targetCell = GridCell + FacingToCellDirection(_facingIndex);
         var worldGrid = GetNode<WorldGrid>("/root/WorldGrid");
         worldGrid.GetCell(targetCell)?.Turf?.ApplyDamage(50f);
+
+        // Also damages a dense structure (a door, today) on that cell, if
+        // any - Atom.ApplyDamage/Destroy is shared machinery, not something
+        // Door reinvents, so this one debug hook covers both.
+        if (worldGrid.GetStructure(targetCell) is Atom structureAtom) structureAtom.ApplyDamage(50f);
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+    private void RequestDebugDoorBoltToggle()
+    {
+        if (!Multiplayer.IsServer() || Multiplayer.GetRemoteSenderId() != OwnerPeerId) return;
+        DoDebugDoorBoltToggle();
+    }
+
+    private void DoDebugDoorBoltToggle()
+    {
+        var targetCell = GridCell + FacingToCellDirection(_facingIndex);
+        var worldGrid = GetNode<WorldGrid>("/root/WorldGrid");
+        if (worldGrid.GetStructure(targetCell) is Door door) door.SetBolted(!door.IsBolted);
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer)]

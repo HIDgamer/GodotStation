@@ -9,13 +9,21 @@ namespace GodotStation.Game.Objects.Structures;
 
 public enum DoorState { Closed, Opening, Open, Closing }
 
-// Base openable/closable structure occupying a single grid cell - the
-// "base door class" stage of Phase 3 (see PORT_ROADMAP.md's Doors/airlocks
-// entry). Airlock-specific complexity (wire panel, power rails, bolts,
-// forced entry, tool interactions) is a deliberately separate follow-up
-// stage, matching the roadmap's own two-stage split for this phase; this
-// class is the fully generic open/close/density/bump-to-open contract every
-// future door variant (airlocks, blast doors, windoors, ...) builds on.
+// Openable/closable structure occupying a single grid cell, covering both
+// Phase 3 stages from PORT_ROADMAP.md's Doors/airlocks entry: the base
+// open/close/density/bump-to-open contract, plus airlock parity's power
+// rails, bolts, welding, and damage/forced-entry (Integrity/ApplyDamage/
+// Destroy are inherited straight from Atom - a destroyed door just means
+// OnDestroyed forces it permanently open, no separate damage model needed).
+// Every future door variant (blast doors, windoors, ...) builds on this.
+//
+// Deliberately NOT built here: a wire panel, or any tool-interaction trigger
+// (weld shut, cut bolts, force with a crowbar) for a player to actually
+// invoke these mechanics with. Both need a real click/tool dispatch system,
+// which is Phase 4's job, not this one's - the mechanics below are real and
+// fully functional, just driven by debug hooks (PlayerMob's
+// debug_door_bolt_toggle, and the existing debug_turf_damage now also
+// damaging structures) until Phase 4 gives them a real trigger.
 //
 // One scene (Scenes/Game/Door.tscn) covers every visual variant via exported
 // IconSheetPath, same composition-over-inheritance convention as Item.
@@ -27,10 +35,27 @@ public partial class Door : WorldObject, IDenseStructure, IBumpable
 
     public DoorState State { get; private set; } = DoorState.Closed;
 
-    // IDenseStructure - dense while fully closed or in the act of closing;
-    // density flips the instant a close begins, not once the animation
-    // finishes, so nothing can dash through a mid-close door.
-    public bool IsDense => State is DoorState.Closed or DoorState.Closing;
+    // Dual power rails - DM parity is "still works if either circuit is
+    // live," not a single powered/unpowered flag. Both default on; either
+    // being cut alone leaves the door working normally.
+    public bool MainPowered { get; private set; } = true;
+    public bool BackupPowered { get; private set; } = true;
+    private bool IsPowered => MainPowered || BackupPowered;
+
+    // Floor bolts - dropped, the door won't open for power or a bump, only
+    // a bolt-cutting tool interaction (Phase 4) or ForceOpen() can move it.
+    public bool IsBolted { get; private set; }
+
+    // Welded shut - same refusal as bolts, cleared only by cutting the weld
+    // (also Phase 4). Bolts and welds are independent; either alone blocks
+    // a normal Open().
+    public bool IsWelded { get; private set; }
+
+    // IDenseStructure - dense while fully closed or in the act of closing
+    // (destroyed is never dense - see OnDestroyed); density flips the
+    // instant a close begins, not once the animation finishes, so nothing
+    // can dash through a mid-close door.
+    public bool IsDense => !IsDestroyed && State is DoorState.Closed or DoorState.Closing;
 
     private Sprite2D? _visual;
     private RoundLogger? _log;
@@ -62,10 +87,32 @@ public partial class Door : WorldObject, IDenseStructure, IBumpable
         if (State == DoorState.Closed) Open();
     }
 
+    // Normal open - refuses while bolted, welded, or fully unpowered, same
+    // as a real airlock's own access-denied buzz. See ForceOpen() for the
+    // one case (a crowbar on an unpowered-but-not-bolted/welded door) that's
+    // meant to bypass this.
     public void Open()
     {
         if (!Multiplayer.IsServer() || State is DoorState.Open or DoorState.Opening) return;
+        if (IsBolted || IsWelded || !IsPowered) return;
 
+        BeginOpen();
+    }
+
+    // Crowbar-style manual forced entry - bypasses the power check (that's
+    // the whole point of forcing an unpowered door) but still respects bolts
+    // and welds, matching real airlock behavior: those need their own tool
+    // interaction (cut the weld, cut the bolts) before even a crowbar works.
+    public void ForceOpen()
+    {
+        if (!Multiplayer.IsServer() || State is DoorState.Open or DoorState.Opening) return;
+        if (IsBolted || IsWelded) return;
+
+        BeginOpen();
+    }
+
+    private void BeginOpen()
+    {
         SetState(DoorState.Opening);
         GetTree().CreateTimer(TransitionSeconds).Timeout += () =>
         {
@@ -103,6 +150,47 @@ public partial class Door : WorldObject, IDenseStructure, IBumpable
         };
     }
 
+    public void SetBolted(bool bolted)
+    {
+        if (!Multiplayer.IsServer() || IsBolted == bolted) return;
+        IsBolted = bolted;
+        _log?.Log("DOOR", $"{AtomName} at {GridCell} bolts {(bolted ? "dropped" : "raised")}");
+        SyncFlagsToClients();
+    }
+
+    public void SetWelded(bool welded)
+    {
+        if (!Multiplayer.IsServer() || IsWelded == welded) return;
+        IsWelded = welded;
+        _log?.Log("DOOR", $"{AtomName} at {GridCell} {(welded ? "welded shut" : "weld cut")}");
+        SyncFlagsToClients();
+    }
+
+    public void SetPower(bool mainPowered, bool backupPowered)
+    {
+        if (!Multiplayer.IsServer() || (MainPowered == mainPowered && BackupPowered == backupPowered)) return;
+        MainPowered = mainPowered;
+        BackupPowered = backupPowered;
+        _log?.Log("DOOR", $"{AtomName} at {GridCell} power: main={mainPowered} backup={backupPowered}");
+        SyncFlagsToClients();
+    }
+
+    // A destroyed door has nothing left to open/close/bolt - it's wreckage,
+    // permanently open and non-dense (see IsDense). No BaseTurf-style
+    // reveal-a-different-object here: unlike a wall, a destroyed door isn't
+    // hiding another structure underneath it, it's just gone.
+    protected override void OnDestroyed()
+    {
+        State = DoorState.Open;
+        UpdateVisual();
+        _log?.Log("DOOR", $"{AtomName} at {GridCell} destroyed");
+
+        if (Multiplayer.HasMultiplayerPeer() && Multiplayer.IsServer())
+        {
+            Rpc(nameof(SyncState), (int)State);
+        }
+    }
+
     private void SetState(DoorState state)
     {
         State = state;
@@ -122,12 +210,37 @@ public partial class Door : WorldObject, IDenseStructure, IBumpable
         UpdateVisual();
     }
 
+    private void SyncFlagsToClients()
+    {
+        UpdateVisual();
+        if (Multiplayer.HasMultiplayerPeer() && Multiplayer.IsServer())
+        {
+            Rpc(nameof(SyncFlags), IsBolted, IsWelded, MainPowered, BackupPowered);
+        }
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
+    private void SyncFlags(bool bolted, bool welded, bool mainPowered, bool backupPowered)
+    {
+        IsBolted = bolted;
+        IsWelded = welded;
+        MainPowered = mainPowered;
+        BackupPowered = backupPowered;
+        UpdateVisual();
+    }
+
+    // Single-sprite swap, same as every other DmiSheet consumer in this
+    // codebase (Item, Turf) - no true multi-layer overlay compositing exists
+    // yet, so simultaneous bolted+welded shows welded (the more severe of
+    // the two) rather than blending both.
     private void UpdateVisual()
     {
         if (_visual == null || IconSheetPath == "") return;
 
         var iconState = State switch
         {
+            _ when IsWelded => "welded",
+            _ when IsBolted && State == DoorState.Closed => "door_locked",
             DoorState.Closed => "door_closed",
             DoorState.Opening => "door_opening",
             DoorState.Open => "door_open",

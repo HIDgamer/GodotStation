@@ -16,6 +16,7 @@ public abstract partial class Atom : Node2D, IAtom
     [Signal] public delegate void DestroyedEventHandler();
 
     private bool _destroyed;
+    public bool IsDestroyed => _destroyed;
 
     public virtual string Examine()
         => string.IsNullOrEmpty(Description) ? AtomName : $"{AtomName}\n{Description}";
