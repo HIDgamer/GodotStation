@@ -340,7 +340,12 @@ public partial class PlayerMob : Mob
         var item = _inventory.TakeActiveItem();
         if (item == null) return;
 
-        if (item.GetParent() == this) RemoveChild(item);
+        // No manual RemoveChild here - PlaceInWorld's own DoPlaceInWorld
+        // already reparents from wherever the item currently is (under this
+        // mob) to its original world parent in one atomic step. Removing it
+        // first left it parentless (outside the scene tree) for the
+        // duration of the call, which is harmless for Drop but crashed
+        // Throw below (see its own comment).
         item.PlaceInWorld(Position);
     }
 
@@ -361,7 +366,14 @@ public partial class PlayerMob : Mob
         var item = _inventory.TakeActiveItem();
         if (item == null) return;
 
-        if (item.GetParent() == this) RemoveChild(item);
+        // No manual RemoveChild here - it used to strip the item from the
+        // tree before ThrowInDirection ran, and ThrowInDirection's own
+        // GetNode<WorldGrid>("/root/WorldGrid") requires being inside the
+        // tree - a Node with an absolute path lookup while parentless
+        // throws "Can't use get_node() with absolute paths from outside the
+        // active scene tree", crashing every throw. PlaceInWorld (called at
+        // the end of ThrowInDirection) already reparents correctly on its
+        // own - see DoDrop's comment above, same fix.
         item.ThrowInDirection(GridCell, FacingToCellDirection(_facingIndex), ThrowRangeCells);
     }
 
@@ -622,7 +634,7 @@ public partial class PlayerMob : Mob
         var item = _inventory.TakeActiveItem();
         if (item == null) return;
 
-        if (item.GetParent() == this) RemoveChild(item);
+        // Same fix as DoDrop/DoThrow - PlaceInWorld reparents on its own.
         item.PlaceInWorld(Position);
     }
 
