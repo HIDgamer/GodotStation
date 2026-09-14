@@ -63,6 +63,9 @@ extends Control
 @onready var right_leg_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/RightLeg
 @onready var right_foot_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/RightFoot
 
+const HUD_SHEET := "res://Icons/mob/hud/screen1.png"
+const ZONE_SEL_SHEET := "res://Icons/mob/hud/zone_sel.png"
+
 var player: Node = null
 var clothing_slots: Dictionary = {}
 var current_limb: String = "right_hand"
@@ -95,6 +98,7 @@ func _ready() -> void:
 	rhand.pressed.connect(func(): _switch_hand(0))
 	pull_button.gui_input.connect(_on_pull_button_input)
 
+	_setup_static_textures()
 	_setup_clothing_slots()
 	_setup_limb_selector()
 	_setup_status_effects()
@@ -152,6 +156,38 @@ func _on_hud_equipment_changed(slot: String, sheet_path: String, state: String) 
 func _on_hud_health_changed(integrity: float, max_integrity: float) -> void:
 	last_health_percent = (integrity / max_integrity) * 100.0 if max_integrity > 0 else 0.0
 	_update_status_effects()
+
+# Base HUD chrome (hand slots, equipment toggle, pull button, limb doll) -
+# real ucfss13 icon states from screen1.png/zone_sel.png, confirmed against
+# their .icon.json state lists (2026-09-14), not guessed. Every one of these
+# nodes had layout but zero texture assigned in PUI.tscn - the whole HUD
+# frame was invisible, not just unpopulated, until this ran. Item/equipment
+# icons layered on top of this backdrop are handled separately by
+# _make_icon() and were already working.
+func _setup_static_textures() -> void:
+	lhand.texture_normal = IconBridge.GetFrame(HUD_SHEET, "hand")
+	rhand.texture_normal = IconBridge.GetFrame(HUD_SHEET, "hand")
+	lhighlight.texture = IconBridge.GetFrame(HUD_SHEET, "selector")
+	rhighlight.texture = IconBridge.GetFrame(HUD_SHEET, "selector")
+	equipment_button.texture_normal = IconBridge.GetFrame(HUD_SHEET, "equip")
+	pull_button.texture_normal = IconBridge.GetFrame(HUD_SHEET, "pull0")
+
+	if limbs_selector:
+		limbs_selector.texture = IconBridge.GetFrame(HUD_SHEET, "zone_sel")
+
+	# zone_sel.png holds one highlight overlay per body part (DM convention:
+	# the doll backdrop above is a screen1.dmi state, the per-zone highlight
+	# is a separate file) - mapped from this UI's own limb names to DM's.
+	var limb_zone_states = {
+		mouth_button: "mouth", eyes_button: "eyes", head_button: "head", body_button: "chest",
+		right_arm_button: "r_arm", right_hand_button: "r_hand",
+		left_arm_button: "l_arm", left_hand_button: "l_hand",
+		groin_button: "groin", left_leg_button: "l_leg", left_foot_button: "l_foot",
+		right_leg_button: "r_leg", right_foot_button: "r_foot",
+	}
+	for limb_button in limb_zone_states.keys():
+		if limb_button:
+			limb_button.texture = IconBridge.GetFrame(ZONE_SEL_SHEET, limb_zone_states[limb_button])
 
 func _setup_clothing_slots() -> void:
 	var equipment_slot_map = {
