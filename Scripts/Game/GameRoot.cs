@@ -1,4 +1,5 @@
 using Godot;
+using GodotStation.Core.Diagnostics;
 using GodotStation.Core.Net;
 using GodotStation.Core.Subsystems;
 using GodotStation.Core.Testing;
@@ -31,6 +32,7 @@ public partial class GameRoot : Node2D
     private Node2D? _playersContainer;
     private MapBootstrap? _activeMap;
     private TestHarnessConfig? _testConfig;
+    private RoundLogger? _log;
 
     public override void _Ready()
     {
@@ -39,6 +41,7 @@ public partial class GameRoot : Node2D
         _world = GetNode<Node2D>("World");
         _playersContainer = GetNode<Node2D>("World/Players");
         _testConfig = GetNode<TestHarnessConfig>("/root/TestHarnessConfig");
+        _log = GetNodeOrNull<RoundLogger>("/root/RoundLogger");
 
         if (_ticker != null) _ticker.StateChanged += OnRoundStateChanged;
         if (_network != null) _network.PeerConnected += OnPeerConnected;
@@ -113,6 +116,7 @@ public partial class GameRoot : Node2D
         if (_network == null || !_network.IsServer) return;
         if (_ticker == null || _ticker.State != RoundState.Playing) return;
 
+        _log?.Log("NETWORK", $"Late join by peer={peerId} - spawning and replaying world state");
         RpcId(peerId, nameof(RoundStartedRpc));
         SpawnPlayerForPeer(peerId);
 
@@ -142,6 +146,7 @@ public partial class GameRoot : Node2D
 
         _activeMap = scene.Instantiate<MapBootstrap>();
         _world.AddChild(_activeMap);
+        _log?.Log("MAP", $"Loaded {TestMapScenePath}");
     }
 
     private void SpawnPlayerForPeer(long peerId)
@@ -175,6 +180,7 @@ public partial class GameRoot : Node2D
         mob.SetMultiplayerAuthority(1); // always the server, see PlayerMob's header comment
 
         _playersContainer.AddChild(mob);
+        _log?.Log("SPAWN", $"PlayerMob peer={peerId} job={job} pos={position}");
 
         if (peerId == Multiplayer.GetUniqueId())
         {

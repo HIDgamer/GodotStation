@@ -1,5 +1,6 @@
 using Godot;
 using GodotStation.Core.Assets;
+using GodotStation.Core.Diagnostics;
 using GodotStation.Core.World;
 using GodotStation.Game.Objects;
 
@@ -25,11 +26,13 @@ public partial class Item : WorldObject
 
     private Sprite2D? _visual;
     private Node? _worldParent;
+    private RoundLogger? _log;
 
     public override void _Ready()
     {
         _visual = GetNodeOrNull<Sprite2D>("Visual");
         _worldParent = GetParent();
+        _log = GetNodeOrNull<RoundLogger>("/root/RoundLogger");
 
         if (_visual != null && IconSheetPath != "")
         {
@@ -84,7 +87,7 @@ public partial class Item : WorldObject
         Position = position;
         Visible = true;
         RegisterAtCurrentPosition();
-        GD.Print($"[Item] {Name} placed in world at {position}");
+        _log?.Log("ITEM", $"{Name} placed in world at {position}");
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
@@ -109,7 +112,7 @@ public partial class Item : WorldObject
         worldGrid.RemoveOccupant(this, GridCell);
         GetParent()?.RemoveChild(this);
         Visible = false;
-        GD.Print($"[Item] {Name} removed from world");
+        _log?.Log("ITEM", $"{Name} removed from world");
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]

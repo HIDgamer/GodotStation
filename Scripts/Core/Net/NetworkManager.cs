@@ -1,4 +1,5 @@
 using Godot;
+using GodotStation.Core.Diagnostics;
 
 namespace GodotStation.Core.Net;
 
@@ -21,12 +22,16 @@ public partial class NetworkManager : Node
 
 	public bool IsServer { get; private set; }
 
+	private RoundLogger? _log;
+
 	public override void _Ready()
 	{
-		Multiplayer.PeerConnected += id => { GD.Print($"[NetworkManager] Peer connected: {id}"); EmitSignal(SignalName.PeerConnected, id); };
-		Multiplayer.PeerDisconnected += id => { GD.Print($"[NetworkManager] Peer disconnected: {id}"); EmitSignal(SignalName.PeerDisconnected, id); };
-		Multiplayer.ConnectedToServer += () => { GD.Print("[NetworkManager] Connected to server."); EmitSignal(SignalName.ConnectedToServer); };
-		Multiplayer.ConnectionFailed += () => { GD.Print("[NetworkManager] Connection failed."); EmitSignal(SignalName.ConnectionFailed); };
+		_log = GetNodeOrNull<RoundLogger>("/root/RoundLogger");
+
+		Multiplayer.PeerConnected += id => { _log?.Log("NETWORK", $"Peer connected: {id}"); EmitSignal(SignalName.PeerConnected, id); };
+		Multiplayer.PeerDisconnected += id => { _log?.Log("NETWORK", $"Peer disconnected: {id}"); EmitSignal(SignalName.PeerDisconnected, id); };
+		Multiplayer.ConnectedToServer += () => { _log?.Log("NETWORK", "Connected to server."); EmitSignal(SignalName.ConnectedToServer); };
+		Multiplayer.ConnectionFailed += () => { _log?.Log("NETWORK", "Connection failed."); EmitSignal(SignalName.ConnectionFailed); };
 	}
 
 	// No-default overloads - GDScript calling a C# method with default
