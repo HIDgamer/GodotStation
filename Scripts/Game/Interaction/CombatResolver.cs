@@ -12,11 +12,15 @@ namespace GodotStation.Game.Interaction;
 // target. CQC modifiers read the real SkillComponent now that it's ported.
 // Grab dispatches to the mob's own PlayerInteractionSystem, which owns the
 // actual pull/grab-level/fireman-carry state machine this class doesn't.
+//
+// Harm and Disarm were audited against the real DM source (2026-09-14,
+// human_attackhand.dm's attack_hand() INTENT_HARM/INTENT_DISARM branches) -
+// see each method's own comment for what changed and why.
 public static class CombatResolver
 {
     private const float UnarmedBaseDamage = 5.0f;
-    private const float BaseHitChance = 0.6f;
-    private const float BaseDisarmStunChance = 0.15f;
+    private const int DisarmStunThreshold = 25;
+    private const int DisarmDropThreshold = 60;
     private const float DisarmStunSeconds = 1.0f;
 
     // Returns a short feedback message for the attacker (empty = silent).
@@ -43,22 +47,38 @@ public static class CombatResolver
         return $"You pat {target.AtomName} reassuringly.";
     }
 
+    // Real DM formula: rand(1,100) - 5*attackerCQC + 5*defenderCQC against
+    // two thresholds, not a single stun-chance roll - a disarm attempt can
+    // whiff entirely (the old prototype this was ported from always dropped
+    // the target's item and only rolled for the stun bonus, which didn't
+    // match). Middle tier breaks an active pull instead of dropping the
+    // item, if the target has one - also real DM behavior.
     private static string ResolveDisarm(Mob attacker, Mob target)
     {
-        // Old formula: 0.15 + ownerCQC*0.1 - targetCQC*0.05, clamped 5-75%.
         var ownerCqc = attacker.GetMobComponent<SkillComponent>()?.GetSkillLevel(SkillType.CQC) ?? 0;
         var targetCqc = target.GetMobComponent<SkillComponent>()?.GetSkillLevel(SkillType.CQC) ?? 0;
-        var stunChance = Mathf.Clamp(BaseDisarmStunChance + ownerCqc * 0.1f - targetCqc * 0.05f, 0.05f, 0.75f);
+        var roll = (int)(GD.Randf() * 100) + 1 - 5 * ownerCqc + 5 * targetCqc;
 
-        // Disarm always knocks the held item loose; the stun roll is the bonus.
-        if (target is PlayerMob targetPlayer) targetPlayer.ForceDropActiveItem();
-
-        if (GD.Randf() < stunChance)
+        if (roll <= DisarmStunThreshold)
         {
             target.GetMobComponent<MobStateSystem>()?.SetStunned(DisarmStunSeconds);
             return $"You shove {target.AtomName} to the ground!";
         }
-        return $"You disarm {target.AtomName}.";
+
+        if (roll <= DisarmDropThreshold)
+        {
+            var targetInteraction = target.GetMobComponent<PlayerInteractionSystem>();
+            if (targetInteraction != null && targetInteraction.IsPulling())
+            {
+                targetInteraction.StopPull();
+                return $"You break {target.AtomName}'s grip on what they were pulling!";
+            }
+
+            if (target is PlayerMob targetPlayer) targetPlayer.ForceDropActiveItem();
+            return $"You disarm {target.AtomName}.";
+        }
+
+        return $"You attempt to disarm {target.AtomName}, but fail.";
     }
 
     private static string ResolveGrab(Mob attacker, Mob target)
@@ -72,18 +92,14 @@ public static class CombatResolver
         return "";
     }
 
+    // Real DM harm intent has no to-hit roll at all - it's a guaranteed hit
+    // (only which limb gets struck is randomized, not modeled here yet);
+    // CQC skill adds bonus damage, it never gates whether the attack lands.
+    // The old prototype this was ported from added a miss-chance roll that
+    // doesn't exist in DM - removed.
     private static string ResolveHarm(Mob attacker, Mob target, Item? heldItem)
     {
-        // Old formula: 0.6 + ownerCQC*0.08 - targetCQC*0.04, clamped 30-95%.
         var ownerCqc = attacker.GetMobComponent<SkillComponent>()?.GetSkillLevel(SkillType.CQC) ?? 0;
-        var targetCqc = target.GetMobComponent<SkillComponent>()?.GetSkillLevel(SkillType.CQC) ?? 0;
-        var hitChance = Mathf.Clamp(BaseHitChance + ownerCqc * 0.08f - targetCqc * 0.04f, 0.3f, 0.95f);
-
-        if (GD.Randf() >= hitChance)
-        {
-            return $"You swing at {target.AtomName} and miss!";
-        }
-
         var damage = heldItem is MeleeWeapon weapon ? weapon.Damage : UnarmedBaseDamage + ownerCqc * 2.0f;
         target.GetMobComponent<HealthSystem>()?.ApplyDamage(DamageType.Brute, damage, attacker.AtomName);
         return $"You hit {target.AtomName}!";
