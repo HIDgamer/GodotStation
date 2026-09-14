@@ -194,6 +194,13 @@ public partial class PlayerMob : Mob
         {
             if (Multiplayer.IsServer()) DoDebugDamage(); else RpcId(1, nameof(RequestDebugDamage));
         }
+        // Same temporary-hook rationale as debug_short_circuit above, but for
+        // turfs - Phase 4 combat is what should eventually deal real damage
+        // to the turf a player is facing. Remove once that exists.
+        if (Input.IsActionJustPressed("debug_turf_damage"))
+        {
+            if (Multiplayer.IsServer()) DoDebugTurfDamage(); else RpcId(1, nameof(RequestDebugTurfDamage));
+        }
     }
 
     private void SendIntent(Intent intent)
@@ -405,6 +412,20 @@ public partial class PlayerMob : Mob
     }
 
     private void DoDebugDamage() => _health?.ApplyDamage(DamageType.Brute, 15f, "Debug");
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+    private void RequestDebugTurfDamage()
+    {
+        if (!Multiplayer.IsServer() || Multiplayer.GetRemoteSenderId() != OwnerPeerId) return;
+        DoDebugTurfDamage();
+    }
+
+    private void DoDebugTurfDamage()
+    {
+        var targetCell = GridCell + FacingToCellDirection(_facingIndex);
+        var worldGrid = GetNode<WorldGrid>("/root/WorldGrid");
+        worldGrid.GetCell(targetCell)?.Turf?.ApplyDamage(50f);
+    }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
     private void RequestSetIntent(int intent)

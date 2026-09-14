@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using GodotStation.Core.Atoms;
+using GodotStation.Core.Diagnostics;
 
 namespace GodotStation.Core.World;
 
@@ -22,12 +23,15 @@ public partial class WorldGrid : Node
 
     private readonly Dictionary<Vector2I, TurfCell> _cells = new();
     private readonly Dictionary<Vector2I, Action> _turfIconHandlers = new();
+    private readonly Dictionary<Vector2I, Action> _turfDestroyedHandlers = new();
     private TurfTileMap? _turfTileMap;
+    private RoundLogger? _log;
 
     public override void _Ready()
     {
         _turfTileMap = new TurfTileMap { Name = "TurfTileMap" };
         AddChild(_turfTileMap);
+        _log = GetNodeOrNull<RoundLogger>("/root/RoundLogger");
     }
 
     public TurfCell GetOrCreateCell(Vector2I cell)
@@ -46,23 +50,41 @@ public partial class WorldGrid : Node
     // the fix for the old MapBootstrap-hardcoded-sprites gap: mutating a
     // turf (SetTurf again, or the turf raising IconChanged after damage)
     // now always shows up on screen, whether the turf came from map
-    // authoring or a future DMM load.
+    // authoring or a future DMM load. Also subscribes to Turf.Destroyed so a
+    // turf reaching 0 integrity auto-replaces itself with its BaseTurf here -
+    // the one place that knows both "this turf" and "this cell", so neither
+    // Turf nor its callers need to.
     public void SetTurf(Vector2I cell, Turf turf)
     {
         var turfCell = GetOrCreateCell(cell);
 
-        if (_turfIconHandlers.TryGetValue(cell, out var previousHandler) && turfCell.Turf != null)
+        if (turfCell.Turf != null)
         {
-            turfCell.Turf.IconChanged -= previousHandler;
+            if (_turfIconHandlers.TryGetValue(cell, out var previousIconHandler))
+            {
+                turfCell.Turf.IconChanged -= previousIconHandler;
+            }
+            if (_turfDestroyedHandlers.TryGetValue(cell, out var previousDestroyedHandler))
+            {
+                turfCell.Turf.Destroyed -= previousDestroyedHandler;
+            }
         }
 
         turfCell.Turf = turf;
 
-        void Handler() => _turfTileMap?.SetCellTurf(cell, turf);
-        turf.IconChanged += Handler;
-        _turfIconHandlers[cell] = Handler;
+        void IconHandler() => _turfTileMap?.SetCellTurf(cell, turf);
+        turf.IconChanged += IconHandler;
+        _turfIconHandlers[cell] = IconHandler;
 
-        Handler();
+        void DestroyedHandler()
+        {
+            _log?.Log("TURF", $"{turf.AtomName} destroyed at {cell}");
+            if (turf.BaseTurf != null) SetTurf(cell, turf.BaseTurf());
+        }
+        turf.Destroyed += DestroyedHandler;
+        _turfDestroyedHandlers[cell] = DestroyedHandler;
+
+        IconHandler();
     }
 
     public void SetArea(Vector2I cell, GameArea area) => GetOrCreateCell(cell).Area = area;
