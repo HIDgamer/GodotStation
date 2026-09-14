@@ -19,14 +19,55 @@ script = ExtResource("1_33e1j")
 anchors_preset = 0
 script = ExtResource("2_8d4ln")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=44564025]
+[node name="LeftBar" type="HBoxContainer" parent="." unique_id=1044556201]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -128.0
+offset_right = 200.0
+offset_bottom = -65.0
+grow_vertical = 0
+scale = Vector2(2, 2)
+theme_override_constants/separation = -1
+alignment = 0
+
+[node name="ID" type="TextureRect" parent="LeftBar" unique_id=1721674147]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="IDSlot" type="TextureRect" parent="LeftBar/ID" unique_id=723227057]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Belt" type="TextureRect" parent="LeftBar" unique_id=92597811]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="BeltSlot" type="TextureRect" parent="LeftBar/Belt" unique_id=212603078]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Backpack" type="TextureRect" parent="LeftBar" unique_id=1142549800]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="BackpackSlot" type="TextureRect" parent="LeftBar/Backpack" unique_id=808097703]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CenterBar" type="HBoxContainer" parent="." unique_id=44564025]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -248.0
+offset_left = -124.0
 offset_top = -128.0
 offset_right = 124.0
 offset_bottom = -65.0
@@ -36,7 +77,7 @@ scale = Vector2(2, 2)
 theme_override_constants/separation = -1
 alignment = 1
 
-[node name="MainContainer" type="HBoxContainer" parent="HBoxContainer" unique_id=866452065]
+[node name="MainContainer" type="HBoxContainer" parent="CenterBar" unique_id=866452065]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
@@ -44,12 +85,12 @@ theme_override_constants/separation = -1
 alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Equipment" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=1195483475]
+[node name="Equipment" type="TextureButton" parent="CenterBar/MainContainer" unique_id=1195483475]
 layout_mode = 2
 toggle_mode = true
 stretch_mode = 3
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/MainContainer/Equipment" unique_id=326393835]
+[node name="GridContainer" type="GridContainer" parent="CenterBar/MainContainer/Equipment" unique_id=326393835]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = -0.96875
@@ -61,119 +102,92 @@ theme_override_constants/v_separation = 4
 columns = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="LEar" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=725621250]
+[node name="LEar" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=725621250]
 layout_mode = 2
 
-[node name="LEarSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/LEar" unique_id=1243271485]
+[node name="LEarSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/LEar" unique_id=1243271485]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="Head" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1075550071]
+[node name="Head" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=1075550071]
 layout_mode = 2
 
-[node name="HeadSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Head" unique_id=1355791745]
+[node name="HeadSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/Head" unique_id=1355791745]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="REar" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1385848014]
+[node name="REar" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=1385848014]
 layout_mode = 2
 
-[node name="REarSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/REar" unique_id=1043171181]
+[node name="REarSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/REar" unique_id=1043171181]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="Eyes" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=680102048]
+[node name="Eyes" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=680102048]
 layout_mode = 2
 
-[node name="EyesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Eyes" unique_id=1908292237]
+[node name="EyesSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/Eyes" unique_id=1908292237]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="Mask" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=116248490]
+[node name="Mask" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=116248490]
 layout_mode = 2
 
-[node name="MaskSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Mask" unique_id=263102963]
+[node name="MaskSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/Mask" unique_id=263102963]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="Gloves" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1901006666]
+[node name="Gloves" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=1901006666]
 layout_mode = 2
 
-[node name="GlovesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Gloves" unique_id=1603895833]
+[node name="GlovesSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/Gloves" unique_id=1603895833]
 layout_mode = 0
 offset_left = 1.0
 offset_right = 33.0
 offset_bottom = 32.0
 
-[node name="Uniform" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1513073958]
+[node name="Uniform" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=1513073958]
 layout_mode = 2
 
-[node name="UniformSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Uniform" unique_id=209310667]
+[node name="UniformSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/Uniform" unique_id=209310667]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="Armor" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=361297757]
+[node name="Armor" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=361297757]
 layout_mode = 2
 
-[node name="ArmorSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Armor" unique_id=1934543317]
+[node name="ArmorSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/Armor" unique_id=1934543317]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="Shoes" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1589190413]
+[node name="Shoes" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=1589190413]
 layout_mode = 2
 
-[node name="ShoesSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/Shoes" unique_id=918007827]
+[node name="ShoesSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/Shoes" unique_id=918007827]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="ArmorHolster" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer" unique_id=1968356795]
+[node name="ArmorHolster" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer" unique_id=1968356795]
 layout_mode = 2
 
-[node name="ArmorHolsterSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Equipment/GridContainer/ArmorHolster" unique_id=580814249]
+[node name="ArmorHolsterSlot" type="TextureRect" parent="CenterBar/MainContainer/Equipment/GridContainer/ArmorHolster" unique_id=580814249]
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 
-[node name="ID" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1721674147]
+[node name="LHand" type="TextureButton" parent="CenterBar/MainContainer" unique_id=867931062]
 layout_mode = 2
 stretch_mode = 3
 
-[node name="IDSlot" type="TextureRect" parent="HBoxContainer/MainContainer/ID" unique_id=723227057]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Belt" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=92597811]
-layout_mode = 2
-stretch_mode = 3
-
-[node name="BeltSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Belt" unique_id=212603078]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Backpack" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1142549800]
-layout_mode = 2
-stretch_mode = 3
-
-[node name="BackpackSlot" type="TextureRect" parent="HBoxContainer/MainContainer/Backpack" unique_id=808097703]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="LHand" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=867931062]
-layout_mode = 2
-stretch_mode = 3
-
-[node name="LHandSlot" type="TextureRect" parent="HBoxContainer/MainContainer/LHand" unique_id=1985311816]
+[node name="LHandSlot" type="TextureRect" parent="CenterBar/MainContainer/LHand" unique_id=1985311816]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.25757575
@@ -182,7 +196,7 @@ anchor_bottom = 0.74242425
 stretch_mode = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="LHighlight" type="TextureRect" parent="HBoxContainer/MainContainer/LHand" unique_id=1558808261]
+[node name="LHighlight" type="TextureRect" parent="CenterBar/MainContainer/LHand" unique_id=1558808261]
 visible = false
 layout_mode = 0
 anchor_top = 0.25757575
@@ -191,11 +205,11 @@ anchor_bottom = 0.74242425
 stretch_mode = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="RHand" type="TextureButton" parent="HBoxContainer/MainContainer" unique_id=2077918053]
+[node name="RHand" type="TextureButton" parent="CenterBar/MainContainer" unique_id=2077918053]
 layout_mode = 2
 stretch_mode = 3
 
-[node name="RHandSlot" type="TextureRect" parent="HBoxContainer/MainContainer/RHand" unique_id=1340011486]
+[node name="RHandSlot" type="TextureRect" parent="CenterBar/MainContainer/RHand" unique_id=1340011486]
 layout_mode = 0
 anchor_top = 0.25757575
 anchor_right = 1.0
@@ -203,7 +217,7 @@ anchor_bottom = 0.74242425
 stretch_mode = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="RHighlight" type="TextureRect" parent="HBoxContainer/MainContainer/RHand" unique_id=1225600411]
+[node name="RHighlight" type="TextureRect" parent="CenterBar/MainContainer/RHand" unique_id=1225600411]
 layout_mode = 0
 anchor_top = 0.25757575
 anchor_right = 1.0
@@ -211,27 +225,73 @@ anchor_bottom = 0.74242425
 stretch_mode = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="LPouch" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=958125666]
+[node name="LPouch" type="TextureRect" parent="CenterBar/MainContainer" unique_id=958125666]
 layout_mode = 2
 stretch_mode = 3
 
-[node name="LPouchSlot" type="TextureRect" parent="HBoxContainer/MainContainer/LPouch" unique_id=1839393010]
+[node name="LPouchSlot" type="TextureRect" parent="CenterBar/MainContainer/LPouch" unique_id=1839393010]
 layout_mode = 0
 offset_left = 155.0
 offset_right = 155.0
 offset_bottom = 66.0
 
-[node name="RPouch" type="TextureRect" parent="HBoxContainer/MainContainer" unique_id=1796952337]
+[node name="RPouch" type="TextureRect" parent="CenterBar/MainContainer" unique_id=1796952337]
 layout_mode = 2
 stretch_mode = 3
 
-[node name="LPouchSlot" type="TextureRect" parent="HBoxContainer/MainContainer/RPouch" unique_id=354065700]
+[node name="LPouchSlot" type="TextureRect" parent="CenterBar/MainContainer/RPouch" unique_id=354065700]
 layout_mode = 0
 offset_left = 124.0
 offset_right = 124.0
 offset_bottom = 66.0
 
-[node name="IntentContainer" type="GridContainer" parent="HBoxContainer" unique_id=2083057729]
+[node name="RightBar" type="VBoxContainer" parent="." unique_id=1996403842]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -216.0
+offset_top = -160.0
+offset_right = -16.0
+offset_bottom = -65.0
+grow_horizontal = 0
+grow_vertical = 0
+scale = Vector2(2, 2)
+theme_override_constants/separation = -1
+alignment = 2
+
+[node name="UpperRow" type="HBoxContainer" parent="RightBar" unique_id=495271755]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -15
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Throw" type="Sprite2D" parent="RightBar/UpperRow" unique_id=1883253315]
+position = Vector2(15, 20)
+hframes = 3
+
+[node name="Pull" type="TextureButton" parent="RightBar/UpperRow" unique_id=1238249872]
+layout_mode = 2
+visible = false
+position = Vector2(15.5, 7.5)
+
+[node name="LowerRow" type="HBoxContainer" parent="RightBar" unique_id=1313562049]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/separation = -1
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Run" type="TextureButton" parent="RightBar/LowerRow" unique_id=1152859107]
+layout_mode = 2
+stretch_mode = 3
+
+[node name="IntentContainer" type="GridContainer" parent="RightBar/LowerRow" unique_id=2083057729]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
@@ -240,40 +300,19 @@ theme_override_constants/v_separation = -1
 columns = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="Help" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=746647534]
+[node name="Help" type="TextureButton" parent="RightBar/LowerRow/IntentContainer" unique_id=746647534]
 layout_mode = 2
 
-[node name="Disarm" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=1422587724]
+[node name="Disarm" type="TextureButton" parent="RightBar/LowerRow/IntentContainer" unique_id=1422587724]
 layout_mode = 2
 
-[node name="Harm" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=783691337]
+[node name="Harm" type="TextureButton" parent="RightBar/LowerRow/IntentContainer" unique_id=783691337]
 layout_mode = 2
 
-[node name="Grab" type="TextureButton" parent="HBoxContainer/IntentContainer" unique_id=671746751]
+[node name="Grab" type="TextureButton" parent="RightBar/LowerRow/IntentContainer" unique_id=671746751]
 layout_mode = 2
 
-[node name="ActionContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=495271755]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 0
-theme_override_constants/separation = -15
-alignment = 1
-metadata/_edit_use_anchors_ = true
-
-[node name="Throw" type="Sprite2D" parent="HBoxContainer/ActionContainer" unique_id=1883253315]
-position = Vector2(15, 54)
-hframes = 3
-
-[node name="Pull" type="TextureButton" parent="HBoxContainer/ActionContainer" unique_id=1238249872]
-layout_mode = 2
-visible = false
-position = Vector2(15.5, 7.5)
-
-[node name="Run" type="TextureButton" parent="HBoxContainer/ActionContainer" unique_id=1152859107]
-layout_mode = 2
-stretch_mode = 3
-
-[node name="LimbContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1313562048]
+[node name="LimbContainer" type="VBoxContainer" parent="RightBar/LowerRow" unique_id=1313562048]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
@@ -281,10 +320,10 @@ theme_override_constants/separation = -15
 alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="LimbsSelector" type="TextureRect" parent="HBoxContainer/LimbContainer" unique_id=806841392]
+[node name="LimbsSelector" type="TextureRect" parent="RightBar/LowerRow/LimbContainer" unique_id=806841392]
 layout_mode = 2
 
-[node name="Mouth" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1914535546]
+[node name="Mouth" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=1914535546]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -294,7 +333,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="Eyes" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1592739093]
+[node name="Eyes" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=1592739093]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -304,7 +343,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="Head" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=469388185]
+[node name="Head" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=469388185]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -314,7 +353,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="Body" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=366676397]
+[node name="Body" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=366676397]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -324,7 +363,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="RightArm" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=192821953]
+[node name="RightArm" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=192821953]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -334,7 +373,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="RightHand" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1077455432]
+[node name="RightHand" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=1077455432]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -343,7 +382,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="LeftArm" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1448178753]
+[node name="LeftArm" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=1448178753]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -353,7 +392,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="LeftHand" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=2146277504]
+[node name="LeftHand" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=2146277504]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -363,7 +402,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="Groin" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1455779992]
+[node name="Groin" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=1455779992]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -373,7 +412,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="LeftLeg" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1631894084]
+[node name="LeftLeg" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=1631894084]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -383,7 +422,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="LeftFoot" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=664651828]
+[node name="LeftFoot" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=664651828]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -393,7 +432,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="RightLeg" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1384835940]
+[node name="RightLeg" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=1384835940]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -403,7 +442,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="RightFoot" type="TextureRect" parent="HBoxContainer/LimbContainer/LimbsSelector" unique_id=1186261939]
+[node name="RightFoot" type="TextureRect" parent="RightBar/LowerRow/LimbContainer/LimbsSelector" unique_id=1186261939]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -413,29 +452,38 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="StatusEffectContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1710884254]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 0
-theme_override_constants/separation = -15
+[node name="StatusColumn" type="VBoxContainer" parent="." unique_id=1710884254]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -160.0
+offset_right = -16.0
+offset_bottom = 0.0
+grow_horizontal = 0
+grow_vertical = 2
+scale = Vector2(2, 2)
+theme_override_constants/separation = 2
 alignment = 1
-metadata/_edit_use_anchors_ = true
 
-[node name="Status" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=466918455]
-position = Vector2(216, -460)
+[node name="Status" type="Sprite2D" parent="StatusColumn" unique_id=466918455]
+position = Vector2(16, 16)
 hframes = 10
 
-[node name="Temp" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=1060063481]
+[node name="Temp" type="Sprite2D" parent="StatusColumn" unique_id=1060063481]
 visible = false
-position = Vector2(216, -428)
+position = Vector2(16, 48)
 hframes = 8
 
-[node name="Hunger" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=1795928490]
+[node name="Hunger" type="Sprite2D" parent="StatusColumn" unique_id=1795928490]
 visible = false
-position = Vector2(216, -396)
+position = Vector2(16, 80)
 hframes = 3
 
-[node name="Effect" type="Sprite2D" parent="HBoxContainer/StatusEffectContainer" unique_id=668072624]
+[node name="Effect" type="Sprite2D" parent="StatusColumn" unique_id=668072624]
 visible = false
-position = Vector2(184, -460)
+position = Vector2(16, 112)
 hframes = 6

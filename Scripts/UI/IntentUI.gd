@@ -22,10 +22,10 @@ func _ready() -> void:
 		return
 
 	intent_buttons = [
-		get_node_or_null("../HBoxContainer/IntentContainer/Help"),
-		get_node_or_null("../HBoxContainer/IntentContainer/Disarm"),
-		get_node_or_null("../HBoxContainer/IntentContainer/Grab"),
-		get_node_or_null("../HBoxContainer/IntentContainer/Harm"),
+		get_node_or_null("../RightBar/LowerRow/IntentContainer/Help"),
+		get_node_or_null("../RightBar/LowerRow/IntentContainer/Disarm"),
+		get_node_or_null("../RightBar/LowerRow/IntentContainer/Grab"),
+		get_node_or_null("../RightBar/LowerRow/IntentContainer/Harm"),
 	]
 
 	# Real ucfss13 icon states from screen1.png (confirmed against its

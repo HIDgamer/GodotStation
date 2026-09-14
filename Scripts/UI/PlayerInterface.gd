@@ -32,36 +32,37 @@ extends Control
 #    consumer in CombatResolver yet (limb-targeted damage is future work),
 #    so nothing is sent over the network for it.
 
-@onready var lhand: TextureButton = $HBoxContainer/MainContainer/LHand
-@onready var rhand: TextureButton = $HBoxContainer/MainContainer/RHand
-@onready var lhighlight: TextureRect = $HBoxContainer/MainContainer/LHand/LHighlight
-@onready var rhighlight: TextureRect = $HBoxContainer/MainContainer/RHand/RHighlight
-@onready var equipment_button: TextureButton = $HBoxContainer/MainContainer/Equipment
-@onready var equipment_section: Control = $HBoxContainer/MainContainer/Equipment/GridContainer
-@onready var main_container: Control = $HBoxContainer/MainContainer
-@onready var throw_button: Sprite2D = $HBoxContainer/ActionContainer/Throw
-@onready var pull_button: TextureButton = $HBoxContainer/ActionContainer/Pull
-@onready var run_button: TextureButton = $HBoxContainer/ActionContainer/Run
+@onready var lhand: TextureButton = $CenterBar/MainContainer/LHand
+@onready var rhand: TextureButton = $CenterBar/MainContainer/RHand
+@onready var lhighlight: TextureRect = $CenterBar/MainContainer/LHand/LHighlight
+@onready var rhighlight: TextureRect = $CenterBar/MainContainer/RHand/RHighlight
+@onready var equipment_button: TextureButton = $CenterBar/MainContainer/Equipment
+@onready var equipment_section: Control = $CenterBar/MainContainer/Equipment/GridContainer
+@onready var main_container: Control = $CenterBar/MainContainer
+@onready var left_bar: Control = $LeftBar
+@onready var throw_button: Sprite2D = $RightBar/UpperRow/Throw
+@onready var pull_button: TextureButton = $RightBar/UpperRow/Pull
+@onready var run_button: TextureButton = $RightBar/LowerRow/Run
 
-@onready var status_sprite: Sprite2D = $HBoxContainer/StatusEffectContainer/Status
-@onready var temp_sprite: Sprite2D = $HBoxContainer/StatusEffectContainer/Temp
-@onready var hunger_sprite: Sprite2D = $HBoxContainer/StatusEffectContainer/Hunger
-@onready var effect_sprite: Sprite2D = $HBoxContainer/StatusEffectContainer/Effect
+@onready var status_sprite: Sprite2D = $StatusColumn/Status
+@onready var temp_sprite: Sprite2D = $StatusColumn/Temp
+@onready var hunger_sprite: Sprite2D = $StatusColumn/Hunger
+@onready var effect_sprite: Sprite2D = $StatusColumn/Effect
 
-@onready var limbs_selector: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector
-@onready var mouth_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/Mouth
-@onready var eyes_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/Eyes
-@onready var head_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/Head
-@onready var body_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/Body
-@onready var right_arm_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/RightArm
-@onready var right_hand_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/RightHand
-@onready var left_arm_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/LeftArm
-@onready var left_hand_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/LeftHand
-@onready var groin_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/Groin
-@onready var left_leg_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/LeftLeg
-@onready var left_foot_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/LeftFoot
-@onready var right_leg_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/RightLeg
-@onready var right_foot_button: TextureRect = $HBoxContainer/LimbContainer/LimbsSelector/RightFoot
+@onready var limbs_selector: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector
+@onready var mouth_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/Mouth
+@onready var eyes_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/Eyes
+@onready var head_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/Head
+@onready var body_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/Body
+@onready var right_arm_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/RightArm
+@onready var right_hand_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/RightHand
+@onready var left_arm_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/LeftArm
+@onready var left_hand_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/LeftHand
+@onready var groin_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/Groin
+@onready var left_leg_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/LeftLeg
+@onready var left_foot_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/LeftFoot
+@onready var right_leg_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/RightLeg
+@onready var right_foot_button: TextureRect = $RightBar/LowerRow/LimbContainer/LimbsSelector/RightFoot
 
 const HUD_SHEET := "res://Icons/mob/hud/screen1.png"
 const ZONE_SEL_SHEET := "res://Icons/mob/hud/zone_sel.png"
@@ -205,10 +206,15 @@ func _setup_clothing_slots() -> void:
 	for slot_name in equipment_slot_map.keys():
 		_wire_clothing_slot(equipment_section, slot_name, equipment_slot_map[slot_name])
 
-	var main_slot_map = {
+	var left_bar_slot_map = {
 		"id": "ID/IDSlot",
 		"belt": "Belt/BeltSlot",
 		"back": "Backpack/BackpackSlot",
+	}
+	for slot_name in left_bar_slot_map.keys():
+		_wire_clothing_slot(left_bar, slot_name, left_bar_slot_map[slot_name])
+
+	var main_slot_map = {
 		"pouch_left": "LPouch/LPouchSlot",
 		"pouch_right": "RPouch/LPouchSlot", # scene typo: RPouch's own slot child is misnamed LPouchSlot
 	}
