@@ -523,7 +523,22 @@ public partial class PlayerMob : Mob
         if (targetCell != GridCell && !worldGrid.IsAdjacent(GridCell, targetCell)) return;
 
         var targetMob = FindMobAt(worldGrid, targetCell);
-        if (targetMob != null) InteractWithMob(targetMob);
+        if (targetMob != null)
+        {
+            InteractWithMob(targetMob);
+            return;
+        }
+
+        // No mob there - a plain click toggles an unlocked door open/closed,
+        // matching ucfss13's own airlock UX. Tool interactions (weld shut,
+        // cut bolts, force with a crowbar) need a real Tool item hierarchy,
+        // which doesn't exist yet - deliberately not built here, see
+        // PORT_ROADMAP.md's Doors/airlocks entry.
+        if (worldGrid.GetStructure(targetCell) is Door door)
+        {
+            if (door.State == DoorState.Closed) door.Open();
+            else if (door.State == DoorState.Open) door.Close();
+        }
     }
 
     private static Mob? FindMobAt(WorldGrid worldGrid, Vector2I cell)
